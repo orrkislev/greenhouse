@@ -5,13 +5,13 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { useUser } from '@/store/user';
 
 export function SignUpForm({ onToggleForm }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { signUp, loading, error } = useAuth();
+  const { signUp, loading, error } = useUser()
 
   const { register, handleSubmit, formState: { errors } } = useForm();
 

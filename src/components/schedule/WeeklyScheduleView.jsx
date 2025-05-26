@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { DayScheduleView } from './DayScheduleView';
-import { useScheduleStore } from '@/store';
+import { useScheduleStore } from '@/store/user';
 import { ScheduleService } from '@/services/schedule';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { calculateTaskStats, formatEstimatedTime } from '@/lib/utils';

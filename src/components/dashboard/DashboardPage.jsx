@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useScheduleStore } from '@/store';
+import { useScheduleStore, useUser } from '@/store/user';
 import { ScheduleService } from '@/services/schedule';
 import { WeeklyScheduleView } from '@/components/schedule/WeeklyScheduleView';
 import { ScheduleForm } from '@/components/schedule/ScheduleForm';
@@ -12,7 +11,7 @@ import { Plus, Calendar, LogOut, User,ChevronLeft,ChevronRight } from 'lucide-re
 import { createEmptyWeeklySchedule, getWeekStartDate,getNextWeek,getPreviousWeek,formatDate } from '@/lib/utils';
 
 export function DashboardPage() {
-  const { user, signOut } = useAuth();
+  const { user, signOut } = useUser()
   const { schedules, currentSchedule, setSchedules, setCurrentSchedule, addSchedule,loading,setLoading,setError } = useScheduleStore();
   
   const [showCreateForm, setShowCreateForm] = useState(false);

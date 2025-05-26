@@ -1,11 +1,11 @@
 'use client';
 
-import { useAuth } from '@/contexts/AuthContext';
 import { AuthPage } from '@/components/auth/AuthPage';
 import { DashboardPage } from '@/components/dashboard/DashboardPage';
+import { useUser } from '@/store/user';
 
 export default function Home() {
-  const { user, loading } = useAuth();
+  const { user, loading } = useUser();
 
   if (loading) {
     return (
