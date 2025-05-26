@@ -1,32 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Task } from '@/types';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
-  Check, 
-  Circle, 
-  Edit2, 
-  Trash2, 
-  Clock,
-  Tag,
-  MoreVertical
-} from 'lucide-react';
-import { 
-  formatEstimatedTime, 
-  getPriorityColor, 
-  getPriorityIcon 
-} from '@/lib/utils';
+import { Check, Circle, Edit2, Trash2, Clock,Tag,MoreVertical } from 'lucide-react';
+import { formatEstimatedTime, getPriorityColor, getPriorityIcon } from '@/lib/utils';
 
-interface TaskItemProps {
-  task: Task;
-  onToggleComplete: (taskId: string) => void;
-  onEdit: (task: Task) => void;
-  onDelete: (taskId: string) => void;
-}
-
-export function TaskItem({ task, onToggleComplete, onEdit, onDelete }: TaskItemProps) {
+/**
+ * @param {{
+ *   task: any,
+ *   onToggleComplete: (taskId: string) => void,
+ *   onEdit: (task: any) => void,
+ *   onDelete: (taskId: string) => void
+ * }} props
+ */
+export function TaskItem({ task, onToggleComplete, onEdit, onDelete }) {
   const [showActions, setShowActions] = useState(false);
 
   return (

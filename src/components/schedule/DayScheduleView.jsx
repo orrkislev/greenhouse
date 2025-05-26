@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { DaySchedule, Task } from '@/types';
 import { TaskItem } from './TaskItem';
 import { TaskForm } from './TaskForm';
 import { Button } from '@/components/ui/button';
@@ -12,16 +11,6 @@ import {
   formatDateShort, 
   calculateTaskStats 
 } from '@/lib/utils';
-import { TaskFormData } from '@/lib/validations';
-
-interface DayScheduleViewProps {
-  daySchedule: DaySchedule;
-  onAddTask: (taskData: TaskFormData) => Promise<void>;
-  onUpdateTask: (taskId: string, updates: Partial<Task>) => Promise<void>;
-  onDeleteTask: (taskId: string) => Promise<void>;
-  onToggleTaskComplete: (taskId: string) => void;
-  onUpdateNotes?: (notes: string) => Promise<void>;
-}
 
 export function DayScheduleView({
   daySchedule,
@@ -30,9 +19,9 @@ export function DayScheduleView({
   onDeleteTask,
   onToggleTaskComplete,
   onUpdateNotes,
-}: DayScheduleViewProps) {
+}) {
   const [showTaskForm, setShowTaskForm] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [editingTask, setEditingTask] = useState(null);
   const [showNotes, setShowNotes] = useState(false);
   const [notes, setNotes] = useState(daySchedule.notes || '');
 
@@ -46,12 +35,12 @@ export function DayScheduleView({
     updatedAt: new Date() 
   });
 
-  const handleAddTask = async (taskData: TaskFormData) => {
+  const handleAddTask = async (taskData) => {
     await onAddTask(taskData);
     setShowTaskForm(false);
   };
 
-  const handleEditTask = async (taskData: TaskFormData) => {
+  const handleEditTask = async (taskData) => {
     if (editingTask) {
       await onUpdateTask(editingTask.id, taskData);
       setEditingTask(null);

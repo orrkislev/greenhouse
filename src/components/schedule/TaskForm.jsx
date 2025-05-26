@@ -2,27 +2,14 @@
 
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { taskSchema, TaskFormData } from '@/lib/validations';
 
-interface TaskFormProps {
-  onSubmit: (data: TaskFormData) => Promise<void>;
-  onCancel: () => void;
-  initialData?: Partial<TaskFormData>;
-  loading?: boolean;
-}
-
-export function TaskForm({ onSubmit, onCancel, initialData, loading }: TaskFormProps) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<TaskFormData>({
-    resolver: zodResolver(taskSchema),
+export function TaskForm({ onSubmit, onCancel, initialData, loading }) {
+  const { register, handleSubmit, formState: { errors },
+  } = useForm({
     defaultValues: {
       title: initialData?.title || '',
       description: initialData?.description || '',
@@ -32,7 +19,7 @@ export function TaskForm({ onSubmit, onCancel, initialData, loading }: TaskFormP
     },
   });
 
-  const handleFormSubmit = async (data: TaskFormData) => {
+  const handleFormSubmit = async (data) => {
     try {
       await onSubmit(data);
     } catch (error) {

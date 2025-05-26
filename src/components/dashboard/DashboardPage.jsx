@@ -8,35 +8,12 @@ import { WeeklyScheduleView } from '@/components/schedule/WeeklyScheduleView';
 import { ScheduleForm } from '@/components/schedule/ScheduleForm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Plus, 
-  Calendar, 
-  LogOut, 
-  User,
-  ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
-import { 
-  createEmptyWeeklySchedule, 
-  getWeekStartDate,
-  getNextWeek,
-  getPreviousWeek,
-  formatDate
-} from '@/lib/utils';
-import { ScheduleFormData } from '@/lib/validations';
+import { Plus, Calendar, LogOut, User,ChevronLeft,ChevronRight } from 'lucide-react';
+import { createEmptyWeeklySchedule, getWeekStartDate,getNextWeek,getPreviousWeek,formatDate } from '@/lib/utils';
 
 export function DashboardPage() {
   const { user, signOut } = useAuth();
-  const { 
-    schedules, 
-    currentSchedule, 
-    setSchedules, 
-    setCurrentSchedule, 
-    addSchedule,
-    loading,
-    setLoading,
-    setError 
-  } = useScheduleStore();
+  const { schedules, currentSchedule, setSchedules, setCurrentSchedule, addSchedule,loading,setLoading,setError } = useScheduleStore();
   
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [currentWeek, setCurrentWeek] = useState(getWeekStartDate(new Date()));
@@ -72,7 +49,7 @@ export function DashboardPage() {
     }
   };
 
-  const handleCreateSchedule = async (data: ScheduleFormData) => {
+  const handleCreateSchedule = async (data) => {
     if (!user) return;
 
     try {
@@ -108,7 +85,7 @@ export function DashboardPage() {
     });
   };
 
-  const navigateWeek = (direction: 'prev' | 'next') => {
+  const navigateWeek = (direction) => {
     setCurrentWeek(direction === 'next' ? getNextWeek(currentWeek) : getPreviousWeek(currentWeek));
   };
 

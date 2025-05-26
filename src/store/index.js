@@ -1,33 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { AuthState, WeeklySchedule, Task } from '@/types';
 
-interface AuthStore extends AuthState {
-  setUser: (user: AuthState['user']) => void;
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
-  logout: () => void;
-}
-
-interface ScheduleStore {
-  schedules: WeeklySchedule[];
-  currentSchedule: WeeklySchedule | null;
-  loading: boolean;
-  error: string | null;
-  setSchedules: (schedules: WeeklySchedule[]) => void;
-  setCurrentSchedule: (schedule: WeeklySchedule | null) => void;
-  addSchedule: (schedule: WeeklySchedule) => void;
-  updateSchedule: (id: string, updates: Partial<WeeklySchedule>) => void;
-  deleteSchedule: (id: string) => void;
-  addTask: (scheduleId: string, dayIndex: number, task: Task) => void;
-  updateTask: (scheduleId: string, dayIndex: number, taskId: string, updates: Partial<Task>) => void;
-  deleteTask: (scheduleId: string, dayIndex: number, taskId: string) => void;
-  toggleTaskCompletion: (scheduleId: string, dayIndex: number, taskId: string) => void;
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
-}
-
-export const useAuthStore = create<AuthStore>()(
+export const useAuthStore = create(
   persist(
     (set) => ({
       user: null,
@@ -45,7 +19,7 @@ export const useAuthStore = create<AuthStore>()(
   )
 );
 
-export const useScheduleStore = create<ScheduleStore>((set, get) => ({
+export const useScheduleStore = create((set, get) => ({
   schedules: [],
   currentSchedule: null,
   loading: false,

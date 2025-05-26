@@ -1,26 +1,20 @@
 'use client';
 
 import React from 'react';
-import { WeeklySchedule, Task } from '@/types';
 import { DayScheduleView } from './DayScheduleView';
 import { useScheduleStore } from '@/store';
 import { ScheduleService } from '@/services/schedule';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { TaskFormData } from '@/lib/validations';
 import { calculateTaskStats, formatEstimatedTime } from '@/lib/utils';
 import { BarChart3, Clock, CheckCircle2, Circle } from 'lucide-react';
 
-interface WeeklyScheduleViewProps {
-  schedule: WeeklySchedule;
-}
-
-export function WeeklyScheduleView({ schedule }: WeeklyScheduleViewProps) {
+export function WeeklyScheduleView({ schedule }) {
   const { updateSchedule, addTask, updateTask, deleteTask, toggleTaskCompletion } = useScheduleStore();
 
   const stats = calculateTaskStats(schedule);
 
-  const handleAddTask = async (dayIndex: number, taskData: TaskFormData) => {
-    const newTask: Omit<Task, 'id'> = {
+  const handleAddTask = async (dayIndex, taskData) => {
+    const newTask = {
       title: taskData.title,
       description: taskData.description,
       completed: false,
@@ -40,7 +34,7 @@ export function WeeklyScheduleView({ schedule }: WeeklyScheduleViewProps) {
     }
   };
 
-  const handleUpdateTask = async (dayIndex: number, taskId: string, updates: Partial<Task>) => {
+  const handleUpdateTask = async (dayIndex, taskId, updates) => {
     try {
       await ScheduleService.updateTask(schedule.id, dayIndex, taskId, updates);
       updateTask(schedule.id, dayIndex, taskId, updates);
@@ -50,7 +44,7 @@ export function WeeklyScheduleView({ schedule }: WeeklyScheduleViewProps) {
     }
   };
 
-  const handleDeleteTask = async (dayIndex: number, taskId: string) => {
+  const handleDeleteTask = async (dayIndex, taskId) => {
     try {
       await ScheduleService.deleteTask(schedule.id, dayIndex, taskId);
       deleteTask(schedule.id, dayIndex, taskId);
@@ -60,9 +54,9 @@ export function WeeklyScheduleView({ schedule }: WeeklyScheduleViewProps) {
     }
   };
 
-  const handleToggleTaskComplete = (dayIndex: number, taskId: string) => {
+  const handleToggleTaskComplete = (dayIndex, taskId) => {
     toggleTaskCompletion(schedule.id, dayIndex, taskId);
-    
+
     // Update in database
     const task = schedule.days[dayIndex]?.tasks.find(t => t.id === taskId);
     if (task) {
@@ -70,10 +64,10 @@ export function WeeklyScheduleView({ schedule }: WeeklyScheduleViewProps) {
     }
   };
 
-  const handleUpdateNotes = async (dayIndex: number, notes: string) => {
+  const handleUpdateNotes = async (dayIndex, notes) => {
     const updatedDays = [...schedule.days];
     updatedDays[dayIndex] = { ...updatedDays[dayIndex], notes };
-    
+
     try {
       await ScheduleService.updateSchedule(schedule.id, { days: updatedDays });
       updateSchedule(schedule.id, { days: updatedDays });
@@ -99,7 +93,7 @@ export function WeeklyScheduleView({ schedule }: WeeklyScheduleViewProps) {
             </div>
           </div>
         </CardHeader>
-        
+
         {/* Week Stats */}
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -112,7 +106,7 @@ export function WeeklyScheduleView({ schedule }: WeeklyScheduleViewProps) {
                 <p className="text-xl font-semibold">{stats.totalTasks}</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-green-100 rounded-lg">
                 <CheckCircle2 className="h-5 w-5 text-green-600" />
@@ -122,7 +116,7 @@ export function WeeklyScheduleView({ schedule }: WeeklyScheduleViewProps) {
                 <p className="text-xl font-semibold">{stats.completedTasks}</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-yellow-100 rounded-lg">
                 <Circle className="h-5 w-5 text-yellow-600" />
@@ -132,7 +126,7 @@ export function WeeklyScheduleView({ schedule }: WeeklyScheduleViewProps) {
                 <p className="text-xl font-semibold">{stats.remainingTasks}</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-purple-100 rounded-lg">
                 <Clock className="h-5 w-5 text-purple-600" />
@@ -145,7 +139,7 @@ export function WeeklyScheduleView({ schedule }: WeeklyScheduleViewProps) {
               </div>
             </div>
           </div>
-          
+
           {/* Progress Bar */}
           {stats.totalTasks > 0 && (
             <div className="mt-4">
@@ -170,11 +164,11 @@ export function WeeklyScheduleView({ schedule }: WeeklyScheduleViewProps) {
           <DayScheduleView
             key={daySchedule.id}
             daySchedule={daySchedule}
-            onAddTask={(taskData) => handleAddTask(index, taskData)}
+            onAddTask={taskData => handleAddTask(index, taskData)}
             onUpdateTask={(taskId, updates) => handleUpdateTask(index, taskId, updates)}
-            onDeleteTask={(taskId) => handleDeleteTask(index, taskId)}
-            onToggleTaskComplete={(taskId) => handleToggleTaskComplete(index, taskId)}
-            onUpdateNotes={(notes) => handleUpdateNotes(index, notes)}
+            onDeleteTask={taskId => handleDeleteTask(index, taskId)}
+            onToggleTaskComplete={taskId => handleToggleTaskComplete(index, taskId)}
+            onUpdateNotes={notes => handleUpdateNotes(index, notes)}
           />
         ))}
       </div>

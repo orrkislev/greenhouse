@@ -1,12 +1,11 @@
-import { clsx, type ClassValue } from 'clsx';
+import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { DaySchedule, WeeklySchedule } from '@/types';
 
-export function cn(...inputs: ClassValue[]) {
+export function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(date: Date): string {
+export function formatDate(date) {
   return new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
     year: 'numeric',
@@ -15,15 +14,15 @@ export function formatDate(date: Date): string {
   }).format(date);
 }
 
-export function formatDateShort(date: Date): string {
+export function formatDateShort(date) {
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
   }).format(date);
 }
 
-export function getWeekDates(weekStartDate: Date): Date[] {
-  const dates: Date[] = [];
+export function getWeekDates(weekStartDate) {
+  const dates = [];
   const startDate = new Date(weekStartDate);
   
   for (let i = 0; i < 7; i++) {
@@ -35,52 +34,52 @@ export function getWeekDates(weekStartDate: Date): Date[] {
   return dates;
 }
 
-export function getWeekStartDate(date: Date): Date {
+export function getWeekStartDate(date) {
   const d = new Date(date);
   const day = d.getDay();
   const diff = d.getDate() - day;
   return new Date(d.setDate(diff));
 }
 
-export function getNextWeek(date: Date): Date {
+export function getNextWeek(date) {
   const nextWeek = new Date(date);
   nextWeek.setDate(date.getDate() + 7);
   return nextWeek;
 }
 
-export function getPreviousWeek(date: Date): Date {
+export function getPreviousWeek(date) {
   const previousWeek = new Date(date);
   previousWeek.setDate(date.getDate() - 7);
   return previousWeek;
 }
 
-export function isSameWeek(date1: Date, date2: Date): boolean {
+export function isSameWeek(date1, date2) {
   const week1Start = getWeekStartDate(date1);
   const week2Start = getWeekStartDate(date2);
   return week1Start.getTime() === week2Start.getTime();
 }
 
-export function getDayOfWeekName(dayIndex: number): string {
+export function getDayOfWeekName(dayIndex) {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   return days[dayIndex] || '';
 }
 
-export function getDayOfWeekShort(dayIndex: number): string {
+export function getDayOfWeekShort(dayIndex) {
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   return days[dayIndex] || '';
 }
 
 export function createEmptyWeeklySchedule(
-  userId: string,
-  title: string,
-  weekStartDate: Date,
-  description?: string
-): Omit<WeeklySchedule, 'id'> {
+  userId,
+  title,
+  weekStartDate,
+  description
+) {
   const weekDates = getWeekDates(weekStartDate);
   
-  const days: DaySchedule[] = weekDates.map((date, index) => ({
+  const days = weekDates.map((date, index) => ({
     id: `day_${Date.now()}_${index}`,
-    dayOfWeek: index as 0 | 1 | 2 | 3 | 4 | 5 | 6,
+    dayOfWeek: index,
     date,
     tasks: [],
     notes: '',
@@ -97,7 +96,7 @@ export function createEmptyWeeklySchedule(
   };
 }
 
-export function calculateTaskStats(schedule: WeeklySchedule) {
+export function calculateTaskStats(schedule) {
   let totalTasks = 0;
   let completedTasks = 0;
   let totalEstimatedTime = 0;
@@ -128,7 +127,7 @@ export function calculateTaskStats(schedule: WeeklySchedule) {
   };
 }
 
-export function formatEstimatedTime(minutes: number): string {
+export function formatEstimatedTime(minutes) {
   if (minutes < 60) {
     return `${minutes}m`;
   }
@@ -143,7 +142,7 @@ export function formatEstimatedTime(minutes: number): string {
   return `${hours}h ${remainingMinutes}m`;
 }
 
-export function getPriorityColor(priority: 'low' | 'medium' | 'high'): string {
+export function getPriorityColor(priority) {
   switch (priority) {
     case 'low':
       return 'text-green-600 bg-green-100';
@@ -156,7 +155,7 @@ export function getPriorityColor(priority: 'low' | 'medium' | 'high'): string {
   }
 }
 
-export function getPriorityIcon(priority: 'low' | 'medium' | 'high'): string {
+export function getPriorityIcon(priority) {
   switch (priority) {
     case 'low':
       return '🟢';
@@ -169,13 +168,13 @@ export function getPriorityIcon(priority: 'low' | 'medium' | 'high'): string {
   }
 }
 
-export function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  delay: number
-): (...args: Parameters<T>) => void {
-  let timeoutId: NodeJS.Timeout;
+export function debounce(
+  func,
+  delay
+) {
+  let timeoutId;
   
-  return (...args: Parameters<T>) => {
+  return (...args) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => func(...args), delay);
   };

@@ -2,31 +2,19 @@
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { signInSchema, SignInFormData } from '@/lib/validations';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
-interface SignInFormProps {
-  onToggleForm: () => void;
-}
-
-export function SignInForm({ onToggleForm }: SignInFormProps) {
+export function SignInForm({ onToggleForm }) {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, loading, error } = useAuth();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignInFormData>({
-    resolver: zodResolver(signInSchema),
-  });
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const onSubmit = async (data: SignInFormData) => {
+  const onSubmit = async (data) => {
     try {
       await signIn(data.email, data.password);
     } catch (error) {

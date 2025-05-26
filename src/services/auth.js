@@ -1,17 +1,9 @@
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  updateProfile,
-  User as FirebaseUser,
-} from 'firebase/auth';
+import {signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile,User as FirebaseUser,} from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
-import { User } from '@/types';
 
 export class AuthService {
-  static async signIn(email: string, password: string): Promise<User> {
+  static async signIn(email, password) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = await this.getUserData(userCredential.user);
@@ -21,7 +13,7 @@ export class AuthService {
     }
   }
 
-  static async signUp(email: string, password: string, displayName: string): Promise<User> {
+  static async signUp(email, password, displayName) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       
@@ -29,9 +21,9 @@ export class AuthService {
       await updateProfile(userCredential.user, { displayName });
       
       // Create user document in Firestore
-      const userData: User = {
+      const userData = {
         id: userCredential.user.uid,
-        email: userCredential.user.email!,
+        email: userCredential.user.email,
         displayName,
         photoURL: null,
         createdAt: new Date(),
@@ -46,7 +38,7 @@ export class AuthService {
     }
   }
 
-  static async signOut(): Promise<void> {
+  static async signOut() {
     try {
       await signOut(auth);
     } catch (error) {
@@ -54,14 +46,14 @@ export class AuthService {
     }
   }
 
-  static async getUserData(firebaseUser: FirebaseUser): Promise<User> {
+  static async getUserData(firebaseUser) {
     const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
     
     if (userDoc.exists()) {
       const data = userDoc.data();
       return {
         id: firebaseUser.uid,
-        email: firebaseUser.email!,
+        email: firebaseUser.email,
         displayName: firebaseUser.displayName,
         photoURL: firebaseUser.photoURL,
         createdAt: data.createdAt?.toDate() || new Date(),
@@ -69,9 +61,9 @@ export class AuthService {
       };
     } else {
       // If user document doesn't exist, create it
-      const userData: User = {
+      const userData = {
         id: firebaseUser.uid,
-        email: firebaseUser.email!,
+        email: firebaseUser.email,
         displayName: firebaseUser.displayName,
         photoURL: firebaseUser.photoURL,
         createdAt: new Date(),
@@ -83,7 +75,7 @@ export class AuthService {
     }
   }
 
-  static async updateUserProfile(userId: string, updates: Partial<User>): Promise<void> {
+  static async updateUserProfile(userId, updates) {
     try {
       const userRef = doc(db, 'users', userId);
       await updateDoc(userRef, {
@@ -95,7 +87,7 @@ export class AuthService {
     }
   }
 
-  static onAuthStateChange(callback: (user: User | null) => void): () => void {
+  static onAuthStateChange(callback) {
     return onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
@@ -111,7 +103,7 @@ export class AuthService {
     });
   }
 
-  private static getErrorMessage(error: any): string {
+  static getErrorMessage(error) {
     if (error.code) {
       switch (error.code) {
         case 'auth/user-not-found':

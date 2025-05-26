@@ -1,13 +1,17 @@
 import * as React from 'react';
+import PropTypes from 'prop-types';
 import { cn } from '@/lib/utils';
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
-}
-
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'default', size = 'default', ...props }, ref) => {
+const Button = React.forwardRef(
+  (
+    {
+      className,
+      variant = 'default',
+      size = 'default',
+      ...props
+    },
+    ref
+  ) => {
     return (
       <button
         className={cn(
@@ -34,6 +38,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     );
   }
 );
+
 Button.displayName = 'Button';
+
+Button.propTypes = {
+  className: PropTypes.string,
+  variant: PropTypes.oneOf(['default', 'destructive', 'outline', 'secondary', 'ghost', 'link']),
+  size: PropTypes.oneOf(['default', 'sm', 'lg', 'icon']),
+};
 
 export { Button };

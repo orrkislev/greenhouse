@@ -15,9 +15,9 @@ import { db } from '@/lib/firebase';
 import { WeeklySchedule, DaySchedule, Task } from '@/types';
 
 export class ScheduleService {
-  private static readonly COLLECTION_NAME = 'schedules';
+  static COLLECTION_NAME = 'schedules';
 
-  static async createSchedule(schedule: Omit<WeeklySchedule, 'id'>): Promise<WeeklySchedule> {
+  static async createSchedule(schedule) {
     try {
       const scheduleData = {
         ...schedule,
@@ -36,7 +36,6 @@ export class ScheduleService {
       };
 
       const docRef = await addDoc(collection(db, this.COLLECTION_NAME), scheduleData);
-      
       return {
         ...schedule,
         id: docRef.id,
@@ -46,20 +45,16 @@ export class ScheduleService {
     }
   }
 
-  static async updateSchedule(scheduleId: string, updates: Partial<WeeklySchedule>): Promise<void> {
+  static async updateSchedule(scheduleId, updates) {
     try {
       const scheduleRef = doc(db, this.COLLECTION_NAME, scheduleId);
-      
-      const updateData: any = {
+      const updateData = {
         ...updates,
         updatedAt: Timestamp.fromDate(new Date()),
       };
-
-      // Convert dates to Timestamps if they exist in updates
       if (updates.weekStartDate) {
         updateData.weekStartDate = Timestamp.fromDate(updates.weekStartDate);
       }
-
       if (updates.days) {
         updateData.days = updates.days.map(day => ({
           ...day,
@@ -71,14 +66,13 @@ export class ScheduleService {
           })),
         }));
       }
-
       await updateDoc(scheduleRef, updateData);
     } catch (error) {
       throw new Error(`Failed to update schedule: ${error}`);
     }
   }
 
-  static async deleteSchedule(scheduleId: string): Promise<void> {
+  static async deleteSchedule(scheduleId) {
     try {
       const scheduleRef = doc(db, this.COLLECTION_NAME, scheduleId);
       await deleteDoc(scheduleRef);
@@ -87,79 +81,61 @@ export class ScheduleService {
     }
   }
 
-  static async getUserSchedules(userId: string): Promise<WeeklySchedule[]> {
+  static async getUserSchedules(userId) {
     try {
       const q = query(
         collection(db, this.COLLECTION_NAME),
         where('userId', '==', userId),
         orderBy('createdAt', 'desc')
       );
-
       const querySnapshot = await getDocs(q);
-      
       return querySnapshot.docs.map(doc => this.convertDocToSchedule(doc.id, doc.data()));
     } catch (error) {
       throw new Error(`Failed to fetch schedules: ${error}`);
     }
   }
 
-  static async getSchedule(scheduleId: string): Promise<WeeklySchedule | null> {
+  static async getSchedule(scheduleId) {
     try {
       const scheduleRef = doc(db, this.COLLECTION_NAME, scheduleId);
       const docSnapshot = await getDoc(scheduleRef);
-
       if (!docSnapshot.exists()) {
         return null;
       }
-
       return this.convertDocToSchedule(docSnapshot.id, docSnapshot.data());
     } catch (error) {
       throw new Error(`Failed to fetch schedule: ${error}`);
     }
   }
 
-  static async addTaskToDay(
-    scheduleId: string,
-    dayIndex: number,
-    task: Omit<Task, 'id'>
-  ): Promise<Task> {
+  static async addTaskToDay(scheduleId, dayIndex, task) {
     try {
       const schedule = await this.getSchedule(scheduleId);
       if (!schedule) {
         throw new Error('Schedule not found');
       }
-
-      const newTask: Task = {
+      const newTask = {
         ...task,
         id: this.generateTaskId(),
       };
-
       const updatedDays = [...schedule.days];
       updatedDays[dayIndex] = {
         ...updatedDays[dayIndex],
         tasks: [...updatedDays[dayIndex].tasks, newTask],
       };
-
       await this.updateSchedule(scheduleId, { days: updatedDays });
-      
       return newTask;
     } catch (error) {
       throw new Error(`Failed to add task: ${error}`);
     }
   }
 
-  static async updateTask(
-    scheduleId: string,
-    dayIndex: number,
-    taskId: string,
-    updates: Partial<Task>
-  ): Promise<void> {
+  static async updateTask(scheduleId, dayIndex, taskId, updates) {
     try {
       const schedule = await this.getSchedule(scheduleId);
       if (!schedule) {
         throw new Error('Schedule not found');
       }
-
       const updatedDays = [...schedule.days];
       updatedDays[dayIndex] = {
         ...updatedDays[dayIndex],
@@ -169,33 +145,30 @@ export class ScheduleService {
             : task
         ),
       };
-
       await this.updateSchedule(scheduleId, { days: updatedDays });
     } catch (error) {
       throw new Error(`Failed to update task: ${error}`);
     }
   }
 
-  static async deleteTask(scheduleId: string, dayIndex: number, taskId: string): Promise<void> {
+  static async deleteTask(scheduleId, dayIndex, taskId) {
     try {
       const schedule = await this.getSchedule(scheduleId);
       if (!schedule) {
         throw new Error('Schedule not found');
       }
-
       const updatedDays = [...schedule.days];
       updatedDays[dayIndex] = {
         ...updatedDays[dayIndex],
         tasks: updatedDays[dayIndex].tasks.filter(task => task.id !== taskId),
       };
-
       await this.updateSchedule(scheduleId, { days: updatedDays });
     } catch (error) {
       throw new Error(`Failed to delete task: ${error}`);
     }
   }
 
-  private static convertDocToSchedule(id: string, data: any): WeeklySchedule {
+  static convertDocToSchedule(id, data) {
     return {
       id,
       userId: data.userId,
@@ -204,12 +177,12 @@ export class ScheduleService {
       weekStartDate: data.weekStartDate?.toDate() || new Date(),
       createdAt: data.createdAt?.toDate() || new Date(),
       updatedAt: data.updatedAt?.toDate() || new Date(),
-      days: (data.days || []).map((day: any): DaySchedule => ({
+      days: (data.days || []).map(day => ({
         id: day.id,
         dayOfWeek: day.dayOfWeek,
         date: day.date?.toDate() || new Date(),
         notes: day.notes,
-        tasks: (day.tasks || []).map((task: any): Task => ({
+        tasks: (day.tasks || []).map(task => ({
           id: task.id,
           title: task.title,
           description: task.description,
@@ -224,15 +197,15 @@ export class ScheduleService {
     };
   }
 
-  private static generateTaskId(): string {
+  static generateTaskId() {
     return `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  static generateScheduleId(): string {
+  static generateScheduleId() {
     return `schedule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  static generateDayId(): string {
+  static generateDayId() {
     return `day_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 }

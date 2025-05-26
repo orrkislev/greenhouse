@@ -2,28 +2,15 @@
 
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { scheduleSchema, ScheduleFormData } from '@/lib/validations';
 import { getWeekStartDate } from '@/lib/utils';
 
-interface ScheduleFormProps {
-  onSubmit: (data: ScheduleFormData) => Promise<void>;
-  onCancel: () => void;
-  initialData?: Partial<ScheduleFormData>;
-  loading?: boolean;
-}
-
-export function ScheduleForm({ onSubmit, onCancel, initialData, loading }: ScheduleFormProps) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ScheduleFormData>({
-    resolver: zodResolver(scheduleSchema),
+export function ScheduleForm({ onSubmit, onCancel, initialData, loading }) {
+  const { register, handleSubmit, formState: { errors },
+  } = useForm({
     defaultValues: {
       title: initialData?.title || '',
       description: initialData?.description || '',
@@ -31,7 +18,7 @@ export function ScheduleForm({ onSubmit, onCancel, initialData, loading }: Sched
     },
   });
 
-  const handleFormSubmit = async (data: ScheduleFormData) => {
+  const handleFormSubmit = async (data) => {
     try {
       await onSubmit(data);
     } catch (error) {

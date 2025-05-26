@@ -1,47 +1,43 @@
 'use client';
 
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useAuthStore } from '@/store';
 import { AuthService } from '@/services/auth';
-import { AuthState } from '@/types';
 
-interface AuthContextType extends AuthState {
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, displayName: string) => Promise<void>;
-  signOut: () => Promise<void>;
-}
+const AuthContext = React.createContext(null);
 
-const AuthContext = createContext<AuthContextType | null>(null);
-
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }) {
   const { user, loading, error, setUser, setLoading, setError, logout } = useAuthStore();
 
   useEffect(() => {
-    setLoading(true);
-    
+    // setLoading(true);
     const unsubscribe = AuthService.onAuthStateChange((user) => {
+      console.log('Auth state changed:', user);
       setUser(user);
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, [setUser, setLoading]);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email, password) => {
+    console.log('Signing in with:', { email, password });
     try {
       setLoading(true);
       setError(null);
       const user = await AuthService.signIn(email, password);
       setUser(user);
+      console.log('Sign in successful:', user);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to sign in');
+      console.error('Sign in error:', error);
       throw error;
     } finally {
+      console.log('Sign in process completed');
       setLoading(false);
     }
   };
 
-  const signUp = async (email: string, password: string, displayName: string) => {
+  const signUp = async (email, password, displayName) => {
     try {
       setLoading(true);
       setError(null);
@@ -69,14 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const value: AuthContextType = {
-    user,
-    loading,
-    error,
-    signIn,
-    signUp,
-    signOut,
-  };
+  const value = { user, loading, error, signIn, signUp, signOut };
 
   return (
     <AuthContext.Provider value={value}>
@@ -86,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context = React.useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }

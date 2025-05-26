@@ -2,32 +2,20 @@
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { signUpSchema, SignUpFormData } from '@/lib/validations';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 
-interface SignUpFormProps {
-  onToggleForm: () => void;
-}
-
-export function SignUpForm({ onToggleForm }: SignUpFormProps) {
+export function SignUpForm({ onToggleForm }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { signUp, loading, error } = useAuth();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignUpFormData>({
-    resolver: zodResolver(signUpSchema),
-  });
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const onSubmit = async (data: SignUpFormData) => {
+  const onSubmit = async (data) => {
     try {
       await signUp(data.email, data.password, data.displayName);
     } catch (error) {
