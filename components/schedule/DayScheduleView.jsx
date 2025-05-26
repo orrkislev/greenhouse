@@ -3,14 +3,14 @@
 import React, { useState } from 'react';
 import { TaskItem } from './TaskItem';
 import { TaskForm } from './TaskForm';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '../ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Plus, Calendar, StickyNote } from 'lucide-react';
 import { 
   getDayOfWeekName, 
   formatDateShort, 
   calculateTaskStats 
-} from '@/utils/utils';
+} from '../../utils/utils';
 
 export function DayScheduleView({
   daySchedule,

@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { DayScheduleView } from './DayScheduleView';
-import { ScheduleService } from '@/utils/schedule';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { calculateTaskStats, formatEstimatedTime } from '@/utils/utils';
+import { ScheduleService } from '../../utils/schedule';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { calculateTaskStats, formatEstimatedTime } from '../../utils/utils';
 import { BarChart3, Clock, CheckCircle2, Circle } from 'lucide-react';
-import { useSchedule } from '@/utils/store/scheduleStore';
+import { useSchedule } from '../../utils/store/scheduleStore';
 
 export function WeeklyScheduleView({ schedule }) {
   const { updateSchedule, addTask, updateTask, deleteTask, toggleTaskCompletion } = useSchedule();

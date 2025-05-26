@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '../ui/card';
 import { Check, Circle, Edit2, Trash2, Clock,Tag,MoreVertical } from 'lucide-react';
-import { formatEstimatedTime, getPriorityColor, getPriorityIcon } from '@/utils/utils';
+import { formatEstimatedTime, getPriorityColor, getPriorityIcon } from '../../utils/utils';
 
 /**
  * @param {{

@@ -1,8 +1,8 @@
 'use client';
 
-import { AuthPage } from '@/components/auth/AuthPage';
-import { DashboardPage } from '@/components/dashboard/DashboardPage';
-import { useUser } from '@/utils/store/user';
+import { AuthPage } from '../components/auth/AuthPage';
+import { DashboardPage } from '../components/dashboard/DashboardPage';
+import { useUser } from '../utils/store/user';
 
 export default function Home() {
   const { user, loading } = useUser();

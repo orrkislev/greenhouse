@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 export function TaskForm({ onSubmit, onCancel, initialData, loading }) {
   const { register, handleSubmit, formState: { errors },

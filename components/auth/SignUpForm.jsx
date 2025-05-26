@@ -2,21 +2,22 @@
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import { useUser } from '@/utils/store/user';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { useUser } from '../../utils/store/user';
 
-export function SignInForm({ onToggleForm }) {
+export function SignUpForm({ onToggleForm }) {
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn, loading, error } = useUser()
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { signUp, loading, error } = useUser()
 
   const { register, handleSubmit, formState: { errors } } = useForm();
 
   const onSubmit = async (data) => {
     try {
-      await signIn(data.email, data.password);
+      await signUp(data.email, data.password, data.displayName);
     } catch (error) {
       // Error is handled by the auth context
     }
@@ -25,9 +26,9 @@ export function SignInForm({ onToggleForm }) {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
+        <CardTitle className="text-2xl text-center">Create account</CardTitle>
         <CardDescription className="text-center">
-          Sign in to your account to continue
+          Enter your details to create your account
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -38,6 +39,25 @@ export function SignInForm({ onToggleForm }) {
             </div>
           )}
           
+          <div className="space-y-2">
+            <label htmlFor="displayName" className="text-sm font-medium">
+              Full Name
+            </label>
+            <div className="relative">
+              <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input
+                id="displayName"
+                type="text"
+                placeholder="Enter your full name"
+                className="pl-10"
+                {...register('displayName')}
+              />
+            </div>
+            {errors.displayName && (
+              <p className="text-sm text-red-600">{errors.displayName.message}</p>
+            )}
+          </div>
+
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
               Email
@@ -83,8 +103,34 @@ export function SignInForm({ onToggleForm }) {
             )}
           </div>
 
+          <div className="space-y-2">
+            <label htmlFor="confirmPassword" className="text-sm font-medium">
+              Confirm Password
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input
+                id="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                placeholder="Confirm your password"
+                className="pl-10 pr-10"
+                {...register('confirmPassword')}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            {errors.confirmPassword && (
+              <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>
+            )}
+          </div>
+
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? 'Creating account...' : 'Create account'}
           </Button>
 
           <div className="text-center">
@@ -93,7 +139,7 @@ export function SignInForm({ onToggleForm }) {
               onClick={onToggleForm}
               className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
             >
-              Don't have an account? Sign up
+              Already have an account? Sign in
             </button>
           </div>
         </form>

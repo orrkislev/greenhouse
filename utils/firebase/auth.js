@@ -1,6 +1,6 @@
 import {signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile,User as FirebaseUser,} from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
-import { auth, db } from '@/utils/firebase/firebase';
+import { auth, db } from './firebase';
 
 export class AuthService {
   static async signIn(email, password) {

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { SignInForm } from '@/components/auth/SignInForm';
-import { SignUpForm } from '@/components/auth/SignUpForm';
+import { SignInForm } from './SignInForm';
+import { SignUpForm } from './SignUpForm';
 
 export function AuthPage() {
   const [isSignIn, setIsSignIn] = useState(true);

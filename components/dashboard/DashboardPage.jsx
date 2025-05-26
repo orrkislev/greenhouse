@@ -1,15 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useUser } from '@/utils/store/user';
-import { ScheduleService } from '@/utils/schedule';
-import { WeeklyScheduleView } from '@/components/schedule/WeeklyScheduleView';
-import { ScheduleForm } from '@/components/schedule/ScheduleForm';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useUser } from '../../utils/store/user';
+import { ScheduleService } from '../../utils/schedule';
+import { WeeklyScheduleView } from '../schedule/WeeklyScheduleView';
+import { ScheduleForm } from '../schedule/ScheduleForm';
+import { Button } from '../ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Plus, Calendar, LogOut, User,ChevronLeft,ChevronRight } from 'lucide-react';
-import { createEmptyWeeklySchedule, getWeekStartDate,getNextWeek,getPreviousWeek,formatDate } from '@/utils/utils';
-import { useSchedule } from '@/utils/store/scheduleStore';
+import { createEmptyWeeklySchedule, getWeekStartDate,getNextWeek,getPreviousWeek,formatDate } from '../../utils/utils';
+import { useSchedule } from '../../utils/store/scheduleStore';
 
 export function DashboardPage() {
   const { user, signOut } = useUser()
