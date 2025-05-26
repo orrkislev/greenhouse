@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
-import { useUser } from '@/store/user';
+import { useUser } from '@/utils/store/user';
 
 export function SignUpForm({ onToggleForm }) {
   const [showPassword, setShowPassword] = useState(false);

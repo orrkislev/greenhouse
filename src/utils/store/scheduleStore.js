@@ -1,66 +1,6 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { AuthService } from '@/services/auth';
+import { create } from "zustand";
 
-export const useUser = create(
-  persist(
-    (set, get) => ({
-      user: null,
-      loading: false,
-      error: null,
-      setUser: (user) => set({ user, error: null }),
-      setLoading: (loading) => set({ loading }),
-      setError: (error) => set({ error }),
-      logout: () => set({ user: null, error: null }),
-
-      // Auth logic merged from AuthContext
-      signIn: async (email, password) => {
-        set({ loading: true, error: null });
-        try {
-          const user = await AuthService.signIn(email, password);
-          set({ user });
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to sign in' });
-          throw error;
-        } finally {
-          set({ loading: false });
-        }
-      },
-
-      signUp: async (email, password, displayName) => {
-        set({ loading: true, error: null });
-        try {
-          const user = await AuthService.signUp(email, password, displayName);
-          set({ user });
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to sign up' });
-          throw error;
-        } finally {
-          set({ loading: false });
-        }
-      },
-
-      signOut: async () => {
-        set({ loading: true, error: null });
-        try {
-          await AuthService.signOut();
-          get().logout();
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to sign out' });
-          throw error;
-        } finally {
-          set({ loading: false });
-        }
-      },
-    }),
-    {
-      name: 'auth-storage',
-      partialize: (state) => ({ user: state.user }),
-    }
-  )
-);
-
-export const useScheduleStore = create((set, get) => ({
+export const useSchedule = create((set, get) => ({
   schedules: [],
   currentSchedule: null,
   loading: false,

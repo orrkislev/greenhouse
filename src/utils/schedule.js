@@ -1,5 +1,5 @@
 import { collection, doc, addDoc, updateDoc, deleteDoc, getDocs, getDoc, query, where, orderBy, Timestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db } from '@/utils/firebase/firebase';
 
 export class ScheduleService {
   static COLLECTION_NAME = 'schedules';

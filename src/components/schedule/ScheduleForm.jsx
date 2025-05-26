@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getWeekStartDate } from '@/lib/utils';
+import { getWeekStartDate } from '@/utils/utils';
 
 export function ScheduleForm({ onSubmit, onCancel, initialData, loading }) {
   const { register, handleSubmit, formState: { errors },

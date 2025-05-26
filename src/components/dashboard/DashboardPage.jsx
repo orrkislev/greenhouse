@@ -1,18 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useScheduleStore, useUser } from '@/store/user';
-import { ScheduleService } from '@/services/schedule';
+import { useUser } from '@/utils/store/user';
+import { ScheduleService } from '@/utils/schedule';
 import { WeeklyScheduleView } from '@/components/schedule/WeeklyScheduleView';
 import { ScheduleForm } from '@/components/schedule/ScheduleForm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Calendar, LogOut, User,ChevronLeft,ChevronRight } from 'lucide-react';
-import { createEmptyWeeklySchedule, getWeekStartDate,getNextWeek,getPreviousWeek,formatDate } from '@/lib/utils';
+import { createEmptyWeeklySchedule, getWeekStartDate,getNextWeek,getPreviousWeek,formatDate } from '@/utils/utils';
+import { useSchedule } from '@/utils/store/scheduleStore';
 
 export function DashboardPage() {
   const { user, signOut } = useUser()
-  const { schedules, currentSchedule, setSchedules, setCurrentSchedule, addSchedule,loading,setLoading,setError } = useScheduleStore();
+  const { schedules, currentSchedule, setSchedules, setCurrentSchedule, addSchedule,loading,setLoading,setError } = useSchedule();
   
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [currentWeek, setCurrentWeek] = useState(getWeekStartDate(new Date()));

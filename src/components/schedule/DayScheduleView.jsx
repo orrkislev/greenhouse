@@ -10,7 +10,7 @@ import {
   getDayOfWeekName, 
   formatDateShort, 
   calculateTaskStats 
-} from '@/lib/utils';
+} from '@/utils/utils';
 
 export function DayScheduleView({
   daySchedule,
