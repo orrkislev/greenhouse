@@ -11,7 +11,6 @@ const Day = tw`col-span-2
     flex flex-col items-center justify-start text-gray-800 text-lg font-semibold p-2
     rounded-lg bg-white/50 backdrop-blur-xs shadow mb-[-.5em]
     `
-
 const Hour = tw`col-span-full flex items-center justify-start rounded-lg p-4 bg-[#EDCBBB] border-b border-gray-300 hover:bg-gray-300 transition-colors cursor-pointer ml-[-1em] text-white text-lg font-semibold`;
 
 export default function Schedule() {

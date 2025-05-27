@@ -1,20 +1,30 @@
-// components/side/SignInFormSideBar.js
 'use client';
 
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useEffect, useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, LogOut } from 'lucide-react';
-import { useUser } from '../../utils/store/user';
+import { useUser } from '@/utils/store/user';
 
 export default function SignInFormSideBar() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [formErrors, setFormErrors] = useState({});
   const { user, signIn, signOut, loading, error } = useUser();
 
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const validate = () => {
+    const errors = {};
+    if (!email) errors.email = 'Email is required';
+    if (!password) errors.password = 'Password is required';
+    return errors;
+  };
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    const errors = validate();
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) return;
     try {
-      await signIn(data.email, data.password);
+      await signIn(email, password);
     } catch (error) {
       // Error is handled by the auth context
     }
@@ -46,13 +56,12 @@ export default function SignInFormSideBar() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4">
       {error && (
         <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
           {error}
         </div>
       )}
-      
       <div className="space-y-2">
         <label htmlFor="email-sidebar" className="text-sm font-medium">
           Email
@@ -64,14 +73,15 @@ export default function SignInFormSideBar() {
             type="email"
             placeholder="Enter your email"
             className="pl-10 w-full border rounded-md p-2 text-sm"
-            {...register('email')}
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            autoComplete="username"
           />
         </div>
-        {errors.email && (
-          <p className="text-sm text-red-600">{errors.email.message}</p>
+        {formErrors.email && (
+          <p className="text-sm text-red-600">{formErrors.email}</p>
         )}
       </div>
-
       <div className="space-y-2">
         <label htmlFor="password-sidebar" className="text-sm font-medium">
           Password
@@ -83,7 +93,9 @@ export default function SignInFormSideBar() {
             type={showPassword ? 'text' : 'password'}
             placeholder="Enter your password"
             className="pl-10 pr-10 w-full border rounded-md p-2 text-sm"
-            {...register('password')}
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            autoComplete="current-password"
           />
           <button
             type="button"
@@ -93,11 +105,10 @@ export default function SignInFormSideBar() {
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
-        {errors.password && (
-          <p className="text-sm text-red-600">{errors.password.message}</p>
+        {formErrors.password && (
+          <p className="text-sm text-red-600">{formErrors.password}</p>
         )}
       </div>
-
       <button
         type="submit"
         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md disabled:opacity-50"
