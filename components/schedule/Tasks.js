@@ -34,8 +34,8 @@ function Task({ task, weekDates }) {
     const selected = useUserSchedule(state => state.selected)
     const setSelected = useUserSchedule(state => state.setSelected);
     
-    const dayStartIndex = weekDates.findIndex(date => formatDate(date) === task.dayStart);
-    const dayEndIndex = weekDates.findIndex(date => formatDate(date) === task.dayEnd);
+    const dayStartIndex = weekDates.findIndex(date => formatDate(date) === task.start);
+    const dayEndIndex = weekDates.findIndex(date => formatDate(date) === task.end);
 
     return (
         <TaskDiv

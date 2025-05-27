@@ -54,8 +54,8 @@ function Event({ weekDates, event, onClick, firstHourRow }) {
             onClick={() => setSelected(event.id)}
             isSelected={selected === event.id}
         >
-            {/* {event.title} */}
-            {event.start} - {event.end}, {startIndex}-{endIndex}
+            {event.title}
+            {/* {event.start} - {event.end}, {startIndex}-{endIndex} */}
         </EventDiv>
     );
 }

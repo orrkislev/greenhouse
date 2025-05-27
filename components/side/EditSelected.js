@@ -5,6 +5,7 @@ import { useUser } from "@/utils/store/user";
 import { collection, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/utils/firebase/firebase";
 import { HOURS } from "@/utils/store/scheduleDataStore";
+import { DateRange } from "../ui/DateRange";
 
 export default function EditSelected() {
     const selected = useUserSchedule(state => state.selected);
@@ -15,23 +16,34 @@ export default function EditSelected() {
     if (!selected) return null
 
     const selectedEvent = events.find(event => event.id === selected);
-    if (selectedEvent) {
-        return <EventEdit event={selectedEvent} />;
-    }
+    if (selectedEvent) return <EventEdit event={selectedEvent} />;
 
     const selectedTask = tasks.find(task => task.id === selected);
-    if (selectedTask) {
-        return (
-            <div className="p-4">
-                <h2 className="text-lg font-semibold">Edit Selected Task</h2>
-                <p className="text-gray-600">{selectedTask.title}</p>
-            </div>
-        );
-    }
+    if (selectedTask) return <TaskEdit task={selectedTask} />;
 
 }
 
 
+function TaskEdit({task}) {
+    const user = useUser(state => state.user);
+    const saveChanges = (updatedData) => {
+        const tasksCol = collection(db, "users", user.id, "tasks");
+        const taskDoc = doc(tasksCol, task.id);
+        updateDoc(taskDoc, updatedData)
+    }
+
+    const handleDateChange = (date) => {
+        saveChanges({ start: formatDate(date.start), end: formatDate(date.end) });
+    }
+
+    return (
+        <div className="p-4">
+            <h2 className="text-lg font-semibold">Edit Selected Task</h2>
+            <p className="text-gray-600">{task.title}</p>
+            <DateRange onChange={handleDateChange} start={parseDate(task.start)} end={parseDate(task.end)} />
+        </div>
+    );
+}
 
 
 function EventEdit({event}) {

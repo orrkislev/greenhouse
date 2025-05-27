@@ -19,8 +19,8 @@ export const HOURS = {
 
 export const useUserSchedule = create((set) => ({
     tasks: [
-        { id: 0, dayStart: '25-05-2025', dayEnd: '27-05-2025', title: 'Task 1' },
-        { id: 1, dayStart: '28-05-2025', dayEnd: '28-05-2025', title: 'Task 2' },
+        { id: 0, start: '25-05-2025', end: '27-05-2025', title: 'Task 1' },
+        { id: 1, start: '28-05-2025', end: '28-05-2025', title: 'Task 2' },
     ],
     events: [
         { id: 0, date: '25-05-2025', start: '09:30', end: '11:30', title: 'Event 1' },
