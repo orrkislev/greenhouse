@@ -35,15 +35,25 @@ const EventDiv = tw`bg-[#E8CB4A] col-span-2 rounded-lg p-2 inset-shadow-[0_2px_4
     ${props => props.isSelected ? 'bg-[#C69F2A] text-white' : ''}
 `;
 
+const hours = [
+    '',
+    '09:30',
+    '10:30',
+    '11:30',
+    '12:30',
+    'ערב',
+]
 function Event({ weekDates, event, onClick, firstHourRow }) {
     const selectedEvent = useUserSchedule(state => state.selectedEvent);
 
     const dayIndex = weekDates.findIndex(date => formatDate(date) === event.date);
+    const startIndex = hours.findIndex(hour => hour === event.start);
+    const endIndex = hours.findIndex(hour => hour === event.end);
     return (
         <EventDiv
             style={{
-                gridRowStart: event.hourStart.index + firstHourRow,
-                gridRowEnd: event.hourEnd.index + firstHourRow + 1,
+                gridRowStart: startIndex + firstHourRow,
+                gridRowEnd: endIndex + firstHourRow + 1,
                 gridColumnStart: dayIndex * 2 + 2,
             }}
             onClick={onClick}

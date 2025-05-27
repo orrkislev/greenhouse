@@ -2,6 +2,9 @@ import { formatDate } from "@/utils/utils";
 import { Grid } from "./Schedule";
 import { tw } from "@/utils/tw";
 import { DAYS, HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
+import { addDoc, collection } from "firebase/firestore";
+import { useUser } from "@/utils/store/user";
+import { db } from "@/utils/firebase/firebase";
 
 const EmptySlot = tw`bg-white col-span-2 rounded-lg p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)] text-gray-800 mx-2
     flex items-center justify-center text-sm font-bold
@@ -9,18 +12,23 @@ const EmptySlot = tw`bg-white col-span-2 rounded-lg p-2 inset-shadow-[0_2px_4px_
 `;
 
 export default function EmptySlotsGrid({ gridData }) {
-    const addEvent = useUserSchedule(state => state.addEvent);
+    const user = useUser(state => state.user);
+
+    if (!user) return null;
     
     const clickNewEvent = (dayIndex, hour) => {
         const date = gridData.weekDates[dayIndex];
+
+        // create a new event in firebase        
         const newEvent = {
-            id: Math.random().toString(36).substr(2, 9), // Generate a random ID
             date: formatDate(date),
-            hourStart: hour,
-            hourEnd: hour,
+            start: hour,
+            end: hour,
             title: `New Event`
         };
-        addEvent(newEvent);
+
+        const eventsCollection = collection(db, `users/${user.id}/events`);
+        addDoc(eventsCollection, newEvent);
     }
     
     return (
@@ -33,7 +41,7 @@ export default function EmptySlotsGrid({ gridData }) {
                             gridColumnStart: index * 2 + 2,
                             gridColumnEnd: index * 2 + 4,
                         }}
-                        onClick={() => clickNewEvent(index, hour)}
+                        onClick={() => clickNewEvent(index, hour.label)}
                     >
                         +
                     </EmptySlot>
