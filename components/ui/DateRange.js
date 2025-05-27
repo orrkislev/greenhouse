@@ -11,26 +11,15 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { useEffect, useState } from "react"
 
 export function DateRange({ start, end ,onChange}) {
-    const [date, setDate] = useState({
-        from: start,
-        to: end,
-    })
-
-    useEffect(()=>{
-        setDate({
-            from: start,
-            to: end,
-        })
-    }, [start, end])
-
-    useEffect(()=>{
-        if (date.from && date.to && onChange) {
-            onChange({ start: date.from, end: date.to })
+    const setDate = (range) => {
+        if (onChange) {
+            onChange({start: range.from, end: range.to})
         }
-    },[date])
+    }
+
+    const date = { from: start, to: end }
 
     return (
         <div className={cn("grid gap-2")}>
