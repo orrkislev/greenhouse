@@ -1,15 +1,17 @@
 import { tw } from "@/utils/tw";
-import { Grid } from "./Main";
+import { Grid } from "./Schedule";
 import { formatDate } from "@/utils/utils";
 import { useUserSchedule } from "@/utils/store/scheduleDataStore";
 
 
 export default function TasksGrid({ gridData }) {
     const tasks = useUserSchedule(state => state.tasks);
+    const setSelectedTask = useUserSchedule(state => state.setSelectedTask);
+
     const { weekDates, template } = gridData;
 
     const clickTask = (task) => {
-        console.log(`Clicked on task: ${task.title}, from day ${task.dayStart} to day ${task.dayEnd}`);
+        setSelectedTask(task);
     }
 
     return (
@@ -27,11 +29,19 @@ export default function TasksGrid({ gridData }) {
 
 
 
-const TaskDiv = tw`bg-[#309898] rounded-full shadow text-gray-800 mx-2 text-white text-sm px-8 flex items-center justify-start`
+const TaskDiv = tw`bg-[#309898] rounded-full shadow mx-2
+        flex items-center justify-start
+        text-gray-800 text-white text-sm px-8 
+        pointer-events-auto cursor-pointer hover:bg-[#2A7B7B] transition-colors
+        ${props => props.isSelected ? 'bg-[#267070] font-bold' : ''}
+`;
 
 function Task({ task, onClick, weekDates }) {
+    const selectedTask = useUserSchedule(state => state.selectedTask);
+    
     const dayStartIndex = weekDates.findIndex(date => formatDate(date) === task.dayStart);
     const dayEndIndex = weekDates.findIndex(date => formatDate(date) === task.dayEnd);
+
     return (
         <TaskDiv
             style={{
@@ -40,6 +50,7 @@ function Task({ task, onClick, weekDates }) {
                 gridColumnEnd: dayEndIndex * 2 + 4
             }}
             onClick={onClick}
+            isSelected={ selectedTask && selectedTask.id === task.id}
         >
             {task.title}
         </TaskDiv>

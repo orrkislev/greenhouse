@@ -19,13 +19,13 @@ export const HOURS = {
 
 export const useUserSchedule = create((set) => ({
     tasks: [
-        { dayStart: '25-05-2025', dayEnd: '27-05-2025', title: 'Task 1' },
-        { dayStart: '28-05-2025', dayEnd: '28-05-2025', title: 'Task 2' },
+        { id: 0, dayStart: '25-05-2025', dayEnd: '27-05-2025', title: 'Task 1' },
+        { id: 1, dayStart: '28-05-2025', dayEnd: '28-05-2025', title: 'Task 2' },
     ],
     events: [
-        { date: '25-05-2025', hourStart: HOURS.HOUR2, hourEnd: HOURS.HOUR3, title: 'Event 1' },
-        { date: '26-05-2025', hourStart: HOURS.HOUR3, hourEnd: HOURS.HOUR4, title: 'Event 2' },
-        { date: '28-05-2025', hourStart: HOURS.HOUR1, hourEnd: HOURS.HOUR2, title: 'Event 3' },
+        { id: 0, date: '25-05-2025', hourStart: HOURS.HOUR2, hourEnd: HOURS.HOUR3, title: 'Event 1' },
+        { id: 1, date: '26-05-2025', hourStart: HOURS.HOUR3, hourEnd: HOURS.HOUR4, title: 'Event 2' },
+        { id: 2, date: '28-05-2025', hourStart: HOURS.HOUR1, hourEnd: HOURS.HOUR2, title: 'Event 3' },
     ],
     setTasks: (tasks) => set({ tasks }),
     setEvents: (events) => set({ events }),
@@ -36,6 +36,11 @@ export const useUserSchedule = create((set) => ({
     addTask: (task) => set((state) => ({
         tasks: [...state.tasks, task]
     })),
+
+    selectedEvent: null,
+    setSelectedEvent: (event) => set({ selectedEvent: event }),
+    selectedTask: null,
+    setSelectedTask: (task) => set({ selectedTask: task }),
 }));
 
 export const useGantt = create((set) => ({

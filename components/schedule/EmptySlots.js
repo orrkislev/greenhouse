@@ -1,9 +1,9 @@
 import { formatDate } from "@/utils/utils";
-import { Grid } from "./Main";
+import { Grid } from "./Schedule";
 import { tw } from "@/utils/tw";
 import { DAYS, HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
 
-const EmptySlot = tw`bg-gray-200 col-span-2 rounded-lg p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)] text-gray-800 mx-2
+const EmptySlot = tw`bg-white col-span-2 rounded-lg p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)] text-gray-800 mx-2
     flex items-center justify-center text-sm font-bold
     cursor-pointer opacity-0 hover:opacity-100 transition-opacity
 `;
@@ -14,6 +14,7 @@ export default function EmptySlotsGrid({ gridData }) {
     const clickNewEvent = (dayIndex, hour) => {
         const date = gridData.weekDates[dayIndex];
         const newEvent = {
+            id: Math.random().toString(36).substr(2, 9), // Generate a random ID
             date: formatDate(date),
             hourStart: hour,
             hourEnd: hour,
