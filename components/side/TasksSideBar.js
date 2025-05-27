@@ -10,16 +10,16 @@ const TaskDiv = tw`bg-[#309898] rounded-full shadow mx-2
 
 export default function TasksSideBar() {
   const tasks = useUserSchedule(state => state.tasks);
-  const selectedTask = useUserSchedule(state => state.selectedTask);
-  const setSelectedTask = useUserSchedule(state => state.setSelectedTask);
+  const selected = useUserSchedule(state => state.selected);
+  const setSelected = useUserSchedule(state => state.setSelected);
 
   return (
     <Container>
       {tasks.map((task, idx) => (
         <TaskDiv
           key={idx}
-          onClick={() => setSelectedTask(task)}
-          isSelected={selectedTask && selectedTask.id === task.id}
+          onClick={() => setSelected(task.id)}
+          isSelected={selectedTask === task.id}
         >
           {task.title}
         </TaskDiv>

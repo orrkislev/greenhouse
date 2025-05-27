@@ -37,10 +37,8 @@ export const useUserSchedule = create((set) => ({
         tasks: [...state.tasks, task]
     })),
 
-    selectedEvent: null,
-    setSelectedEvent: (event) => set({ selectedEvent: event }),
-    selectedTask: null,
-    setSelectedTask: (task) => set({ selectedTask: task }),
+    selected: null,
+    setSelected: (selected) => set({ selected }),
 }));
 
 export const useGantt = create((set) => ({

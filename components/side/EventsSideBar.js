@@ -14,15 +14,15 @@ const EventDiv = tw`bg-[#E8CB4A] rounded-full shadow mx-2
 
 export default function EventsSideBar() {
   const events = useUserSchedule(state => state.events);
-  const selectedEvent = useUserSchedule(state => state.selectedEvent);
-  const setSelectedEvent = useUserSchedule(state => state.setSelectedEvent);
+  const selected = useUserSchedule(state => state.selected);
+  const setSelected = useUserSchedule(state => state.setSelecte);
 
   return (
     <Container>
       {events.map((event, idx) => (
         <EventDiv key={idx}
-          onClick={() => setSelectedEvent(event)}
-          isSelected={selectedEvent && selectedEvent.id === event.id}
+          onClick={() => setSelected(event.id)}
+          isSelected={selected === event.id}
         >
           {event.title}
         </EventDiv>

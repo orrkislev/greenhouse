@@ -7,12 +7,7 @@ import { HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
 
 export default function EventsGrid({ gridData }) {
     const events = useUserSchedule(state => state.events)
-    const setSelectedEvent = useUserSchedule(state => state.setSelectedEvent);
     const { weekDates, firstHourRow, template } = gridData;
-
-    const clickEvent = (event) => {
-        setSelectedEvent(event);
-    }
 
     return (
         <Grid className={`z-40`} style={{ gridTemplateRows: template, pointerEvents: 'none' }}>
@@ -21,7 +16,6 @@ export default function EventsGrid({ gridData }) {
                     firstHourRow={firstHourRow}
                     event={event}
                     weekDates={weekDates}
-                    onClick={() => clickEvent(event)}
                 />
             ))}
         </Grid>
@@ -44,7 +38,8 @@ const hours = [
     'ערב',
 ]
 function Event({ weekDates, event, onClick, firstHourRow }) {
-    const selectedEvent = useUserSchedule(state => state.selectedEvent);
+    const selected = useUserSchedule(state => state.selected);
+    const setSelected = useUserSchedule(state => state.setSelected);
 
     const dayIndex = weekDates.findIndex(date => formatDate(date) === event.date);
     const startIndex = hours.findIndex(hour => hour === event.start);
@@ -56,10 +51,11 @@ function Event({ weekDates, event, onClick, firstHourRow }) {
                 gridRowEnd: endIndex + firstHourRow + 1,
                 gridColumnStart: dayIndex * 2 + 2,
             }}
-            onClick={onClick}
-            isSelected={selectedEvent && selectedEvent.id === event.id}
+            onClick={() => setSelected(event.id)}
+            isSelected={selected === event.id}
         >
-            {event.title}
+            {/* {event.title} */}
+            {event.start} - {event.end}, {startIndex}-{endIndex}
         </EventDiv>
     );
 }

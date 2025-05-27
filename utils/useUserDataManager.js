@@ -23,7 +23,6 @@ export default function useUserDataManager() {
         (async () => {
             let userEvents = await getDocs(userEventsCollection)
             userEvents = userEvents.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            console.log("userEvents", userEvents);
             setEvents(userEvents);
 
             let userTasks = await getDocs(userTasksCollection)

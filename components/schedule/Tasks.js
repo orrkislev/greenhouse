@@ -6,20 +6,14 @@ import { useUserSchedule } from "@/utils/store/scheduleDataStore";
 
 export default function TasksGrid({ gridData }) {
     const tasks = useUserSchedule(state => state.tasks);
-    const setSelectedTask = useUserSchedule(state => state.setSelectedTask);
 
     const { weekDates, template } = gridData;
-
-    const clickTask = (task) => {
-        setSelectedTask(task);
-    }
 
     return (
         <Grid className={`z-40`} style={{ gridTemplateRows: template, pointerEvents: 'none' }}>
             {tasks.map((task, index) => (
                 <Task key={index}
                     task={task}
-                    onClick={() => clickTask(task)}
                     weekDates={weekDates}
                 />
             ))}
@@ -36,8 +30,9 @@ const TaskDiv = tw`bg-[#309898] rounded-full shadow mx-2
         ${props => props.isSelected ? 'bg-[#267070] font-bold' : ''}
 `;
 
-function Task({ task, onClick, weekDates }) {
-    const selectedTask = useUserSchedule(state => state.selectedTask);
+function Task({ task, weekDates }) {
+    const selected = useUserSchedule(state => state.selected)
+    const setSelected = useUserSchedule(state => state.setSelected);
     
     const dayStartIndex = weekDates.findIndex(date => formatDate(date) === task.dayStart);
     const dayEndIndex = weekDates.findIndex(date => formatDate(date) === task.dayEnd);
@@ -49,8 +44,8 @@ function Task({ task, onClick, weekDates }) {
                 gridColumnStart: dayStartIndex * 2 + 2,
                 gridColumnEnd: dayEndIndex * 2 + 4
             }}
-            onClick={onClick}
-            isSelected={ selectedTask && selectedTask.id === task.id}
+            onClick={() => setSelected(task.id)}
+            isSelected={ selected === task.id}
         >
             {task.title}
         </TaskDiv>
