@@ -1,0 +1,43 @@
+import { formatDate } from "@/utils/utils";
+import { Grid } from "./Main";
+import { tw } from "@/utils/tw";
+import { DAYS, HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
+
+const EmptySlot = tw`bg-gray-200 col-span-2 rounded-lg p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)] text-gray-800 mx-2
+    flex items-center justify-center text-sm font-bold
+    cursor-pointer opacity-0 hover:opacity-100 transition-opacity
+`;
+
+export default function EmptySlotsGrid({ gridData }) {
+    const addEvent = useUserSchedule(state => state.addEvent);
+    
+    const clickNewEvent = (dayIndex, hour) => {
+        const date = gridData.weekDates[dayIndex];
+        const newEvent = {
+            date: formatDate(date),
+            hourStart: hour,
+            hourEnd: hour,
+            title: `New Event`
+        };
+        addEvent(newEvent);
+    }
+    
+    return (
+        <Grid className='z-30' style={{ gridTemplateRows: gridData.template }}>
+            {Object.values(DAYS).map((day, index) => {
+                return Object.values(HOURS).map(hour => (
+                    <EmptySlot key={`${index}-${hour.index}`}
+                        style={{
+                            gridRowStart: hour.index + gridData.firstHourRow,
+                            gridColumnStart: index * 2 + 2,
+                            gridColumnEnd: index * 2 + 4,
+                        }}
+                        onClick={() => clickNewEvent(index, hour)}
+                    >
+                        +
+                    </EmptySlot>
+                ));
+            })}
+        </Grid>
+    )
+}
