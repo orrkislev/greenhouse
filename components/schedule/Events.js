@@ -1,5 +1,5 @@
 import { tw } from "@/utils/tw";
-import { Grid } from "./Schedule";
+import { Grid, useWeek } from "./Schedule";
 import { formatDate } from "@/utils/utils";
 import { HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
 
@@ -7,15 +7,13 @@ import { HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
 
 export default function EventsGrid({ gridData }) {
     const events = useUserSchedule(state => state.events)
-    const { weekDates, firstHourRow, template } = gridData;
 
     return (
-        <Grid className={`z-40`} style={{ gridTemplateRows: template, pointerEvents: 'none' }}>
+        <Grid className={`z-40`} style={{ ...gridData.style, pointerEvents: 'none' }}>
             {events.map((event, index) => (
                 <Event key={index}
-                    firstHourRow={firstHourRow}
+                    firstHourRow={gridData.firstHourRow}
                     event={event}
-                    weekDates={weekDates}
                 />
             ))}
         </Grid>
@@ -37,11 +35,12 @@ const hours = [
     '12:30',
     'ערב',
 ]
-function Event({ weekDates, event, onClick, firstHourRow }) {
+function Event({ event, onClick, firstHourRow }) {
+    const week = useWeek(state => state.week);
     const selected = useUserSchedule(state => state.selected);
     const setSelected = useUserSchedule(state => state.setSelected);
 
-    const dayIndex = weekDates.findIndex(date => formatDate(date) === event.date);
+    const dayIndex = week.findIndex(date => formatDate(date) === event.date);
     const startIndex = hours.findIndex(hour => hour === event.start);
     const endIndex = hours.findIndex(hour => hour === event.end);
     return (

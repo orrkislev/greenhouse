@@ -1,5 +1,5 @@
 import { tw } from "@/utils/tw";
-import { Grid } from "./Schedule";
+import { Grid, useWeek } from "./Schedule";
 import { formatDate } from "@/utils/utils";
 import { useUserSchedule } from "@/utils/store/scheduleDataStore";
 
@@ -7,14 +7,11 @@ import { useUserSchedule } from "@/utils/store/scheduleDataStore";
 export default function TasksGrid({ gridData }) {
     const tasks = useUserSchedule(state => state.tasks);
 
-    const { weekDates, template } = gridData;
-
     return (
-        <Grid className={`z-40`} style={{ gridTemplateRows: template, pointerEvents: 'none' }}>
+        <Grid className={`z-40`} style={{ ...gridData.style, pointerEvents: 'none' }}>
             {tasks.map((task, index) => (
                 <Task key={index}
                     task={task}
-                    weekDates={weekDates}
                 />
             ))}
         </Grid>
@@ -30,12 +27,13 @@ const TaskDiv = tw`bg-[#309898] rounded-full shadow mx-2
         ${props => props.isSelected ? 'bg-[#267070] font-bold' : ''}
 `;
 
-function Task({ task, weekDates }) {
+function Task({ task }) {
+    const week = useWeek(state => state.week);
     const selected = useUserSchedule(state => state.selected)
     const setSelected = useUserSchedule(state => state.setSelected);
     
-    const dayStartIndex = weekDates.findIndex(date => formatDate(date) === task.start);
-    const dayEndIndex = weekDates.findIndex(date => formatDate(date) === task.end);
+    const dayStartIndex = week.findIndex(date => formatDate(date) === task.start);
+    const dayEndIndex = week.findIndex(date => formatDate(date) === task.end);
 
     return (
         <TaskDiv
