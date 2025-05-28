@@ -24,10 +24,18 @@ export default function TasksSideBar() {
 
   const createNewTask = () => {
     const tasksCollection = collection(db, "users", user.id, "tasks");
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const formattedDate = `${dd}-${mm}-${yyyy}`;
+
     const newTask = {
       title: "New Task",
       description: "",
       completed: false,
+      start: formattedDate,
+      end: formattedDate,
     };
     addDoc(tasksCollection, newTask)
       .then(docRef => {
