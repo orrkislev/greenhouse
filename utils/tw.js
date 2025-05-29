@@ -1,5 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
+import { motion } from 'motion/react';
 
 function createStyledElement(elementType) {
   return (strings, ...values) => {
@@ -34,13 +35,35 @@ const elementTypes = [
   // Add more as needed
 ];
 
+// Add support for tw.motion
+const motionProxy = new Proxy(function () {}, {
+  apply(target, thisArg, args) {
+    // tw.motion`...` defaults to motion.div
+    return createStyledElement(motion.div)(...args);
+  },
+  get(target, prop) {
+    // tw.motion.div, tw.motion.span, etc.
+    if (typeof motion[prop] === 'function') {
+      return createStyledElement(motion[prop]);
+    }
+    return target[prop];
+  }
+});
+
 const twHandler = {
   apply(target, thisArg, args) {
     // tw`...` syntax, default to div
     return createStyledElement('div')(...args);
   },
   get(target, prop) {
+    if (prop === 'motion') {
+      return motionProxy;
+    }
     if (elementTypes.includes(prop)) {
+      return createStyledElement(prop);
+    }
+    // Support React components (e.g., motion.div)
+    if (typeof prop === 'function' || (typeof prop === 'object' && prop !== null)) {
       return createStyledElement(prop);
     }
     // fallback to default

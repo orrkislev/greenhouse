@@ -1,7 +1,8 @@
 import { tw } from "@/utils/tw";
-import { Grid, useWeek } from "./Schedule";
+import { Grid } from "./Schedule";
 import { formatDate } from "@/utils/utils";
 import { useUserSchedule } from "@/utils/store/scheduleDataStore";
+import { useWeek } from "@/utils/store/scheduleDisplayStore";
 
 
 export default function TasksGrid({ gridData }) {
@@ -24,7 +25,7 @@ const TaskDiv = tw`bg-[#309898] rounded-full shadow mx-2
         flex items-center justify-start
         text-gray-800 text-white text-sm px-8 
         pointer-events-auto cursor-pointer hover:bg-[#2A7B7B] transition-colors
-        ${props => props.isSelected ? 'bg-[#267070] font-bold' : ''}
+        ${props => props.isselected ? 'bg-[#267070] font-bold' : ''}
 `;
 
 function Task({ task }) {
@@ -43,7 +44,7 @@ function Task({ task }) {
                 gridColumnEnd: dayEndIndex * 2 + 4
             }}
             onClick={() => setSelected(task.id)}
-            isSelected={ selected === task.id}
+            isselected={ selected === task.id ? "true" : "false" }
         >
             {task.title}
         </TaskDiv>

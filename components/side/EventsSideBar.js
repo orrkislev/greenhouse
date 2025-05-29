@@ -6,7 +6,7 @@ const EventDiv = tw`bg-[#E8CB4A] rounded-full shadow mx-2
         flex items-center justify-start
         text-gray-800 text-white text-sm px-8 
         pointer-events-auto cursor-pointer hover:bg-[#D7B33A] transition-colors
-        ${props => props.isSelected ? 'bg-[#C69F2A] font-bold' : ''}
+        ${props => props.isselected ? 'bg-[#C69F2A] font-bold' : ''}
 `;
 
 
@@ -22,7 +22,7 @@ export default function EventsSideBar() {
       {events.map((event, idx) => (
         <EventDiv key={idx}
           onClick={() => setSelected(event.id)}
-          isSelected={selected === event.id}
+          isselected={selected === event.id ? "true" : "false"}
         >
           {event.title}
         </EventDiv>

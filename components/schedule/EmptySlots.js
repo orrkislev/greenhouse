@@ -1,12 +1,13 @@
 import { formatDate } from "@/utils/utils";
-import { Grid, useWeek } from "./Schedule";
+import { Grid } from "./Schedule";
 import { tw } from "@/utils/tw";
 import { DAYS, HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
 import { addDoc, collection } from "firebase/firestore";
 import { useUser } from "@/utils/store/user";
 import { db } from "@/utils/firebase/firebase";
+import { useWeek } from "@/utils/store/scheduleDisplayStore";
 
-const EmptySlot = tw`bg-white col-span-2 rounded-lg p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)] text-gray-800 mx-2
+const EmptySlot = tw`bg-white rounded-lg p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)] text-gray-800 mx-2
     flex items-center justify-center text-sm font-bold
     cursor-pointer opacity-0 hover:opacity-100 transition-opacity
 `;
@@ -23,7 +24,7 @@ export default function EmptySlotsGrid({ gridData }) {
         const newEvent = {
             date: formatDate(date),
             start: hour,
-            end: hour,
+            duration: 1,
             title: `New Event`
         };
 
@@ -34,14 +35,14 @@ export default function EmptySlotsGrid({ gridData }) {
     return (
         <Grid className='z-30' style={gridData.style}>
             {Object.values(DAYS).map((day, index) => {
-                return Object.values(HOURS).map(hour => (
-                    <EmptySlot key={`${index}-${hour.index}`}
+                return HOURS.map((hour,hourIndex) => (
+                    <EmptySlot key={`${index}-${hourIndex}`}
                         style={{
-                            gridRowStart: hour.index + gridData.firstHourRow,
-                            gridColumnStart: index * 2 + 2,
-                            gridColumnEnd: index * 2 + 4,
+                            gridRowStart: hourIndex + gridData.firstHourRow,
+                            gridColumnStart: index + 2,
+                            gridColumnEnd: index + 3,
                         }}
-                        onClick={() => clickNewEvent(index, hour.label)}
+                        onClick={() => clickNewEvent(index, hour)}
                     >
                         +
                     </EmptySlot>

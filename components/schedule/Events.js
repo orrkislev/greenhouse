@@ -1,60 +1,110 @@
-import { tw } from "@/utils/tw";
-import { Grid, useWeek } from "./Schedule";
+import { Grid } from "./Schedule";
 import { formatDate } from "@/utils/utils";
 import { HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
-
+import { useState } from "react";
+import { updateEvent } from "@/utils/firebase/firebase_data";
+import { Event } from "./Event";
+import { useWeek } from "@/utils/store/scheduleDisplayStore";
 
 
 export default function EventsGrid({ gridData }) {
+    const [draggingId, setDraggingId] = useState(null);
+    const [resizingId, setResizingId] = useState(null);
+
+    const week = useWeek(state => state.week);
     const events = useUserSchedule(state => state.events)
 
+    const positions = Array(6).fill(0).map((_, col) => Array(6).fill(0).map((_, row) => ({ row, col }))).flat();
+
+    const onPlace = pos => {
+        if (draggingId === null) return;
+        updateEvent(draggingId[0], {
+            date: formatDate(week[pos.col]),
+            start: HOURS[pos.row],
+        })
+    }
+
     return (
-        <Grid className={`z-40`} style={{ ...gridData.style, pointerEvents: 'none' }}>
+        <Grid className={`z-60`} style={{ ...gridData.style, pointerEvents: 'none' }}>
+            {draggingId !== null &&
+                positions.map((pos, index) => (
+                    <Droppable key={index} row={pos.row} col={pos.col} gridData={gridData}
+                        offset={draggingId[1]}
+                        onPlace={() => onPlace(pos)}
+                    />
+                ))
+            }
+
+            {resizingId !== null && (() => {
+                const event = events.find(e => e.id === resizingId);
+                if (!event) return null;
+                // Find the column index for the event's date
+                const eventCol = week.findIndex(date => formatDate(date) === event.date);
+                if (eventCol === -1) return null;
+                // Only render Droppable for the event's column
+                return positions
+                    .filter(pos => pos.col === eventCol)
+                    .map((pos, index) => (
+                        <Droppable key={index} row={pos.row} col={pos.col} gridData={gridData}
+                            onPlace={() => {
+                                const newDuration = pos.row - HOURS.indexOf(event.start) + 1;
+                                if (newDuration > 0) {
+                                    updateEvent(resizingId, { duration: newDuration });
+                                }
+                            }}
+                        />
+                    ));
+            })()}
+
+
             {events.map((event, index) => (
                 <Event key={index}
                     firstHourRow={gridData.firstHourRow}
                     event={event}
+                    onStartDrag={(offset) => setDraggingId([event.id, offset])}
+                    onEndDrag={() => setDraggingId(null)}
+                    onStartResize={() => setResizingId(event.id)}
+                    onEndResize={() => setResizingId(null)}
                 />
             ))}
         </Grid>
     )
 }
 
-
-const EventDiv = tw`bg-[#E8CB4A] col-span-2 rounded-lg p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)] text-gray-800 mx-2
-    flex items-center justify-start text-sm
-    pointer-events-auto cursor-pointer hover:bg-[#D7B33A] transition-colors
-    ${props => props.isSelected ? 'bg-[#C69F2A] text-white' : ''}
-`;
-
-const hours = [
-    '',
-    '09:30',
-    '10:30',
-    '11:30',
-    '12:30',
-    'ערב',
-]
-function Event({ event, onClick, firstHourRow }) {
-    const week = useWeek(state => state.week);
-    const selected = useUserSchedule(state => state.selected);
-    const setSelected = useUserSchedule(state => state.setSelected);
-
-    const dayIndex = week.findIndex(date => formatDate(date) === event.date);
-    const startIndex = hours.findIndex(hour => hour === event.start);
-    const endIndex = hours.findIndex(hour => hour === event.end);
+function Droppable({ row, col, gridData, onPlace, offset = 0 }) {
     return (
-        <EventDiv
+        <div
             style={{
-                gridRowStart: startIndex + firstHourRow,
-                gridRowEnd: endIndex + firstHourRow + 1,
-                gridColumnStart: dayIndex * 2 + 2,
+                gridRow: row + gridData.firstHourRow,
+                gridColumn: col + 2,
+                zIndex: 100,
+                position: 'relative',
             }}
-            onClick={() => setSelected(event.id)}
-            isSelected={selected === event.id}
         >
-            {event.title}
-            {/* {event.start} - {event.end}, {startIndex}-{endIndex} */}
-        </EventDiv>
+            <div className="mx-2 rounded-sm pointer-events-auto absolute inset-0"
+                style={{transform: `translateY(${offset}px)`}}
+                onMouseEnter={onPlace}
+            />
+        </div>
     );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

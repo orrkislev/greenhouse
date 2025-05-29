@@ -2,6 +2,7 @@ import { db } from "@/utils/firebase/firebase";
 import { useUserSchedule } from "@/utils/store/scheduleDataStore";
 import { useUser } from "@/utils/store/user";
 import { tw } from "@/utils/tw";
+import { formatDate } from "@/utils/utils";
 import { addDoc, collection } from "firebase/firestore";
 
 const Container = tw`flex flex-col gap-2`;
@@ -9,7 +10,7 @@ const TaskDiv = tw`bg-[#309898] rounded-full shadow mx-2
         flex items-center justify-start
         text-gray-800 text-white text-sm px-8 
         pointer-events-auto cursor-pointer hover:bg-[#2A7B7B] transition-colors
-        ${props => props.isSelected ? 'bg-[#226666] font-bold' : ''}`;
+        ${props => props.isselected ? 'bg-[#226666] font-bold' : ''}`;
 const NewTaskDiv = tw`bg-[#309898] rounded-full shadow mx-2
         flex items-center justify-center
         text-gray-800 text-white text-sm px-8 
@@ -24,18 +25,13 @@ export default function TasksSideBar() {
 
   const createNewTask = () => {
     const tasksCollection = collection(db, "users", user.id, "tasks");
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    const formattedDate = `${dd}-${mm}-${yyyy}`;
-
+    const today = formatDate(new Date());
     const newTask = {
       title: "New Task",
       description: "",
       completed: false,
-      start: formattedDate,
-      end: formattedDate,
+      start: today,
+      end: today,
     };
     addDoc(tasksCollection, newTask)
       .then(docRef => {
@@ -56,7 +52,7 @@ export default function TasksSideBar() {
         <TaskDiv
           key={idx}
           onClick={() => setSelected(task.id)}
-          isSelected={selected === task.id}
+          isselected={selected === task.id ? "true" : "false"}
         >
           {task.title}
         </TaskDiv>

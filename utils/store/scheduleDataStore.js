@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { updateEvent } from "@/utils/firebase/firebase_data";
 
 export const DAYS = {
     SUNDAY: { label: 'א', index: 1 },
@@ -9,13 +10,7 @@ export const DAYS = {
     WEEKEND: { label: 'ו-ש', index: 6 },
 };
 
-export const HOURS = {
-    HOUR1: { label: '09:30', index: 1 },
-    HOUR2: { label: '10:30', index: 2 },
-    HOUR3: { label: '11:30', index: 3 },
-    HOUR4: { label: '12:30', index: 4 },
-    AFTERNOON: { label: 'ערב', index: 5 },
-};
+export const HOURS = ['9:30', '10:30', '11:30', '12:30', 'ערב'];
 
 export const useUserSchedule = create((set) => ({
     tasks: [
@@ -51,4 +46,3 @@ export const useGantt = create((set) => ({
     ],
     setGantt: (gantt) => set({ gantt }),
 }));
-

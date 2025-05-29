@@ -74,8 +74,8 @@ export default function EventEdit({ event }) {
             {...register("start")}
           >
             <option value="">בחר שעה</option>
-            {Object.values(HOURS).map(hour => (
-              <option key={hour.label} value={hour.label}>{hour.label}</option>
+            {HOURS.map(hour => (
+              <option key={hour} value={hour}>{hour}</option>
             ))}
           </select>
           {errors.start && <p className="text-sm text-red-600 mt-1">{errors.start.message}</p>}
@@ -88,8 +88,8 @@ export default function EventEdit({ event }) {
             {...register("end")}
           >
             <option value="">בחר שעה</option>
-            {Object.values(HOURS).map(hour => (
-              <option key={hour.label} value={hour.label}>{hour.label}</option>
+            {HOURS.map(hour => (
+              <option key={hour} value={hour}>{hour}</option>
             ))}
           </select>
           {errors.end && <p className="text-sm text-red-600 mt-1">{errors.end.message}</p>}
