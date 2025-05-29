@@ -1,59 +1,19 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Eye, EyeOff, Mail, Lock, LogOut } from 'lucide-react';
+import { useState } from 'react';
+import { UserCircle2 } from 'lucide-react';
 import { useUser } from '@/utils/store/user';
+import PINInput from '../ui/PIN';
 
 export default function SignInFormSideBar() {
-  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [formErrors, setFormErrors] = useState({});
-  const { user, signIn, signOut, loading, error } = useUser();
+  const [pin, setPin] = useState(['', '', '', '']);
+  const { signIn, loading, error } = useUser();
 
-  const validate = () => {
-    const errors = {};
-    if (!email) errors.email = 'Email is required';
-    if (!password) errors.password = 'Password is required';
-    return errors;
-  };
-
-  const onSubmit = async (e) => {
+  const onSubmit = (e) => {
     e.preventDefault();
-    const errors = validate();
-    setFormErrors(errors);
-    if (Object.keys(errors).length > 0) return;
-    try {
-      await signIn(email, password);
-    } catch (error) {
-      // Error is handled by the auth context
-    }
+    signIn(email, pin);
   };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      // Handle sign out error if necessary
-      console.error("Sign out error:", error);
-    }
-  };
-
-  if (user) {
-    return (
-      <div className="space-y-4 text-center">
-        <p className="text-lg font-medium">Hey, {user.displayName || user.email}!</p>
-        <button
-          onClick={handleSignOut}
-          className="w-full flex items-center justify-center bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-md disabled:opacity-50"
-          disabled={loading}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          {loading ? 'Signing out...' : 'Sign out'}
-        </button>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
@@ -64,50 +24,27 @@ export default function SignInFormSideBar() {
       )}
       <div className="space-y-2">
         <label htmlFor="email-sidebar" className="text-sm font-medium">
-          Email
+          Username
         </label>
         <div className="relative">
-          <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          <UserCircle2 className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
           <input
             id="email-sidebar"
-            type="email"
-            placeholder="Enter your email"
+            placeholder="username"
             className="pl-10 w-full border rounded-md p-2 text-sm"
             value={email}
             onChange={e => setEmail(e.target.value)}
             autoComplete="username"
           />
         </div>
-        {formErrors.email && (
-          <p className="text-sm text-red-600">{formErrors.email}</p>
-        )}
       </div>
       <div className="space-y-2">
         <label htmlFor="password-sidebar" className="text-sm font-medium">
-          Password
+          PIN
         </label>
-        <div className="relative">
-          <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-          <input
-            id="password-sidebar"
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Enter your password"
-            className="pl-10 pr-10 w-full border rounded-md p-2 text-sm"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            autoComplete="current-password"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-          >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
+        <div className="flex gap-2">
+          <PINInput onChange={setPin} />
         </div>
-        {formErrors.password && (
-          <p className="text-sm text-red-600">{formErrors.password}</p>
-        )}
       </div>
       <button
         type="submit"

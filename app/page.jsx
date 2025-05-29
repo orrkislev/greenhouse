@@ -20,9 +20,9 @@ export default function Home() {
       <TopBar />
 
       <PageContainer>
-        {/* <SideContainer className="flex flex-col items-center justify-start">
+        <SideContainer className="flex flex-col items-center justify-start">
           <SideBar />
-        </SideContainer> */}
+        </SideContainer>
         <MainContainer>
           <Schedule />
         </MainContainer>

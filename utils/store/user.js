@@ -14,10 +14,10 @@ export const useUser = create(
       logout: () => set({ user: null, error: null }),
 
       // Auth logic merged from AuthContext
-      signIn: async (email, password) => {
+      signIn: async (username, pinPass) => {
         set({ loading: true, error: null });
         try {
-          const user = await AuthService.signIn(email, password);
+          const user = await AuthService.signIn(username, pinPass);
           set({ user });
         } catch (error) {
           set({ error: error instanceof Error ? error.message : 'Failed to sign in' });
@@ -27,10 +27,10 @@ export const useUser = create(
         }
       },
 
-      signUp: async (email, password, displayName) => {
+      signUp: async (username, pinPass, userData) => {
         set({ loading: true, error: null });
         try {
-          const user = await AuthService.signUp(email, password, displayName);
+          const user = await AuthService.signUp(username, pinPass, userData);
           set({ user });
         } catch (error) {
           set({ error: error instanceof Error ? error.message : 'Failed to sign up' });

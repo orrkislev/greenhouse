@@ -19,11 +19,11 @@ export default function SideBar() {
                 <SignInFormSideBar />
             ) : (
                 <>
-                    <EditSelected />
+                    {/* <EditSelected />
                     <Divider />
                     <TasksSideBar />
                     <Divider />
-                    <EventsSideBar />
+                    <EventsSideBar /> */}
                 </>
             )}
         </SideBarDiv>

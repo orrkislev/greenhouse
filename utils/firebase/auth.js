@@ -1,9 +1,18 @@
-import {signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile,User as FirebaseUser,} from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, User as FirebaseUser, } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
+
+const prepareEmailPassword = (username, pinPass) => {
+  const email = username.split('@')[0] + '@chamama.org'
+  const password = pinPass.toString().padStart(6, '0')
+  return [email, password]
+}
+
 export class AuthService {
-  static async signIn(email, password) {
+  static async signIn(username, pinPass) {
+    const [email, password] = prepareEmailPassword(username, pinPass);
+    console.log('signing in with:', email, password)
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = await this.getUserData(userCredential.user);
@@ -13,25 +22,14 @@ export class AuthService {
     }
   }
 
-  static async signUp(email, password, displayName) {
+  static async signUp(username, pinPass, userData) {
+    const [email, password] = prepareEmailPassword(username, pinPass);
+    console.log('signing up with:', email, password, userData);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
-      // Update the user's display name
-      await updateProfile(userCredential.user, { displayName });
-      
-      // Create user document in Firestore
-      const userData = {
-        id: userCredential.user.uid,
-        email: userCredential.user.email,
-        displayName,
-        photoURL: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      
+      // await updateProfile(userCredential.user, { displayName: userData.firstName + ' ' + userData.lastName });
       await setDoc(doc(db, 'users', userCredential.user.uid), userData);
-      
+      userData.id = userCredential.user.uid; // Add user ID to the data
       return userData;
     } catch (error) {
       throw new Error(this.getErrorMessage(error));
@@ -48,30 +46,13 @@ export class AuthService {
 
   static async getUserData(firebaseUser) {
     const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-    
+
     if (userDoc.exists()) {
       const data = userDoc.data();
-      return {
-        id: firebaseUser.uid,
-        email: firebaseUser.email,
-        displayName: firebaseUser.displayName,
-        photoURL: firebaseUser.photoURL,
-        createdAt: data.createdAt?.toDate() || new Date(),
-        updatedAt: data.updatedAt?.toDate() || new Date(),
-      };
+      return { id: firebaseUser.uid, ...data };
     } else {
-      // If user document doesn't exist, create it
-      const userData = {
-        id: firebaseUser.uid,
-        email: firebaseUser.email,
-        displayName: firebaseUser.displayName,
-        photoURL: firebaseUser.photoURL,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      
-      await setDoc(doc(db, 'users', firebaseUser.uid), userData);
-      return userData;
+      console.error('No user data found for this user ID:', firebaseUser.uid);
+      throw new Error('User data not found');
     }
   }
 
