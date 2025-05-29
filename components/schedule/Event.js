@@ -1,7 +1,7 @@
 import { tw } from "@/utils/tw";
 
 import { formatDate } from "@/utils/utils";
-import { HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
+import { HOURS } from "@/utils/store/scheduleDataStore";
 import { useEffect, useState } from "react";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
 import { updateEvent } from "@/utils/firebase/firebase_data";
@@ -22,8 +22,6 @@ export function Event({ event, firstHourRow, onStartDrag, onEndDrag, onStartResi
     const [isResizing, setIsResizing] = useState(false);
 
     const week = useWeek(state => state.week);
-    const selected = useUserSchedule(state => state.selected);
-    const setSelected = useUserSchedule(state => state.setSelected);
 
     useEffect(() => {
         if (!isDragging) return
@@ -58,7 +56,7 @@ export function Event({ event, firstHourRow, onStartDrag, onEndDrag, onStartResi
 
     return (
         <EventDiv
-            drag={isDragging}
+            drag
             dragElastic={0.1}
             dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
             dragTransition={{
@@ -67,7 +65,7 @@ export function Event({ event, firstHourRow, onStartDrag, onEndDrag, onStartResi
             }}
             animate={{
                 opacity: isDragging ? 0.8 : 1,
-                scale: isDragging ? 1.1 : 1
+                scale: isDragging ? 1.05 : 1
             }}
             style={{
                 gridRowStart: startIndex + firstHourRow,
@@ -80,8 +78,6 @@ export function Event({ event, firstHourRow, onStartDrag, onEndDrag, onStartResi
                 const rect = e.currentTarget.getBoundingClientRect();
                 setIsDragging(e.clientY - rect.top);
             }}
-            onClick={() => setSelected(event.id)}
-            isSelected={selected === event.id}
         >
             <EventTitleEditor event={event}/>
 
