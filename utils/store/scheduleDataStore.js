@@ -13,15 +13,8 @@ export const DAYS = {
 export const HOURS = ['9:30', '10:30', '11:30', '12:30', 'ערב'];
 
 export const useUserSchedule = create((set) => ({
-    tasks: [
-        { id: 0, start: '25-05-2025', end: '27-05-2025', title: 'Task 1' },
-        { id: 1, start: '28-05-2025', end: '28-05-2025', title: 'Task 2' },
-    ],
-    events: [
-        { id: 0, date: '25-05-2025', start: '09:30', end: '11:30', title: 'Event 1' },
-        { id: 1, date: '26-05-2025', start: '10:30', end: '11:30', title: 'Event 2' },
-        { id: 2, date: '28-05-2025', start: '09:30', end: '12:30', title: 'Event 3' },
-    ],
+    tasks: [],
+    events: [],
     setTasks: (tasks) => set({ tasks }),
     setEvents: (events) => set({ events }),
 
@@ -38,11 +31,11 @@ export const useUserSchedule = create((set) => ({
 
 export const useGantt = create((set) => ({
     gantt: [
-        { date: '26-05-2025', text: 'יום ירושלים' },
-        { date: '27-05-2025', text: 'יומולדת מתן רן' },
-        { date: '28-05-2025', text: 'יומולדת עדי' },
-        { date: '29-05-2025', text: 'כנס שותפים' },
-        { date: '30-05-2025', text: 'יומולדת ירון' },
+        { date: '26-05-2025', text: ['יום ירושלים'] },
+        { date: '27-05-2025', text: ['יומולדת עדי', 'יום ירושלים'] },
+        { date: '28-05-2025', text: ['יומולדת עדי'] },
+        { date: '29-05-2025', text: ['כנס שותפים'] },
+        { date: '30-05-2025', text: ['יומולדת ירון'] },
     ],
     setGantt: (gantt) => set({ gantt }),
 }));

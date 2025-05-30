@@ -4,9 +4,10 @@ import { formatDate } from "@/utils/utils";
 import { HOURS } from "@/utils/store/scheduleDataStore";
 import { useEffect, useState } from "react";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
-import { updateEvent } from "@/utils/firebase/firebase_data";
+import { deleteEvent, updateEvent } from "@/utils/firebase/firebase_data";
+import { Trash2 } from "lucide-react";
 
-const EventDiv = tw.motion`bg-[#E8CB4A] rounded-lg p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)] text-gray-800
+const EventDiv = tw.motion`bg-[#E8CB4A] rounded-lg mx-2 p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)] text-gray-800
     flex items-center justify-start text-sm
     pointer-events-auto cursor-pointer hover:bg-[#D7B33A] transition-colors
     z-[50] relative
@@ -47,20 +48,25 @@ export function Event({ event, firstHourRow, onStartDrag, onEndDrag, onStartResi
 
     const dayIndex = week.findIndex(date => formatDate(date) === event.date);
     const startIndex = HOURS.findIndex(hour => hour === event.start);
-    const endIndex = startIndex + event.duration - 1;
+    const endIndex = Math.min(startIndex + event.duration - 1, 4)
 
     const handleResizeDown = (e) => {
         e.stopPropagation();
         setIsResizing(true);
     }
 
+    const handleDelete = async (e) => {
+        e.stopPropagation();
+        deleteEvent(event.id);
+    }
+
     return (
         <EventDiv
             drag
-            dragElastic={0.1}
+            dragElastic={0.05}
             dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
             dragTransition={{
-                bounceStiffness: 300,
+                bounceStiffness: 1000,
                 bounceDamping: 10
             }}
             animate={{
@@ -79,9 +85,21 @@ export function Event({ event, firstHourRow, onStartDrag, onEndDrag, onStartResi
                 setIsDragging(e.clientY - rect.top);
             }}
         >
-            <EventTitleEditor event={event}/>
+            {/* Icon buttons on hover */}
+            {isHovered && !isDragging && !isResizing && (
+                <div className="absolute top-1 left-2 flex gap-2 z-10" onMouseDown={e => e.stopPropagation()}>
+                    <button
+                        className="p-1 rounded focus:outline-none rounded-full hover:scale-110 transition-transform bg-transparent hover:bg-white/50"
+                        onClick={handleDelete}
+                        aria-label="Delete event"
+                    >
+                        <Trash2 width={14} height={14} className="text-gray-600/80" />
+                    </button>
+                </div>
+            )}
+            <EventTitleEditor event={event} />
 
-            {((isHovered && !isDragging) || isResizing) &&  (
+            {((isHovered && !isDragging) || isResizing) && (
                 <div className="absolute bottom-0 right-0 w-full p-1 px-2 cursor-col-resize"
                     onMouseDown={handleResizeDown}
                 >
@@ -114,12 +132,12 @@ function EventTitleEditor({ event }) {
     };
 
     return <input
-            className="bg-transparent text-gray-800 rounded px-1 w-full outline-none pointer-events-auto"
-            value={editTitle}
-            autoFocus
-            onChange={handleTitleChange}
-            onBlur={handleTitleBlur}
-            onKeyDown={handleTitleKeyDown}
-            onClick={e => e.stopPropagation()}
-        />
+        className="bg-transparent text-gray-800 rounded px-1 w-full outline-none pointer-events-auto"
+        value={editTitle}
+        autoFocus
+        onChange={handleTitleChange}
+        onBlur={handleTitleBlur}
+        onKeyDown={handleTitleKeyDown}
+        onClick={e => e.stopPropagation()}
+    />
 }

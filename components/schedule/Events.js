@@ -24,8 +24,10 @@ export default function EventsGrid({ gridData }) {
         })
     }
 
+    const weekEvents = events.filter(event => week.some(date => formatDate(date) === event.date));
+
     return (
-        <Grid className={`z-60`} style={{ ...gridData.style, pointerEvents: 'none' }}>
+        <Grid className="z-60" style={{ ...gridData.style, pointerEvents: 'none' }}>
             {draggingId !== null &&
                 positions.map((pos, index) => (
                     <Droppable key={index} row={pos.row} col={pos.col} gridData={gridData}
@@ -57,7 +59,7 @@ export default function EventsGrid({ gridData }) {
             })()}
 
 
-            {events.map((event, index) => (
+            {weekEvents.map((event, index) => (
                 <Event key={index}
                     firstHourRow={gridData.firstHourRow}
                     event={event}
