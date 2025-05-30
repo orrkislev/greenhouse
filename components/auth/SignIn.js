@@ -12,7 +12,6 @@ export default function WithAuth({ children, role }) {
     const { user, signIn, loading, error } = useUser();
 
     if (user) {
-        console.log(user)
         if (!role || (role && user.roles.includes(role))) {
             return children;
         } else {

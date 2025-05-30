@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Pencil, Trash2, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export default function EditableList({ items: propItems = [], onChange, onCreate }) {
+export default function EditableList({ items: propItems = [], onChange, onCreate, editable = true }) {
   const [items, setItems] = useState(propItems)
   const [newItem, setNewItem] = useState("")
   const [editingIndex, setEditingIndex] = useState(null)
@@ -49,59 +49,69 @@ export default function EditableList({ items: propItems = [], onChange, onCreate
 
   return (
     <div className="space-y-1 max-w-sm text-sm">
-      {items.map((item, index) => (
-        <div
-          key={index}
-          className="group flex items-center justify-between bg-muted px-2 py-1 rounded hover:bg-muted/70"
-        >
-          {editingIndex === index ? (
+      {editable ? (
+        <>
+          {items.map((item, index) => (
+            <div
+              key={index}
+              className="group flex items-center justify-between bg-muted px-2 py-1 rounded hover:bg-muted/70"
+            >
+              {editingIndex === index ? (
+                <Input
+                  value={editingText}
+                  onChange={(e) => setEditingText(e.target.value)}
+                  onBlur={handleEditSave}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleEditSave()
+                  }}
+                  className="text-sm h-7"
+                  autoFocus
+                />
+              ) : (
+                <span>{item}</span>
+              )}
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => handleEdit(index)}
+                >
+                  <Pencil className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => handleDelete(index)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          ))}
+          <div className="flex items-center gap-2 mt-1">
             <Input
-              value={editingText}
-              onChange={(e) => setEditingText(e.target.value)}
-              onBlur={handleEditSave}
+              value={newItem}
+              onChange={(e) => setNewItem(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") handleEditSave()
+                if (e.key === "Enter") handleAdd()
               }}
               className="text-sm h-7"
-              autoFocus
+              placeholder="New item"
             />
-          ) : (
-            <span>{item}</span>
-          )}
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => handleEdit(index)}
-            >
-              <Pencil className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => handleDelete(index)}
-            >
-              <Trash2 className="w-4 h-4" />
+            <Button size="icon" className="h-7 w-7" onClick={handleAdd}>
+              <Plus className="w-4 h-4" />
             </Button>
           </div>
-        </div>
-      ))}
-      <div className="flex items-center gap-2 mt-1">
-        <Input
-          value={newItem}
-          onChange={(e) => setNewItem(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleAdd()
-          }}
-          className="text-sm h-7"
-          placeholder="New item"
-        />
-        <Button size="icon" className="h-7 w-7" onClick={handleAdd}>
-          <Plus className="w-4 h-4" />
-        </Button>
-      </div>
+        </>
+      ) : (
+        <ul className="list-disc pl-5">
+          {items.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

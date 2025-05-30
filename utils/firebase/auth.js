@@ -3,7 +3,7 @@ import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
 
-const prepareEmailPassword = (username, pinPass) => {
+export const prepareEmailPassword = (username, pinPass) => {
   const email = username.split('@')[0] + '@chamama.org'
   const password = pinPass.toString().padStart(6, '0')
   return [email, password]
@@ -12,7 +12,6 @@ const prepareEmailPassword = (username, pinPass) => {
 export class AuthService {
   static async signIn(username, pinPass) {
     const [email, password] = prepareEmailPassword(username, pinPass);
-    console.log('signing in with:', email, password)
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = await this.getUserData(userCredential.user);
@@ -24,7 +23,6 @@ export class AuthService {
 
   static async signUp(username, pinPass, userData) {
     const [email, password] = prepareEmailPassword(username, pinPass);
-    console.log('signing up with:', email, password, userData);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       // await updateProfile(userCredential.user, { displayName: userData.firstName + ' ' + userData.lastName });

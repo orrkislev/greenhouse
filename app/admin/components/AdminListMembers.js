@@ -11,8 +11,8 @@ export default function AdminListMembers() {
             const membersCollection = collection(db, "users");
             let allMembers = await getDocs(membersCollection);
             allMembers = allMembers.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            const studentsList = allMembers.filter(member => member.roles.includes('student'));
-            const staffList = allMembers.filter(member => member.roles.includes('staff'));
+            const studentsList = allMembers.filter(member => !member.roles || member.roles.includes('student'));
+            const staffList = allMembers.filter(member => member.roles && member.roles.includes('staff'));
             setStudents(studentsList);
             setStaff(staffList);
         })()
