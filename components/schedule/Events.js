@@ -2,7 +2,6 @@ import { Grid } from "./Schedule";
 import { formatDate } from "@/utils/utils";
 import { HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
 import { useState } from "react";
-import { updateEvent } from "@/utils/firebase/firebase_data";
 import { Event } from "./Event";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
 
@@ -13,6 +12,7 @@ export default function EventsGrid({ gridData }) {
 
     const week = useWeek(state => state.week);
     const events = useUserSchedule(state => state.events)
+    const updateEvent = useUserSchedule(state => state.updateEvent);
 
     const positions = Array(6).fill(0).map((_, col) => Array(6).fill(0).map((_, row) => ({ row, col }))).flat();
 
@@ -84,7 +84,7 @@ function Droppable({ row, col, gridData, onPlace, offset = 0 }) {
             }}
         >
             <div className="mx-2 rounded-sm pointer-events-auto absolute inset-0"
-                style={{transform: `translateY(${offset}px)`}}
+                style={{ transform: `translateY(${offset}px)` }}
                 onMouseEnter={onPlace}
             />
         </div>

@@ -53,7 +53,8 @@ export default function Schedule() {
                         style={{
                             gridColumnStart: index + 2,
                             gridRowStart: 1,
-                            gridRowEnd: gridData.totalRows
+                            gridRowEnd: gridData.totalRows,
+                            backgroundColor: index === 5 ? '#B8A1D944' : undefined
                         }}
                     >
                         {/* <div>{day.label}</div> */}
@@ -71,7 +72,7 @@ export default function Schedule() {
             <TasksGrid gridData={gridData} />
             <EventsGrid gridData={gridData} />
 
-            <Grid className='z-30' style={{...gridData.style, gridTemplateRows:'2em'}} >
+            <Grid className='z-30' style={{ ...gridData.style, gridTemplateRows: '2em' }} >
                 <div style={{ gridColumn: 7, gridRow: 1 }} className="relative">
                     <div className="absolute left-0 top-0 ml-[-2.5em] mt-2 rounded-full bg-transparent hover:bg-white p-1 cursor-pointer transition-colors"
                         onClick={() => useWeek.getState().nextWeek()}>

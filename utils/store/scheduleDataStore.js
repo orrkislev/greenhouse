@@ -18,6 +18,13 @@ export const useUserSchedule = create((set) => ({
     setTasks: (tasks) => set({ tasks }),
     setEvents: (events) => set({ events }),
 
+    updateEvent: (eventId, updatedEvent) => set((state) => {
+        const updatedEvents = state.events.map(event => 
+            event.id === eventId ? { ...event, ...updatedEvent } : event
+        );
+        // updateEvent(eventId, updatedEvent);
+        return { events: updatedEvents };
+    }),
     addEvent: (event) => set((state) => ({
         events: [...state.events, event]
     })),

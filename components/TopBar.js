@@ -37,28 +37,22 @@ export default function TopBar() {
 
                     {/* Learning */}
                     <NavigationMenuItem>
-                        <NavigationMenuLink>
-                            <Link href="/learning" className="flex items-center justify-center gap-1">
-                                <BookOpen className="w-5 h-5" /> למידה
-                            </Link>
+                        <NavigationMenuLink href="/learning" className="flex items-center justify-center gap-1">
+                            <BookOpen className="w-5 h-5" /> למידה
                         </NavigationMenuLink>
                     </NavigationMenuItem>
 
                     {/* Projects */}
                     <NavigationMenuItem>
-                        <NavigationMenuLink>
-                            <Link href="/projects" className="flex items-center justify-center gap-1">
-                                <Briefcase className="w-5 h-5" /> פרויקטים
-                            </Link>
+                        <NavigationMenuLink href="/projects" className="flex items-center justify-center gap-1">
+                            <Briefcase className="w-5 h-5" /> פרויקטים
                         </NavigationMenuLink>
                     </NavigationMenuItem>
 
                     {/* Schedule */}
                     <NavigationMenuItem>
-                        <NavigationMenuLink>
-                            <Link href="/schedule" className="flex items-center justify-center gap-1">
-                                <Calendar className="w-5 h-5" /> לוח זמנים
-                            </Link>
+                        <NavigationMenuLink href="/schedule" className="flex items-center justify-center gap-1">
+                            <Calendar className="w-5 h-5" /> לוח זמנים
                         </NavigationMenuLink>
                     </NavigationMenuItem>
 
@@ -67,10 +61,8 @@ export default function TopBar() {
 
                     {/* Settings */}
                     <NavigationMenuItem>
-                        <NavigationMenuLink>
-                            <Link href="/settings" className="flex items-center justify-center gap-1">
-                                <Settings className="w-5 h-5" /> הגדרות
-                            </Link>
+                        <NavigationMenuLink href="/settings" className="flex items-center justify-center gap-1">
+                            <Settings className="w-5 h-5" /> הגדרות
                         </NavigationMenuLink>
                     </NavigationMenuItem>
                 </NavigationMenuList>

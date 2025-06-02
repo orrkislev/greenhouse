@@ -1,10 +1,10 @@
 import { tw } from "@/utils/tw";
 
 import { formatDate } from "@/utils/utils";
-import { HOURS } from "@/utils/store/scheduleDataStore";
+import { HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
 import { useEffect, useState } from "react";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
-import { deleteEvent, updateEvent } from "@/utils/firebase/firebase_data";
+import { deleteEvent } from "@/utils/firebase/firebase_data";
 import { Trash2 } from "lucide-react";
 
 const EventDiv = tw.motion`bg-[#E8CB4A] rounded-lg mx-2 p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)] text-gray-800
@@ -114,20 +114,21 @@ export function Event({ event, firstHourRow, onStartDrag, onEndDrag, onStartResi
 
 function EventTitleEditor({ event }) {
     const [editTitle, setEditTitle] = useState(event.title);
+    const updateEvent = useUserSchedule(state => state.updateEvent);
 
     const handleTitleChange = (e) => {
         setEditTitle(e.target.value);
     };
-    const handleTitleBlur = async () => {
+    const handleTitleBlur = () => {
         if (editTitle !== event.title) {
-            await updateEvent(event.id, { title: editTitle });
+            updateEvent(event.id, { title: editTitle });
         }
     };
 
-    const handleTitleKeyDown = async (e) => {
+    const handleTitleKeyDown = (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            await handleTitleBlur();
+            handleTitleBlur();
         }
     };
 
