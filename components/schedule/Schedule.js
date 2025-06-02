@@ -26,7 +26,7 @@ export default function Schedule() {
     gridData.totalRows = HOURS.length + 2 + gridData.taskRows + 1;
     gridData.style = {
         gridTemplateColumns: '1fr repeat(6, 2fr)',
-        gridTemplateRows: `2em repeat(${gridData.taskRows}, 2em) 1em repeat(${HOURS.length}, 2em) 3em`
+        gridTemplateRows: `2em repeat(${gridData.taskRows}, 2em) 1em repeat(${HOURS.length}, 2em) 1fr`
     }
     gridData.firstHourRow = gridData.totalRows - HOURS.length
 
