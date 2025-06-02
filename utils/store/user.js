@@ -8,7 +8,12 @@ export const useUser = create(
       user: null,
       loading: false,
       error: null,
-      setUser: (user) => set({ user, error: null }),
+      setUser: (newUserData) => set(prev => ({
+        user: {
+          ...prev.user,
+          ...newUserData,
+        },
+      })),
       setLoading: (loading) => set({ loading }),
       setError: (error) => set({ error }),
       logout: () => set({ user: null, error: null }),

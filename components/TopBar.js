@@ -44,14 +44,14 @@ export default function TopBar() {
 
                     {/* Projects */}
                     <NavigationMenuItem>
-                        <NavigationMenuLink href="/projects" className="flex items-center justify-center gap-1">
-                            <Briefcase className="w-5 h-5" /> פרויקטים
+                        <NavigationMenuLink href="/project" className="flex items-center justify-center gap-1">
+                            <Briefcase className="w-5 h-5" /> הפרויקט
                         </NavigationMenuLink>
                     </NavigationMenuItem>
 
                     {/* Schedule */}
                     <NavigationMenuItem>
-                        <NavigationMenuLink href="/schedule" className="flex items-center justify-center gap-1">
+                        <NavigationMenuLink href="/" className="flex items-center justify-center gap-1">
                             <Calendar className="w-5 h-5" /> לוח זמנים
                         </NavigationMenuLink>
                     </NavigationMenuItem>
