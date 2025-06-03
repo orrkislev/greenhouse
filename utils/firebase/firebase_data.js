@@ -1,6 +1,16 @@
 import { addDoc, collection, deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
 
+export function updateUserData(updatedData) {
+    const user = auth.currentUser;
+    if (!user) return;
+    const userDocRef = doc(db, 'users', user.uid);
+    updateDoc(userDocRef, updatedData)
+        .catch((error) => {
+            console.error("Error updating user data: ", error);
+        });
+}
+
 export function updateEvent(eventId, updatedEvent) {
     const user = auth.currentUser;
     if (!user) return;
@@ -35,6 +45,7 @@ export async function initProject() {
     console.log("Projects collection reference:", projectsCollectionRef);
     const newProject = await addDoc(projectsCollectionRef, {
         createdAt: new Date(),
+        status: 'intentions'
     }).catch((error) => console.error("Error creating new project: ", error));
     if (!newProject) return;
 

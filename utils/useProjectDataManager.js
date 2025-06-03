@@ -11,6 +11,7 @@ export default function useProjectDataManager() {
 
     const project = useProject((state) => state.project);
     const setProject = useProject((state) => state.setProject);
+    const setView = useProject((state) => state.setView);
     const lastProject = useRef(true);
 
     useEffect(() => {
@@ -21,13 +22,14 @@ export default function useProjectDataManager() {
         }
 
         (async () => {
-            console.log("Loading project data for user:", user.id, "project:", user.currentProject);
             const projectDoc = doc(db, 'users', user.id, 'projects', user.currentProject);
             const loadedProject = await getDoc(projectDoc);
             const projectData = {id: loadedProject.id, ...loadedProject.data()};
             lastProject.current = projectData
-            console.log("Loaded project data:", projectData);
-            setProject(projectData);
+            setProject(projectData)
+            if (projectData.status !== 'intentions') {
+                setView('overview');
+            }
         })();
     }, [user])
 

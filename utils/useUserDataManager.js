@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useUser } from "./store/user";
-import { collection, getDocs, query, onSnapshot, setDoc, doc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc } from "firebase/firestore";
 import { db } from "./firebase/firebase";
 import { useUserSchedule } from "./store/scheduleDataStore";
 
@@ -30,11 +30,11 @@ export default function useUserDataManager() {
         (async () => {
             let userEvents = await getDocs(userEventsCollection)
             userEvents = userEvents.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            dontUpdateFirebase.current = true
             setEvents(userEvents);
 
             let userTasks = await getDocs(userTasksCollection)
             userTasks = userTasks.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            dontUpdateFirebase.current = true
             setTasks(userTasks);
         })();
 
@@ -68,24 +68,44 @@ export default function useUserDataManager() {
 
         const updateEvents = async () => {
             const eventsCollectionRef = collection(db, 'users', user.id, 'events');
-            // Only update events that have changed
+
+            // check for deleted events
+            const currentEventIds = new Set(events.map(e => e.id));
+            const deletedEvents = lastEvents.current.filter(e => !currentEventIds.has(e.id));
+            for (const event of deletedEvents) {
+                const eventDocRef = doc(eventsCollectionRef, event.id);
+                await deleteDoc(eventDocRef);
+            }
+
             for (const event of events) {
                 const prevEvent = lastEvents.current.find(e => e.id === event.id);
                 if (!prevEvent || JSON.stringify(prevEvent) !== JSON.stringify(event)) {
-                    const eventDocRef = doc(eventsCollectionRef, event.id);
-                    updateDoc(eventDocRef, event)
-                        .catch((error) => {
-                            console.error("Error updating event: ", error);
-                        });
+                    if (event.id) {
+                        const eventDocRef = doc(eventsCollectionRef, event.id);
+                        updateDoc(eventDocRef, event)
+                            .catch((error) => {
+                                console.error("Error updating event: ", error);
+                            });
+                    }
                 }
             }
-            // Update lastEvents after syncing
+
+            if (events.some(event => !event.id)) {
+                const newEventsObj = [...events]
+                for (const event of newEventsObj) {
+                    if (event.id) continue;
+                    const newEventDoc = await addDoc(eventsCollectionRef, event);
+                    event.id = newEventDoc.id;
+                }
+                setEvents(newEventsObj);
+            }
+            // Update lastEvents to the current events
             lastEvents.current = events;
         };
 
         const timer = setTimeout(() => {
             if (!dontUpdateFirebase.current) updateEvents();
-        }, 2000);
+        }, 1000);
 
         return () => clearTimeout(timer);
     }, [events, user]);

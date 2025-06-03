@@ -11,10 +11,11 @@ export default function WithAuth({ children, role }) {
     const [pin, setPin] = useState(['', '', '', '']);
     const { user, signIn, loading, error } = useUser();
 
-    if (user) {
-        if (!role || (role && user.roles.includes(role))) {
+    if (Object.keys(user).length > 0) {
+        if (!role || (role && user.roles && user.roles.includes(role))) {
             return children;
         } else {
+            console.warn('Unauthorized access attempt:', user);
             redirect('/')
         }
     }

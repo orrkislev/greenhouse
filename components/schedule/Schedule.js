@@ -6,17 +6,19 @@ import Gantt from "./Gantt";
 import EmptySlotsGrid from "./EmptySlots";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
+import { formatDate } from "@/utils/utils";
 
 
 const ScheduleContainer = tw`select-none w-full relative h-full`
 export const Grid = tw`absolute w-full grid gap-2`;
 const Day = tw`flex flex-col items-center justify-start text-gray-800 text-lg font-semibold p-2
     rounded-lg bg-white/50 backdrop-blur-xs shadow mb-[-.5em]
+    ${props => props.istoday == 'true' ? 'border-2 border-gray-500/50' : ''}
     `
 const Hour = tw`col-span-full flex items-center justify-start rounded-lg p-4 bg-[#EDCBBB] border-b border-gray-300 hover:bg-gray-300 transition-colors cursor-pointer ml-[-1em] text-white text-lg font-semibold`;
 
 
-
+const weekLabels = ['א', 'ב', 'ג', 'ד', 'ה', 'ו-ש'];
 export default function Schedule() {
     const week = useWeek((state) => state.week);
 
@@ -48,8 +50,9 @@ export default function Schedule() {
 
             {/* -------- DAYS --------- */}
             <Grid className='z-20' style={gridData.style}>
-                {Object.values(DAYS).map((day, index) => (
+                {week.map((day, index) => (
                     <Day key={index}
+                        istoday={formatDate(day) === formatDate(new Date())}
                         style={{
                             gridColumnStart: index + 2,
                             gridRowStart: 1,
@@ -57,9 +60,9 @@ export default function Schedule() {
                             backgroundColor: index === 5 ? '#B8A1D944' : undefined
                         }}
                     >
-                        {/* <div>{day.label}</div> */}
                         <div style={{ fontSize: '0.9em', color: '#666' }}>
-                            {week[index].toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}
+                            <span>{weekLabels[index]}</span> 
+                            <span className="mr-1 text-xs">{day.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}</span>
                         </div>
                     </Day>
                 ))}

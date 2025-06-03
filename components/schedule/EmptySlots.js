@@ -2,9 +2,7 @@ import { formatDate } from "@/utils/utils";
 import { Grid } from "./Schedule";
 import { tw } from "@/utils/tw";
 import { DAYS, HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
-import { addDoc, collection } from "firebase/firestore";
 import { useUser } from "@/utils/store/user";
-import { db } from "@/utils/firebase/firebase";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
 
 const EmptySlot = tw`bg-white rounded-lg p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)] text-gray-800 mx-2
@@ -15,6 +13,8 @@ const EmptySlot = tw`bg-white rounded-lg p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,
 export default function EmptySlotsGrid({ gridData }) {
     const week = useWeek(state => state.week);
     const user = useUser(state => state.user);
+    const events = useUserSchedule(state => state.events);
+    const setEvents = useUserSchedule(state => state.setEvents);
 
     if (!user) return null;
     const clickNewEvent = (dayIndex, hour) => {
@@ -27,9 +27,7 @@ export default function EmptySlotsGrid({ gridData }) {
             duration: 1,
             title: `New Event`
         };
-
-        const eventsCollection = collection(db, `users/${user.id}/events`);
-        addDoc(eventsCollection, newEvent);
+        setEvents([...events, newEvent]);
     }
     
     return (

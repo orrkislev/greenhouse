@@ -1,10 +1,9 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
 import { useUser } from "@/utils/store/user";
 import { tw } from "@/utils/tw";
-import { LogOut, User, BookOpen, Briefcase, Calendar, Settings } from "lucide-react";
+import { LogOut, User, BookOpen, Briefcase, Calendar, Settings, Snail } from "lucide-react";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"
 import { Button } from "./ui/button";
 
@@ -45,7 +44,7 @@ export default function TopBar() {
                     {/* Projects */}
                     <NavigationMenuItem>
                         <NavigationMenuLink href="/project" className="flex items-center justify-center gap-1">
-                            <Briefcase className="w-5 h-5" /> הפרויקט
+                            <Snail className="w-5 h-5" /> הפרויקט
                         </NavigationMenuLink>
                     </NavigationMenuItem>
 
@@ -55,6 +54,18 @@ export default function TopBar() {
                             <Calendar className="w-5 h-5" /> לוח זמנים
                         </NavigationMenuLink>
                     </NavigationMenuItem>
+
+                    {/* Separator */}
+                    <div className="mx-2 h-6 w-px bg-gray-300" />
+
+                    {/* Staff only */}
+                    {user && user.roles && user.roles.includes('staff') && (
+                        <NavigationMenuItem>
+                            <NavigationMenuLink href="/staff" className="flex items-center justify-center gap-1">
+                                <Briefcase className="w-5 h-5" /> צוות
+                            </NavigationMenuLink>
+                        </NavigationMenuItem>
+                    )}
 
                     {/* Separator */}
                     <div className="mx-2 h-6 w-px bg-gray-300" />

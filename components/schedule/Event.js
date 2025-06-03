@@ -4,7 +4,6 @@ import { formatDate } from "@/utils/utils";
 import { HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
 import { useEffect, useState } from "react";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
-import { deleteEvent } from "@/utils/firebase/firebase_data";
 import { Trash2 } from "lucide-react";
 
 const EventDiv = tw.motion`bg-[#E8CB4A] rounded-lg mx-2 p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)] text-gray-800
@@ -21,6 +20,8 @@ export function Event({ event, firstHourRow, onStartDrag, onEndDrag, onStartResi
     const [isHovered, setIsHovered] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [isResizing, setIsResizing] = useState(false);
+    const events = useUserSchedule(state => state.events);
+    const setEvents = useUserSchedule(state => state.setEvents);
 
     const week = useWeek(state => state.week);
 
@@ -57,7 +58,7 @@ export function Event({ event, firstHourRow, onStartDrag, onEndDrag, onStartResi
 
     const handleDelete = async (e) => {
         e.stopPropagation();
-        deleteEvent(event.id);
+        setEvents(events.filter(e => e.id !== event.id));
     }
 
     return (

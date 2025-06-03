@@ -82,6 +82,7 @@ export default function ProjectIntentions() {
 
     const goToProjectManagement = () => {
         setView('overview');
+        if (project.status === 'intentions' || !project.status) setProject({ status: 'started' });
     }
     const firstThreeFilled = QUESTIONS.slice(0, 3).every(q => project.intentions[q.key] && project.intentions[q.key].trim() !== '');
     return (

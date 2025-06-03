@@ -1,5 +1,5 @@
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, User as FirebaseUser, } from 'firebase/auth';
-import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
 
@@ -79,6 +79,14 @@ export class AuthService {
       } else {
         callback(null);
       }
+    });
+  }
+
+  static subscribeToUserDoc(userId, callback) {
+    const userRef = doc(db, 'users', userId);
+    return onSnapshot(userRef, (docSnap) => {
+      if (docSnap.exists()) callback({ id: userId, ...docSnap.data() });
+      else callback(null);
     });
   }
 
