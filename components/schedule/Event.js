@@ -5,18 +5,18 @@ import { HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
 import { useEffect, useState } from "react";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
 import { Trash2 } from "lucide-react";
+import { animate } from "motion";
 
 const EventDiv = tw.motion`bg-[#E8CB4A] rounded-lg mx-2 p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)] text-gray-800
     flex items-center justify-start text-sm
     pointer-events-auto cursor-pointer hover:bg-[#D7B33A] transition-colors
     z-[50] relative
-    ${props => props.isSelected ? 'bg-[#C69F2A] text-white' : ''}
 `;
 
 
 
 
-export function Event({ event, firstHourRow, onStartDrag, onEndDrag, onStartResize, onEndResize }) {
+export function Event({ event, edittable, firstHourRow, onStartDrag, onEndDrag, onStartResize, onEndResize }) {
     const [isHovered, setIsHovered] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [isResizing, setIsResizing] = useState(false);
@@ -61,31 +61,32 @@ export function Event({ event, firstHourRow, onStartDrag, onEndDrag, onStartResi
         setEvents(events.filter(e => e.id !== event.id));
     }
 
+    const EventDivProps = {
+        style: {
+            gridRowStart: startIndex + firstHourRow,
+            gridRowEnd: endIndex + firstHourRow + 1,
+            gridColumnStart: dayIndex + 2,
+        }
+    };
+    if (edittable) Object.assign(EventDivProps, {
+        drag: true,
+        dragElastic: 0.05,
+        dragConstraints: { left: 0, right: 0, top: 0, bottom: 0 },
+        dragTransition: { bounceStiffness: 1000, bounceDamping: 10 },
+        animate: {
+            opacity: isDragging ? 0.8 : 1,
+            scale: isDragging ? 1.05 : 1
+        },
+        onMouseEnter: () => setIsHovered(true),
+        onMouseLeave: () => setIsHovered(false),
+        onMouseDown: (e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            setIsDragging(e.clientY - rect.top);
+        }
+    });
+
     return (
-        <EventDiv
-            drag
-            dragElastic={0.05}
-            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-            dragTransition={{
-                bounceStiffness: 1000,
-                bounceDamping: 10
-            }}
-            animate={{
-                opacity: isDragging ? 0.8 : 1,
-                scale: isDragging ? 1.05 : 1
-            }}
-            style={{
-                gridRowStart: startIndex + firstHourRow,
-                gridRowEnd: endIndex + firstHourRow + 1,
-                gridColumnStart: dayIndex + 2,
-            }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            onMouseDown={e => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                setIsDragging(e.clientY - rect.top);
-            }}
-        >
+        <EventDiv {...EventDivProps}>
             {/* Icon buttons on hover */}
             {isHovered && !isDragging && !isResizing && (
                 <div className="absolute top-1 left-2 flex gap-2 z-10" onMouseDown={e => e.stopPropagation()}>

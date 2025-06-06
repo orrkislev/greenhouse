@@ -9,6 +9,16 @@ export const useUser = create(
       if (typeof window !== 'undefined' && !window.__userStoreAuthSubscribed) {
         window.__userStoreAuthSubscribed = true;
         AuthService.onAuthStateChange((user) => {
+          
+          if (!user) {
+            set({ user: null, loading: false, error: null });
+            if (unsubscribeUserDoc) {
+              unsubscribeUserDoc();
+              unsubscribeUserDoc = null;
+            }
+            return;
+          }
+
           set({ user });
 
           if (unsubscribeUserDoc) {

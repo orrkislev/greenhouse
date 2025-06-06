@@ -9,15 +9,7 @@ import { useMemo } from "react";
 
 export default function StaffGroups({ students, mode }) {
     const user = useUser(state => state.user);
-
-    const getModeIcon = () => {
-        return mode === "schedule" ? <Calendar className="w-5 h-5" /> : <FolderOpen className="w-5 h-5" />;
-    };
-
-    const getModeColor = () => {
-        return mode === "schedule" ? "text-green-600" : "text-purple-600";
-    };
-
+    
     const groups = useMemo(() => {
         if (!user || !user.groups || user.groups.length === 0) return {};
         const grouped = {};
@@ -32,25 +24,8 @@ export default function StaffGroups({ students, mode }) {
 
     return (
         <div className="space-y-6">
-            {/* Assign Group Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex items-center gap-4 mb-4">
-                    <h2 className="text-xl font-bold text-gray-800">הקבוצות שלי</h2>
-                    <div className={`flex items-center gap-2 ${getModeColor()}`}>
-                        {getModeIcon()}
-                        <span className="font-medium">
-                            {mode === "schedule" ? "מצב לוח זמנים" : "מצב פרויקטים"}
-                        </span>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                    <AddGroupButton groups={groups} />
-                </div>
-            </div>
-
             {/* Groups Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="">
                 {Object.values(groups).map((group) => (
                     <GroupCard
                         key={group.name}
@@ -67,6 +42,11 @@ export default function StaffGroups({ students, mode }) {
                     <p className="text-gray-400">בקש מהמנהל להקצות לך קבוצות או הוסף קבוצה</p>
                 </div>
             )}
+
+            {/* Add Group Button - Moved to the bottom */}
+            <div className="mt-6 flex justify-center">
+                <AddGroupButton groups={groups} />
+            </div>
         </div>
     );
 }
@@ -120,7 +100,7 @@ function GroupCard({ group, mode }) {
 
             {/* Students Grid */}
             <div className="p-4">
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-wrap gap-2">
                     {group.students
                         .sort((a, b) => a.firstName.localeCompare(b.firstName, 'he'))
                         .map((student) => (

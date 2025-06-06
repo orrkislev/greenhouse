@@ -6,7 +6,7 @@ import { Event } from "./Event";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
 
 
-export default function EventsGrid({ gridData }) {
+export default function EventsGrid({ gridData, edittable = false }) {
     const [draggingId, setDraggingId] = useState(null);
     const [resizingId, setResizingId] = useState(null);
 
@@ -28,7 +28,7 @@ export default function EventsGrid({ gridData }) {
 
     return (
         <Grid className="z-60" style={{ ...gridData.style, pointerEvents: 'none' }}>
-            {draggingId !== null &&
+            {edittable && draggingId !== null &&
                 positions.map((pos, index) => (
                     <Droppable key={index} row={pos.row} col={pos.col} gridData={gridData}
                         offset={draggingId[1]}
@@ -37,7 +37,7 @@ export default function EventsGrid({ gridData }) {
                 ))
             }
 
-            {resizingId !== null && (() => {
+            {edittable && resizingId !== null && (() => {
                 const event = events.find(e => e.id === resizingId);
                 if (!event) return null;
                 // Find the column index for the event's date
@@ -62,6 +62,7 @@ export default function EventsGrid({ gridData }) {
             {weekEvents.map((event, index) => (
                 <Event key={index}
                     firstHourRow={gridData.firstHourRow}
+                    edittable={edittable}
                     event={event}
                     onStartDrag={(offset) => setDraggingId([event.id, offset])}
                     onEndDrag={() => setDraggingId(null)}

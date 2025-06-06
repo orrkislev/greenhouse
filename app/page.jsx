@@ -19,10 +19,7 @@ export default function Home() {
 
         <PageContainer>
           <MainContainer>
-            <Schedule />
-            <div>
-              aa
-            </div>
+            <Schedule edittable={true}/>
           </MainContainer>
         </PageContainer>
     </WithAuth>

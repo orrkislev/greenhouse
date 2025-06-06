@@ -1,15 +1,11 @@
 'use client'
 
-import { useState, useEffect, useMemo } from "react";
+import { useState } from "react";
 import WithAuth from "@/components/auth/SignIn";
 import TopBar from "@/components/TopBar";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "@/utils/firebase/firebase";
-import { useUser } from "@/utils/store/user";
 import StaffGroups from "./components/StaffGroups";
 import StaffStudents from "./components/StaffStudents";
 import { tw } from "@/utils/tw";
-import { formatDate } from "@/utils/utils";
 import useStaffStudentsData from "./utils/useStaffStudentsData";
 
 const TabContainer = tw`flex bg-gray-100 rounded-lg p-1`;
@@ -79,7 +75,6 @@ export default function StaffPage() {
                             {activeTab === "students" && (
                                 <StaffStudents
                                     students={students}
-                                    assignedGroups={assignedGroups}
                                     mode={mode}
                                 />
                             )}

@@ -1,7 +1,7 @@
 import { formatDate } from "@/utils/utils";
 import { Grid } from "./Schedule";
 import { tw } from "@/utils/tw";
-import { DAYS, HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
+import { HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
 import { useUser } from "@/utils/store/user";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
 
@@ -32,7 +32,7 @@ export default function EmptySlotsGrid({ gridData }) {
     
     return (
         <Grid className='z-30 pointer-events-auto' style={gridData.style}>
-            {Object.values(DAYS).map((day, index) => {
+            {Array(6).map((_, index) => {
                 return HOURS.map((hour,hourIndex) => (
                     <EmptySlot key={`${index}-${hourIndex}`}
                         style={{

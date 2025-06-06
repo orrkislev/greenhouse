@@ -1,5 +1,5 @@
 import { tw } from "@/utils/tw";
-import { DAYS, HOURS } from "@/utils/store/scheduleDataStore";
+import { HOURS } from "@/utils/store/scheduleDataStore";
 import EventsGrid from "./Events";
 import TasksGrid from "./Tasks";
 import Gantt from "./Gantt";
@@ -19,7 +19,7 @@ const Hour = tw`col-span-full flex items-center justify-start rounded-lg p-4 bg-
 
 
 const weekLabels = ['א', 'ב', 'ג', 'ד', 'ה', 'ו-ש'];
-export default function Schedule() {
+export default function Schedule({ edittable = false }) {
     const week = useWeek((state) => state.week);
 
     const gridData = {}
@@ -61,7 +61,7 @@ export default function Schedule() {
                         }}
                     >
                         <div style={{ fontSize: '0.9em', color: '#666' }}>
-                            <span>{weekLabels[index]}</span> 
+                            <span>{weekLabels[index]}</span>
                             <span className="mr-1 text-xs">{day.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}</span>
                         </div>
                     </Day>
@@ -71,10 +71,11 @@ export default function Schedule() {
             </Grid>
 
             {/* -------- TASKS AND EVENTS --------- */}
-            <EmptySlotsGrid gridData={gridData} />
-            <TasksGrid gridData={gridData} />
-            <EventsGrid gridData={gridData} />
+            {edittable && <EmptySlotsGrid gridData={gridData} />}
+            <TasksGrid gridData={gridData} edittable={edittable} />
+            <EventsGrid gridData={gridData} edittable={edittable} />
 
+            {/* -------- NAVIGATION ARROWS --------- */}
             <Grid className='z-30' style={{ ...gridData.style, gridTemplateRows: '2em' }} >
                 <div style={{ gridColumn: 7, gridRow: 1 }} className="relative">
                     <div className="absolute left-0 top-0 ml-[-2.5em] mt-2 rounded-full bg-transparent hover:bg-white p-1 cursor-pointer transition-colors"
