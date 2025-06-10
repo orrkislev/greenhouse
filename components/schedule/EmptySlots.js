@@ -32,7 +32,7 @@ export default function EmptySlotsGrid({ gridData }) {
     
     return (
         <Grid className='z-30 pointer-events-auto' style={gridData.style}>
-            {Array(6).map((_, index) => {
+            {Array(6).fill(0).map((_, index) => {
                 return HOURS.map((hour,hourIndex) => (
                     <EmptySlot key={`${index}-${hourIndex}`}
                         style={{

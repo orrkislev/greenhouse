@@ -26,7 +26,7 @@ export default function WithAuth({ children, role }) {
     };
 
     return (
-        <div className="flex items-center justify-center h-screen bg-gray-100">
+        <div className="flex items-center justify-center h-screen bg-pink-500">
             <div className="text-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">Sign In</h1>
                 <p className="text-sm text-gray-600">Please enter your username and PIN to continue.</p>

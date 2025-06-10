@@ -15,9 +15,12 @@ export default function useProjectDataManager() {
     const lastProject = useRef(true);
 
     useEffect(() => {
-        if (!user) return;
+        console.log("useProjectDataManager: user changed", user);
+        if (!user || Object.keys(user).length === 0) return;
+        console.log("useProjectDataManager: user is valid, checking current project");
 
         if (!user.currentProject){
+            console.log("No current project found for user, initializing a new project.");
             initProject().then((newProjectId) => setUser({currentProject: newProjectId }))
         }
 
