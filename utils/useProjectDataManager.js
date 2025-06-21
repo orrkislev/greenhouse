@@ -1,62 +1,74 @@
 import { useEffect, useRef } from "react";
 import { useUser } from "./store/user";
-import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase/firebase";
 import { useProject } from "./store/projectStore";
 import { initProject } from "./firebase/firebase_data";
 
 export default function useProjectDataManager() {
     const user = useUser((state) => state.user);
-    const setUser = useUser((state) => state.setUser);
-
     const project = useProject((state) => state.project);
     const setProject = useProject((state) => state.setProject);
     const setView = useProject((state) => state.setView);
-    const lastProject = useRef(true);
+    
+    const isInitializing = useRef(false);
+    const loadedProjectRef = useRef(null);
 
+    // Effect 1: Load project data when user changes
     useEffect(() => {
-        console.log("useProjectDataManager: user changed", user);
-        if (!user || Object.keys(user).length === 0) return;
-        console.log("useProjectDataManager: user is valid, checking current project");
-
-        if (!user.currentProject){
-            console.log("No current project found for user, initializing a new project.");
-            initProject().then((newProjectId) => setUser({currentProject: newProjectId }))
+        if (!user || !user.id) {
+            return;
         }
 
-        (async () => {
-            const projectDoc = doc(db, 'users', user.id, 'projects', user.currentProject);
-            const loadedProject = await getDoc(projectDoc);
-            const projectData = {id: loadedProject.id, ...loadedProject.data()};
-            lastProject.current = projectData
-            setProject(projectData)
-            if (projectData.status !== 'intentions') {
-                setView('overview');
+        if (!user.currentProject) {
+            if (!isInitializing.current) {
+                isInitializing.current = true;
+                initProject().then(() => {
+                    isInitializing.current = false;
+                });
             }
-        })();
-    }, [user])
+            return;
+        }
 
+        const projectDocRef = doc(db, 'users', user.id, 'projects', user.currentProject);
+        getDoc(projectDocRef).then(projectDoc => {
+            if (projectDoc.exists()) {
+                const projectData = { id: projectDoc.id, ...projectDoc.data() };
+                // Only set project if it's different from what we last loaded
+                if (JSON.stringify(loadedProjectRef.current) !== JSON.stringify(projectData)) {
+                    loadedProjectRef.current = projectData;
+                    setProject(projectData);
+                    if (projectData.status !== 'intentions') {
+                        setView('overview');
+                    }
+                }
+            }
+        });
+
+    }, [user, setProject, setView]);
+
+    // Effect 2: Save project data when it changes in the store
     useEffect(() => {
-        if (!user) return;
-        if (!user.currentProject) return;
+        // Don't save if there's no project or user, or if project has no data yet
+        if (!project || !user || !user.currentProject || Object.keys(project).length <= 1) {
+            return;
+        }
 
-        const updateProject = async () => {
+        // Do not save the initial project data that was just loaded
+        if (JSON.stringify(loadedProjectRef.current) === JSON.stringify(project)) {
+            return;
+        }
+
+        const timeoutId = setTimeout(() => {
             const projectDocRef = doc(db, 'users', user.id, 'projects', user.currentProject);
             updateDoc(projectDocRef, project)
                 .catch((error) => {
                     console.error("Error updating project: ", error);
                 });
-            lastProject.current = project
-        };
+        }, 2000);
 
-        const timeout = setTimeout(() => {
-            if (lastProject.current && JSON.stringify(lastProject.current) !== JSON.stringify(project)) 
-                updateProject();
-        }, 2000); // Delay to avoid too frequent updates
-
-        return () => clearTimeout(timeout)
-
+        return () => clearTimeout(timeoutId);
     }, [project, user]);
 
-    return null
+    return null;
 }
