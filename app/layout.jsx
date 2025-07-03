@@ -1,5 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import TopBar from "@/components/TopBar";
+import { MainContainer, PageContainer } from "@/components/ui/StyledLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,9 +24,14 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased 
-          rtl bg-linear-to-tl from-stone-100/50 via-stone-200/50 to-stone-300/50 min-h-screen
+          rtl bg-linear-to-br from-white via-stone-100/50 to-stone-300/50 min-h-screen
       `} >
-        {children}
+        <TopBar />
+        {/* <PageContainer> */}
+          {/* <MainContainer> */}
+            {children}
+          {/* </MainContainer> */}
+        {/* </PageContainer> */}
       </body>
     </html>
   );

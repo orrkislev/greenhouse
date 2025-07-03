@@ -8,7 +8,7 @@ export default function ProjectOverview() {
 
     const goToIntentions = () => setView('intentions');
     return (
-        <div className="min-h-screen bg-gray-50 p-4" dir="rtl">
+        <div className="min-h-screen p-4" dir="rtl">
             <Button className="mb-4" onClick={goToIntentions}>
                 הצהרת כוונות
             </Button>

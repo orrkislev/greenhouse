@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import { tw } from "@/utils/tw";
 import { formatDate } from "@/utils/utils";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
+import { SectionTitle } from "./Schedule";
+import { ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 
 const GanttDay = tw`flex flex-col items-center justify-center text-gray-800 text-xs p-2
-    rounded-sm bg-pink-300/50 backdrop-blur-xs shadow mb-[-.5em]
-    gap-2 divide-y divide-black/10
-`;
+    gap-2 divide-y divide-black/10 z-[10] mb-8
+    `;
 
 export default function Gantt() {
+    const [isOpen, setIsOpen] = useState(false);
     const week = useWeek((state) => state.week);
     const [events, setEvents] = useState([]);
 
@@ -50,14 +52,11 @@ export default function Gantt() {
 
     return (
         <>
-            {week.map((date, index) => (
-                <GanttDay key={`empty-${index}`}
-                    style={{
-                        marginTop: '0.5em',
-                        gridColumnStart: index + 2,
-                        pointerEvents: 'none',
-                    }}
-                >
+            <SectionTitle className="row-2" onClick={() => setIsOpen(!isOpen)}>
+                גאנט {isOpen ? <ArrowUpCircle/> : <ArrowDownCircle />}
+            </SectionTitle>
+            {isOpen && week.map((date, index) => (
+                <GanttDay key={`empty-${index}`} className={`mt-2 pointer-events-none row-2 col-${index + 2}`}>
                     {events.filter(g => g.date === formatDate(date)).map(g => (
                         <div key={g.date + g.content} className="text-xs text-gray-700 text-center">
                             {g.content}

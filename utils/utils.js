@@ -1,4 +1,10 @@
-export const formatDate = (date) => date.toLocaleDateString('en-GB').replace(/\//g, '-');
+export const formatDate = (date) => {
+  if (typeof date === "string") return date;
+  if (!(date instanceof Date)) {
+    throw new Error('Invalid date type. Expected Date, string, or number - got ' + date + '(' + typeof date + ')');
+  }
+  return date.toLocaleDateString('en-GB').replace(/\//g, '-');
+}
 export const parseDate = (dateString) => {
   const parts = dateString.split('-');
   if (parts.length !== 3) {

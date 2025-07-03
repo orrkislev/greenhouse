@@ -6,13 +6,11 @@ import ProjectOverview from "./components/ProjectOverview";
 import { motion, AnimatePresence } from "motion/react"
 import useProjectDataManager from "@/utils/useProjectDataManager";
 import { useProject } from "@/utils/store/projectStore";
-import TopBar from "@/components/TopBar";
 
 export default function ProjectPage() {
     useProjectDataManager()
 
     return <WithAuth>
-        <TopBar />
         <ProjectPageActual />
     </WithAuth>;
 }

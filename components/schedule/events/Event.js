@@ -4,19 +4,18 @@ import { formatDate } from "@/utils/utils";
 import { HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
 import { useEffect, useState } from "react";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
-import { Trash2 } from "lucide-react";
-import { animate } from "motion";
+import { Edit2, Trash2 } from "lucide-react";
 
 const EventDiv = tw.motion`bg-[#E8CB4A] rounded-lg mx-2 p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)] text-gray-800
     flex items-center justify-start text-sm
     pointer-events-auto cursor-pointer hover:bg-[#D7B33A] transition-colors
-    z-[50] relative
+    z-10 relative
 `;
 
 
 
 
-export function Event({ event, edittable, firstHourRow, onStartDrag, onEndDrag, onStartResize, onEndResize }) {
+export function Event({ event, edittable, firstHourRow, onStartDrag, onEndDrag, onStartResize, onEndResize, onSelect }) {
     const [isHovered, setIsHovered] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [isResizing, setIsResizing] = useState(false);
@@ -65,7 +64,7 @@ export function Event({ event, edittable, firstHourRow, onStartDrag, onEndDrag, 
         style: {
             gridRowStart: startIndex + firstHourRow,
             gridRowEnd: endIndex + firstHourRow + 1,
-            gridColumnStart: dayIndex + 2,
+            gridColumn: dayIndex + 2,
         }
     };
     if (edittable) Object.assign(EventDivProps, {
@@ -82,7 +81,7 @@ export function Event({ event, edittable, firstHourRow, onStartDrag, onEndDrag, 
         onMouseDown: (e) => {
             const rect = e.currentTarget.getBoundingClientRect();
             setIsDragging(e.clientY - rect.top);
-        }
+        },
     });
 
     return (
@@ -96,6 +95,13 @@ export function Event({ event, edittable, firstHourRow, onStartDrag, onEndDrag, 
                         aria-label="Delete event"
                     >
                         <Trash2 width={14} height={14} className="text-gray-600/80" />
+                    </button>
+                    <button
+                        className="p-1 rounded focus:outline-none rounded-full hover:scale-110 transition-transform bg-transparent hover:bg-white/50"
+                        onClick={onSelect}
+                        aria-label="Edit event"
+                    >
+                        <Edit2 width={14} height={14} className="text-gray-600/80" />
                     </button>
                 </div>
             )}
@@ -127,20 +133,12 @@ function EventTitleEditor({ event }) {
         }
     };
 
-    const handleTitleKeyDown = (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            handleTitleBlur();
-        }
-    };
-
     return <input
-        className="bg-transparent text-gray-800 rounded px-1 w-full outline-none pointer-events-auto"
+        className="bg-transparent text-gray-800 rounded px-1 w-full outline-none pointer-events-auto focus:bg-white/50"
         value={editTitle}
-        autoFocus
+        onMouseDown={e => e.stopPropagation()}
         onChange={handleTitleChange}
         onBlur={handleTitleBlur}
-        onKeyDown={handleTitleKeyDown}
         onClick={e => e.stopPropagation()}
     />
 }

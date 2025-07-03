@@ -10,7 +10,7 @@ import useStaffStudentsData from "./utils/useStaffStudentsData";
 
 const TabContainer = tw`flex bg-gray-100 rounded-lg p-1`;
 const TabButton = tw`px-6 py-2 rounded-lg font-medium transition-all 
-    ${props => props.active == 'true' ? "bg-white text-blue-600 shadow-sm"
+    ${props => props.$active == 'true' ? "bg-white text-blue-600 shadow-sm"
                                       : "text-gray-600 hover:text-gray-800"}
 `;
 
@@ -22,8 +22,7 @@ export default function StaffPage() {
 
     return (
         <WithAuth role='staff'>
-            <TopBar />
-            <div className="min-h-screen bg-gray-50 p-4" dir="rtl">
+            <div className="min-h-screen p-4" dir="rtl">
                 <div className="max-w-7xl mx-auto">
                     {/* Header with tabs and mode toggle */}
                     <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
@@ -32,13 +31,13 @@ export default function StaffPage() {
                             <TabContainer>
                                 <TabButton
                                     onClick={() => setActiveTab("groups")}
-                                    active={activeTab === "groups" ? 'true' : 'false'}
+                                    $active={activeTab === "groups" ? 'true' : 'false'}
                                 >
                                     קבוצות
                                 </TabButton>
                                 <TabButton
                                     onClick={() => setActiveTab("students")}
-                                    active={activeTab === "students" ? 'true' : 'false'}
+                                    $active={activeTab === "students" ? 'true' : 'false'}
                                 >
                                     חניכים
                                 </TabButton>
@@ -48,13 +47,13 @@ export default function StaffPage() {
                             <TabContainer>
                                 <TabButton
                                     onClick={() => setMode("schedule")}
-                                    active={mode === "schedule" ? 'true' : 'false'}
+                                    $active={mode === "schedule" ? 'true' : 'false'}
                                 >
                                     לוז
                                 </TabButton>
                                 <TabButton
                                     onClick={() => setMode("project")}
-                                    active={mode === "project" ? 'true' : 'false'}
+                                    $active={mode === "project" ? 'true' : 'false'}
                                 >
                                     פרויקט
                                 </TabButton>

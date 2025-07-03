@@ -13,6 +13,10 @@ export default function TopBar() {
     const user = useUser((state) => state.user);
     const logout = useUser((state) => state.logout);
 
+    if (!user) {
+        return null; // Don't render the top bar if no user is logged in
+    }
+
     return (
         <TopBarDiv>
             <NavigationMenu viewport={false} className="bg-white p-2 shadow-md " style={{ borderRadius: "0 0 8px 8px" }}>
@@ -63,6 +67,14 @@ export default function TopBar() {
                         <NavigationMenuItem>
                             <NavigationMenuLink href="/staff" className="flex items-center justify-center gap-1">
                                 <Briefcase className="w-5 h-5" /> צוות
+                            </NavigationMenuLink>
+                        </NavigationMenuItem>
+                    )}
+
+                    {user && user.roles && user.roles.includes('admin') && (
+                        <NavigationMenuItem>
+                            <NavigationMenuLink href="/admin" className="flex items-center justify-center gap-1">
+                                <Briefcase className="w-5 h-5" /> ניהול
                             </NavigationMenuLink>
                         </NavigationMenuItem>
                     )}

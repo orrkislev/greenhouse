@@ -1,96 +1,43 @@
-import { tw } from "@/utils/tw";
-import { HOURS } from "@/utils/store/scheduleDataStore";
-import EventsGrid from "./Events";
-import TasksGrid from "./Tasks";
-import Gantt from "./Gantt";
-import EmptySlotsGrid from "./EmptySlots";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+'use client';
+
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
-import { formatDate } from "@/utils/utils";
+import { tw } from "@/utils/tw";
+import Gantt from "./Gantt";
+import Tasks from "./tasks/Tasks";
+import Events from "./events/Events";
 
+const ScheduleOuter = tw`w-full h-full px-16 pt-8`;
+const ScheduleContainer = tw`grid grid-cols-7 w-full relative h-full gap-x-2 gap-y-2 grid-cols-[1fr_repeat(6,_minmax(0,2fr))]`;
+const DayColumn = tw`bg-slate-800/10 rounded-t-lg rounded-b-lg mb-[-1em] row-start-1 row-end-[9] z-5 backdrop-blur-2xs
+    shadow-[0_0px_20px_rgba(255,255,255,.8)_inset] flex flex-col items-center justify-start
+`;
+const DayHeader = tw`flex items-center justify-center gap-2 z-10`;
+export const SectionTitle = tw`flex items-center justify-end text-gray-800 text-sm mb-4 col-1 z-10`;
 
-const ScheduleContainer = tw`select-none w-full relative h-full`
-export const Grid = tw`absolute w-full grid gap-2`;
-const Day = tw`flex flex-col items-center justify-start text-gray-800 text-lg font-semibold p-2
-    rounded-lg bg-white/50 backdrop-blur-xs shadow mb-[-.5em]
-    ${props => props.istoday == 'true' ? 'border-2 border-gray-500/50' : ''}
-    `
-const Hour = tw`col-span-full flex items-center justify-start rounded-lg p-4 bg-[#EDCBBB] border-b border-gray-300 hover:bg-gray-300 transition-colors cursor-pointer ml-[-1em] text-white text-lg font-semibold`;
-
-
-const weekLabels = ['א', 'ב', 'ג', 'ד', 'ה', 'ו-ש'];
+const daysOfTheWeek = ['א', 'ב', 'ג', 'ד', 'ה', 'ו-ש'];
 export default function Schedule({ edittable = false }) {
     const week = useWeek((state) => state.week);
 
-    const gridData = {}
-
-    gridData.taskRows = 1
-    gridData.totalRows = HOURS.length + 2 + gridData.taskRows + 1;
-    gridData.style = {
-        gridTemplateColumns: '1fr repeat(6, 2fr)',
-        gridTemplateRows: `2em repeat(${gridData.taskRows}, 2em) 1em repeat(${HOURS.length}, 2em) 1fr`
-    }
-    gridData.firstHourRow = gridData.totalRows - HOURS.length
-
     return (
-        <ScheduleContainer>
-            {/* -------- HOURS --------- */}
-            <Grid className='z-10' style={gridData.style}>
-                {HOURS.map((hour, index) => (
-                    <Hour key={index}
-                        style={{
-                            gridRowStart: index + gridData.firstHourRow,
-                            backgroundColor: index === HOURS.length - 1 ? '#B8A1D9' : undefined // Different color for last hour
-                        }}
-                    >
-                        {hour}
-                    </Hour>
-                ))}
-            </Grid>
-
-            {/* -------- DAYS --------- */}
-            <Grid className='z-20' style={gridData.style}>
-                {week.map((day, index) => (
-                    <Day key={index}
-                        istoday={formatDate(day) === formatDate(new Date())}
-                        style={{
-                            gridColumnStart: index + 2,
-                            gridRowStart: 1,
-                            gridRowEnd: gridData.totalRows,
-                            backgroundColor: index === 5 ? '#B8A1D944' : undefined
-                        }}
-                    >
-                        <div style={{ fontSize: '0.9em', color: '#666' }}>
-                            <span>{weekLabels[index]}</span>
-                            <span className="mr-1 text-xs">{day.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })}</span>
-                        </div>
-                    </Day>
+        <ScheduleOuter>
+            <ScheduleContainer>
+                {week.map((day, dayIndex) => (
+                    <DayColumn key={dayIndex} className={`col-${dayIndex + 2} ${dayIndex === 5 ? 'bg-sky-900/30' : ''}`} />
                 ))}
 
-                <Gantt weekDays={week} />
-            </Grid>
 
-            {/* -------- TASKS AND EVENTS --------- */}
-            {edittable && <EmptySlotsGrid gridData={gridData} />}
-            <TasksGrid gridData={gridData} edittable={edittable} />
-            <EventsGrid gridData={gridData} edittable={edittable} />
+                {week.map((day, dayIndex) => (
+                    <DayHeader key={dayIndex} className={`col-${dayIndex + 2} row-1`}>
+                        <div className='text-gray-800 text-lg font-semibold'>{daysOfTheWeek[dayIndex]}</div>
+                        <div className="text-gray-500 text-xs">{day.toLocaleDateString('he-IL', { month: 'long', day: 'numeric' })}</div>
+                    </DayHeader>
+                ))}
 
-            {/* -------- NAVIGATION ARROWS --------- */}
-            <Grid className='z-30' style={{ ...gridData.style, gridTemplateRows: '2em' }} >
-                <div style={{ gridColumn: 7, gridRow: 1 }} className="relative">
-                    <div className="absolute left-0 top-0 ml-[-2.5em] mt-2 rounded-full bg-transparent hover:bg-white p-1 cursor-pointer transition-colors"
-                        onClick={() => useWeek.getState().nextWeek()}>
-                        <ChevronLeft width="1.5em" height="1.5em" className="text-gray-800" />
-                    </div>
-                </div>
-                <div style={{ gridColumn: 1, gridRowStart: 1, gridRowEnd: gridData.totalRows }} className="relative">
-                    <div className="absolute left-0 top-0 mr-[-2.5em] mt-2 rounded-full bg-transparent hover:bg-white p-1 cursor-pointer transition-colors"
-                        onClick={() => useWeek.getState().prevWeek()}>
-                        <ChevronRight width="1.5em" height="1.5em" className="text-gray-800" />
-                    </div>
-                </div>
-            </Grid>
-        </ScheduleContainer>
-    );
+                <Gantt />
+                <Tasks />
+                <Events edittable={edittable} />
+
+            </ScheduleContainer>
+        </ScheduleOuter>
+    )
 }
-

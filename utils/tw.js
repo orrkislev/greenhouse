@@ -1,6 +1,17 @@
 import React from 'react';
-import clsx from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import { motion } from 'motion/react';
+
+// Utility function to filter out props that start with '$'
+export function filterProps(props) {
+  const filtered = {};
+  for (const key in props) {
+    if (!key.startsWith('$')) {
+      filtered[key] = props[key];
+    }
+  }
+  return filtered;
+}
 
 function createStyledElement(elementType) {
   return (strings, ...values) => {
@@ -12,14 +23,14 @@ function createStyledElement(elementType) {
         return acc + str + resolved;
       }, '').trim();
 
-      const finalClassName = clsx(resolvedClassName, className);
+      const finalClassName = twMerge(resolvedClassName, className);
 
       return React.createElement(
         elementType,
         {
           className: finalClassName,
           ref,
-          ...props
+          ...filterProps(props),
         },
         children
       );
@@ -36,7 +47,7 @@ const elementTypes = [
 ];
 
 // Add support for tw.motion
-const motionProxy = new Proxy(function () {}, {
+const motionProxy = new Proxy(function () { }, {
   apply(target, thisArg, args) {
     // tw.motion`...` defaults to motion.div
     return createStyledElement(motion.div)(...args);

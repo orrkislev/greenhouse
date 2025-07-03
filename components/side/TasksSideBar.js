@@ -10,7 +10,7 @@ const TaskDiv = tw`bg-[#309898] rounded-full shadow mx-2
         flex items-center justify-start
         text-gray-800 text-white text-sm px-8 
         pointer-events-auto cursor-pointer hover:bg-[#2A7B7B] transition-colors
-        ${props => props.isselected ? 'bg-[#226666] font-bold' : ''}`;
+        ${props => props.$isSelected ? 'bg-[#226666] font-bold' : ''}`;
 const NewTaskDiv = tw`bg-[#309898] rounded-full shadow mx-2
         flex items-center justify-center
         text-gray-800 text-white text-sm px-8 
@@ -52,7 +52,7 @@ export default function TasksSideBar() {
         <TaskDiv
           key={idx}
           onClick={() => setSelected(task.id)}
-          isselected={selected === task.id ? "true" : "false"}
+          $isSelected={selected === task.id ? "true" : "false"}
         >
           {task.title}
         </TaskDiv>

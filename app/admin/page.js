@@ -53,7 +53,7 @@ export default function AdminPage() {
 
     return (
         <WithAuth role="admin">
-            <div className="flex items-center justify-center h-screen bg-gray-100 rtl flex-col gap-4 p-4">
+            <div className="flex items-center justify-center h-screen rtl flex-col gap-4 p-4">
                 <div className="w-full max-w-5xl flex gap-4">
                     <AdminGroups groups={groups} students={students} staff={staff} />
                     <AdminStaff groups={groups} staff={staff} />
