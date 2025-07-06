@@ -1,17 +1,11 @@
-import { tw } from "@/utils/tw";
+'use client';
 
 import { formatDate } from "@/utils/utils";
 import { HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
 import { useEffect, useState } from "react";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
 import { Edit2, Trash2 } from "lucide-react";
-
-const EventDiv = tw.motion`bg-[#EF98A1] py-2 px-10 text-gray-800
-    flex items-center justify-start text-sm
-    pointer-events-auto cursor-pointer transition-colors
-    z-5 relative
-    hover:bg-[#E77885]
-`;
+import { motion } from "motion/react";
 
 
 
@@ -85,8 +79,16 @@ export function Event({ event, edittable, onStartDrag, onEndDrag, onStartResize,
         },
     });
 
+    const eventClasses = `
+        bg-[#EF98A1] py-2 px-10 text-gray-800
+        flex items-center justify-start text-sm
+        pointer-events-auto cursor-pointer transition-colors
+        z-5 relative
+        hover:bg-[#E77885]
+    `
+
     return (
-        <EventDiv {...EventDivProps}>
+        <motion.div className={eventClasses} {...EventDivProps}>
             {/* Icon buttons on hover */}
             {isHovered && !isDragging && !isResizing && (
                 <div className="absolute top-1 left-2 flex gap-2 z-10" onMouseDown={e => e.stopPropagation()}>
@@ -115,7 +117,7 @@ export function Event({ event, edittable, onStartDrag, onEndDrag, onStartResize,
                     <div className="w-full h-[3px] rounded-full bg-white bg-white/50 cursor-col-resize" />
                 </div>
             )}
-        </EventDiv>
+        </motion.div>
     );
 }
 
