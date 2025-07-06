@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/utils/firebase/firebase";
+import { updateUserData } from "../actions/member actions";
 
 export default function EditStudentDrawer({ open, onOpenChange, student, groups }) {
     const [firstName, setFirstName] = useState("");
@@ -23,9 +24,9 @@ export default function EditStudentDrawer({ open, onOpenChange, student, groups 
     const handleSave = async (e) => {
         e.preventDefault();
         if (!student?.id) return;
-        await updateDoc(doc(db, "users", student.id), {
-            firstName,
-            lastName,
+        updateUserData(student.username, {
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
             className: selectedGroup,
         });
         onOpenChange(false);

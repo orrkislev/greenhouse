@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { tw } from "@/utils/tw";
 import { formatDate } from "@/utils/utils";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
-import { ScheduleGrid } from "./ScheduleTop";
 import { useGantt } from "@/utils/store/scheduleDataStore";
+import { ScheduleSection } from "./Layout";
 
 const GanttDay = tw`flex flex-col items-center justify-center text-gray-800 text-xs p-2
     gap-2 divide-y divide-black/10 z-[10]
-    border-l-2 border-white bg-[#D5D2FD]
+    bg-[#D5D2FD]
     `;
 
 export default function Gantt() {
@@ -20,7 +20,7 @@ export default function Gantt() {
     }, [week]);
 
     return (
-        <ScheduleGrid>
+        <ScheduleSection name="גאנט" edittable={false}>
             {week.map((date, index) => (
                 <GanttDay key={`empty-${index}`} className={`pointer-events-none col-${index + 1}`}>
                     {gantt.gantt[formatDate(date)] && gantt.gantt[formatDate(date)].map((event, i) => (
@@ -30,7 +30,7 @@ export default function Gantt() {
                     ))}
                 </GanttDay>
             ))}
-        </ScheduleGrid>
+        </ScheduleSection>
     );
 }
 

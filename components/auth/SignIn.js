@@ -69,7 +69,7 @@ export default function WithAuth({ children, role }) {
                                 סיסמא (4 ספרות)
                             </label>
                             <div className="flex gap-2 justify-center">
-                                <PINInput onChange={setPin} />
+                                <PINInput onChange={e => setPin(e.target.value)} />
                             </div>
                         </div>
 

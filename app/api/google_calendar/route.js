@@ -48,12 +48,6 @@ async function getGanttEvents(startDate, endDate) {
     const timeMin = startDate.toISOString();
     const timeMax = endDate.toISOString();
 
-    console.log('Fetching events from Google Calendar:', {
-        calendarId,
-        timeMin,
-        timeMax
-    });
-
     const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?` +
         `key=${process.env.GOOGLE_CLOUD_API}&` +
         `timeMin=${timeMin}&` +

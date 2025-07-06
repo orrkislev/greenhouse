@@ -3,9 +3,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@
 import { Input } from "@/components/ui/input";
 import PINInput from "@/components/ui/PIN";
 import { Button } from "@/components/ui/button";
-import { createUser } from "../actions/createUser";
-import { doc, setDoc } from "firebase/firestore";
-import { db } from "@/utils/firebase/firebase";
+import { createStudent } from "../actions/member actions";
 
 export default function NewStudentDrawer({ open, onOpenChange, groupName, groups }) {
     const [firstName, setFirstName] = useState("");
@@ -19,28 +17,11 @@ export default function NewStudentDrawer({ open, onOpenChange, groupName, groups
         setSelectedGroup(groupName || (groups && groups[0]?.name) || "");
     }, [groupName, groups]);
 
-    const usernameRegex = /^[A-Za-z][A-Za-z0-9._-]*$/;
 
     const handleAddStudent = async (e) => {
         e.preventDefault();
-        setError("");
-        if (!usernameRegex.test(username)) {
-            setError("Username must start with a letter and contain only English letters, numbers, dots, underscores, or hyphens.");
-            return;
-        }
 
-        const res = await createUser(username, pin, firstName + " " + lastName);
-
-        if (res.success) {
-            setDoc(doc(db, "users", res.id), {
-                firstName,
-                lastName,
-                className: selectedGroup,
-                roles: ['student'],
-            });
-        } else {
-            console.error("Error adding student:", res.error);
-        }
+        await createStudent(firstName, lastName, username, pin, selectedGroup);
 
         setFirstName("");
         setLastName("");

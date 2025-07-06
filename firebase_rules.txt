@@ -3,7 +3,8 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     function getUser() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      let username = request.auth.token.email.split('@')[0];
+      return get(/databases/$(database)/documents/users/$(username)).data;
     }
 
     function hasRole(role) {
@@ -11,24 +12,44 @@ service cloud.firestore {
       return userData.roles != null && userData.roles.hasAny([role]);
     }
 
-    function isSelf(userId) {
-      return request.auth.uid == userId;
+    function isSelf(username) {
+      return request.auth.token.email.split('@')[0] == username;
     }
 
-    match /users/{userId} {
+    match /users/{username} {
       allow read;
 
       allow update: if hasRole("admin") || (
-        isSelf(userId) &&
+        isSelf(username) &&
         request.resource.data.roles == resource.data.roles
       );
 
-      allow create: if hasRole("admin") || isSelf(userId);
+      allow create: if hasRole("admin") || isSelf(username);
       
+      allow delete: if hasRole("admin");
+
 			match /{document=**} {
-        allow read, write: if hasRole("admin") || isSelf(userId);
+        allow read, write: if hasRole("admin") || isSelf(username);
       }
     }
+
+    function isGroupAdmin(groupName) {
+      let username = request.auth.token.email.split('@')[0];
+      let groupDoc = get(/databases/$(database)/documents/groups/$(groupName));
+      return groupDoc.data.admins != null && groupDoc.data.admins.hasAny([username]);
+    }
+
+    match /groups/{groupName} {
+      allow read: if true;
+      allow create, update, delete: if true;
+
+      match /schedule/{dateString} {
+        allow read: if true;
+        allow create, update, delete: if hasRole("admin") || isGroupAdmin(groupName);
+      }
+    }
+
+
 
     // Allow anyone to read all other documents/collections, writable only by admins
     match /{document=**} {

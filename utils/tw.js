@@ -1,6 +1,6 @@
 import React from 'react';
-import { twMerge } from 'tailwind-merge';
 import { motion } from 'motion/react';
+import { cn } from '@/lib/utils';
 
 // Utility function to filter out props that start with '$'
 export function filterProps(props) {
@@ -23,7 +23,7 @@ function createStyledElement(elementType) {
         return acc + str + resolved;
       }, '').trim();
 
-      const finalClassName = twMerge(resolvedClassName, className);
+      const finalClassName = cn(resolvedClassName, className);
 
       return React.createElement(
         elementType,

@@ -26,7 +26,7 @@ export const useUser = create(
             unsubscribeUserDoc = null;
           }
 
-          unsubscribeUserDoc = AuthService.subscribeToUserDoc(user.id, (userDoc) => {
+          unsubscribeUserDoc = AuthService.subscribeToUserDoc(user.username, (userDoc) => {
             set({ user: { ...get().user, ...userDoc } });
           });
         });
@@ -59,27 +59,13 @@ export const useUser = create(
             set({ user });
             // Subscribe to user doc changes
             if (unsubscribeUserDoc) unsubscribeUserDoc();
-            if (user && user.uid) {
-              console.log('subscribing to user doc:', user.uid);
-              unsubscribeUserDoc = AuthService.subscribeToUserDoc(user.uid, (userDoc) => {
+            if (user && user.usename) {
+              unsubscribeUserDoc = AuthService.subscribeToUserDoc(user.username, (userDoc) => {
                 set({ user: { ...get().user, ...userDoc } });
               });
             }
           } catch (error) {
             set({ error: error instanceof Error ? error.message : 'Failed to sign in' });
-            throw error;
-          } finally {
-            set({ loading: false });
-          }
-        },
-
-        signUp: async (username, pinPass, userData) => {
-          set({ loading: true, error: null });
-          try {
-            const user = await AuthService.signUp(username, pinPass, userData);
-            set({ user });
-          } catch (error) {
-            set({ error: error instanceof Error ? error.message : 'Failed to sign up' });
             throw error;
           } finally {
             set({ loading: false });

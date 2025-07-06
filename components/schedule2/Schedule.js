@@ -7,6 +7,8 @@ import Events from "./events/Events";
 import ScheduleTop from "./ScheduleTop";
 import Semester from "./Semester/Semester";
 import { useState } from "react";
+import { AddSchedule } from "./AddSchedule";
+import OtherSchedules from "./GroupSchedule/OtherSchedules";
 
 const ScheduleOuter = tw`w-full h-full px-16 pt-8`;
 
@@ -36,9 +38,12 @@ export default function Schedule({ edittable = false }) {
 
             {view === 'week' && (
                 <>
-                    <Gantt />
                     <Tasks />
                     <Events edittable={edittable} />
+                    <OtherSchedules />
+                    {/* <Gantt /> */}
+
+                    {/* <AddSchedule /> */}
                 </>
             )}
             {view === 'semester' && (

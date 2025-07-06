@@ -4,7 +4,7 @@ import { useUserSchedule } from "@/utils/store/scheduleDataStore";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
 import { useState } from "react";
 import EditTaskDrawer from "./EditTaskDrawer";
-import { ScheduleGrid } from "../ScheduleTop";
+import { ScheduleSection } from "../Layout";
 
 
 export default function Tasks() {
@@ -29,7 +29,7 @@ export default function Tasks() {
     })
 
     return (
-        <ScheduleGrid>
+        <ScheduleSection name="משימות">
             {Array(6).fill(null).map((_, dayIndex) => (
                 <AddTaskButton
                     key={`add-${dayIndex}`}
@@ -51,14 +51,15 @@ export default function Tasks() {
                 onClose={() => setSelectedTask(null)}
                 task={selectedTask}
             />
-        </ScheduleGrid>
+        </ScheduleSection>
+
     )
 }
 
 
 const AddTaskButtonDiv = tw`flex items-center justify-center text-gray-800 text-sm
         pointer-events-auto cursor-pointer 
-        transition-all border border-white bg-[#FADFC199] hover:bg-[#FADFC1]
+        transition-all bg-[#FADFC199] hover:bg-[#FADFC1]
         text-transparent hover:text-gray-800
         z-5
 `;
@@ -94,7 +95,6 @@ const TaskDiv = tw`bg-[#F3B580]
         flex items-center justify-center text-gray-800 text-sm
         pointer-events-auto cursor-pointer 
         hover:bg-[#F3A05B] transition-all z-10
-        border border-white
         py-1
 `;
 

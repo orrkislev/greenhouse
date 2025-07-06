@@ -10,7 +10,6 @@ const EventDiv = tw.motion`bg-[#EF98A1] py-2 px-10 text-gray-800
     flex items-center justify-start text-sm
     pointer-events-auto cursor-pointer transition-colors
     z-5 relative
-    border border-white
     hover:bg-[#E77885]
 `;
 

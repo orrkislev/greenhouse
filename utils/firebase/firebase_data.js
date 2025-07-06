@@ -38,18 +38,14 @@ export function deleteEvent(eventId) {
 
 export async function initProject() {
     const user = auth.currentUser;
-    console.log(user ? 'User is logged in' : 'No user is logged in');
     if (!user) return;
 
     const projectsCollectionRef = collection(db, 'users', user.uid, 'projects');
-    console.log("Projects collection reference:", projectsCollectionRef);
     const newProject = await addDoc(projectsCollectionRef, {
         createdAt: new Date(),
         status: 'intentions'
     }).catch((error) => console.error("Error creating new project: ", error));
     if (!newProject) return;
-
-    console.log("New project created with ID:", newProject.id);
 
     const userDoc = doc(db, 'users', user.uid);
     await updateDoc(userDoc, {

@@ -1,4 +1,4 @@
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, User as FirebaseUser, } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
@@ -12,23 +12,11 @@ export const prepareEmailPassword = (username, pinPass) => {
 export class AuthService {
   static async signIn(username, pinPass) {
     const [email, password] = prepareEmailPassword(username, pinPass);
+    console.log('Signing in with email:', email, 'and password:', password);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = await this.getUserData(userCredential.user);
       return user;
-    } catch (error) {
-      throw new Error(this.getErrorMessage(error));
-    }
-  }
-
-  static async signUp(username, pinPass, userData) {
-    const [email, password] = prepareEmailPassword(username, pinPass);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      // await updateProfile(userCredential.user, { displayName: userData.firstName + ' ' + userData.lastName });
-      await setDoc(doc(db, 'users', userCredential.user.uid), userData);
-      userData.id = userCredential.user.uid; // Add user ID to the data
-      return userData;
     } catch (error) {
       throw new Error(this.getErrorMessage(error));
     }
@@ -43,26 +31,18 @@ export class AuthService {
   }
 
   static async getUserData(firebaseUser) {
-    const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+    const username = firebaseUser.email ? firebaseUser.email.split('@')[0] : null;
+    if (!username) {
+      throw new Error('Username not found in Firebase user data');
+    }
 
+    const userDoc = await getDoc(doc(db, 'users', username));
     if (userDoc.exists()) {
       const data = userDoc.data();
-      return { id: firebaseUser.uid, ...data };
+      return { id: username, ...data };
     } else {
-      console.error('No user data found for this user ID:', firebaseUser.uid);
+      console.error('No user data found for this username:', username);
       throw new Error('User data not found');
-    }
-  }
-
-  static async updateUserProfile(userId, updates) {
-    try {
-      const userRef = doc(db, 'users', userId);
-      await updateDoc(userRef, {
-        ...updates,
-        updatedAt: new Date(),
-      });
-    } catch (error) {
-      throw new Error(this.getErrorMessage(error));
     }
   }
 
@@ -82,10 +62,10 @@ export class AuthService {
     });
   }
 
-  static subscribeToUserDoc(userId, callback) {
-    const userRef = doc(db, 'users', userId);
+  static subscribeToUserDoc(username, callback) {
+    const userRef = doc(db, 'users', username);
     return onSnapshot(userRef, (docSnap) => {
-      if (docSnap.exists()) callback({ id: userId, ...docSnap.data() });
+      if (docSnap.exists()) callback({ username, ...docSnap.data() });
       else callback(null);
     });
   }

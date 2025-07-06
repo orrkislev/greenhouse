@@ -51,7 +51,6 @@ export default function useStaffStudentsData() {
     useEffect(() => {
         if (!groups) return
         const fetchData = async () => {
-            console.log("Fetching groups:", groups);
             if (groups.length > 0) {
                 const q = query(collection(db, 'users'), where('className', 'in', groups));
                 const usersSnapshot = await getDocs(q);

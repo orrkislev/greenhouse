@@ -1,9 +1,9 @@
 import { formatDate, parseDate } from "@/utils/utils";
-import { ScheduleGrid } from "../ScheduleTop";
 import { tw } from "@/utils/tw";
 import { isToday } from "date-fns";
 import { useEffect, useState } from "react";
 import { useGantt } from "@/utils/store/scheduleDataStore";
+import { ScheduleSection } from "../Layout";
 
 const SemesterCell = tw`text-center bg-[#F3C5C599] z-1 border border-white min-h-16 text-xs p-2 pt-6
 ${props => props.$isWeekend ? 'bg-[#F3C5C5]' : ''}
@@ -98,7 +98,7 @@ export default function Semester() {
     const days = weeks.map(week => week.days).flat();
 
     return (
-        <ScheduleGrid>
+        <ScheduleSection>
             {days.map((day, index) => (
                 <SemesterCell key={index} className={`col-${day.col} row-${day.row}`}
                     $isInSemester={day.isInSemester}
@@ -125,6 +125,6 @@ export default function Semester() {
                     {week.weekNumber}
                 </WeekMarker>
             ))}
-        </ScheduleGrid>
+        </ScheduleSection>
     )
 }

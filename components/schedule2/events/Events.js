@@ -5,11 +5,11 @@ import { Event } from "./Event";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
 import { tw } from "@/utils/tw";
 import EditEventDrawer from "./EditEventDrawer copy";
-import { ScheduleGrid } from "../ScheduleTop";
+import { ScheduleSection } from "../Layout";
 
 const EmptySlot = tw`min-h-8 z-1
     flex items-center justify-center text-xs
-    bg-[#F3C5C599] hover:bg-[#F3C5C5] border border-white
+    bg-[#F3C5C599] hover:bg-[#F3C5C5]
     text-transparent hover:text-gray-800
     cursor-pointer transition-all
 `;
@@ -69,7 +69,7 @@ export default function Events({ edittable = false }) {
     }
 
     return (
-        <ScheduleGrid>
+        <ScheduleSection name="לוז">
             {positions.map((pos, index) => (
                 <EmptySlot key={index} className={`col-${pos.col} row-${pos.row}`}
                     onClick={() => handleNewEvent(pos)}
@@ -125,7 +125,7 @@ export default function Events({ edittable = false }) {
             ))}
 
             <EditEventDrawer onClose={() => setSelectedEvent(null)} event={selectedEvent} />
-        </ScheduleGrid>
+        </ScheduleSection>
     )
 }
 
