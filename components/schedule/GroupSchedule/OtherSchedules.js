@@ -44,7 +44,9 @@ function GroupSchedule({ groupName }) {
 }
 
 
-const GroupCellDiv = tw`bg-[#C4BBB2] p-2 flex items-center justify-between`;
+const GroupCellDiv = tw`bg-[#C4BBB2] p-2 flex items-center justify-center text-xs text-center text-gray-800
+    ${props => !props.$edittable ? 'bg-[#C4BBB2]/60' : ''}
+    `;
 
 function GroupCell({ date, groupName, edittable }) {
     const [text, setText] = useState("");
@@ -65,17 +67,17 @@ function GroupCell({ date, groupName, edittable }) {
     };
 
     return (
-        <GroupCellDiv>
+        <GroupCellDiv $edittable={edittable}>
             {edittable ? (
                 <textarea
                     rows={2}
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     onBlur={onBlur}
-                    className="bg-white/50 w-full"
+                    className="focus:bg-white/50 w-full"
                 />
             ) : (
-                <span className="flex-1 ml-2">{text}</span>
+                <span className="flex-1 ml-2 whitespace-pre-line">{text}</span>
             )}
         </GroupCellDiv>
     );

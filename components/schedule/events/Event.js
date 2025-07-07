@@ -1,21 +1,16 @@
-import { tw } from "@/utils/tw";
+'use client';
 
 import { formatDate } from "@/utils/utils";
 import { HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
 import { useEffect, useState } from "react";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
 import { Edit2, Trash2 } from "lucide-react";
-
-const EventDiv = tw.motion`bg-[#E8CB4A] rounded-lg mx-2 p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)] text-gray-800
-    flex items-center justify-start text-sm
-    pointer-events-auto cursor-pointer hover:bg-[#D7B33A] transition-colors
-    z-10 relative
-`;
+import { motion } from "motion/react";
 
 
 
 
-export function Event({ event, edittable, firstHourRow, onStartDrag, onEndDrag, onStartResize, onEndResize, onSelect }) {
+export function Event({ event, edittable, onStartDrag, onEndDrag, onStartResize, onEndResize, onSelect }) {
     const [isHovered, setIsHovered] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [isResizing, setIsResizing] = useState(false);
@@ -62,9 +57,9 @@ export function Event({ event, edittable, firstHourRow, onStartDrag, onEndDrag, 
 
     const EventDivProps = {
         style: {
-            gridRowStart: startIndex + firstHourRow,
-            gridRowEnd: endIndex + firstHourRow + 1,
-            gridColumn: dayIndex + 2,
+            gridRowStart: startIndex + 1,
+            gridRowEnd: endIndex + 2,
+            gridColumn: dayIndex + 1,
         }
     };
     if (edittable) Object.assign(EventDivProps, {
@@ -84,8 +79,16 @@ export function Event({ event, edittable, firstHourRow, onStartDrag, onEndDrag, 
         },
     });
 
+    const eventClasses = `
+        bg-[#EF98A1] py-2 px-10 text-gray-800
+        flex items-center justify-start text-sm
+        pointer-events-auto cursor-pointer transition-colors
+        z-5 relative
+        hover:bg-[#E77885]
+    `
+
     return (
-        <EventDiv {...EventDivProps}>
+        <motion.div className={eventClasses} {...EventDivProps}>
             {/* Icon buttons on hover */}
             {isHovered && !isDragging && !isResizing && (
                 <div className="absolute top-1 left-2 flex gap-2 z-10" onMouseDown={e => e.stopPropagation()}>
@@ -94,14 +97,14 @@ export function Event({ event, edittable, firstHourRow, onStartDrag, onEndDrag, 
                         onClick={handleDelete}
                         aria-label="Delete event"
                     >
-                        <Trash2 width={14} height={14} className="text-gray-600/80" />
+                        <Trash2 width={14} height={14} className="text-white/80" />
                     </button>
                     <button
                         className="p-1 rounded focus:outline-none rounded-full hover:scale-110 transition-transform bg-transparent hover:bg-white/50"
                         onClick={onSelect}
                         aria-label="Edit event"
                     >
-                        <Edit2 width={14} height={14} className="text-gray-600/80" />
+                        <Edit2 width={14} height={14} className="text-white/80" />
                     </button>
                 </div>
             )}
@@ -114,7 +117,7 @@ export function Event({ event, edittable, firstHourRow, onStartDrag, onEndDrag, 
                     <div className="w-full h-[3px] rounded-full bg-white bg-white/50 cursor-col-resize" />
                 </div>
             )}
-        </EventDiv>
+        </motion.div>
     );
 }
 

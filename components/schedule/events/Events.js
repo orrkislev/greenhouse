@@ -5,16 +5,16 @@ import { Event } from "./Event";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
 import { tw } from "@/utils/tw";
 import EditEventDrawer from "./EditEventDrawer copy";
+import { ScheduleSection } from "../Layout";
 
-const TimeRow = tw`bg-[#EDCBBB] col-start-2 col-end-[8] z-1 rounded-l-full ml-[-1em] shadow-md`;
-const EmptySlot = tw`bg-white rounded-lg p-2 inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)] text-gray-800 mx-2
-    flex items-center justify-center text-sm font-bold
-    cursor-pointer opacity-0 hover:opacity-100 transition-opacity
-    z-5
+const EmptySlot = tw`min-h-8 z-1
+    flex items-center justify-center text-xs
+    bg-[#F3C5C599] hover:bg-[#F3C5C5]
+    text-transparent hover:text-gray-800
+    cursor-pointer transition-all
 `;
 
-const HourTitle = tw`flex justify-end col-1`;
-const HourTitleInner = tw`text-white font-semibold bg-[#EDCBBB] rounded-r-full pl-8 pr-4 ml-[-1em] flex items-center justify-end shadow-md`;
+const TimeSlot = tw.div`flex items-start justify-start text-black/50 text-xs pointer-events-none z-6 p-1`;
 
 
 const newEventTitles = [
@@ -36,19 +36,19 @@ export default function Events({ edittable = false }) {
     const addEvent = useUserSchedule(state => state.addEvent);
 
     const positions = Array(6).fill(0).map((_, col) => Array(5).fill(0).map((_, row) => (
-        { row: row + 4, col: col + 2 }))).flat();
+        { row: row + 1, col: col + 1 }))).flat();
 
     const onPlace = pos => {
         if (draggingId === null) return;
         updateEvent(draggingId, {
-            date: formatDate(week[pos.col - 2]),
-            start: HOURS[pos.row - 4],
+            date: formatDate(week[pos.col - 1]),
+            start: HOURS[pos.row - 1],
         })
     }
 
     const handleNewEvent = (pos) => {
-        const date = week[pos.col - 2];
-        const hour = HOURS[pos.row - 4];
+        const date = week[pos.col - 1];
+        const hour = HOURS[pos.row - 1];
 
         const newEvent = {
             date: formatDate(date),
@@ -69,24 +69,20 @@ export default function Events({ edittable = false }) {
     }
 
     return (
-        <>
-            <TimeRow className="row-4" />
-            <TimeRow className="row-5" />
-            <TimeRow className="row-6" />
-            <TimeRow className="row-7" />
-            <TimeRow className="row-8 bg-[#7D86A6]" />
-
-            <HourTitle className="row-4"><HourTitleInner>9:30</HourTitleInner></HourTitle>
-            <HourTitle className="row-5"><HourTitleInner>10:30</HourTitleInner></HourTitle>
-            <HourTitle className="row-6"><HourTitleInner>11:30</HourTitleInner></HourTitle>
-            <HourTitle className="row-7"><HourTitleInner>12:30</HourTitleInner></HourTitle>
-            <HourTitle className="row-8"><HourTitleInner className='bg-[#7D86A6]'>אחרהצ</HourTitleInner></HourTitle>
-
+        <ScheduleSection name="לוז">
             {positions.map((pos, index) => (
                 <EmptySlot key={index} className={`col-${pos.col} row-${pos.row}`}
                     onClick={() => handleNewEvent(pos)}
                 >+</EmptySlot>
             ))}
+
+            {positions.map((pos, index) => (
+                <TimeSlot key={index} className={`col-${pos.col} row-${pos.row}`}>
+                    {HOURS[pos.row - 1]}
+                </TimeSlot>
+            ))}
+
+
 
             {extrasState == 'dragging' &&
                 positions.map((pos, index) => (
@@ -99,14 +95,14 @@ export default function Events({ edittable = false }) {
             {extrasState == 'resizing' && (() => {
                 const event = events.find(e => e.id === resizingId);
                 if (!event) return null;
-                const eventCol = week.findIndex(date => formatDate(date) === event.date) + 2;
+                const eventCol = week.findIndex(date => formatDate(date) === event.date) + 1;
                 if (eventCol === -1) return null;
                 return positions
                     .filter(pos => pos.col === eventCol)
                     .map((pos, index) => (
                         <Droppable key={index} row={pos.row} col={pos.col}
                             onPlace={() => {
-                                const newDuration = pos.row - 4 - HOURS.indexOf(event.start) + 1;
+                                const newDuration = pos.row - HOURS.indexOf(event.start);
                                 if (newDuration > 0) {
                                     updateEvent(resizingId, { duration: newDuration });
                                 }
@@ -118,7 +114,6 @@ export default function Events({ edittable = false }) {
 
             {weekEvents.map((event, index) => (
                 <Event key={index}
-                    firstHourRow={4}
                     edittable={edittable}
                     event={event}
                     onStartDrag={() => setDraggingId(event.id)}
@@ -130,7 +125,7 @@ export default function Events({ edittable = false }) {
             ))}
 
             <EditEventDrawer onClose={() => setSelectedEvent(null)} event={selectedEvent} />
-        </>
+        </ScheduleSection>
     )
 }
 
@@ -139,7 +134,6 @@ function Droppable({ row, col, onPlace }) {
     return (
         <div className={`z-20 col-${col} row-${row}`}
             onMouseEnter={onPlace}
-        >
-        </div>
+        />
     );
 }

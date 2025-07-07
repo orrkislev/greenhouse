@@ -7,7 +7,7 @@ const ScheduleGrid = tw`grid grid-cols-6 w-full relative h-full grid-cols-[repea
 
 export function ScheduleSection({ children, className = '', name, edittable = true }) {
 
-    const bgColor = !edittable ? 'bg-slate-200 text-slate-500' : '';
+    const bgColor = !edittable ? 'opacity-70' : '';
 
     return (
         <ScheduleSectionDiv className={`${bgColor} ${className}`}>

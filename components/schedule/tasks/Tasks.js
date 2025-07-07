@@ -2,8 +2,9 @@ import { tw } from "@/utils/tw";
 import { formatDate } from "@/utils/utils";
 import { useUserSchedule } from "@/utils/store/scheduleDataStore";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import EditTaskDrawer from "./EditTaskDrawer";
+import { ScheduleSection } from "../Layout";
 
 
 export default function Tasks() {
@@ -28,42 +29,39 @@ export default function Tasks() {
     })
 
     return (
-        <>
-            <div className="col-start-2 col-end-8 row-3 z-10">
-                <div className="w-full grid grid-cols-6 gap-2">
-                    {Array(6).fill(null).map((_, dayIndex) => (
-                        <AddTaskButton
-                            key={`add-${dayIndex}`}
-                            col={dayIndex + 1}
-                            row={columns[dayIndex].tasks.length + 1}
-                            onClick={() => handleCreateNewTask(dayIndex)}
-                        />
-                    ))}
-                    {displayTasks.map((task, index) => (
-                        <Task key={index}
-                            task={task}
-                            row={task.row}
-                            onClick={() => setSelectedTask(task)}
-                        />
-                    ))}
-                </div>
-            </div>
+        <ScheduleSection name="משימות">
+            {Array(6).fill(null).map((_, dayIndex) => (
+                <AddTaskButton
+                    key={`add-${dayIndex}`}
+                    col={dayIndex + 1}
+                    row={columns[dayIndex].tasks.length + 1}
+                    onClick={() => handleCreateNewTask(dayIndex)}
+                />
+            ))}
+            {displayTasks.map((task, index) => (
+                <Task key={index}
+                    task={task}
+                    row={task.row}
+                    onClick={() => setSelectedTask(task)}
+                />
+            ))}
 
             <EditTaskDrawer
                 open={!!selectedTask}
                 onClose={() => setSelectedTask(null)}
                 task={selectedTask}
             />
-        </>
+        </ScheduleSection>
+
     )
 }
 
 
 const AddTaskButtonDiv = tw`flex items-center justify-center text-gray-800 text-sm
         pointer-events-auto cursor-pointer 
-        opacity-0 hover:opacity-100 bg-white transition-all
-        inset-shadow-[0_2px_4px_rgba(0,0,0,0.1)]
-        rounded-md z-5 m-2
+        transition-all bg-[#FADFC199] hover:bg-[#FADFC1]
+        text-transparent hover:text-gray-800
+        z-5
 `;
 
 function AddTaskButton({ col, row }) {
@@ -85,7 +83,7 @@ function AddTaskButton({ col, row }) {
         <AddTaskButtonDiv className={`col-${col} row-start-${row} row-end-5`}
             onClick={handleClick}
         >
-            משימה חדשה
+            +
         </AddTaskButtonDiv>
     );
 }
@@ -93,15 +91,14 @@ function AddTaskButton({ col, row }) {
 
 
 
-const TaskDiv = tw`bg-[#309898] 
-        flex items-center justify-center text-gray-800 text-white text-sm
+const TaskDiv = tw`bg-[#F3B580]
+        flex items-center justify-center text-gray-800 text-sm
         pointer-events-auto cursor-pointer 
-        hover:bg-[#2A7B7B] hover:shadow-lg hover:translate-y-[-2px] transition-all z-10
-        py-1 mx-[-1em] rounded-full shadow-md
+        hover:bg-[#F3A05B] transition-all z-10
+        py-1
 `;
 
 function Task({ task, onClick, row }) {
-    const rotation = useRef(Math.random() * 10 - 5);
     const week = useWeek(state => state.week);
 
     let dayStartIndex = week.findIndex(date => formatDate(date) === task.start);
@@ -110,11 +107,8 @@ function Task({ task, onClick, row }) {
     if (dayStartIndex === -1) dayStartIndex = 0;
     if (dayEndIndex === -1) dayEndIndex = week.length - 1
 
-    const taskLength = dayEndIndex - dayStartIndex + 1;
-
     return (
         <TaskDiv className={`col-start-${dayStartIndex + 1} col-end-${dayEndIndex + 2} row-${row}`}
-            style={{ transform: `rotate(${rotation.current / (taskLength * taskLength)}deg)` }}
             onClick={onClick}
         >
             {task.title}

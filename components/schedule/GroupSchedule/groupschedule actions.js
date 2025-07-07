@@ -1,6 +1,23 @@
 import { db } from "@/utils/firebase/firebase";
 import { parseDate } from "@/utils/utils";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
+
+export async function getAllGroups(){
+    const groupsSnapshot = await getDocs(collection(db,"groups"));
+    return groupsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
+export async function joinGroup(userId, groupName) {
+    const userDoc = doc(db, "users", userId);
+    await updateDoc(userDoc, {
+        groups: arrayUnion(groupName)
+    })
+}
+export async function leaveGroup(userId, groupName) {
+    const userDoc = doc(db, "users", userId);
+    await updateDoc(userDoc, {
+        groups: arrayRemove(groupName)
+    })
+}
 
 export async function getGroupData(groupName) {
     const groupDoc = doc(db, "groups", groupName);
