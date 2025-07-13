@@ -33,8 +33,7 @@ export default function EditStudentDrawer({ open, onOpenChange, student, groups 
     };
 
     const handleResetPassword = () => {
-        // Here you would implement the logic to reset the password
-        console.log("Reset password for:", username);
+        // TODO: Implement password reset logic
     };
 
     return (

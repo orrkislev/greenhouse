@@ -29,8 +29,19 @@ export function useForm(initial, onSubmit) {
         return acc;
     }, {});
 
+    const setValue = (key, value) => {
+        if (!values.hasOwnProperty(key)) return;
+        if (!value || value === null || value === undefined) return;
+        if (values[key] === value) return;
+        
+        setValues(prevValues => ({
+            ...prevValues,
+            [key]: value
+        }));
+    };
+
     return {
-        values,
+        values, setValue,
         populate,
         clear,
         props,
@@ -43,7 +54,7 @@ export function useForm(initial, onSubmit) {
                     setError(err.message);
                 }
             }
-        }
+        },
     };
 }
 

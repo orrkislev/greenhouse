@@ -60,21 +60,21 @@ export default function EditTaskDrawer({ open, onClose, task }) {
         <Drawer open={open} onOpenChange={onClose} direction="right">
             <DrawerContent>
                 <DrawerHeader>
-                    <DrawerTitle>{task ? "Edit Task" : "New Task"}</DrawerTitle>
+                    <DrawerTitle>עריכת משימה</DrawerTitle>
                 </DrawerHeader>
                 <form className="flex flex-col gap-4 p-4" onSubmit={handleSave}>
                     <div>
-                        <label className="block text-sm font-medium mb-1">Task Title</label>
+                        <label className="block text-sm font-medium mb-1">מה המשימה</label>
                         <Input 
                             value={title} 
                             onChange={e => setTitle(e.target.value)} 
-                            placeholder="Enter task title"
+                            placeholder="הכנס שם משימה"
                             required 
                         />
                     </div>
                     
                     <div>
-                        <label className="block text-sm font-medium mb-1">Start Date</label>
+                        <label className="block text-sm font-medium mb-1">תאריך התחלה</label>
                         <DatePicker 
                             initial={startDate}
                             onChange={setStartDate}
@@ -82,7 +82,7 @@ export default function EditTaskDrawer({ open, onClose, task }) {
                     </div>
                     
                     <div>
-                        <label className="block text-sm font-medium mb-1">End Date</label>
+                        <label className="block text-sm font-medium mb-1">תאריך סיום</label>
                         <DatePicker 
                             initial={endDate}
                             onChange={setEndDate}
@@ -96,14 +96,14 @@ export default function EditTaskDrawer({ open, onClose, task }) {
                                 variant="destructive" 
                                 onClick={handleDelete}
                             >
-                                Delete
+                                מחק
                             </Button>
                         )}
                         <DrawerClose asChild>
-                            <Button type="button" variant="outline">Cancel</Button>
+                            <Button type="button" variant="outline">ביטול</Button>
                         </DrawerClose>
                         <Button type="submit">
-                            {task ? "Update" : "Create"}
+                            {task ? "עדכן" : "צור משימה חדשה"}
                         </Button>
                     </div>
                 </form>

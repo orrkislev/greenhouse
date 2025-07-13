@@ -34,9 +34,7 @@ export async function createStudent(firstName, lastName, username, pin, group) {
 }
 
 export async function createStaff(firstName, lastName, username, pin, job) {
-    console.log('Creating staff member:', firstName, lastName, username, pin, job);
     await createUser(username, pin, firstName, lastName);
-    console.log('Staff member created:', username);
     updateUserData(username, {
         firstName,
         lastName,

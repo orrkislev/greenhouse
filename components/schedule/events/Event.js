@@ -2,7 +2,7 @@
 
 import { formatDate } from "@/utils/utils";
 import { HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
 import { Edit2, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
@@ -136,12 +136,37 @@ function EventTitleEditor({ event }) {
         }
     };
 
-    return <input
-        className="bg-transparent text-gray-800 rounded px-1 w-full outline-none pointer-events-auto focus:bg-white/50"
-        value={editTitle}
-        onMouseDown={e => e.stopPropagation()}
-        onChange={handleTitleChange}
-        onBlur={handleTitleBlur}
-        onClick={e => e.stopPropagation()}
-    />
+    return (
+        <SmartTextArea
+            className="bg-transparent text-gray-800 rounded px-1 w-full outline-none pointer-events-auto focus:bg-white/50 resize-none"
+            value={editTitle}
+            onMouseDown={e => e.stopPropagation()}
+            onChange={handleTitleChange}
+            onBlur={handleTitleBlur}
+            onClick={e => e.stopPropagation()}
+            style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+        />
+    );
+}
+
+function SmartTextArea(props) {
+    const ref = useRef();
+
+    useEffect(() => {
+        const textarea = ref.current;
+        if (textarea) {
+            textarea.style.height = "auto";
+            textarea.style.height = textarea.scrollHeight + "px";
+        }
+    }, [props.value]);
+
+    return (
+        <textarea
+            ref={ref}
+            rows={1}
+            className="bg-transparent text-gray-800 rounded px-1 w-full outline-none pointer-events-auto focus:bg-white/50 resize-none"
+            style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', minHeight: '0', ...props.style }}
+            {...props}
+        />
+    );
 }

@@ -1,5 +1,5 @@
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
-import { doc, setDoc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
 
@@ -12,7 +12,6 @@ export const prepareEmailPassword = (username, pinPass) => {
 export class AuthService {
   static async signIn(username, pinPass) {
     const [email, password] = prepareEmailPassword(username, pinPass);
-    console.log('Signing in with email:', email, 'and password:', password);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = await this.getUserData(userCredential.user);

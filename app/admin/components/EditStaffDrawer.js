@@ -49,7 +49,6 @@ export default function EditStaffDrawer({ open, onOpenChange, staff }) {
     );
 
     useEffect(() => {
-        console.log(staff)
         if (staff) {
             populate({
                 firstName: staff.firstName || "",

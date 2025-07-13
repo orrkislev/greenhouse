@@ -73,7 +73,7 @@ function AddTaskButton({ col, row }) {
         addTask({
             start: formatDate(date),
             end: formatDate(date),
-            title: "New Task",
+            title: "משימה חדשה",
             description: "",
             type: "task",
         });

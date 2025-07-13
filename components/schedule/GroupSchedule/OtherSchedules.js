@@ -1,14 +1,15 @@
 import { useUser } from "@/utils/store/user";
-import { useEffect, useRef, useState } from "react";
-import { getGroupData, getGroupSchedule, isGroupAdmin, updateGroupSchedule } from "./groupschedule actions";
+import { useEffect, useState } from "react";
+import { getGroupData, getGroupScheduleForDay, isGroupAdmin, subscribeToGroupScheduleForDay } from "./groupschedule actions";
 import { ScheduleSection } from "../Layout";
 import { tw } from "@/utils/tw";
 import { useWeek } from "@/utils/store/scheduleDisplayStore";
 import { formatDate } from "@/utils/utils";
+import { NewGroupObjectButton } from "./NewGroupObjectModal";
+import { GroupCellObject } from "./GroupCellObject";
 
 export default function OtherSchedules() {
     const groups = useUser(state => state.user.groups);
-    
     return groups.map((group, index) => (
         <GroupSchedule key={index} groupName={group} />
     ));
@@ -32,7 +33,7 @@ function GroupSchedule({ groupName }) {
         return <div className="p-4 border rounded mb-4">Loading...</div>;
     }
 
-    const edittable =  isGroupAdmin(groupData, userId)
+    const edittable = isGroupAdmin(groupData, userId)
 
     return (
         <ScheduleSection edittable={edittable} name={groupName}>
@@ -44,41 +45,44 @@ function GroupSchedule({ groupName }) {
 }
 
 
-const GroupCellDiv = tw`bg-[#C4BBB2] p-2 flex items-center justify-center text-xs text-center text-gray-800
+const GroupCellDiv = tw`bg-white flex flex-col h-full gap-[2px]
     ${props => !props.$edittable ? 'bg-[#C4BBB2]/60' : ''}
     `;
 
 function GroupCell({ date, groupName, edittable }) {
-    const [text, setText] = useState("");
-    const lastText = useRef("");
+    const [objects, setObjects] = useState([]);
 
     useEffect(() => {
-        getGroupSchedule(groupName, formatDate(date)).then(scheduleText => {
-            setText(scheduleText || "");
-            lastText.current = scheduleText || "";
-        })
+        getGroupScheduleForDay(groupName, formatDate(date)).then(objects => {
+            if (objects && objects.length !== 0) {
+                setObjects(objects);
+            }
+        });
+        const unsubscribe = subscribeToGroupScheduleForDay(groupName, formatDate(date), setObjects);
+
+        return unsubscribe;
     }, [date, groupName]);
 
-    const onBlur = () => {
-        if (text !== lastText.current) {
-            updateGroupSchedule(groupName, formatDate(date), text)
-            lastText.current = text;
-        }
-    };
+    if (objects.length == 0 && !edittable) {
+        return (
+            <GroupCellDiv $edittable={edittable}>
+                <div className="h-5" />
+            </GroupCellDiv>
+        );
+    }
 
     return (
         <GroupCellDiv $edittable={edittable}>
-            {edittable ? (
-                <textarea
-                    rows={2}
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    onBlur={onBlur}
-                    className="focus:bg-white/50 w-full"
+            {objects.map((obj, index) => (
+                <GroupCellObject key={index}
+                    groupName={groupName}
+                    dateString={formatDate(date)}
+                    obj={obj}
+                    edittable={edittable}
                 />
-            ) : (
-                <span className="flex-1 ml-2 whitespace-pre-line">{text}</span>
-            )}
+            ))}
+            {edittable && <NewGroupObjectButton groupName={groupName} dateString={formatDate(date)} />}
         </GroupCellDiv>
     );
 }
+
