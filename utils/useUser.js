@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { AuthService } from '../firebase/auth';
+import { AuthService } from './firebase/auth';
 
 export const useUser = create(
   persist(

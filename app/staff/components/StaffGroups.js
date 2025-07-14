@@ -3,7 +3,7 @@
 import { Users, Calendar, FolderOpen, X } from "lucide-react";
 import AddGroupButton from "./AddGroupButton";
 import { updateUserData } from "@/utils/firebase/firebase_data";
-import { useUser } from "@/utils/store/user";
+import { useUser } from "@/utils/useUser";
 import { StudentCard } from "./StudentCard";
 import { useMemo } from "react";
 

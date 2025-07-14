@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { useUser } from "@/utils/store/user";
+import { useUser } from "@/utils/useUser";
 import { Button } from "@/components/ui/button";
 import { ArrowBigLeftDash } from "lucide-react";
 import QuestionCard from "./QuestionCard";
-import { useProject } from "@/utils/store/projectStore";
+import { useProject } from "@/app/project/utils/projectStore";
 
 // Questions configuration object
 const QUESTIONS = [

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { UserCircle2 } from 'lucide-react';
-import { useUser } from '@/utils/store/user';
+import { useUser } from '@/utils/useUser';
 import PINInput from '../ui/PIN';
 import { redirect } from 'next/navigation';
 

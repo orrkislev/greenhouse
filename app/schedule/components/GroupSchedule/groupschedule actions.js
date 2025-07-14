@@ -1,5 +1,5 @@
 import { db } from "@/utils/firebase/firebase";
-import { addDoc, arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, onSnapshot, query, setDoc, updateDoc } from "firebase/firestore";
+import { addDoc, arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from "firebase/firestore";
 
 export async function getAllGroups() {
     const groupsSnapshot = await getDocs(collection(db, "groups"));

@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { tw } from "@/utils/tw";
 import { formatDate } from "@/utils/utils";
-import { useWeek } from "@/utils/store/scheduleDisplayStore";
-import { useGantt } from "@/utils/store/scheduleDataStore";
+import { useWeek } from "@/app/schedule/utils/useWeek";
 import { ScheduleSection } from "./Layout";
+import { useGantt } from "../utils/useGantt";
 
 const GanttDay = tw`flex flex-col items-center justify-center text-gray-800 text-xs p-2
     gap-2 divide-y divide-black/10 z-[10]

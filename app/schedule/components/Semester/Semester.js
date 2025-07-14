@@ -1,9 +1,9 @@
 import { formatDate, parseDate } from "@/utils/utils";
 import { tw } from "@/utils/tw";
 import { isToday } from "date-fns";
-import { useEffect, useState } from "react";
-import { useGantt } from "@/utils/store/scheduleDataStore";
+import { useEffect } from "react";
 import { ScheduleSection } from "../Layout";
+import { useGantt } from "../../utils/useGantt";
 
 const SemesterCell = tw`text-center bg-[#F3C5C599] z-1 border border-white min-h-16 text-xs p-2 pt-6
 ${props => props.$isWeekend ? 'bg-[#F3C5C5]' : ''}

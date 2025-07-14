@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { doc, getDoc } from "firebase/firestore";
-import { useUser } from "@/utils/store/user";
+import { useUser } from "@/utils/useUser";
 import { db } from "@/utils/firebase/firebase";
 import { updateUserData } from "@/utils/firebase/firebase_data";
 

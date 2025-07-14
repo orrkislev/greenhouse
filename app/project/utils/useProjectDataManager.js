@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
-import { useUser } from "./store/user";
+import { useUser } from "../../../utils/useUser";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "./firebase/firebase";
-import { useProject } from "./store/projectStore";
-import { initProject } from "./firebase/firebase_data";
+import { db } from "../../../utils/firebase/firebase";
+import { useProject } from "./projectStore";
+import { initProject } from "../../../utils/firebase/firebase_data";
 
 export default function useProjectDataManager() {
     const user = useUser((state) => state.user);

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useUser } from "@/utils/store/user";
+import { useUser } from "@/utils/useUser";
 import { tw } from "@/utils/tw";
 import { LogOut, User, BookOpen, Briefcase, Calendar, Settings, Snail } from "lucide-react";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"

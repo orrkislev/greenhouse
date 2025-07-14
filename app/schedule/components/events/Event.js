@@ -1,9 +1,9 @@
 'use client';
 
 import { formatDate } from "@/utils/utils";
-import { HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
+import { HOURS, useUserSchedule } from "@/app/schedule/utils/useUserSchedule";
 import { useEffect, useRef, useState } from "react";
-import { useWeek } from "@/utils/store/scheduleDisplayStore";
+import { useWeek } from "@/app/schedule/utils/useWeek";
 import { Edit2, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 

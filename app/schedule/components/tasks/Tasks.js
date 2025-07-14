@@ -1,7 +1,7 @@
 import { tw } from "@/utils/tw";
 import { formatDate } from "@/utils/utils";
-import { useUserSchedule } from "@/utils/store/scheduleDataStore";
-import { useWeek } from "@/utils/store/scheduleDisplayStore";
+import { useUserSchedule } from "@/app/schedule/utils/useUserSchedule";
+import { useWeek } from "@/app/schedule/utils/useWeek";
 import { useState } from "react";
 import EditTaskDrawer from "./EditTaskDrawer";
 import { ScheduleSection } from "../Layout";

@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
-import { useUser } from "./store/user";
+import { useUser } from "../../../utils/useUser";
 import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc, query, or, where } from "firebase/firestore";
-import { db } from "./firebase/firebase";
-import { useUserSchedule } from "./store/scheduleDataStore";
-import { useWeek } from "./store/scheduleDisplayStore";
-import { formatDate } from "./utils";
+import { db } from "../../../utils/firebase/firebase";
+import { useUserSchedule } from "./useUserSchedule";
+import { useWeek } from "./useWeek";
+import { formatDate } from "../../../utils/utils";
 
 export default function useUserDataManager() {
     const user = useUser((state) => state.user);

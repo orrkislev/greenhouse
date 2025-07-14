@@ -1,6 +1,6 @@
 'use client'
 
-import { useUser } from "@/utils/store/user";
+import { useUser } from "@/utils/useUser";
 import { StudentCard } from "./StudentCard";
 
 export default function StaffStudents() {

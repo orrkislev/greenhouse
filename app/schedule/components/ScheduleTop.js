@@ -1,4 +1,4 @@
-import { useWeek } from "@/utils/store/scheduleDisplayStore";
+import { useWeek } from "@/app/schedule/utils/useWeek";
 import { tw } from "@/utils/tw";
 import { ScheduleSection } from "./Layout";
 

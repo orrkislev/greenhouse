@@ -1,11 +1,9 @@
 'use client';
 
 import WithAuth from '@/components/auth/SignIn';
-import Schedule from '@/components/schedule/Schedule';
-import useUserDataManager from '@/utils/useUserDataManager';
+import Schedule from '@/app/schedule/components/Schedule';
 
 export default function Home() {
-  useUserDataManager();
 
   return (
     <WithAuth>

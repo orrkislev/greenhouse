@@ -1,9 +1,9 @@
-import { useUser } from "@/utils/store/user";
+import { useUser } from "@/utils/useUser";
 import { useEffect, useState } from "react";
 import { getGroupData, getGroupScheduleForDay, isGroupAdmin, subscribeToGroupScheduleForDay } from "./groupschedule actions";
 import { ScheduleSection } from "../Layout";
 import { tw } from "@/utils/tw";
-import { useWeek } from "@/utils/store/scheduleDisplayStore";
+import { useWeek } from "@/app/schedule/utils/useWeek";
 import { formatDate } from "@/utils/utils";
 import { NewGroupObjectButton } from "./NewGroupObjectModal";
 import { GroupCellObject } from "./GroupCellObject";
@@ -50,20 +50,26 @@ const GroupCellDiv = tw`bg-white flex flex-col h-full gap-[2px]
     `;
 
 function GroupCell({ date, groupName, edittable }) {
-    const [objects, setObjects] = useState([]);
+    const [tasks, setTasks] = useState([]);
+    const [events, setEvents] = useState([]);
 
     useEffect(() => {
-        getGroupScheduleForDay(groupName, formatDate(date)).then(objects => {
-            if (objects && objects.length !== 0) {
-                setObjects(objects);
+        getGroupScheduleForDay(groupName, formatDate(date)).then(({ tasks, events }) => {
+            if (tasks && tasks.length !== 0) setTasks(tasks);
+            if (events && events.length !== 0) setEvents(events);
+        });
+        const unsubscribe = subscribeToGroupScheduleForDay(groupName, formatDate(date), newObjects => {
+            if (newObjects.type === 'tasks' && newObjects.data) {
+                setTasks(prev => [...prev, ...newObjects.data]);
+            } else if (newObjects.type === 'events') {
+                setEvents(prev => [...prev, ...newObjects.data]);
             }
         });
-        const unsubscribe = subscribeToGroupScheduleForDay(groupName, formatDate(date), setObjects);
 
         return unsubscribe;
     }, [date, groupName]);
 
-    if (objects.length == 0 && !edittable) {
+    if (tasks.length == 0 && events.length == 0 && !edittable) {
         return (
             <GroupCellDiv $edittable={edittable}>
                 <div className="h-5" />
@@ -73,7 +79,7 @@ function GroupCell({ date, groupName, edittable }) {
 
     return (
         <GroupCellDiv $edittable={edittable}>
-            {objects.map((obj, index) => (
+            {[...tasks, ...events].map((obj, index) => (
                 <GroupCellObject key={index}
                     groupName={groupName}
                     dateString={formatDate(date)}

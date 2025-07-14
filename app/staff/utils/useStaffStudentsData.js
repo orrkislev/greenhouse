@@ -1,5 +1,5 @@
 import { db } from "@/utils/firebase/firebase";
-import { useUser } from "@/utils/store/user";
+import { useUser } from "@/utils/useUser";
 import { formatDate } from "@/utils/utils";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";

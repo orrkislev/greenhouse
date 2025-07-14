@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useProject } from "@/utils/store/projectStore";
+import { useProject } from "@/app/project/utils/projectStore";
 
 export default function ProjectOverview() {
     const project = useProject((state) => state.project);

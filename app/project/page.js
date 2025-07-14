@@ -4,8 +4,8 @@ import WithAuth from "@/components/auth/SignIn";
 import ProjectIntentions from "./components/ProjectIntentions";
 import ProjectOverview from "./components/ProjectOverview";
 import { motion, AnimatePresence } from "motion/react"
-import useProjectDataManager from "@/utils/useProjectDataManager";
-import { useProject } from "@/utils/store/projectStore";
+import useProjectDataManager from "@/app/project/utils/useProjectDataManager";
+import { useProject } from "@/app/project/utils/projectStore";
 
 export default function ProjectPage() {
     useProjectDataManager()

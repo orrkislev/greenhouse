@@ -1,8 +1,8 @@
 import { formatDate } from "@/utils/utils";
-import { HOURS, useUserSchedule } from "@/utils/store/scheduleDataStore";
+import { HOURS, useUserSchedule } from "@/app/schedule/utils/useUserSchedule";
 import { useState } from "react";
 import { Event } from "./Event";
-import { useWeek } from "@/utils/store/scheduleDisplayStore";
+import { useWeek } from "@/app/schedule/utils/useWeek";
 import { tw } from "@/utils/tw";
 import EditEventDrawer from "./EditEventDrawer copy";
 import { ScheduleSection } from "../Layout";

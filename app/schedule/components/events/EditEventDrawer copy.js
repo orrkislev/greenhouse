@@ -3,7 +3,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { useUserSchedule } from "@/utils/store/scheduleDataStore";
+import { useUserSchedule } from "@/app/schedule/utils/useUserSchedule";
 import { formatDate, parseDate } from "@/utils/utils";
 
 export default function EditEventDrawer({ onClose, event }) {

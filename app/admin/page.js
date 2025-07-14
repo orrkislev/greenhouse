@@ -2,7 +2,7 @@
 
 import WithAuth from "@/components/auth/SignIn"
 import AdminGroups from "./components/AdminGroups"
-import { useUser } from "@/utils/store/user"
+import { useUser } from "@/utils/useUser"
 import { useEffect, useState } from "react"
 import AdminStaff from "./components/AdminStaff"
 import { Button } from "@/components/ui/button"
