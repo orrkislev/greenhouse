@@ -1,13 +1,12 @@
 import { useEffect, useRef } from "react";
 import { useUser } from "../../../utils/useUser";
-import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc, query, or, where } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc, query, or, where, and } from "firebase/firestore";
 import { db } from "../../../utils/firebase/firebase";
 import { useUserSchedule } from "./useUserSchedule";
 import { useWeek } from "./useWeek";
-import { formatDate } from "../../../utils/utils";
 
 export default function useUserDataManager() {
-    const user = useUser((state) => state.user);
+    const userId = useUser((state) => state.user.id);
     const week = useWeek((state) => state.week);
 
     const lastEvents = useRef([]);
@@ -19,24 +18,27 @@ export default function useUserDataManager() {
     const setTasks = useUserSchedule((state) => state.setTasks);
 
     useEffect(() => {
-        if (!user) {
+        if (!userId) {
             setEvents([]);
             setTasks([]);
             return;
         }
-    }, [user])
+    }, [userId])
 
     useEffect(() => {
-        if (!user) return;
+        if (!userId) return;
         if (!week || week.length === 0) return;
 
-        const userEventsCollection = collection(db, `users/${user.id}/events`);
-        const userTasksCollection = collection(db, `users/${user.id}/tasks`);
+        const userEventsCollection = collection(db, `users/${userId}/events`);
+        const userTasksCollection = collection(db, `users/${userId}/tasks`);
 
         // get all events and tasks for this week, in the user's collection
         (async () => {
             const eventsQuery = query(userEventsCollection,
-                where('date', 'in', week.map(date => formatDate(date)))
+                and(
+                    where('date', '>=', week[0]),
+                    where('date', '<=', week[week.length - 1])
+                )
             )
             let userEvents = await getDocs(eventsQuery);
             userEvents = userEvents.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -45,8 +47,18 @@ export default function useUserDataManager() {
 
             const tasksQuery = query(userTasksCollection,
                 or(
-                    where('start', 'in', week.map(date => formatDate(date))),
-                    where('end', 'in', week.map(date => formatDate(date)))
+                    and(
+                        where('start', '>=', week[0]),
+                        where('start', '<=', week[week.length - 1])
+                    ),
+                    and(
+                        where('end', '>=', week[0]),
+                        where('end', '<=', week[week.length - 1])
+                    ),
+                    and(
+                        where('start', '<=', week[0]),
+                        where('end', '>=', week[week.length - 1])
+                    )
                 )
             )
             let userTasks = await getDocs(tasksQuery);
@@ -54,7 +66,7 @@ export default function useUserDataManager() {
             lastTasks.current = tasks;
             setTasks(userTasks);
         })();
-    }, [user, week])
+    }, [userId, week])
 
 
 
@@ -65,25 +77,30 @@ export default function useUserDataManager() {
     // ---------- Update events in Firebase ----------
     // -----------------------------------------------
     useEffect(() => {
-        if (!user) return;
+        console.log('useEffect for events');
+        if (!userId) return;
 
         const updateEvents = async () => {
-            const eventsCollectionRef = collection(db, 'users', user.id, 'events');
+            const eventsCollectionRef = collection(db, 'users', userId, 'events');
 
             // check for deleted events
             const currentEventIds = new Set(events.map(e => e.id));
             const deletedEvents = lastEvents.current.filter(e => !currentEventIds.has(e.id));
             for (const event of deletedEvents) {
+                console.log("Deleting event", event);
                 const eventDocRef = doc(eventsCollectionRef, event.id);
                 await deleteDoc(eventDocRef);
             }
 
             for (const event of events) {
                 const prevEvent = lastEvents.current.find(e => e.id === event.id);
-                if (!prevEvent || JSON.stringify(prevEvent) !== JSON.stringify(event)) {
-                    if (event.id) {
+                // get the event data, without the id
+                if (prevEvent && prevEvent.id) {
+                    const { id, ...eventData } = event;
+                    const { id: prevId, ...prevEventData } = prevEvent;
+                    if (JSON.stringify(prevEventData) !== JSON.stringify(eventData)) {
                         const eventDocRef = doc(eventsCollectionRef, event.id);
-                        updateDoc(eventDocRef, event)
+                        updateDoc(eventDocRef, eventData)
                             .catch((error) => {
                                 console.error("Error updating event: ", error);
                             });
@@ -101,27 +118,26 @@ export default function useUserDataManager() {
                     event.id = newEventDoc.id;
                 }
                 lastEvents.current = newEventsObj;
-                setEvents(newEventsObj);
+                // setEvents(newEventsObj);
             }
         };
 
-        const timer = setTimeout(() => {
-            updateEvents();
-        }, 1000);
-
+        const timer = setTimeout(updateEvents, 1000);
         return () => clearTimeout(timer);
-    }, [events, user]);
+    }, [events, userId]);
 
 
 
     // ---------- Update tasks in Firebase ----------
     // -----------------------------------------------
     useEffect(() => {
-        if (!user) return;
+        if (!userId) return;
         if (!tasks || tasks.length === 0) return;
-        
+
         const updateTasks = async () => {
-            const tasksCollectionRef = collection(db, 'users', user.id, 'tasks');
+            console.log("Updating tasks in Firebase", tasks);
+            return
+            const tasksCollectionRef = collection(db, 'users', userId, 'tasks');
 
             // check for deleted tasks
             const currentTaskIds = new Set(tasks.map(t => t.id));
@@ -156,13 +172,11 @@ export default function useUserDataManager() {
                 lastTasks.current = newTasksObj;
                 setTasks(newTasksObj);
             }
-            
+
         };
 
-        setTimeout(() => {
-            updateTasks();
-        }, 1000);
-
-    }, [tasks, user]);
+        const timer = setTimeout(updateTasks, 1000);
+        return () => clearTimeout(timer);
+    }, [tasks, userId]);
 
 }

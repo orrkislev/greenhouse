@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { useUserSchedule } from "@/app/schedule/utils/useUserSchedule";
-import { formatDate, parseDate } from "@/utils/utils";
 
 export default function EditEventDrawer({ onClose, event }) {
     const [title, setTitle] = useState("");
@@ -17,7 +16,7 @@ export default function EditEventDrawer({ onClose, event }) {
     useEffect(() => {
         if (event) {
             setTitle(event.title || "");
-            setDate(event.date ? parseDate(event.date) : null);
+            setDate(event.date || null);
             setDuration(event.duration || 1);
         } else {
             setTitle("");
@@ -29,22 +28,12 @@ export default function EditEventDrawer({ onClose, event }) {
     const handleSave = async (e) => {
         e.preventDefault();
 
-        const eventData = {
-            title,
-            date: formatDate(date),
-            duration,
-        };
-
+        const eventData = { title, date, duration };
         if (event?.id) {
             // Update existing event
             updateEvent(event.id, eventData);
         } else {
-            // Create new event
-            const newEvent = {
-                ...eventData,
-                id: Date.now().toString(), // Simple ID generation
-            };
-            addEvent(newEvent);
+            addEvent(eventData);
         }
 
         onClose();

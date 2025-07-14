@@ -9,18 +9,27 @@ export const daysOfTheWeek = ['א', 'ב', 'ג', 'ד', 'ה', 'סופשבוע'];
 export default function ScheduleTop({ view }) {
     const week = useWeek((state) => state.week);
 
+    const labels = week.map((date, i) => {
+        const dateObj = new Date(date);
+        return {
+            dayOfTheWeek: daysOfTheWeek[i],
+            weekday: dateObj.toLocaleDateString('he-IL', { month: 'long', day: 'numeric' }),
+            semester: dateObj.toLocaleDateString('he-IL', { weekday: 'long' }),
+        };
+    });
+
     return (
         <ScheduleSection className='border-t'>
-                {week.map((day, dayIndex) => (
+                {labels.map((label, dayIndex) => (
                     <DayColumn key={dayIndex} className={`col-${dayIndex + 1} ${dayIndex === 5 ? 'bg-[#E4D4C7]' : ''}`}>
                         {view === 'week' && (
                             <>
-                                <div className='text-lg font-semibold'>{daysOfTheWeek[dayIndex]}</div>
-                                <div className="text-xs">{day.toLocaleDateString('he-IL', { month: 'long', day: 'numeric' })}</div>
+                                <div className='text-lg font-semibold'>{label.dayOfTheWeek}</div>
+                                <div className="text-xs">{label.weekday}</div>
                             </>
                         )}
                         {view === 'semester' && (
-                            <div className='text-lg font-semibold'>{day.toLocaleDateString('he-IL', { weekday: 'long' })}</div>
+                            <div className='text-lg font-semibold'>{label.semester}</div>
                         )}
                     </DayColumn>
                 ))}

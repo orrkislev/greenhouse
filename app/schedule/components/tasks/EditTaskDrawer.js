@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { useUserSchedule } from "@/app/schedule/utils/useUserSchedule";
-import { formatDate, parseDate } from "@/utils/utils";
+import { format } from "date-fns";
 
 export default function EditTaskDrawer({ open, onClose, task }) {
     const [title, setTitle] = useState("");
@@ -18,8 +18,8 @@ export default function EditTaskDrawer({ open, onClose, task }) {
     useEffect(() => {
         if (task) {
             setTitle(task.title || "");
-            setStartDate(task.start ? parseDate(task.start) : null);
-            setEndDate(task.end ? parseDate(task.end) : null);
+            setStartDate(task.start ||  null);
+            setEndDate(task.end || null);
         } else {
             setTitle("");
             setStartDate(null);
@@ -30,22 +30,15 @@ export default function EditTaskDrawer({ open, onClose, task }) {
     const handleSave = async (e) => {
         e.preventDefault();
 
-        const taskData = {
-            title,
-            start: formatDate(startDate),
-            end: formatDate(endDate),
+        const taskData = { title, 
+            start: format(startDate, 'yyyy-MM-dd'),
+            end: format(endDate, 'yyyy-MM-dd')
         };
 
         if (task?.id) {
-            // Update existing task
             updateTask(task.id, taskData);
         } else {
-            // Create new task
-            const newTask = {
-                ...taskData,
-                id: Date.now().toString(), // Simple ID generation
-            };
-            addTask(newTask);
+            addTask(taskData);
         }
         
         onClose();

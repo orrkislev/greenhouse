@@ -1,5 +1,4 @@
 import { tw } from "@/utils/tw";
-import { formatDate } from "@/utils/utils";
 import { useUserSchedule } from "@/app/schedule/utils/useUserSchedule";
 import { useWeek } from "@/app/schedule/utils/useWeek";
 import { useState } from "react";
@@ -15,8 +14,8 @@ export default function Tasks() {
     const displayTasks = [...tasks]
     const columns = week.map(date => ({ date, tasks: [] }));
     displayTasks.forEach(task => {
-        let startIndex = week.findIndex(date => formatDate(date) === task.start);
-        let endIndex = week.findIndex(date => formatDate(date) === task.end);
+        let startIndex = week.findIndex(date => date === task.start);
+        let endIndex = week.findIndex(date => date === task.end);
 
         if (startIndex === -1) startIndex = 0;
         if (endIndex === -1) endIndex = week.length - 1;
@@ -71,8 +70,8 @@ function AddTaskButton({ col, row }) {
     const handleClick = () => {
         const date = week[col - 1];
         addTask({
-            start: formatDate(date),
-            end: formatDate(date),
+            start: date,
+            end: date,
             title: "משימה חדשה",
             description: "",
             type: "task",
@@ -101,8 +100,8 @@ const TaskDiv = tw`bg-[#F3B580]
 function Task({ task, onClick, row }) {
     const week = useWeek(state => state.week);
 
-    let dayStartIndex = week.findIndex(date => formatDate(date) === task.start);
-    let dayEndIndex = week.findIndex(date => formatDate(date) === task.end);
+    let dayStartIndex = week.findIndex(date => date === task.start);
+    let dayEndIndex = week.findIndex(date => date === task.end);
 
     if (dayStartIndex === -1) dayStartIndex = 0;
     if (dayEndIndex === -1) dayEndIndex = week.length - 1

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllGroups, joinGroup } from "./groupschedule actions";
+import { getAllGroups, joinGroup } from "../../utils/groupschedule actions";
 import { useUser } from "@/utils/useUser";
 import { tw } from "@/utils/tw";
 

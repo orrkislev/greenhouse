@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { tw } from "@/utils/tw";
-import { formatDate } from "@/utils/utils";
 import { useWeek } from "@/app/schedule/utils/useWeek";
 import { ScheduleSection } from "./Layout";
 import { useGantt } from "../utils/useGantt";
@@ -16,15 +15,15 @@ export default function Gantt() {
 
     useEffect(() => {
         if (!week || week.length === 0) return;
-        gantt.getGanttEvents(week[0]);
+        gantt.fetchGanttEvents(week[0]);
     }, [week]);
 
     return (
         <ScheduleSection name="גאנט" edittable={false}>
             {week.map((date, index) => (
                 <GanttDay key={`empty-${index}`} className={`pointer-events-none col-${index + 1}`}>
-                    {gantt.gantt[formatDate(date)] && gantt.gantt[formatDate(date)].map((event, i) => (
-                        <div key={`${formatDate(date)}-${i}`} className="text-xs text-gray-700 text-center">
+                    {gantt.getGanttForDay(date).map((event, i) => (
+                        <div key={i} className="text-xs text-gray-700 text-center">
                             {event}
                         </div>
                     ))}

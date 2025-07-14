@@ -1,4 +1,4 @@
-import { createGroupObject, removeGroupObject, updateGroupObject } from "./groupschedule actions";
+import { createGroupEntry, removeGroupEntry, updateGroupEntry } from "../../utils/groupschedule actions";
 import { SegmentedControl, SegmentedControlList, SegmentedControlTrigger } from "@/components/ui/segmented-control";
 import { useState } from "react";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
@@ -7,6 +7,7 @@ import { tw } from "@/utils/tw";
 import { FormInput, useForm } from "@/components/ui/form/FormInput";
 import { Button } from "@/components/ui/button";
 import TimeRangePicker from "@/components/ui/timerange-picker";
+import { format } from "date-fns";
 
 const AddObjectDiv = tw`flex items-center justify-center text-gray-800 text-sm
         pointer-events-auto cursor-pointer 
@@ -17,7 +18,7 @@ const AddObjectDiv = tw`flex items-center justify-center text-gray-800 text-sm
 `;
 
 
-export function NewGroupObjectButton({ groupName, dateString, updateObject }) {
+export function NewGroupObjectButton({ groupName, date }) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -31,14 +32,14 @@ export function NewGroupObjectButton({ groupName, dateString, updateObject }) {
                 <NewGroupObjectModal
                     onClose={() => setIsOpen(false)}
                     groupName={groupName}
-                    dateString={dateString}
+                    date={date}
                 />
             </PopoverContent>
         </Popover>
     );
 }
 
-export function NewGroupObjectModal({ onClose, groupName, dateString, obj }) {
+export function NewGroupObjectModal({ onClose, groupName, date, obj }) {
     const form = useForm({
         text: obj?.text || '',
         type: obj?.type || 'event',
@@ -47,14 +48,15 @@ export function NewGroupObjectModal({ onClose, groupName, dateString, obj }) {
         const newObj = {
             text: values.text,
             type: values.type,
+            date: format(date, 'yyyy-MM-dd'),
         };
         if (values.type === 'event') {
             newObj.timeRange = values.timeRange;
         }
         if (obj) {
-            await updateGroupObject(groupName, dateString, { ...newObj, id: obj.id });
+            await updateGroupEntry(groupName, { ...newObj, id: obj.id });
         } else {
-            await createGroupObject(groupName, dateString, newObj);
+            await createGroupEntry(groupName, newObj);
         }
         form.clear();
         onClose()
@@ -62,7 +64,7 @@ export function NewGroupObjectModal({ onClose, groupName, dateString, obj }) {
 
     const clickDelete = async () => {
         if (obj) {
-            await removeGroupObject(groupName, dateString, obj.id);
+            await removeGroupEntry(groupName, obj.id);
             onClose();
         }
     };

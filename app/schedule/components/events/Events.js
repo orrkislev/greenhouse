@@ -1,10 +1,9 @@
-import { formatDate } from "@/utils/utils";
-import { HOURS, useUserSchedule } from "@/app/schedule/utils/useUserSchedule";
+import { useUserSchedule } from "@/app/schedule/utils/useUserSchedule";
 import { useState } from "react";
 import { Event } from "./Event";
-import { useWeek } from "@/app/schedule/utils/useWeek";
+import { HOURS, useWeek } from "@/app/schedule/utils/useWeek";
 import { tw } from "@/utils/tw";
-import EditEventDrawer from "./EditEventDrawer copy";
+import EditEventDrawer from "./EditEventDrawer";
 import { ScheduleSection } from "../Layout";
 
 const EmptySlot = tw`min-h-8 z-1
@@ -41,7 +40,7 @@ export default function Events({ edittable = false }) {
     const onPlace = pos => {
         if (draggingId === null) return;
         updateEvent(draggingId, {
-            date: formatDate(week[pos.col - 1]),
+            date: week[pos.col - 1],
             start: HOURS[pos.row - 1],
         })
     }
@@ -51,7 +50,7 @@ export default function Events({ edittable = false }) {
         const hour = HOURS[pos.row - 1];
 
         const newEvent = {
-            date: formatDate(date),
+            date,
             start: hour,
             duration: 1,
             title: newEventTitles[Math.floor(Math.random() * newEventTitles.length)],
@@ -59,7 +58,7 @@ export default function Events({ edittable = false }) {
         addEvent(newEvent);
     }
 
-    const weekEvents = events.filter(event => week.some(date => formatDate(date) === event.date));
+    const weekEvents = events.filter(event => week.some(date => date === event.date))
 
     let extrasState
     if (edittable) {
@@ -95,7 +94,7 @@ export default function Events({ edittable = false }) {
             {extrasState == 'resizing' && (() => {
                 const event = events.find(e => e.id === resizingId);
                 if (!event) return null;
-                const eventCol = week.findIndex(date => formatDate(date) === event.date) + 1;
+                const eventCol = week.findIndex(date => date === event.date) + 1;
                 if (eventCol === -1) return null;
                 return positions
                     .filter(pos => pos.col === eventCol)

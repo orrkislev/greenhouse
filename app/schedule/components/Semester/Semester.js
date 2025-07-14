@@ -1,6 +1,5 @@
-import { formatDate, parseDate } from "@/utils/utils";
 import { tw } from "@/utils/tw";
-import { isToday } from "date-fns";
+import { endOfWeek, isToday, startOfWeek } from "date-fns";
 import { useEffect } from "react";
 import { ScheduleSection } from "../Layout";
 import { useGantt } from "../../utils/useGantt";
@@ -23,40 +22,28 @@ export default function Semester() {
         end: "31-08-2025",
         name: "החופש הגדול",
     }
-    const gantt = useGantt()
+    const gantt = useGantt();
 
     useEffect(() => {
-        gantt.getGanttEvents(parseDate(semesterData.start), parseDate(semesterData.end));
-    }, [])
-
-    // Function to find the first Sunday before or on the given date
-    const findFirstSunday = (date) => {
-        const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-        const firstSunday = new Date(date);
-        firstSunday.setDate(date.getDate() - dayOfWeek);
-        return firstSunday;
-    }
+        if (!gantt) return;
+        gantt.fetchGanttEvents(semesterData.start, semesterData.end);
+    }, [gantt]);
 
     // Function to calculate all weeks in the semester
     const calculateSemesterWeeks = () => {
-        const startDate = parseDate(semesterData.start);
-        const endDate = parseDate(semesterData.end);
+        const endDate = semesterData.end;
 
         // Find the first Sunday (start of first week)
-        const firstSunday = findFirstSunday(startDate);
+        const firstSunday = startOfWeek(semesterData.start)
 
         const weeks = [];
         let currentWeekStart = new Date(firstSunday);
-
         while (currentWeekStart <= endDate) {
-            const weekEnd = new Date(currentWeekStart);
-            weekEnd.setDate(currentWeekStart.getDate() + 6); // Add 6 days to get Saturday
 
-            // Create week object with all days
             const week = {
                 weekNumber: weeks.length + 1,
-                startDate: formatDate(currentWeekStart),
-                endDate: formatDate(weekEnd),
+                startDate: currentWeekStart,
+                endDate: endOfWeek(currentWeekStart),
                 days: []
             };
 
@@ -66,11 +53,11 @@ export default function Semester() {
                 currentDay.setDate(currentWeekStart.getDate() + i);
 
                 const dayInfo = {
-                    date: formatDate(currentDay),
+                    date: currentDay,
                     dateString: currentDay.getDate().toString().padStart(2, '0') + '/' + (currentDay.getMonth() + 1).toString().padStart(2, '0'),
                     dayOfWeek: currentDay.getDay(),
                     isWeekend: currentDay.getDay() === 5 || currentDay.getDay() === 6, // Friday (5) or Saturday (6)
-                    isInSemester: currentDay >= startDate && currentDay <= endDate,
+                    isInSemester: currentDay >= semesterData.start && currentDay <= semesterData.end,
                     col: i + 1, // 1-based index for row
                     row: weeks.length + 1, // 1-based index for column (week number)
                     isPast: currentDay < new Date(new Date().setHours(0, 0, 0, 0)), // Check if the day is in the past
@@ -90,11 +77,6 @@ export default function Semester() {
     }
 
     const weeks = calculateSemesterWeeks();
-    const totalWeeks = weeks.length;
-    const semesterDays = weeks.reduce((total, week) =>
-        total + week.days.filter(day => day.isInSemester && !day.isWeekend).length, 0
-    );
-
     const days = weeks.map(week => week.days).flat();
 
     return (

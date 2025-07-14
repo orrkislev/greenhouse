@@ -6,15 +6,17 @@ import Tasks from "./tasks/Tasks";
 import Events from "./events/Events";
 import ScheduleTop from "./ScheduleTop";
 import Semester from "./Semester/Semester";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AddSchedule } from "./GroupSchedule/AddSchedule";
 import OtherSchedules from "./GroupSchedule/OtherSchedules";
 import useUserDataManager from "../utils/useUserDataManager";
+import { useWeek } from "../utils/useWeek";
+import { useUserSchedule } from "../utils/useUserSchedule";
 
 const ScheduleOuter = tw`w-full h-full px-16 pt-8`;
 
 export default function Schedule({ edittable = false }) {
-    useUserDataManager();
+    // useUserDataManager();
     const [view, setView] = useState('week'); // 'week' or 'semester'
 
     return (
@@ -61,6 +63,13 @@ export default function Schedule({ edittable = false }) {
 }
 
 function DataManager() {
-    useUserDataManager();
-    return null; // This component is used to trigger the data manager effect
+    const week = useWeek((state) => state.week);
+    const userSchedule = useUserSchedule();
+
+    useEffect(()=>{
+        userSchedule.loadWeekEvents(week);
+        userSchedule.loadWeekTasks(week);
+    },[week]);
+
+    return null;
 }

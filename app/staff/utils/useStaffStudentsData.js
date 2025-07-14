@@ -1,6 +1,6 @@
 import { db } from "@/utils/firebase/firebase";
 import { useUser } from "@/utils/useUser";
-import { formatDate } from "@/utils/utils";
+import { format } from "date-fns";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
@@ -25,7 +25,7 @@ export default function useStaffStudentsData() {
         if (studentsMissingEvents.length === 0) return;
 
         (async () => {
-            const todayFormatted = formatDate(new Date());
+            const todayFormatted = format(new Date(), 'yyyy-MM-dd');
             for (let i = 0; i < studentsMissingEvents.length; i++) {
                 const student = studentsMissingEvents[i];
                 const studentEventCollection = collection(db, 'users', student.id, 'events');

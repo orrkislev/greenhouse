@@ -9,7 +9,7 @@ const GroupObjectText = tw`h-full
         whitespace-pre-line py-1 cursor-pointer text-xs
     `;
 
-export function GroupCellObject({ groupName, dateString, obj, edittable }) {
+export function GroupCellObject({ groupName, date, obj, edittable }) {
 
     return (
         <Popover>
@@ -26,15 +26,14 @@ export function GroupCellObject({ groupName, dateString, obj, edittable }) {
             <PopoverContent className="w-80 bg-white p-4 border border-gray-300 z-[999]">
                 {edittable ? (
                     <NewGroupObjectModal
-                        onClose={() => setIsOpen(false)}
                         groupName={groupName}
-                        dateString={dateString}
+                        date={date}
                         obj={obj}
                     />
                 ) : (
                     <AcceptObjectModal
                         groupName={groupName}
-                        dateString={dateString}
+                        date={date}
                         obj={obj}
                     />
                 )}

@@ -1,9 +1,8 @@
 'use client';
 
-import { formatDate } from "@/utils/utils";
-import { HOURS, useUserSchedule } from "@/app/schedule/utils/useUserSchedule";
+import { useUserSchedule } from "@/app/schedule/utils/useUserSchedule";
 import { useEffect, useRef, useState } from "react";
-import { useWeek } from "@/app/schedule/utils/useWeek";
+import { HOURS, useWeek } from "@/app/schedule/utils/useWeek";
 import { Edit2, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 
@@ -14,8 +13,7 @@ export function Event({ event, edittable, onStartDrag, onEndDrag, onStartResize,
     const [isHovered, setIsHovered] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [isResizing, setIsResizing] = useState(false);
-    const events = useUserSchedule(state => state.events);
-    const setEvents = useUserSchedule(state => state.setEvents);
+    const deleteEvent = useUserSchedule(state => state.deleteEvent);
 
     const week = useWeek(state => state.week);
 
@@ -41,7 +39,7 @@ export function Event({ event, edittable, onStartDrag, onEndDrag, onStartResize,
         return () => window.removeEventListener('mouseup', onMouseUp);
     }, [isResizing])
 
-    const dayIndex = week.findIndex(date => formatDate(date) === event.date);
+    const dayIndex = week.findIndex(date => date === event.date);
     const startIndex = HOURS.findIndex(hour => hour === event.start);
     const endIndex = Math.min(startIndex + event.duration - 1, 4)
 
@@ -52,7 +50,7 @@ export function Event({ event, edittable, onStartDrag, onEndDrag, onStartResize,
 
     const handleDelete = async (e) => {
         e.stopPropagation();
-        setEvents(events.filter(e => e.id !== event.id));
+        deleteEvent(event.id);
     }
 
     const EventDivProps = {

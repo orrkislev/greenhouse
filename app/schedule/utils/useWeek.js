@@ -1,13 +1,15 @@
+import { format, startOfWeek } from "date-fns";
 import { create } from "zustand";
+
+export const HOURS = ['9:30', '10:30', '11:30', '12:30', 'ערב'];
 
 export const useWeek = create((set) => {
     const getWeekDates = (date) => {
-        const startOfWeek = new Date(date);
-        startOfWeek.setDate(date.getDate() - date.getDay()); // Sunday
+        const start = startOfWeek(date)
         return Array.from({ length: 6 }, (_, i) => {
-            const d = new Date(startOfWeek);
-            d.setDate(startOfWeek.getDate() + i);
-            return d;
+            const d = new Date(start);
+            d.setDate(start.getDate() + i);
+            return format(d, 'yyyy-MM-dd');
         });
     };
     return {
