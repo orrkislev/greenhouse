@@ -43,7 +43,7 @@ service cloud.firestore {
       allow read: if true;
       allow create, update, delete: if true;
 
-      match /schedule/{dateString} {
+      match /entries/{dateString} {
         allow read: if true;
         allow create, update, delete: if hasRole("admin") || isGroupAdmin(groupName);
       }

@@ -18,6 +18,7 @@ export async function leaveGroup(userId, groupName) {
     })
 }
 
+
 export async function getGroupData(groupName) {
     const groupDoc = doc(db, "groups", groupName);
     const groupData = await getDoc(groupDoc);
@@ -30,6 +31,13 @@ export function isGroupAdmin(group, userId) {
 }
 
 
+
+
+
+
+
+
+
 export async function getGroupEntriesForWeek(groupName, week) {
     const entriesRef = collection(db, 'groups', groupName, 'entries');
     const entriesQuery = query(
@@ -38,18 +46,16 @@ export async function getGroupEntriesForWeek(groupName, week) {
         where('date', '<=', week[week.length - 1])
     );
     const entriesSnapshot = await getDocs(entriesQuery);
-    const entries = entriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const entries = entriesSnapshot.docs.map(doc => ({ id: doc.id, group: groupName, ...doc.data() }));
     const subscribe = (callback) => {
         const unsubscribe = onSnapshot(entriesQuery, snapshot => {
-            const updatedEntries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const updatedEntries = snapshot.docs.map(doc => ({ id: doc.id, group: groupName, ...doc.data() }));
             callback(updatedEntries);
         });
         return unsubscribe;
     };
     return { entries, subscribe };
 }
-
-
 export async function createGroupEntry(groupName, obj) {
     const collectionRef = collection(db, 'groups', groupName, 'entries');
     await addDoc(collectionRef, obj);
@@ -61,4 +67,16 @@ export async function updateGroupEntry(groupName, obj) {
 export async function removeGroupEntry(groupName, objId) {
     const docRef = doc(db, 'groups', groupName, 'entries', objId);
     await deleteDoc(docRef);
+}
+export async function joinGroupEntry(groupName, objId, userId) {
+    const docRef = doc(db, 'groups', groupName, 'entries', objId);
+    await updateDoc(docRef, {
+        members: arrayUnion(userId)
+    });
+}
+export async function leaveGroupEntry(groupName, objId, userId) {
+    const docRef = doc(db, 'groups', groupName, 'entries', objId);
+    await updateDoc(docRef, {
+        members: arrayRemove(userId)
+    });
 }

@@ -28,30 +28,7 @@ export const useUserSchedule = create((set, get) => {
         setTasks: (tasks) => set({ tasks }),
         setEvents: (events) => set({ events }),
 
-        updateEvent: (eventId, updatedEvent) => {
-            updatedEvent._dirty = true;
-            set((state) => {
-                const updatedEvents = state.events.map(event =>
-                    event.id === eventId ? { ...event, ...updatedEvent } : event
-                );
-                return { events: updatedEvents };
-            });
-            debouncedUpdateEvents();
-        },
-        addEvent: async (event) => {
-            const newDoc = await addDoc(getRef("events"), event);
-            event.id = newDoc.id;
-            set((state) => ({
-                events: [...state.events, event]
-            }));
-        },
-        deleteEvent: async (eventId) => {
-            const ref = getRef("events");
-            await deleteDoc(doc(ref, eventId));
-            set((state) => ({
-                events: state.events.filter(event => event.id !== eventId)
-            }));
-        },
+
 
         loadWeekEvents: async (week) => {
             const uid = useUser.getState().user.id;
@@ -69,6 +46,41 @@ export const useUserSchedule = create((set, get) => {
 
             set({ events });
         },
+        addEvent: async (event) => {
+            const newDoc = await addDoc(getRef("events"), event);
+            event.id = newDoc.id;
+            set((state) => ({
+                events: [...state.events, event]
+            }));
+        },
+        updateEvent: (eventId, updatedEvent) => {
+            updatedEvent._dirty = true;
+            set((state) => {
+                const updatedEvents = state.events.map(event =>
+                    event.id === eventId ? { ...event, ...updatedEvent } : event
+                );
+                return { events: updatedEvents };
+            });
+            debouncedUpdateEvents();
+        },
+        deleteEvent: async (eventId) => {
+            const ref = getRef("events");
+            await deleteDoc(doc(ref, eventId));
+            set((state) => ({
+                events: state.events.filter(event => event.id !== eventId)
+            }));
+        },
+        addGroupEvent: event => {
+            set((state) => ({ events: [...state.events, event] }));
+        },
+        removeGroupEvent: (eventId) => {
+            set((state) => ({
+                events: state.events.filter(event => event.id !== eventId)
+            }));
+        },
+
+
+
 
         loadWeekTasks: async (week) => {
             const uid = userId()
@@ -84,16 +96,16 @@ export const useUserSchedule = create((set, get) => {
             );
             const tasksSnap = await getDocs(tasksQuery);
             const tasks = tasksSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            tasks.forEach(task => {
+                if (task.group) {
+
+                }
+            })
             set({ tasks });
         },
-
-
-
-
-
         addTask: async (task) => {
             const newDoc = await addDoc(getRef("tasks"), task);
-            task.id = newDoc.id;   
+            task.id = newDoc.id;
             set((state) => ({
                 tasks: [...state.tasks, task]
             }));
@@ -109,6 +121,25 @@ export const useUserSchedule = create((set, get) => {
         },
         deleteTask: (taskId) => {
             deleteDoc(doc(getRef("tasks"), taskId));
+            set((state) => ({
+                tasks: state.tasks.filter(task => task.id !== taskId)
+            }));
+        },
+        addGroupTask: task => {
+            task.start = task.date
+            task.end = task.date;
+            set((state) => {
+                const exists = state.tasks.some(t => t.id === task.id);
+                if (exists) {
+                    return {
+                        tasks: state.tasks.map(t => t.id === task.id ? { ...t, ...task } : t)
+                    };
+                } else {
+                    return { tasks: [...state.tasks, task] };
+                }
+            });
+        },
+        removeGroupTask: (taskId) => {
             set((state) => ({
                 tasks: state.tasks.filter(task => task.id !== taskId)
             }));

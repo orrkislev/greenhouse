@@ -1,11 +1,12 @@
 import { useUser } from "@/utils/useUser";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getGroupData, getGroupEntriesForWeek, isGroupAdmin } from "../../utils/groupschedule actions";
 import { ScheduleSection } from "../Layout";
 import { tw } from "@/utils/tw";
 import { useWeek } from "@/app/schedule/utils/useWeek";
 import { NewGroupObjectButton } from "./NewGroupObjectModal";
 import { GroupCellObject } from "./GroupCellObject";
+import { useUserSchedule } from "../../utils/useUserSchedule";
 
 export default function OtherSchedules() {
     const groups = useUser(state => state.user.groups);
@@ -22,6 +23,20 @@ function GroupSchedule({ groupName }) {
     const [groupData, setGroupData] = useState(null);
     const week = useWeek(state => state.week);
     const [entries, setEntries] = useState([]);
+    const addGroupTask = useUserSchedule(state => state.addGroupTask);
+
+
+    const addEntries = useMemo(() => (newEntries) => {
+        newEntries.forEach(entry => {
+            if (entry.members && entry.members.includes(userId)) {
+                entry.isMember = true;
+                if (entry.type == 'task') {
+                    addGroupTask(entry);
+                }
+            }
+        });
+        setEntries(prev => [...prev.filter(e => !newEntries.some(ne => ne.id === e.id)), ...newEntries]);
+    }, [userId]);
 
     useEffect(() => {
         getGroupData(groupName).then(data => {
@@ -33,8 +48,8 @@ function GroupSchedule({ groupName }) {
         if (!groupName || !week || week.length === 0) return;
         (async () => {
             const { entries, subscribe: eventSubscribe } = await getGroupEntriesForWeek(groupName, week);
-            setEntries(entries);
-            const unsubscribe = eventSubscribe(setEntries);
+            addEntries(entries);
+            const unsubscribe = eventSubscribe(addEntries);
             return unsubscribe;
         })();
     }, [week, groupName]);

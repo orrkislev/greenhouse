@@ -41,12 +41,12 @@ export function NewGroupObjectButton({ groupName, date }) {
 
 export function NewGroupObjectModal({ onClose, groupName, date, obj }) {
     const form = useForm({
-        text: obj?.text || '',
+        title: obj?.title || '',
         type: obj?.type || 'event',
         timeRange: obj?.timeRange || { start: '09:30', end: '11:00' }
     }, async (values) => {
         const newObj = {
-            text: values.text,
+            title: values.title,
             type: values.type,
             date: format(date, 'yyyy-MM-dd'),
         };
@@ -81,7 +81,7 @@ export function NewGroupObjectModal({ onClose, groupName, date, obj }) {
                     </SegmentedControlTrigger>
                 </SegmentedControlList>
             </SegmentedControl>
-            <FormInput {...form.props.text} />
+            <FormInput {...form.props.title} />
             {form.values.type === 'event' && (
                 <TimeRangePicker
                     value={form.values.timeRange}
