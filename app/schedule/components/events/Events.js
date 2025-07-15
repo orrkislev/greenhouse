@@ -5,6 +5,8 @@ import { HOURS, useWeek } from "@/app/schedule/utils/useWeek";
 import { tw } from "@/utils/tw";
 import EditEventDrawer from "./EditEventDrawer";
 import { ScheduleSection } from "../Layout";
+import { getTimeWithOffset } from "./useEventPosition"
+import useWeeksEvents from "./useWeeksEvents";
 
 const EmptySlot = tw`min-h-8 z-1
     flex items-center justify-center text-xs
@@ -30,35 +32,51 @@ export default function Events({ edittable = false }) {
     const [resizingId, setResizingId] = useState(null);
 
     const week = useWeek(state => state.week);
-    const events = useUserSchedule(state => state.events)
     const updateEvent = useUserSchedule(state => state.updateEvent);
     const addEvent = useUserSchedule(state => state.addEvent);
+
+    const events = useWeeksEvents();
 
     const positions = Array(6).fill(0).map((_, col) => Array(5).fill(0).map((_, row) => (
         { row: row + 1, col: col + 1 }))).flat();
 
-    const onPlace = pos => {
+    const onMove = pos => {
         if (draggingId === null) return;
+        const currDuration = events.find(e => e.id === draggingId).duration;
         updateEvent(draggingId, {
             date: week[pos.col - 1],
             start: HOURS[pos.row - 1],
+            end: getTimeWithOffset(HOURS[pos.row - 1], currDuration),
         })
+    }
+
+    const onResize = (pos, event) => {
+        const newDuration = pos.row - HOURS.indexOf(event.start);
+        if (newDuration > 0) {
+            updateEvent(resizingId, {
+                end: getTimeWithOffset(event.start, newDuration * 60),
+                duration: newDuration * 60,
+            });
+        }
     }
 
     const handleNewEvent = (pos) => {
         const date = week[pos.col - 1];
-        const hour = HOURS[pos.row - 1];
+        const start = HOURS[pos.row - 1];
+        const end = getTimeWithOffset(start, 60);
 
         const newEvent = {
-            date,
-            start: hour,
-            duration: 1,
+            date, start, end, duration: 60,
             title: newEventTitles[Math.floor(Math.random() * newEventTitles.length)],
         };
         addEvent(newEvent);
     }
 
     const weekEvents = events.filter(event => week.some(date => date === event.date))
+    weekEvents.forEach(event => {
+        event.edittable = edittable;
+        if (event.group) event.edittable = false;
+    })
 
     let extrasState
     if (edittable) {
@@ -86,7 +104,7 @@ export default function Events({ edittable = false }) {
             {extrasState == 'dragging' &&
                 positions.map((pos, index) => (
                     <Droppable key={index} row={pos.row} col={pos.col}
-                        onPlace={() => onPlace(pos)}
+                        onPlace={() => onMove(pos)}
                     />
                 ))
             }
@@ -100,12 +118,7 @@ export default function Events({ edittable = false }) {
                     .filter(pos => pos.col === eventCol)
                     .map((pos, index) => (
                         <Droppable key={index} row={pos.row} col={pos.col}
-                            onPlace={() => {
-                                const newDuration = pos.row - HOURS.indexOf(event.start);
-                                if (newDuration > 0) {
-                                    updateEvent(resizingId, { duration: newDuration });
-                                }
-                            }}
+                            onPlace={() => onResize(pos, event)}
                         />
                     ));
             })()}
@@ -113,7 +126,7 @@ export default function Events({ edittable = false }) {
 
             {weekEvents.map((event, index) => (
                 <Event key={index}
-                    edittable={edittable}
+                    edittable={event.edittable}
                     event={event}
                     onStartDrag={() => setDraggingId(event.id)}
                     onEndDrag={() => setDraggingId(null)}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { getAllGroups, joinGroup } from "../../utils/groupschedule actions";
 import { useUser } from "@/utils/useUser";
 import { tw } from "@/utils/tw";
+import { useGroupSchedule } from "./useGroupSchedule";
 
 
 const GroupButton = tw`text-xs text-gray-800 bg-blue-200 px-2 py-1 text-center hover:bg-blue-400 cursor-pointer transition-all`;
@@ -11,23 +11,12 @@ export function AddSchedule() {
     const user = useUser(state => state.user);
     const [showGroups, setShowGroups] = useState(false);
     const [groups, setGroups] = useState([]);
+    const getAllGroups = useGroupSchedule(state => state.getAllGroups);
+    const joinGroup = useGroupSchedule(state => state.joinGroup);
 
     useEffect(() => {
         if (!showGroups) return;
-        getAllGroups().then(data => {
-            setGroups(data);
-            const onlyNewGroups = data.filter(group => !user.groups.includes(group.id));
-            if (user.roles.includes('staff')) {
-                setGroups(onlyNewGroups);
-            } else {
-                const onlyOpenGroups = onlyNewGroups.filter(group => group.open);
-                setGroups(onlyOpenGroups);
-            }
-        }).catch(error => {
-            console.error("Error fetching groups:", error);
-            setGroups([]);
-        });
-
+        getAllGroups().then(setGroups);
     }, [showGroups]);
 
     const clickGroup = (group) => {

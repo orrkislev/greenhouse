@@ -1,45 +1,12 @@
-import { createGroupEntry, removeGroupEntry, updateGroupEntry } from "../../utils/groupschedule actions";
 import { SegmentedControl, SegmentedControlList, SegmentedControlTrigger } from "@/components/ui/segmented-control";
-import { useState } from "react";
-import { Popover, PopoverTrigger } from "@/components/ui/popover";
-import { PopoverContent } from "@radix-ui/react-popover";
-import { tw } from "@/utils/tw";
 import { FormInput, useForm } from "@/components/ui/form/FormInput";
 import { Button } from "@/components/ui/button";
 import TimeRangePicker from "@/components/ui/timerange-picker";
 import { format } from "date-fns";
-
-const AddObjectDiv = tw`flex items-center justify-center text-gray-800 text-sm
-        pointer-events-auto cursor-pointer 
-        transition-all bg-[#FADFC199] hover:bg-[#FADFC1]
-        text-transparent hover:text-gray-800
-        ${props => props.$active ? 'bg-[#FADFC1] text-gray-800' : ''}
-        z-5 flex-1
-`;
+import { createGroupEntry, removeGroupEntry, updateGroupEntry } from "./useGroupSchedule";
 
 
-export function NewGroupObjectButton({ groupName, date }) {
-    const [isOpen, setIsOpen] = useState(false);
-
-    return (
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
-            <PopoverTrigger asChild>
-                <AddObjectDiv onClick={() => setIsOpen(true)} $active={isOpen}>
-                    +
-                </AddObjectDiv>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 bg-white p-4 border border-gray-300 z-[999]">
-                <NewGroupObjectModal
-                    onClose={() => setIsOpen(false)}
-                    groupName={groupName}
-                    date={date}
-                />
-            </PopoverContent>
-        </Popover>
-    );
-}
-
-export function NewGroupObjectModal({ onClose, groupName, date, obj }) {
+export function GroupEntryEdit({ onClose, groupName, date, obj }) {
     const form = useForm({
         title: obj?.title || '',
         type: obj?.type || 'event',
@@ -63,10 +30,8 @@ export function NewGroupObjectModal({ onClose, groupName, date, obj }) {
     });
 
     const clickDelete = async () => {
-        if (obj) {
-            await removeGroupEntry(groupName, obj.id);
-            onClose();
-        }
+        await removeGroupEntry(groupName, obj.id);
+        onClose();
     };
 
     return (

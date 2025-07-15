@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/utils/useUser";
-import { joinGroupEntry } from "../../utils/groupschedule actions";
+import { joinGroupEntry } from "./useGroupSchedule";
 
-export default function AcceptObjectModal({ groupName, obj, onClose }) {
+export default function GroupEntryContext({ groupName, obj, onClose }) {
     const userId = useUser(state => state.user.id);
 
     const handleAccept = async () => {

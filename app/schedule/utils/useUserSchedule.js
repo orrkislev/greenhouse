@@ -71,7 +71,15 @@ export const useUserSchedule = create((set, get) => {
             }));
         },
         addGroupEvent: event => {
-            set((state) => ({ events: [...state.events, event] }));
+            const newEvent = {
+                group: event.group,
+                start: event.timeRange.start,
+                end: event.timeRange.end,
+                title: event.title,
+                date: event.date,
+                id: event.id,
+            }
+            set((state) => ({ events: [...state.events, newEvent] }));
         },
         removeGroupEvent: (eventId) => {
             set((state) => ({
@@ -96,11 +104,6 @@ export const useUserSchedule = create((set, get) => {
             );
             const tasksSnap = await getDocs(tasksQuery);
             const tasks = tasksSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            tasks.forEach(task => {
-                if (task.group) {
-
-                }
-            })
             set({ tasks });
         },
         addTask: async (task) => {

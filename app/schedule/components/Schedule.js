@@ -8,16 +8,14 @@ import ScheduleTop from "./ScheduleTop";
 import Semester from "./Semester/Semester";
 import { useEffect, useState } from "react";
 import { AddSchedule } from "./GroupSchedule/AddSchedule";
-import OtherSchedules from "./GroupSchedule/OtherSchedules";
-import useUserDataManager from "../utils/useUserDataManager";
 import { useWeek } from "../utils/useWeek";
 import { useUserSchedule } from "../utils/useUserSchedule";
+import GroupSchedules from "./GroupSchedule/GroupSchedules";
 
 const ScheduleOuter = tw`w-full h-full px-16 pt-8`;
 
 export default function Schedule({ edittable = false }) {
-    // useUserDataManager();
-    const [view, setView] = useState('week'); // 'week' or 'semester'
+    const [view, setView] = useState('week');
 
     return (
         <>
@@ -46,7 +44,7 @@ export default function Schedule({ edittable = false }) {
                     <>
                         <Tasks />
                         <Events edittable={edittable} />
-                        <OtherSchedules />
+                        <GroupSchedules />
                         <Gantt />
                         <AddSchedule />
                     </>

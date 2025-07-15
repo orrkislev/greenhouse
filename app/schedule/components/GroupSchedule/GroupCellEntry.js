@@ -1,9 +1,10 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { NewGroupObjectModal } from "./NewGroupObjectModal";
+import { GroupEntryEdit, NewGroupObjectModal } from "./GroupEntryEdit";
 import { tw } from "@/utils/tw";
 import AcceptObjectModal from "./AcceptObjectModal";
 import { useState } from "react";
 import { Bookmark, BookmarkCheck } from "lucide-react";
+import GroupEntryContext from "./AcceptObjectModal";
 
 const GroupObjectCellDiv = tw.div`bg-[#C4BBB2] flex-1 hover:bg-[#9F8770] cursor-pointer hover:text-white transition-all`;
 const GroupObjectText = tw`h-full 
@@ -11,7 +12,7 @@ const GroupObjectText = tw`h-full
         whitespace-pre-line py-1 cursor-pointer text-xs
     `;
 
-export function GroupCellObject({ groupName, date, obj, edittable }) {
+export function GroupCellEntry({ groupName, date, obj, edittable }) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -32,14 +33,14 @@ export function GroupCellObject({ groupName, date, obj, edittable }) {
             </PopoverTrigger>
             <PopoverContent className="w-80 bg-white p-4 border border-gray-300 z-[999]">
                 {edittable ? (
-                    <NewGroupObjectModal
+                    <GroupEntryEdit
                         onClose={() => setIsOpen(false)}
                         groupName={groupName}
                         date={date}
                         obj={obj}
                     />
                 ) : (
-                    <AcceptObjectModal
+                    <GroupEntryContext
                         onClose={() => setIsOpen(false)}
                         groupName={groupName}
                         obj={obj}
