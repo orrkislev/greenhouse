@@ -1,6 +1,6 @@
 import { db } from "@/utils/firebase/firebase";
 import { useUser } from "@/utils/useUser";
-import { arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from "firebase/firestore";
 import { create } from "zustand";
 
 export const useGroupSchedule = create((set, get) => {
