@@ -10,18 +10,17 @@ import { leaveGroupEntry } from "../GroupSchedule/useGroupSchedule";
 const EventDiv = tw`
     bg-[#EF98A1] py-2 px-4 text-gray-800
     flex flex-col justify-center text-sm
-    pointer-events-auto cursor-pointer transition-all duration-200
-    z-5 hover:bg-[#E77885] stripes
+    pointer-events-auto cursor-pointer transition-colors duration-200
+    z-5 hover:bg-[#E77885] stripes outline-2 outline-white
 `;
 
 export function ReadOnlyEvent({ event, onSelect }) {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const { gridStyle } = useEventPosition(event);
 
     return (
         <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
             <PopoverTrigger asChild>
-                <EventDiv style={gridStyle} onClick={() => setIsPopoverOpen(true)}>
+                <EventDiv style={event.gridStyle} onClick={() => setIsPopoverOpen(true)}>
                     <div className="font-medium truncate">{event.title}</div>
                 </EventDiv>
             </PopoverTrigger>

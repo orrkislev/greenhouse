@@ -3,8 +3,8 @@
 import { EditableEvent } from "./EditableEvent";
 import { ReadOnlyEvent } from "./ReadOnlyEvent";
 
-export function Event({ event, edittable, onStartDrag, onEndDrag, onStartResize, onEndResize, onSelect }) {
-    if (edittable) {
+export function Event({ event, onStartDrag, onEndDrag, onStartResize, onEndResize, onSelect }) {
+    if (event.edittable) {
         return (
             <EditableEvent
                 event={event}

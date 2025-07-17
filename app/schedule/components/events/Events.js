@@ -6,7 +6,8 @@ import { tw } from "@/utils/tw";
 import EditEventDrawer from "./EditEventDrawer";
 import { ScheduleSection } from "../Layout";
 import { getTimeWithOffset } from "./useEventPosition"
-import useWeeksEvents from "./useWeeksEvents";
+import useWeeksEvents, { eventsToBlocks } from "./useWeeksEvents";
+import { ScheduleBlock } from "./ScheduleBlock";
 
 const EmptySlot = tw`min-h-8 z-1
     flex items-center justify-center text-xs
@@ -35,7 +36,7 @@ export default function Events({ edittable = false }) {
     const updateEvent = useUserSchedule(state => state.updateEvent);
     const addEvent = useUserSchedule(state => state.addEvent);
 
-    const events = useWeeksEvents();
+    const events = useWeeksEvents(week, edittable);
 
     const positions = Array(6).fill(0).map((_, col) => Array(5).fill(0).map((_, row) => (
         { row: row + 1, col: col + 1 }))).flat();
@@ -72,19 +73,6 @@ export default function Events({ edittable = false }) {
         addEvent(newEvent);
     }
 
-    const weekEvents = events.filter(event => week.some(date => date === event.date))
-    weekEvents.forEach(event => {
-        event.edittable = edittable;
-        if (event.group) event.edittable = false;
-    })
-
-    let extrasState
-    if (edittable) {
-        extrasState = 'new-event'
-        if (draggingId !== null) extrasState = 'dragging';
-        if (resizingId !== null) extrasState = 'resizing';
-    }
-
     return (
         <ScheduleSection name="לוז">
             {positions.map((pos, index) => (
@@ -101,7 +89,7 @@ export default function Events({ edittable = false }) {
 
 
 
-            {extrasState == 'dragging' &&
+            {edittable && draggingId !== null &&
                 positions.map((pos, index) => (
                     <Droppable key={index} row={pos.row} col={pos.col}
                         onPlace={() => onMove(pos)}
@@ -109,7 +97,7 @@ export default function Events({ edittable = false }) {
                 ))
             }
 
-            {extrasState == 'resizing' && (() => {
+            {edittable && resizingId !== null && (() => {
                 const event = events.find(e => e.id === resizingId);
                 if (!event) return null;
                 const eventCol = week.findIndex(date => date === event.date) + 1;
@@ -124,7 +112,7 @@ export default function Events({ edittable = false }) {
             })()}
 
 
-            {weekEvents.map((event, index) => (
+            {events.map((event, index) => (
                 <Event key={index}
                     edittable={event.edittable}
                     event={event}
@@ -135,6 +123,7 @@ export default function Events({ edittable = false }) {
                     onSelect={() => setSelectedEvent(event)}
                 />
             ))}
+
 
             <EditEventDrawer onClose={() => setSelectedEvent(null)} event={selectedEvent} />
         </ScheduleSection>

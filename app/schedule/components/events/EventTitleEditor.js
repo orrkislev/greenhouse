@@ -12,11 +12,13 @@ function SmartTextArea(props) {
         }
     }, [props.value]);
 
+    const textSize = props.value.length > 20 ? "text-xs" : "text-sm"
+
     return (
         <textarea
             ref={ref}
             rows={1}
-            className="bg-transparent text-gray-800 rounded px-1 w-full outline-none pointer-events-auto focus:bg-white/50 resize-none"
+            className={`bg-transparent text-gray-800 rounded px-1 w-full outline-none pointer-events-auto focus:bg-white/50 resize-none ${textSize}`}
             style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', minHeight: '0', ...props.style }}
             {...props}
         />
@@ -39,7 +41,6 @@ export function EventTitleEditor({ event }) {
 
     return (
         <SmartTextArea
-            className="bg-transparent text-gray-800 rounded px-1 w-full outline-none pointer-events-auto focus:bg-white/50 resize-none"
             value={editTitle}
             onMouseDown={e => e.stopPropagation()}
             onChange={handleTitleChange}
