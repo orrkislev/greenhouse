@@ -6,7 +6,6 @@ import { useDragAndResize } from "./useDragAndResize";
 import { EventControls } from "./EventControls";
 import { ResizeHandle } from "./ResizeHandle";
 import { EventTitleEditor } from "./EventTitleEditor";
-import { useEventPosition } from "./useEventPosition";
 
 export function EditableEvent({ event, onStartDrag, onEndDrag, onStartResize, onEndResize, onSelect }) {
     const {

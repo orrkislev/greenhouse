@@ -1,15 +1,18 @@
 'use client'
 
-import { Users, Calendar, FolderOpen, X } from "lucide-react";
+import { Users, X } from "lucide-react";
 import AddGroupButton from "./AddGroupButton";
 import { updateUserData } from "@/utils/firebase/firebase_data";
 import { useUser } from "@/utils/useUser";
 import { StudentCard } from "./StudentCard";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Events from "@/app/schedule/components/events/Events";
+import { useWeek } from "@/app/schedule/utils/useWeek";
+import { getUserEventsForWeek, getUserGroupEntriesForWeek } from "@/app/schedule/utils/firebase actions";
 
 export default function StaffGroups({ students, mode }) {
     const user = useUser(state => state.user);
-    
+
     const groups = useMemo(() => {
         if (!user || !user.groups || user.groups.length === 0) return {};
         const grouped = {};
@@ -19,7 +22,7 @@ export default function StaffGroups({ students, mode }) {
                 students: students.filter(student => student.className === groupName)
             };
         });
-        return grouped;
+        return Object.fromEntries(Object.entries(grouped).filter(([_, group]) => group.students.length > 0));
     }, [students, user.groups]);
 
     return (
@@ -53,6 +56,7 @@ export default function StaffGroups({ students, mode }) {
 
 function GroupCard({ group, mode }) {
     const user = useUser(state => state.user);
+    const [selectedStudent, setSelectedStudent] = useState(null);
 
     const getModeStyles = () => {
         if (mode === "schedule") {
@@ -75,7 +79,9 @@ function GroupCard({ group, mode }) {
     const onRemove = () => {
         updateUserData({ groups: user.groups.filter(g => g !== group.name) });
     }
-
+    const onSelect = (student) => {
+        setSelectedStudent(prev => prev?.id === student.id ? null : student);
+    };
     return (
         <div className={`bg-white rounded-lg shadow-sm border-2 ${styles.border} overflow-hidden hover:shadow-md transition-shadow`}>
             {/* Group Header */}
@@ -109,11 +115,50 @@ function GroupCard({ group, mode }) {
                                 student={student}
                                 mode={mode}
                                 styles={styles}
+                                onSelect={() => onSelect(student)}
                             />
                         ))
                     }
                 </div>
             </div>
+
+            {selectedStudent && (
+                <div className="p-4 border-t">
+                    <StudentSchedule student={selectedStudent} />
+                </div>
+            )}
         </div>
     );
+}
+
+
+function StudentSchedule({ student }) {
+    const week = useWeek(state => state.week);
+    const [events, setEvents] = useState([]);
+    useEffect(() => {
+        if (!student || !week) return;
+        (async () => {
+            const studentEvents = await getUserEventsForWeek(student.id, week);
+            for (const group of student.groups || []) {
+                const studentGroupEvents = await getUserGroupEntriesForWeek(group, student.id, week);
+
+                studentEvents.push(...studentGroupEvents.map(event => ({
+                    ...event,
+                    start: event.timeRange.start,
+                    end: event.timeRange.end,
+                    group: group,
+                })));
+            }
+            setEvents(studentEvents)
+        })();
+    }, [student, week]);
+
+    return (
+        <Events
+            events={events}
+            edittable={false}
+            week={week}
+        />
+    )
+
 }

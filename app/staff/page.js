@@ -2,23 +2,24 @@
 
 import { useState } from "react";
 import WithAuth from "@/components/auth/SignIn";
-import TopBar from "@/components/TopBar";
 import StaffGroups from "./components/StaffGroups";
 import StaffStudents from "./components/StaffStudents";
 import { tw } from "@/utils/tw";
 import useStaffStudentsData from "./utils/useStaffStudentsData";
+import { useUser } from "@/utils/useUser";
 
 const TabContainer = tw`flex bg-gray-100 rounded-lg p-1`;
 const TabButton = tw`px-6 py-2 rounded-lg font-medium transition-all 
     ${props => props.$active == 'true' ? "bg-white text-blue-600 shadow-sm"
-                                      : "text-gray-600 hover:text-gray-800"}
+        : "text-gray-600 hover:text-gray-800"}
 `;
 
 export default function StaffPage() {
-    const {students, loading} = useStaffStudentsData()
+    const { students } = useStaffStudentsData()
     const [activeTab, setActiveTab] = useState("groups");
     const [mode, setMode] = useState("schedule");
-    
+
+    console.log("StaffPage", students);
 
     return (
         <WithAuth role='staff'>
@@ -61,23 +62,14 @@ export default function StaffPage() {
                         </div>
                     </div>
 
-                    {/* Content */}
-                    {loading ? (
-                        <div className="flex justify-center items-center h-64">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                        </div>
-                    ) : (
-                        <>
-                            {activeTab === "groups" && (
-                                <StaffGroups students={students} mode={mode} />
-                            )}
-                            {activeTab === "students" && (
-                                <StaffStudents
-                                    students={students}
-                                    mode={mode}
-                                />
-                            )}
-                        </>
+                    {activeTab === "groups" && (
+                        <StaffGroups students={students} mode={mode} />
+                    )}
+                    {activeTab === "students" && (
+                        <StaffStudents
+                            students={students}
+                            mode={mode}
+                        />
                     )}
                 </div>
             </div>

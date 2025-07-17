@@ -1,34 +1,28 @@
 import { useState, useEffect } from "react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
-import { Input } from "@/components/ui/input";
-import PINInput from "@/components/ui/PIN";
 import { Button } from "@/components/ui/button";
+import PINInput from "@/components/ui/PIN";
 import { createStudent } from "../actions/member actions";
+import { FormInput, useForm } from "@/components/ui/form/FormInput";
 
 export default function NewStudentDrawer({ open, onOpenChange, groupName, groups }) {
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [username, setUsername] = useState("");
-    const [pin, setPin] = useState("");
-    const [selectedGroup, setSelectedGroup] = useState(groupName || (groups && groups[0]?.name) || "");
     const [error, setError] = useState("");
+    const [selectedGroup, setSelectedGroup] = useState(groupName || (groups && groups[0]?.name) || "");
 
     useEffect(() => {
         setSelectedGroup(groupName || (groups && groups[0]?.name) || "");
     }, [groupName, groups]);
 
-
-    const handleAddStudent = async (e) => {
-        e.preventDefault();
-
-        await createStudent(firstName, lastName, username, pin, selectedGroup);
-
-        setFirstName("");
-        setLastName("");
-        setUsername("");
-        setPin("");
+    const form = useForm({
+        firstName: "",
+        lastName: "",
+        username: "",
+        pin: ""
+    }, async (values) => {
+        await createStudent(values.firstName, values.lastName, values.username, values.pin, selectedGroup);
+        form.clear();
         onOpenChange(false);
-    };
+    });
 
     return (
         <Drawer open={open} onOpenChange={onOpenChange} direction="right">
@@ -36,17 +30,11 @@ export default function NewStudentDrawer({ open, onOpenChange, groupName, groups
                 <DrawerHeader>
                     <DrawerTitle>Add New Student</DrawerTitle>
                 </DrawerHeader>
-                <form className="flex flex-col gap-4 p-4" onSubmit={handleAddStudent}>
+                <form className="flex flex-col gap-4 p-4" {...form.formProps}>
+                    <FormInput label="שם פרטי" {...form.props.firstName} />
+                    <FormInput label="שם משפחה" {...form.props.lastName} />
                     <div>
-                        <label className="block text-sm font-medium mb-1">First Name</label>
-                        <Input value={firstName} onChange={e => setFirstName(e.target.value)} required />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Family Name</label>
-                        <Input value={lastName} onChange={e => setLastName(e.target.value)} required />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Group</label>
+                        <label className="block text-sm font-medium mb-1">קבוצה</label>
                         <select
                             className="w-full border rounded px-2 py-1"
                             value={selectedGroup}
@@ -58,22 +46,18 @@ export default function NewStudentDrawer({ open, onOpenChange, groupName, groups
                             ))}
                         </select>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Username</label>
-                        <Input value={username} onChange={e => setUsername(e.target.value)} required />
-                    </div>
-                    {error && <div className="text-red-500 text-xs">{error}</div>}
-                    <div>
-                        <label className="block text-sm font-medium mb-1">PIN</label>
-                        <PINInput onChange={setPin} />
-                    </div>
+                    <FormInput label="שם משתמש" {...form.props.username} />
+                    <PINInput {...form.props.pin} />
+
                     <div className="flex gap-2 justify-end">
                         <DrawerClose asChild>
-                            <Button type="button" variant="outline">Cancel</Button>
+                            <Button type="button" variant="outline">ביטול</Button>
                         </DrawerClose>
-                        <Button type="submit">Add Student</Button>
+                        <Button type="submit">הוספת תלמיד</Button>
                     </div>
                 </form>
+
+                {error && <p className="text-red-500 text-sm p-4">{error}</p>}
             </DrawerContent>
         </Drawer>
     );

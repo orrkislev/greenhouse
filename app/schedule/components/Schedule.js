@@ -3,7 +3,7 @@
 import { tw } from "@/utils/tw";
 import Gantt from "./Gantt";
 import Tasks from "./tasks/Tasks";
-import Events from "./events/Events";
+import Events, { ScheduleEvents } from "./events/Events";
 import ScheduleTop from "./ScheduleTop";
 import Semester from "./Semester/Semester";
 import { useEffect, useState } from "react";
@@ -14,7 +14,7 @@ import GroupSchedules from "./GroupSchedule/GroupSchedules";
 
 const ScheduleOuter = tw`w-full h-full px-16 pt-8`;
 
-export default function Schedule({ edittable = false }) {
+export default function Schedule() {
     const [view, setView] = useState('week');
 
     return (
@@ -43,7 +43,7 @@ export default function Schedule({ edittable = false }) {
                 {view === 'week' && (
                     <>
                         <Tasks />
-                        <Events edittable={edittable} />
+                        <ScheduleEvents />
                         <GroupSchedules />
                         <Gantt />
                         <AddSchedule />

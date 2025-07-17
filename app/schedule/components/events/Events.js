@@ -5,9 +5,7 @@ import { HOURS, useWeek } from "@/app/schedule/utils/useWeek";
 import { tw } from "@/utils/tw";
 import EditEventDrawer from "./EditEventDrawer";
 import { ScheduleSection } from "../Layout";
-import { getTimeWithOffset } from "./useEventPosition"
-import useWeeksEvents, { eventsToBlocks } from "./useWeeksEvents";
-import { ScheduleBlock } from "./ScheduleBlock";
+import useWeeksEvents, { getTimeWithOffset, prepareEventsForSchedule } from "./useWeeksEvents";
 
 const EmptySlot = tw`min-h-8 z-1
     flex items-center justify-center text-xs
@@ -27,16 +25,25 @@ const newEventTitles = [
     "פגישה חשובה",
     "שיחה אישית",
 ];
-export default function Events({ edittable = false }) {
+export function ScheduleEvents(){
+    const week = useWeek(state => state.week);
+    const allEvents = useWeeksEvents(week, true);
+    if (!week || week.length === 0) return null;
+
+
+    return (
+        <Events events={allEvents} edittable={true} week={week}/>
+    )
+}
+export default function Events({events, edittable = false, week}) {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [draggingId, setDraggingId] = useState(null);
     const [resizingId, setResizingId] = useState(null);
 
-    const week = useWeek(state => state.week);
     const updateEvent = useUserSchedule(state => state.updateEvent);
     const addEvent = useUserSchedule(state => state.addEvent);
 
-    const events = useWeeksEvents(week, edittable);
+    const displayEvents = prepareEventsForSchedule(events, week, edittable);
 
     const positions = Array(6).fill(0).map((_, col) => Array(5).fill(0).map((_, row) => (
         { row: row + 1, col: col + 1 }))).flat();
@@ -98,7 +105,7 @@ export default function Events({ edittable = false }) {
             }
 
             {edittable && resizingId !== null && (() => {
-                const event = events.find(e => e.id === resizingId);
+                const event = displayEvents.find(e => e.id === resizingId);
                 if (!event) return null;
                 const eventCol = week.findIndex(date => date === event.date) + 1;
                 if (eventCol === -1) return null;
@@ -112,7 +119,7 @@ export default function Events({ edittable = false }) {
             })()}
 
 
-            {events.map((event, index) => (
+            {displayEvents.map((event, index) => (
                 <Event key={index}
                     edittable={event.edittable}
                     event={event}

@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useUser } from "@/utils/useUser";
 import { tw } from "@/utils/tw";
-import { LogOut, User, BookOpen, Briefcase, Calendar, Settings, Snail } from "lucide-react";
+import { LogOut, User, BookOpen, Briefcase, Calendar, Settings, Snail, UsersRound } from "lucide-react";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"
 import { Button } from "./ui/button";
 
@@ -66,7 +66,7 @@ export default function TopBar() {
                     {user && user.roles && user.roles.includes('staff') && (
                         <NavigationMenuItem>
                             <NavigationMenuLink href="/staff" className="flex items-center justify-center gap-1">
-                                <Briefcase className="w-5 h-5" /> צוות
+                                <UsersRound className="w-5 h-5" /> החניכים שלי
                             </NavigationMenuLink>
                         </NavigationMenuItem>
                     )}

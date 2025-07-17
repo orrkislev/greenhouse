@@ -1,6 +1,7 @@
-export function StudentCard({ student, mode, styles }) {
+export function StudentCard({ student, mode, styles, onSelect}) {
     return (
-        <div className="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors cursor-pointer border border-gray-200">
+        <div className="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors cursor-pointer border border-gray-200"
+            onClick={onSelect}>
             <div className="text-center">
                 <div className="w-8 h-8 bg-gray-300 rounded-full mx-auto mb-2 flex items-center justify-center">
                     <span className="text-xs font-medium text-gray-600">

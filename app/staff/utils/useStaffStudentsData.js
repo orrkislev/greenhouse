@@ -5,15 +5,23 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
 export default function useStaffStudentsData() {
-    const user = useUser((state) => state.user);
-    const groups = user?.groups || [];
+    const groups = useUser(state => state.user?.groups);
 
     const [students, setStudents] = useState([]);
-    const [loading, setLoading] = useState(true);
 
     const addStudents = async (newStudentsToAdd) => {
         const newStudents = newStudentsToAdd.filter(s1 => students.find(s2 => s2.id === s1.id) === undefined);
         if (newStudents.length === 0) return;
+
+        for (const student of newStudents) {
+            console.log("Adding student:", student);
+            const collectionRef = collection(db, "users", student.id, "events");
+            const todayDate = format(new Date(), "yyyy-MM-dd");
+            const eventsQuery = query(collectionRef, where("date", "==", todayDate));
+            const eventsSnapshot = await getDocs(eventsQuery);
+            const events = eventsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            student.events = events;
+        }
 
         setStudents((prevStudents) => {
             return [...prevStudents, ...newStudents];
@@ -21,55 +29,31 @@ export default function useStaffStudentsData() {
     }
 
     useEffect(() => {
-        const studentsMissingEvents = students.filter(s => s.events === undefined || s.events.length === 0);
-        if (studentsMissingEvents.length === 0) return;
-
+        console.log("Fetching students for groups:", groups);
+        if (!groups || groups.length === 0) {
+            return;
+        }
+        
         (async () => {
-            const todayFormatted = format(new Date(), 'yyyy-MM-dd');
-            for (let i = 0; i < studentsMissingEvents.length; i++) {
-                const student = studentsMissingEvents[i];
-                const studentEventCollection = collection(db, 'users', student.id, 'events');
-                const studentEventsQuery = query(studentEventCollection, where('date', '==', todayFormatted));
-                const studentEventsSnapshot = await getDocs(studentEventsQuery);
-                const studentEvents = studentEventsSnapshot.docs.map(doc => ({
+            const allStudents = [];
+            for (const group of groups) {
+                const groupQuery = query(
+                    collection(db, "users"),
+                    where("className", "==", group),
+                );
+
+                const groupSnapshot = await getDocs(groupQuery);
+                const groupStudents = groupSnapshot.docs.map(doc => ({
+                    ...doc.data(),
                     id: doc.id,
-                    ...doc.data()
                 }));
-                student.events = studentEvents;
+
+                allStudents.push(...groupStudents);
             }
 
-            setStudents((prevStudents) => {
-                return prevStudents.map(s => {
-                    const updatedStudent = studentsMissingEvents.find(s1 => s1.id === s.id);
-                    if (updatedStudent) return { ...s, events: updatedStudent.events };
-                    return s;
-                });
-            })
+            await addStudents(allStudents);
         })();
-    }, [students]);
-
-    useEffect(() => {
-        if (!groups) return
-        const fetchData = async () => {
-            if (groups.length > 0) {
-                const q = query(collection(db, 'users'), where('className', 'in', groups));
-                const usersSnapshot = await getDocs(q);
-                const usersData = usersSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                addStudents(usersData);
-            }
-        }
-
-        try {
-            fetchData();
-        } catch (error) {
-            console.error("Error fetching groups or students:", error);
-        } finally {
-            setLoading(false);
-        }
     }, [groups]);
 
-    return { students, loading };
+    return { students };
 }

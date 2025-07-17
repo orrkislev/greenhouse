@@ -9,9 +9,6 @@ export default function useWeeksEvents(week, edittable = false) {
     if (!week || week.length === 0) return [];
 
     const userEvents = events.filter(event => event.date >= week[0] && event.date <= week[week.length - 1]);
-    userEvents.forEach(event => {
-        event.edittable = edittable;
-    });
 
     const groupEvents = groups.filter(group => group.entries).flatMap(group =>
         group.entries
@@ -22,21 +19,26 @@ export default function useWeeksEvents(week, edittable = false) {
                 ...event,
                 start: event.timeRange.start,
                 end: event.timeRange.end,
-                edittable: false,
             }))
     );
 
-    const allEvents = [...userEvents, ...groupEvents]
+    return [...userEvents, ...groupEvents]
+}
 
-    // -------- event position --------
-    allEvents.forEach(event => {
+export function prepareEventsForSchedule(events, week, edittable = false) {
+    events.forEach(event => {
+        event.edittable = event.group ? false : edittable;
+    })
+
+// ------ event position --------
+    events.forEach(event => {
         event.dayIndex = week.findIndex(date => date === event.date);
         event.startIndex = getHourIndex(event.start);
         event.endIndex = getHourIndex(event.end, true);
     });
 
     const blocks = [];
-    allEvents.forEach(event => {
+    events.forEach(event => {
         const dayIndex = week.findIndex(date => date === event.date);
         if (dayIndex === -1) return;
 
@@ -84,7 +86,7 @@ export default function useWeeksEvents(week, edittable = false) {
         });
     });
 
-    return allEvents;
+    return events;
 }
 
 

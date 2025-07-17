@@ -29,10 +29,13 @@ export const createUser = async (username, pinPass, firstName, lastName) => {
     }
 
     const [email, password] = prepareEmailPassword(username, pinPass);
+    console.log('Creating user with email:', email, 'and username:', username, 'and password:', password);
     const userRecord = await getAuth().createUser({ email, password, displayName: `${firstName} ${lastName}`, emailVerified: true, });
 
     if (!userRecord) {
         throw new Error('Failed to create user');
+    } else {
+        console.log('User created successfully:', userRecord.uid);
     }
 
     userDoc.set({

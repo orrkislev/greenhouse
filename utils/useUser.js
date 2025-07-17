@@ -6,31 +6,31 @@ export const useUser = create(
   persist(
     (set, get) => {
       let unsubscribeUserDoc = null;
-      if (typeof window !== 'undefined' && !window.__userStoreAuthSubscribed) {
-        window.__userStoreAuthSubscribed = true;
-        AuthService.onAuthStateChange((user) => {
+      // if (typeof window !== 'undefined' && !window.__userStoreAuthSubscribed) {
+      //   window.__userStoreAuthSubscribed = true;
+      //   AuthService.onAuthStateChange((user) => {
           
-          if (!user) {
-            set({ user: null, loading: false, error: null });
-            if (unsubscribeUserDoc) {
-              unsubscribeUserDoc();
-              unsubscribeUserDoc = null;
-            }
-            return;
-          }
+      //     if (!user) {
+      //       set({ user: null, loading: false, error: null });
+      //       if (unsubscribeUserDoc) {
+      //         unsubscribeUserDoc();
+      //         unsubscribeUserDoc = null;
+      //       }
+      //       return;
+      //     }
 
-          set({ user });
+      //     set({ user });
 
-          if (unsubscribeUserDoc) {
-            unsubscribeUserDoc();
-            unsubscribeUserDoc = null;
-          }
+      //     if (unsubscribeUserDoc) {
+      //       unsubscribeUserDoc();
+      //       unsubscribeUserDoc = null;
+      //     }
 
-          unsubscribeUserDoc = AuthService.subscribeToUserDoc(user.username, (userDoc) => {
-            set({ user: { ...get().user, ...userDoc } });
-          });
-        });
-      }
+      //     unsubscribeUserDoc = AuthService.subscribeToUserDoc(user.username, (userDoc) => {
+      //       set({ user: { ...get().user, ...userDoc } });
+      //     });
+      //   });
+      // }
       return {
         user: {},
         loading: false,
