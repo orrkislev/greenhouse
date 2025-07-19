@@ -70,3 +70,11 @@ export const useTasks = create((set, get) => {
     }
 });
 
+export const tasksActions = {
+    loadWeekTasks: (week) => useTasks.getState().loadWeekTasks(week),
+    addTask: (task) => useTasks.getState().addTask(task),
+    updateTask: (taskId, updatedTask) => useTasks.getState().updateTask(taskId, updatedTask),
+    deleteTask: (taskId) => useTasks.getState().deleteTask(taskId),
+    addGroupTask: (task) => useTasks.getState().addGroupTask(task),
+    removeGroupTask: (taskId) => useTasks.getState().removeGroupTask(taskId),
+};

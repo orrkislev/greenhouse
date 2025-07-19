@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/utils/useUser";
-import { joinGroupEntry } from "@/utils/useGroups";
+import { groupsActions } from "@/utils/useGroups";
 
 export default function GroupEntryContext({ groupName, obj, onClose }) {
     const userId = useUser(state => state.user.id);
 
     const handleAccept = async () => {
-        joinGroupEntry(groupName, obj.id, userId)
+        groupsActions.joinGroupEntry(groupName, obj.id, userId)
         onClose()
     };
 

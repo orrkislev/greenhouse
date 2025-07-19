@@ -3,7 +3,7 @@ import { FormInput, useForm } from "@/components/ui/form/FormInput";
 import { Button } from "@/components/ui/button";
 import TimeRangePicker from "@/components/ui/timerange-picker";
 import { format } from "date-fns";
-import { createGroupEntry, removeGroupEntry, updateGroupEntry } from "@/utils/useGroups";
+import { groupsActions } from "@/utils/useGroups";
 
 
 export function GroupEntryEdit({ onClose, groupName, date, obj }) {
@@ -21,16 +21,16 @@ export function GroupEntryEdit({ onClose, groupName, date, obj }) {
             newObj.timeRange = values.timeRange;
         }
         if (obj) {
-            await updateGroupEntry(groupName, { ...newObj, id: obj.id });
+            await groupsActions.updateGroupEntry(groupName, { ...newObj, id: obj.id });
         } else {
-            await createGroupEntry(groupName, newObj);
+            await groupsActions.createGroupEntry(groupName, newObj);
         }
         form.clear();
         onClose()
     });
 
     const clickDelete = async () => {
-        await removeGroupEntry(groupName, obj.id);
+        await groupsActions.removeGroupEntry(groupName, obj.id);
         onClose();
     };
 

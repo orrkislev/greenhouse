@@ -3,15 +3,12 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { useUserSchedule } from "@/app/schedule/utils/useUserSchedule";
+import { eventsActions } from "@/utils/useEvents";
 
 export default function EditEventDrawer({ onClose, event }) {
     const [title, setTitle] = useState("");
     const [date, setDate] = useState(null);
     const [duration, setDuration] = useState(1);
-
-    const updateEvent = useUserSchedule(state => state.updateEvent);
-    const deleteEvent = useUserSchedule(state => state.deleteEvent);
 
     useEffect(() => {
         if (event) {
@@ -30,17 +27,16 @@ export default function EditEventDrawer({ onClose, event }) {
 
         const eventData = { title, date, duration };
         if (event?.id) {
-            // Update existing event
-            updateEvent(event.id, eventData);
+            eventsActions.updateEvent(event.id, eventData);
         } else {
-            addEvent(eventData);
+            eventsActions.addEvent(eventData);
         }
 
         onClose();
     };
 
     const handleDelete = () => {
-        deleteEvent(event.id);
+        eventsActions.deleteEvent(event.id);
         onClose();
     };
 

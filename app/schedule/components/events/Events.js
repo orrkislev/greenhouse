@@ -1,4 +1,3 @@
-import { useUserSchedule } from "@/app/schedule/utils/useUserSchedule";
 import { useState } from "react";
 import { Event } from "./Event";
 import { HOURS, useWeek } from "@/app/schedule/utils/useWeek";
@@ -6,6 +5,7 @@ import { tw } from "@/utils/tw";
 import EditEventDrawer from "./EditEventDrawer";
 import { ScheduleSection } from "../Layout";
 import useWeeksEvents, { getTimeWithOffset, prepareEventsForSchedule } from "./useWeeksEvents";
+import { eventsActions } from "@/utils/useEvents";
 
 const EmptySlot = tw`min-h-8 z-1
     flex items-center justify-center text-xs
@@ -41,9 +41,6 @@ export default function Events({ events, edittable = false, week, withLabel = tr
     const [draggingId, setDraggingId] = useState(null);
     const [resizingId, setResizingId] = useState(null);
 
-    const updateEvent = useUserSchedule(state => state.updateEvent);
-    const addEvent = useUserSchedule(state => state.addEvent);
-
     const displayEvents = prepareEventsForSchedule(events, week, edittable);
 
     const positions = Array(6).fill(0).map((_, col) => Array(5).fill(0).map((_, row) => (
@@ -52,7 +49,7 @@ export default function Events({ events, edittable = false, week, withLabel = tr
     const onMove = pos => {
         if (draggingId === null) return;
         const currDuration = events.find(e => e.id === draggingId).duration;
-        updateEvent(draggingId, {
+        eventsActions.updateEvent(draggingId, {
             date: week[pos.col - 1],
             start: HOURS[pos.row - 1],
             end: getTimeWithOffset(HOURS[pos.row - 1], currDuration),
@@ -62,7 +59,7 @@ export default function Events({ events, edittable = false, week, withLabel = tr
     const onResize = (pos, event) => {
         const newDuration = pos.row - HOURS.indexOf(event.start);
         if (newDuration > 0) {
-            updateEvent(resizingId, {
+            eventsActions.updateEvent(resizingId, {
                 end: getTimeWithOffset(event.start, newDuration * 60),
                 duration: newDuration * 60,
             });
@@ -78,7 +75,7 @@ export default function Events({ events, edittable = false, week, withLabel = tr
             date, start, end, duration: 60,
             title: newEventTitles[Math.floor(Math.random() * newEventTitles.length)],
         };
-        addEvent(newEvent);
+        eventsActions.addEvent(newEvent);
     }
 
     return (

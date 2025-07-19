@@ -3,8 +3,8 @@ import { tw } from "@/utils/tw";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/utils/useUser";
-import { useUserSchedule } from "../../utils/useUserSchedule";
-import { leaveGroupEntry } from "@/utils/useGroups"
+import { groupsActions } from "@/utils/useGroups"
+import { eventsActions } from "@/utils/useEvents";
 
 const EventDiv = tw`
     bg-[#EF98A1] py-2 px-4 text-gray-800
@@ -32,11 +32,10 @@ export function ReadOnlyEvent({ event, onSelect }) {
 
 function GroupEventContext({ event, onClose }) {
     const userId = useUser(state => state.user.id);
-    const removeGroupEvent = useUserSchedule(state => state.removeGroupEvent);
 
     const handleRemove = () => {
-        leaveGroupEntry(event.group, event.id, userId)
-        removeGroupEvent(event.id);
+        groupsActions.leaveGroupEntry(event.group, event.id, userId)
+        eventsActions.removeGroupEvent(event.id);
         onClose();
     };
 

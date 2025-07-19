@@ -1,12 +1,11 @@
 import { Edit2, Trash2 } from "lucide-react";
-import { useUserSchedule } from "@/app/schedule/utils/useUserSchedule";
+import { eventsActions } from "@/utils/useEvents";
 
 export function EventControls({ event, onSelect, visible }) {
-    const deleteEvent = useUserSchedule(state => state.deleteEvent);
 
     const handleDelete = async (e) => {
         e.stopPropagation();
-        deleteEvent(event.id);
+        eventsActions.deleteEvent(event.id);
     };
 
     if (!visible) return null;

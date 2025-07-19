@@ -1,9 +1,9 @@
 import { useGroups } from "@/utils/useGroups";
-import { useUserSchedule } from "../../utils/useUserSchedule";
 import { useWeek } from "../../utils/useWeek";
+import { useTasks } from "@/utils/useTasks";
 
 export default function useWeeksTasks() {
-    const tasks = useUserSchedule(state => state.tasks);
+    const tasks = useTasks(state => state.tasks);
     const groups = useGroups(state => state.groups);
     const week = useWeek(state => state.week);
 

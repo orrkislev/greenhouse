@@ -24,14 +24,17 @@ export const useMeetings = create((set, get) => {
     }
 });
 
-export function createMeeting(participants, day, start, end){
-    const uid = useUser.getState().user.id;
-    if (!uid) return;
+export const meetingsActions = {
+    loadMeetings: () => useMeetings.getState().loadMeetings(),
+    createMeeting: async (participants, day, start, end) => {
+        const uid = useUser.getState().user.id;
+        if (!uid) return;
 
-    const meeting = {
-        participants: [...participants, uid],
-        day, start, end, created: uid,
-    };
-
-    return addDoc(collection(db, `meetings`), meeting);
+        const meeting = {
+            participants: [...participants, uid],
+            day, start, end, created: uid,
+        };
+        const newMeetingDoc = await addDoc(collection(db, `meetings`), meeting);
+        return newMeetingDoc;
+    },
 }

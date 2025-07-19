@@ -5,7 +5,6 @@ import WithAuth from "@/components/WithAuth";
 import MentoringGroup from "./components/MentoringGroup";
 import StaffStudents from "./components/StaffStudents";
 import { tw } from "@/utils/tw";
-import useStaffStudentsData from "./utils/useStaffStudentsData";
 import { useGroups } from "@/utils/useGroups";
 
 export default function StaffPage() {

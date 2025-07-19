@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { leaveGroupEntry } from "@/utils/useGroups";
+import { groupsActions } from "@/utils/useGroups";
 import { useUser } from "@/utils/useUser";
-import { useUserSchedule } from "../../utils/useUserSchedule";
 import { Input } from "@/components/ui/input";
+import { tasksActions } from "@/utils/useTasks";
+import { useState } from "react";
 
 export default function TaskContext({task, onClose}) {
     if (task.group){
@@ -15,11 +16,10 @@ export default function TaskContext({task, onClose}) {
 
 function GroupTaskContext({ task, onClose }) {
     const userId = useUser(state => state.user.id);
-    const removeGroupTask = useUserSchedule(state => state.removeGroupTask);
 
     const handleRemove = () => {
-        leaveGroupEntry(task.group, task.id, userId)
-        removeGroupTask(task.id);
+        groupsActions.leaveGroupEntry(task.group, task.id, userId)
+        tasksActions.removeGroupTask(task.id);
         onClose();
     };
 
@@ -40,17 +40,15 @@ function GroupTaskContext({ task, onClose }) {
 
 function EditTask({ task, onClose }) {
     const [title, setTitle] = useState(task.title || "");
-    const updateTask = useUserSchedule(state => state.updateTask);
-    const deleteTask = useUserSchedule(state => state.deleteTask);
-    
+
     const handleUpdate = () => {
         const updatedTask = { ...task, title };
-        updateTask(task.id, updatedTask);
+        tasksActions.updateTask(task.id, updatedTask);
         onClose();
     };
 
     const handleDelete = () => {
-        deleteTask(task.id);
+        tasksActions.deleteTask(task.id);
         onClose();
     };
 

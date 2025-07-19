@@ -22,65 +22,73 @@ export const useEvents = create((set, get) => {
     }, 1000);
 
     return {
+
         events: [],
 
-        loadWeekTasks: async (week) => {
-            const uid = userId()
+        loadWeekEvents: async (week) => {
+            const uid = useUser.getState().user.id;
             if (!uid || !week || week.length === 0) return;
 
-            const tasksRef = getRef("tasks");
-            const tasksQuery = query(tasksRef,
-                or(
-                    and(where("start", ">=", week[0]), where("start", "<=", week[week.length - 1])),
-                    and(where("end", ">=", week[0]), where("end", "<=", week[week.length - 1])),
-                    and(where("start", "<=", week[0]), where("end", ">=", week[week.length - 1]))
+            const eventsRef = getRef("events");
+            const eventsQuery = query(eventsRef,
+                and(
+                    where("date", ">=", week[0]),
+                    where("date", "<=", week[week.length - 1])
                 )
             );
-            const tasksSnap = await getDocs(tasksQuery);
-            const tasks = tasksSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            set({ tasks });
+            const eventsSnap = await getDocs(eventsQuery);
+            const events = eventsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            set({ events });
         },
-        addTask: async (task) => {
-            const newDoc = await addDoc(getRef("tasks"), task);
-            task.id = newDoc.id;
+        addEvent: async (event) => {
+            const newDoc = await addDoc(getRef("events"), event);
+            event.id = newDoc.id;
             set((state) => ({
-                tasks: [...state.tasks, task]
+                events: [...state.events, event]
             }));
         },
-        updateTask: (taskId, updatedTask) => {
-            updateDoc(doc(getRef("tasks"), taskId), updatedTask);
+        updateEvent: (eventId, updatedEvent) => {
+            updatedEvent._dirty = true;
             set((state) => {
-                const updatedTasks = state.tasks.map(task =>
-                    task.id === taskId ? { ...task, ...updatedTask } : task
+                const updatedEvents = state.events.map(event =>
+                    event.id === eventId ? { ...event, ...updatedEvent } : event
                 );
-                return { tasks: updatedTasks };
+                return { events: updatedEvents };
             });
+            debouncedUpdateEvents();
         },
-        deleteTask: (taskId) => {
-            deleteDoc(doc(getRef("tasks"), taskId));
+        deleteEvent: async (eventId) => {
+            const ref = getRef("events");
+            await deleteDoc(doc(ref, eventId));
             set((state) => ({
-                tasks: state.tasks.filter(task => task.id !== taskId)
+                events: state.events.filter(event => event.id !== eventId)
             }));
         },
-        addGroupTask: task => {
-            task.start = task.date
-            task.end = task.date;
-            set((state) => {
-                const exists = state.tasks.some(t => t.id === task.id);
-                if (exists) {
-                    return {
-                        tasks: state.tasks.map(t => t.id === task.id ? { ...t, ...task } : t)
-                    };
-                } else {
-                    return { tasks: [...state.tasks, task] };
-                }
-            });
+        addGroupEvent: event => {
+            const newEvent = {
+                group: event.group,
+                start: event.timeRange.start,
+                end: event.timeRange.end,
+                title: event.title,
+                date: event.date,
+                id: event.id,
+            }
+            set((state) => ({ events: [...state.events, newEvent] }));
         },
-        removeGroupTask: (taskId) => {
+        removeGroupEvent: (eventId) => {
             set((state) => ({
-                tasks: state.tasks.filter(task => task.id !== taskId)
+                events: state.events.filter(event => event.id !== eventId)
             }));
         },
     }
 });
 
+export const eventsActions = {
+    loadWeekEvents: (week) => useEvents.getState().loadWeekEvents(week),
+    addEvent: (event) => useEvents.getState().addEvent(event),
+    updateEvent: (eventId, updatedEvent) => useEvents.getState().updateEvent(eventId, updatedEvent),
+    deleteEvent: (eventId) => useEvents.getState().deleteEvent(eventId),
+    addGroupEvent: (event) => useEvents.getState().addGroupEvent(event),
+    removeGroupEvent: (eventId) => useEvents.getState().removeGroupEvent(eventId),
+}

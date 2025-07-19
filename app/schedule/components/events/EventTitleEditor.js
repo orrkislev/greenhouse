@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import { useUserSchedule } from "@/app/schedule/utils/useUserSchedule";
+import { eventsActions } from "@/utils/useEvents";
 
 function SmartTextArea(props) {
     const ref = useRef();
@@ -27,7 +27,6 @@ function SmartTextArea(props) {
 
 export function EventTitleEditor({ event }) {
     const [editTitle, setEditTitle] = useState(event.title);
-    const updateEvent = useUserSchedule(state => state.updateEvent);
 
     const handleTitleChange = (e) => {
         setEditTitle(e.target.value);
@@ -35,7 +34,7 @@ export function EventTitleEditor({ event }) {
 
     const handleTitleBlur = () => {
         if (editTitle !== event.title) {
-            updateEvent(event.id, { title: editTitle });
+            eventsActions.updateEvent(event.id, { title: editTitle });
         }
     };
 

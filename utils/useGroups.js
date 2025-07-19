@@ -112,32 +112,41 @@ export const useGroups = create(persist(
         }
     }),
     {
-        name: "groups-storage", // unique name for the storage
+        name: "groups-storage",
         partialize: (state) => ({ groups: state.groups }),
     }
 ));
 
-export async function createGroupEntry(groupName, obj) {
-    const collectionRef = collection(db, 'groups', groupName, 'entries');
-    await addDoc(collectionRef, obj);
-}
-export async function updateGroupEntry(groupName, obj) {
-    const docRef = doc(db, 'groups', groupName, 'entries', obj.id);
-    await updateDoc(docRef, obj);
-}
-export async function removeGroupEntry(groupName, objId) {
-    const docRef = doc(db, 'groups', groupName, 'entries', objId);
-    await deleteDoc(docRef);
-}
-export async function joinGroupEntry(groupName, objId, userId) {
-    const docRef = doc(db, 'groups', groupName, 'entries', objId);
-    await updateDoc(docRef, {
-        members: arrayUnion(userId)
-    });
-}
-export async function leaveGroupEntry(groupName, objId, userId) {
-    const docRef = doc(db, 'groups', groupName, 'entries', objId);
-    await updateDoc(docRef, {
-        members: arrayRemove(userId)
-    });
-}
+export const groupsActions = {
+    loadUserGroups: () => useGroups.getState().loadUserGroups(),
+    loadGroup: (group) => useGroups.getState().loadGroup(group),
+    joinGroup: (groupName) => useGroups.getState().joinGroup(groupName),
+    leaveGroup: (groupName) => useGroups.getState().leaveGroup(groupName),
+    updateWeek: (week) => useGroups.getState().updateWeek(week),
+    updateGroupsEntries: (groupName, week) => useGroups.getState().updateGroupsEntries(groupName, week),
+    getGroupStudents: (groupId) => useGroups.getState().getGroupStudents(groupId),
+    createGroupEntry: async (groupName, obj) => {
+        const collectionRef = collection(db, 'groups', groupName, 'entries');
+        await addDoc(collectionRef, obj);
+    },
+    updateGroupEntry: (groupName, obj) => {
+        const docRef = doc(db, 'groups', groupName, 'entries', obj.id);
+        return updateDoc(docRef, obj);
+    },
+    removeGroupEntry: (groupName, objId) => {
+        const docRef = doc(db, 'groups', groupName, 'entries', objId);
+        return deleteDoc(docRef);
+    },
+    joinGroupEntry: (groupName, objId, userId) => {
+        const docRef = doc(db, 'groups', groupName, 'entries', objId);
+        return updateDoc(docRef, {
+            members: arrayUnion(userId)
+        });
+    },
+    leaveGroupEntry: (groupName, objId, userId) => {
+        const docRef = doc(db, 'groups', groupName, 'entries', objId);
+        return updateDoc(docRef, {
+            members: arrayRemove(userId)
+        });
+    }
+};

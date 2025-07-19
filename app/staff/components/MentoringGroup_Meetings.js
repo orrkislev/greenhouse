@@ -1,14 +1,15 @@
 import { ScheduleEvents } from "@/app/schedule/components/events/Events";
-import { useUserSchedule } from "@/app/schedule/utils/useUserSchedule";
 import { useWeek } from "@/app/schedule/utils/useWeek";
+import { eventsActions } from "@/utils/useEvents";
+import { tasksActions } from "@/utils/useTasks";
 import { useEffect } from "react";
 
 export default function MentoringGroup_Meetings({ group, styles }) {
     const week = useWeek(state => state.week);
 
     useEffect(()=>{
-        useUserSchedule.getState().loadWeekEvents(week);
-        useUserSchedule.getState().loadWeekTasks(week);
+        eventsActions.loadWeekEvents(week);
+        tasksActions.loadWeekTasks(week);
     }, [week])
 
     return (

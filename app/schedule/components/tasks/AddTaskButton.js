@@ -1,6 +1,6 @@
 import { tw } from "@/utils/tw";
-import { useUserSchedule } from "../../utils/useUserSchedule";
 import { useWeek } from "../../utils/useWeek";
+import { useTasks } from "@/utils/useTasks";
 
 const AddTaskButtonDiv = tw`flex items-center justify-center text-gray-800 text-sm
         pointer-events-auto cursor-pointer 
@@ -10,7 +10,7 @@ const AddTaskButtonDiv = tw`flex items-center justify-center text-gray-800 text-
 `;
 
 export default function AddTaskButton({ col, row }) {
-    const addTask = useUserSchedule(state => state.addTask);
+    const addTask = useTasks(state => state.addTask);
     const week = useWeek(state => state.week);
 
     const handleClick = () => {

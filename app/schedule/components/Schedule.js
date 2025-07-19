@@ -3,14 +3,17 @@
 import { tw } from "@/utils/tw";
 import Gantt from "./Gantt";
 import Tasks from "./tasks/Tasks";
-import Events, { ScheduleEvents } from "./events/Events";
+import { ScheduleEvents } from "./events/Events";
 import ScheduleTop from "./ScheduleTop";
 import Semester from "./Semester/Semester";
 import { useEffect, useState } from "react";
 import { AddSchedule } from "./GroupSchedule/AddSchedule";
 import { useWeek } from "../utils/useWeek";
-import { useUserSchedule } from "../utils/useUserSchedule";
 import GroupSchedules from "./GroupSchedule/GroupSchedules";
+import { eventsActions } from "@/utils/useEvents";
+import { tasksActions } from "@/utils/useTasks";
+import { meetingsActions } from "@/utils/useMeetings";
+import Meetings from "./meetings/Meetings";
 
 const ScheduleOuter = tw`w-full h-full px-16 pt-8`;
 
@@ -43,9 +46,10 @@ export default function Schedule() {
                 {view === 'week' && (
                     <>
                         <Tasks />
+                        <Meetings />
                         <ScheduleEvents />
                         <GroupSchedules />
-                        <Gantt />
+                        {/* <Gantt /> */}
                         <AddSchedule />
                     </>
                 )}
@@ -62,11 +66,11 @@ export default function Schedule() {
 
 function DataManager() {
     const week = useWeek((state) => state.week);
-    const userSchedule = useUserSchedule();
 
     useEffect(()=>{
-        userSchedule.loadWeekEvents(week);
-        userSchedule.loadWeekTasks(week);
+        eventsActions.loadWeekEvents(week);
+        tasksActions.loadWeekTasks(week);
+        meetingsActions.loadMeetings();
     },[week]);
 
     return null;

@@ -1,8 +1,7 @@
 'use client'
 
-import { Users } from "lucide-react";
 import { useEffect } from "react";
-import { useGroups } from "@/utils/useGroups";
+import { groupsActions } from "@/utils/useGroups";
 import MentoringGroup_Students from "./MentoringGroup_Students";
 import MentoringGroup_Meetings from "./MentoringGroup_Meetings";
 import MentoringGroup_Header from "./MentoringGroup_Header";
@@ -10,7 +9,7 @@ import MentoringGroup_Header from "./MentoringGroup_Header";
 
 export default function MentoringGroup({ group, mode }) {
     useEffect(() => {
-        useGroups.getState().getGroupStudents(group.id);
+         groupsActions.getGroupStudents(group.id);
     }, [group]);
 
     const styles = mode === "schedule" ? {
