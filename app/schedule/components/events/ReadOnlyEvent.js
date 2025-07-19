@@ -4,7 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/utils/useUser";
 import { useUserSchedule } from "../../utils/useUserSchedule";
-import { leaveGroupEntry } from "../GroupSchedule/useGroupSchedule";
+import { leaveGroupEntry } from "@/utils/useGroups"
 
 const EventDiv = tw`
     bg-[#EF98A1] py-2 px-4 text-gray-800

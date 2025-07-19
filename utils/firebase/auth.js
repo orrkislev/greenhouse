@@ -45,21 +45,21 @@ export class AuthService {
     }
   }
 
-  static onAuthStateChange(callback) {
-    return onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          const user = await this.getUserData(firebaseUser);
-          callback(user);
-        } catch (error) {
-          console.error('Error getting user data:', error);
-          callback(null);
-        }
-      } else {
-        callback(null);
-      }
-    });
-  }
+  // static onAuthStateChange(callback) {
+  //   return onAuthStateChanged(auth, async (firebaseUser) => {
+  //     if (firebaseUser) {
+  //       try {
+  //         const user = await this.getUserData(firebaseUser);
+  //         callback(user);
+  //       } catch (error) {
+  //         console.error('Error getting user data:', error);
+  //         callback(null);
+  //       }
+  //     } else {
+  //       callback(null);
+  //     }
+  //   });
+  // }
 
   static subscribeToUserDoc(username, callback) {
     const userRef = doc(db, 'users', username);

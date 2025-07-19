@@ -1,95 +1,75 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { AuthService } from './firebase/auth';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from './firebase/firebase';
 
 export const useUser = create(
-  persist(
-    (set, get) => {
-      let unsubscribeUserDoc = null;
-      // if (typeof window !== 'undefined' && !window.__userStoreAuthSubscribed) {
-      //   window.__userStoreAuthSubscribed = true;
-      //   AuthService.onAuthStateChange((user) => {
-          
-      //     if (!user) {
-      //       set({ user: null, loading: false, error: null });
-      //       if (unsubscribeUserDoc) {
-      //         unsubscribeUserDoc();
-      //         unsubscribeUserDoc = null;
-      //       }
-      //       return;
-      //     }
+	persist(
+		(set, get) => {
+			let unsubscribeUserDoc = null;
+			const unsubscribe = () => {
+				if (unsubscribeUserDoc) {
+					unsubscribeUserDoc();
+					unsubscribeUserDoc = null;
+				}
+			}
 
-      //     set({ user });
 
-      //     if (unsubscribeUserDoc) {
-      //       unsubscribeUserDoc();
-      //       unsubscribeUserDoc = null;
-      //     }
+			return {
+				user: {},
+				loading: true,
+				error: null,
+				setUser: (newUserData) => set(prev => ({
+					user: {
+						...prev.user,
+						...newUserData,
+					},
+				})),
+				setLoading: (loading) => set({ loading }),
+				setError: (error) => set({ error }),
+				logout: () => {
+					unsubscribe();
+					set({ user: null, error: null });
+					AuthService.signOut();
+				},
 
-      //     unsubscribeUserDoc = AuthService.subscribeToUserDoc(user.username, (userDoc) => {
-      //       set({ user: { ...get().user, ...userDoc } });
-      //     });
-      //   });
-      // }
-      return {
-        user: {},
-        loading: false,
-        error: null,
-        setUser: (newUserData) => set(prev => ({
-          user: {
-            ...prev.user,
-            ...newUserData,
-          },
-        })),
-        setLoading: (loading) => set({ loading }),
-        setError: (error) => set({ error }),
-        logout: () => {
-          if (unsubscribeUserDoc) {
-            unsubscribeUserDoc();
-            unsubscribeUserDoc = null;
-          }
-          set({ user: null, error: null });
-        },
+				signIn: async (username, pinPass) => {
+					set({ loading: true, error: null });
+					try {
+						const user = await AuthService.signIn(username, pinPass);
+						set({ user });
+						unsubscribe();
+						if (user && user.username) {
+							unsubscribeUserDoc = AuthService.subscribeToUserDoc(user.username, (userDoc) => {
+								set({ user: { ...get().user, ...userDoc } });
+							});
+						}
+					} catch (error) {
+						set({ error: error instanceof Error ? error.message : 'Failed to sign in' });
+						throw error;
+					} finally {
+						set({ loading: false });
+					}
+				},
 
-        // Auth logic merged from AuthContext
-        signIn: async (username, pinPass) => {
-          set({ loading: true, error: null });
-          try {
-            const user = await AuthService.signIn(username, pinPass);
-            set({ user });
-            // Subscribe to user doc changes
-            if (unsubscribeUserDoc) unsubscribeUserDoc();
-            if (user && user.usename) {
-              unsubscribeUserDoc = AuthService.subscribeToUserDoc(user.username, (userDoc) => {
-                set({ user: { ...get().user, ...userDoc } });
-              });
-            }
-          } catch (error) {
-            set({ error: error instanceof Error ? error.message : 'Failed to sign in' });
-            throw error;
-          } finally {
-            set({ loading: false });
-          }
-        },
-
-        signOut: async () => {
-          set({ loading: true, error: null });
-          try {
-            await AuthService.signOut();
-            get().logout();
-          } catch (error) {
-            set({ error: error instanceof Error ? error.message : 'Failed to sign out' });
-            throw error;
-          } finally {
-            set({ loading: false });
-          }
-        },
-      };
-    },
-    {
-      name: 'auth-storage',
-      partialize: (state) => ({ user: state.user }),
-    }
-  )
+				updateUserDoc: async (updates) => {
+					const userDocRef = doc(db, 'users', get().user.id);
+					await updateDoc(userDocRef, updates);
+					set((state) => ({
+						user: {
+							...state.user,
+							...updates,
+						},
+					}));
+				},
+			};
+		},
+		{
+			name: 'auth-storage',
+			partialize: (state) => ({ user: state.user }),
+			merge: (persistedState, currentState) => ({ ...currentState, ...persistedState, loading: false }),
+		}
+	)
 );
 

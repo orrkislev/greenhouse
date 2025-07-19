@@ -1,6 +1,6 @@
 'use client'
 
-import WithAuth from "@/components/auth/SignIn";
+import WithAuth from "@/components/WithAuth";
 import ProjectIntentions from "./components/ProjectIntentions";
 import ProjectOverview from "./components/ProjectOverview";
 import { motion, AnimatePresence } from "motion/react"

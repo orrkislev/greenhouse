@@ -13,6 +13,7 @@ const EmptySlot = tw`min-h-8 z-1
     text-transparent hover:text-gray-800
     cursor-pointer transition-all
 `;
+const Empty = tw`min-h-8 z-1 bg-[#F3C5C599]`
 
 const TimeSlot = tw.div`flex items-start justify-start text-black/50 text-xs pointer-events-none z-6 p-1`;
 
@@ -25,17 +26,17 @@ const newEventTitles = [
     "פגישה חשובה",
     "שיחה אישית",
 ];
-export function ScheduleEvents(){
+export function ScheduleEvents({ withLabel = true }) {
     const week = useWeek(state => state.week);
     const allEvents = useWeeksEvents(week, true);
     if (!week || week.length === 0) return null;
 
 
     return (
-        <Events events={allEvents} edittable={true} week={week}/>
+        <Events events={allEvents} edittable={true} week={week} withLabel={withLabel} />
     )
 }
-export default function Events({events, edittable = false, week}) {
+export default function Events({ events, edittable = false, week, withLabel = true }) {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [draggingId, setDraggingId] = useState(null);
     const [resizingId, setResizingId] = useState(null);
@@ -81,12 +82,15 @@ export default function Events({events, edittable = false, week}) {
     }
 
     return (
-        <ScheduleSection name="לוז">
-            {positions.map((pos, index) => (
-                <EmptySlot key={index} className={`col-${pos.col} row-${pos.row}`}
-                    onClick={() => handleNewEvent(pos)}
-                >+</EmptySlot>
-            ))}
+        <ScheduleSection name="לוז" withLabel={withLabel}>
+            {positions.map((pos, index) => {
+                if (edittable)
+                    return <EmptySlot key={index} className={`col-${pos.col} row-${pos.row}`}
+                        onClick={() => handleNewEvent(pos)}
+                    >+</EmptySlot>
+                else
+                    return <Empty key={index} className={`col-${pos.col} row-${pos.row}`} />
+            })}
 
             {positions.map((pos, index) => (
                 <TimeSlot key={index} className={`col-${pos.col} row-${pos.row}`}>

@@ -3,7 +3,7 @@ import { FormInput, useForm } from "@/components/ui/form/FormInput";
 import { Button } from "@/components/ui/button";
 import TimeRangePicker from "@/components/ui/timerange-picker";
 import { format } from "date-fns";
-import { createGroupEntry, removeGroupEntry, updateGroupEntry } from "./useGroupSchedule";
+import { createGroupEntry, removeGroupEntry, updateGroupEntry } from "@/utils/useGroups";
 
 
 export function GroupEntryEdit({ onClose, groupName, date, obj }) {

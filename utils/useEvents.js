@@ -4,7 +4,7 @@ import { addDoc, and, collection, deleteDoc, doc, getDocs, or, query, updateDoc,
 import { debounce } from "lodash";
 import { create } from "zustand";
 
-export const useUserSchedule = create((set, get) => {
+export const useEvents = create((set, get) => {
     const userId = () => useUser.getState().user.id;
     const getRef = (collectionName) => collection(db, `users/${userId()}/${collectionName}`);
 
@@ -22,78 +22,7 @@ export const useUserSchedule = create((set, get) => {
     }, 1000);
 
     return {
-
-        tasks: [],
         events: [],
-        meetings: [],
-
-        loadWeekEvents: async (week) => {
-            const uid = useUser.getState().user.id;
-            if (!uid || !week || week.length === 0) return;
-
-            const eventsRef = getRef("events");
-            const eventsQuery = query(eventsRef,
-                and(
-                    where("date", ">=", week[0]),
-                    where("date", "<=", week[week.length - 1])
-                )
-            );
-            const eventsSnap = await getDocs(eventsQuery);
-            const events = eventsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-            set({ events });
-        },
-        addEvent: async (event) => {
-            const newDoc = await addDoc(getRef("events"), event);
-            event.id = newDoc.id;
-            set((state) => ({
-                events: [...state.events, event]
-            }));
-        },
-        updateEvent: (eventId, updatedEvent) => {
-            updatedEvent._dirty = true;
-            set((state) => {
-                const updatedEvents = state.events.map(event =>
-                    event.id === eventId ? { ...event, ...updatedEvent } : event
-                );
-                return { events: updatedEvents };
-            });
-            debouncedUpdateEvents();
-        },
-        deleteEvent: async (eventId) => {
-            const ref = getRef("events");
-            await deleteDoc(doc(ref, eventId));
-            set((state) => ({
-                events: state.events.filter(event => event.id !== eventId)
-            }));
-        },
-        addGroupEvent: event => {
-            const newEvent = {
-                group: event.group,
-                start: event.timeRange.start,
-                end: event.timeRange.end,
-                title: event.title,
-                date: event.date,
-                id: event.id,
-            }
-            set((state) => ({ events: [...state.events, newEvent] }));
-        },
-        removeGroupEvent: (eventId) => {
-            set((state) => ({
-                events: state.events.filter(event => event.id !== eventId)
-            }));
-        },
-
-
-        loadMeetings: async () => {
-            const uid = userId();
-            if (!uid) return;
-            const meetingsRef = collection(db, `meetings`);
-            const meetingsQuery = query(meetingsRef, where("participants", "array-contains", uid));
-            const meetingsSnap = await getDocs(meetingsQuery);
-            const meetings = meetingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            set({ meetings });
-        },
 
         loadWeekTasks: async (week) => {
             const uid = userId()
@@ -152,9 +81,6 @@ export const useUserSchedule = create((set, get) => {
                 tasks: state.tasks.filter(task => task.id !== taskId)
             }));
         },
-
-        selected: null,
-        setSelected: (selected) => set({ selected }),
     }
 });
 

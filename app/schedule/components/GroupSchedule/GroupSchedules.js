@@ -1,22 +1,22 @@
 import { useUser } from "@/utils/useUser";
-import { useGroupSchedule } from "./useGroupSchedule";
 import { useWeek } from "../../utils/useWeek";
 import { useEffect } from "react";
 import GroupSchedule from "./GroupSchedule";
+import { useGroups } from "@/utils/useGroups";
 
 export default function GroupSchedules() {
     const userGroups = useUser(state => state.user.groups);
-    const groupsSchedule = useGroupSchedule();
+    const groups = useGroups()
     const week = useWeek(state => state.week);
 
     useEffect(() => {
         if (!week || week.length === 0) return;
-        groupsSchedule.getUserGroups().then(()=>{
-            groupsSchedule.getWeeksEntries(week);
+        groups.loadUserGroups().then(()=>{
+            groups.updateWeek(week);
         })
     }, [userGroups, week])
 
-    return groupsSchedule.groups.map(group => (
+    return groups.groups.map(group => (
         <GroupSchedule key={group.name} group={group} />
     ));
 }

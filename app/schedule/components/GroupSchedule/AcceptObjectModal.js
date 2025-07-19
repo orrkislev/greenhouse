@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/utils/useUser";
-import { joinGroupEntry } from "./useGroupSchedule";
+import { joinGroupEntry } from "@/utils/useGroups";
 
 export default function GroupEntryContext({ groupName, obj, onClose }) {
     const userId = useUser(state => state.user.id);

@@ -1,10 +1,11 @@
+import { useGroups } from "@/utils/useGroups";
 import { useUserSchedule } from "../../utils/useUserSchedule";
 import { HOURS } from "../../utils/useWeek";
-import { useGroupSchedule } from "../GroupSchedule/useGroupSchedule";
 
-export default function useWeeksEvents(week, edittable = false) {
+export default function useWeeksEvents(week) {
     const events = useUserSchedule(state => state.events);
-    const groups = useGroupSchedule(state => state.groups);
+    console.log({events})
+    const groups = useGroups(state => state.groups);
 
     if (!week || week.length === 0) return [];
 

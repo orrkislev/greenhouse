@@ -3,10 +3,10 @@ export function ResizeHandle({ visible, onMouseDown }) {
 
     return (
         <div 
-            className="absolute bottom-0 right-0 w-full p-1 px-2 cursor-col-resize"
+            className="absolute bottom-0 right-0 w-full p-1 px-2 cursor-row-resize z-10"
             onMouseDown={onMouseDown}
         >
-            <div className="w-full h-[3px] rounded-full bg-white bg-white/50 cursor-col-resize" />
+            <div className="w-full h-[3px] rounded-full bg-white bg-white/50" />
         </div>
     );
 }

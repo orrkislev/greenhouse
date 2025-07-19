@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { leaveGroupEntry } from "../GroupSchedule/useGroupSchedule";
+import { leaveGroupEntry } from "@/utils/useGroups";
 import { useUser } from "@/utils/useUser";
 import { useUserSchedule } from "../../utils/useUserSchedule";
 import { Input } from "@/components/ui/input";

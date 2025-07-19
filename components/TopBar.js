@@ -31,7 +31,7 @@ export default function TopBar() {
                             <div className="p-4 min-w-[220px] flex flex-col gap-2">
                                 <div className="font-semibold text-lg">{user ? user.firstName + ' ' + user.lastName : "Guest"}</div>
                                 <div className="text-sm text-muted-foreground">{user ? user.email : "No email"}</div>
-                                <Button onClick={logout}>
+                                <Button onClick={logout} className='cursor-pointer'>
                                     <LogOut className="w-4 h-4" /> יציאה
                                 </Button>
                             </div>

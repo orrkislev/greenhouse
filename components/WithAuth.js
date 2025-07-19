@@ -3,13 +3,22 @@
 import { useState } from 'react';
 import { UserCircle2 } from 'lucide-react';
 import { useUser } from '@/utils/useUser';
-import PINInput from '../ui/PIN';
+import PINInput from './ui/PIN';
 import { redirect } from 'next/navigation';
 
 export default function WithAuth({ children, role }) {
     const [username, setUsername] = useState('');
     const [pin, setPin] = useState(['', '', '', '']);
     const { user, signIn, loading, error } = useUser();
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-lg text-gray-600">טוען...</div>
+            </div>
+        );
+    }
+
 
     if (user && Object.keys(user).length > 0) {
         if (!role || (role && user.roles && user.roles.includes(role))) {

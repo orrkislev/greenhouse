@@ -1,6 +1,6 @@
 'use client';
 
-import WithAuth from '@/components/auth/SignIn';
+import WithAuth from '@/components/WithAuth';
 import Schedule from '@/app/schedule/components/Schedule';
 
 export default function Home() {
