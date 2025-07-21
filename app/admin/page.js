@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import AdminStaff from "./components/AdminStaff"
 import { getAllGroups, subscribeToGroups } from "./actions/group actions"
 import { getAllMembers, subscribeToMembers } from "./actions/member actions"
+import AdminYearSchedule from "./components/AdminYearSchedule"
 
 export default function AdminPage() {
     return (
@@ -41,10 +42,13 @@ export function AdminPageActual() {
     }, [])
 
     return (
-        <div className="flex items-center justify-center h-screen rtl flex-col gap-4 p-4">
-            <div className="w-full max-w-5xl flex gap-4">
-                <AdminGroups groups={groups} students={students} staff={staff} />
-                <AdminStaff staff={staff} />
+        <div className="rtl p-4 flex justify-center min-h-screen">
+            <div className="w-full max-w-7xl flex flex-col gap-4">
+                <div className="flex gap-2">
+                    <AdminGroups groups={groups} students={students} staff={staff} />
+                    <AdminStaff staff={staff} />
+                </div>
+                <AdminYearSchedule />
             </div>
         </div>
     )

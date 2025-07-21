@@ -10,7 +10,6 @@ export const useGroups = create(persist(
         groups: [],
         loadUserGroups: async () => {
             set({ groups: [] });
-            console.log("Loading user groups");
             try {
                 const userGroups = useUser.getState().user.groups;
                 userGroups.forEach(group => get().loadGroup(group))
@@ -19,7 +18,6 @@ export const useGroups = create(persist(
             }
         },
         loadGroup: async (group) => {
-            console.log("Loading group:", group);
             if (get().groups.find(g => g.id === group)) return;
             const groupDocRef = doc(db, "groups", group);
             const groupDoc = await getDoc(groupDocRef);

@@ -51,9 +51,9 @@ export function prepareEventsForSchedule(events, week, edittable = false) {
             // Event is fully inside block
             (event.startIndex >= block.startIndex && event.endIndex <= block.endIndex) ||
             // Event overlaps block end
-            (event.endIndex >= block.startIndex && event.endIndex <= block.endIndex) ||
+            (event.endIndex > block.startIndex && event.endIndex <= block.endIndex) ||
             // Event overlaps block start
-            (event.startIndex >= block.startIndex && event.startIndex <= block.endIndex) ||
+            (event.startIndex >= block.startIndex && event.startIndex < block.endIndex) ||
             // Block is fully inside event
             (block.startIndex >= event.startIndex && block.endIndex <= event.endIndex)
             )
@@ -114,6 +114,12 @@ function getHourIndex(time, isEnd = false) {
     if (index === -1) index = HOURS.length - 1;
 
     return index;
+}
+
+export function getEventDuration(event) {
+    const startMinutes = toMinutes(event.start);
+    const endMinutes = toMinutes(event.end);
+    return Math.ceil((endMinutes - startMinutes) / 60);
 }
 
 export function getTimeWithOffset(time, offset) {

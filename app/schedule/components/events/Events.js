@@ -2,9 +2,8 @@ import { useState } from "react";
 import { Event } from "./Event";
 import { HOURS, useWeek } from "@/app/schedule/utils/useWeek";
 import { tw } from "@/utils/tw";
-import EditEventDrawer from "./EditEventDrawer";
 import { ScheduleSection } from "../Layout";
-import useWeeksEvents, { getTimeWithOffset, prepareEventsForSchedule } from "./useWeeksEvents";
+import useWeeksEvents, { getEventDuration, getTimeWithOffset, prepareEventsForSchedule } from "./useWeeksEvents";
 import { eventsActions } from "@/utils/useEvents";
 
 const EmptySlot = tw`min-h-8 z-1
@@ -37,7 +36,6 @@ export function ScheduleEvents({ withLabel = true }) {
     )
 }
 export default function Events({ events, edittable = false, week, withLabel = true }) {
-    const [selectedEvent, setSelectedEvent] = useState(null);
     const [draggingId, setDraggingId] = useState(null);
     const [resizingId, setResizingId] = useState(null);
 
@@ -48,7 +46,8 @@ export default function Events({ events, edittable = false, week, withLabel = tr
 
     const onMove = pos => {
         if (draggingId === null) return;
-        const currDuration = events.find(e => e.id === draggingId).duration;
+        const currEvent = events.find(e => e.id === draggingId);
+        const currDuration = getEventDuration(currEvent);
         eventsActions.updateEvent(draggingId, {
             date: week[pos.col - 1],
             start: HOURS[pos.row - 1],
@@ -61,7 +60,6 @@ export default function Events({ events, edittable = false, week, withLabel = tr
         if (newDuration > 0) {
             eventsActions.updateEvent(resizingId, {
                 end: getTimeWithOffset(event.start, newDuration * 60),
-                duration: newDuration * 60,
             });
         }
     }
@@ -72,7 +70,7 @@ export default function Events({ events, edittable = false, week, withLabel = tr
         const end = getTimeWithOffset(start, 60);
 
         const newEvent = {
-            date, start, end, duration: 60,
+            date, start, end,
             title: newEventTitles[Math.floor(Math.random() * newEventTitles.length)],
         };
         eventsActions.addEvent(newEvent);
@@ -128,12 +126,9 @@ export default function Events({ events, edittable = false, week, withLabel = tr
                     onEndDrag={() => setDraggingId(null)}
                     onStartResize={() => setResizingId(event.id)}
                     onEndResize={() => setResizingId(null)}
-                    onSelect={() => setSelectedEvent(event)}
                 />
             ))}
 
-
-            <EditEventDrawer onClose={() => setSelectedEvent(null)} event={selectedEvent} />
         </ScheduleSection>
     )
 }
