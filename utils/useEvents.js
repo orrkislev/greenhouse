@@ -25,6 +25,7 @@ export const useEvents = create((set, get) => {
     return {
 
         events: [],
+        clear: () => set({ events: [] }),
 
         loadWeekEvents: async (week) => {
             const uid = useUser.getState().user.id;
@@ -92,6 +93,7 @@ export const eventsActions = {
     deleteEvent: (eventId) => useEvents.getState().deleteEvent(eventId),
     addGroupEvent: (event) => useEvents.getState().addGroupEvent(event),
     removeGroupEvent: (eventId) => useEvents.getState().removeGroupEvent(eventId),
+    clear: useEvents.getState().clear
 }
 
 const onUpdateWeek = (week) => {

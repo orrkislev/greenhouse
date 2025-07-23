@@ -8,14 +8,13 @@ import { useWeek } from "@/app/schedule/utils/useWeek";
 export const useGroups = create(persist(
     (set, get) => ({
         groups: [],
+        clear: () => set({ groups: [] }),
+
         loadUserGroups: async () => {
             set({ groups: [] });
-            try {
-                const userGroups = useUser.getState().user.groups;
-                userGroups.forEach(group => get().loadGroup(group))
-            } catch (error) {
-                console.error('Error loading user groups:', error);
-            }
+            const userGroups = useUser.getState().user.groups;
+            if (!userGroups || userGroups.length === 0) return;
+            userGroups.forEach(group => get().loadGroup(group))
         },
         loadGroup: async (group) => {
             if (get().groups.find(g => g.id === group)) return;
@@ -37,7 +36,7 @@ export const useGroups = create(persist(
         },
         joinGroup: async (groupName) => {
             useUser.getState().updateUserDoc({
-                groups: arrayUnion(groupName)
+                groups: useUser.getState().user.groups.concat(groupName)
             });
         },
         leaveGroup: async (groupName) => {
@@ -97,7 +96,7 @@ export const useGroups = create(persist(
             const group = get().groups.find(g => g.id === groupId);
             if (!group) return;
             if (group.students) return;
-            
+
             const studentQuery = query(
                 collection(db, "users"),
                 where("className", "==", groupId)
@@ -116,6 +115,7 @@ export const useGroups = create(persist(
 ));
 
 export const groupsActions = {
+    clear: () => useGroups.getState().clear(),
     loadUserGroups: () => useGroups.getState().loadUserGroups(),
     loadGroup: (group) => useGroups.getState().loadGroup(group),
     joinGroup: (groupName) => useGroups.getState().joinGroup(groupName),
@@ -146,5 +146,10 @@ export const groupsActions = {
         return updateDoc(docRef, {
             members: arrayRemove(userId)
         });
+    },
+    getAllGroups: async () => {
+        const groupsRef = collection(db, "groups");
+        const snapshot = await getDocs(groupsRef);
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     }
 };

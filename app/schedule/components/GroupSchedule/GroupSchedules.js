@@ -17,6 +17,6 @@ export default function GroupSchedules() {
     }, [userGroups, week])
 
     return groups.groups.map(group => (
-        <GroupSchedule key={group.name} group={group} />
+        <GroupSchedule key={group.id} group={group} />
     ));
 }

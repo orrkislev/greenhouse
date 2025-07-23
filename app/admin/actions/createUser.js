@@ -3,7 +3,6 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { prepareEmailPassword } from '@/utils/firebase/auth';
-import { getDoc, setDoc } from 'firebase/firestore';
 
 if (!getApps().length) {
     initializeApp({
@@ -15,7 +14,7 @@ if (!getApps().length) {
     });
 }
 
-export const createUser = async (username, pinPass, firstName, lastName) => {
+export const createUser = async (username, firstName, lastName) => {
     const db = getFirestore();
     const userDoc = db.collection('users').doc(username);
     const userSnapshot = await userDoc.get();
@@ -28,7 +27,7 @@ export const createUser = async (username, pinPass, firstName, lastName) => {
         throw new Error("Username must start with a letter and contain only English letters, numbers, dots, underscores, or hyphens.");
     }
 
-    const [email, password] = prepareEmailPassword(username, pinPass);
+    const [email, password] = prepareEmailPassword(username, '0000');
     console.log('Creating user with email:', email, 'and username:', username, 'and password:', password);
     const userRecord = await getAuth().createUser({ email, password, displayName: `${firstName} ${lastName}`, emailVerified: true, });
 

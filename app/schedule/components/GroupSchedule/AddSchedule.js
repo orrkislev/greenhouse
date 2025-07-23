@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useUser } from "@/utils/useUser";
 import { tw } from "@/utils/tw";
 import { groupsActions } from "@/utils/useGroups";
 
@@ -7,7 +6,6 @@ const GroupButton = tw`text-xs text-gray-800 bg-blue-200 px-2 py-1 text-center h
 const NewGroupButton = tw`text-xs text-gray-800 bg-emerald-200 px-2 py-1 text-center hover:bg-emerald-400 cursor-pointer transition-all`;
 
 export function AddSchedule() {
-    const user = useUser(state => state.user);
     const [showGroups, setShowGroups] = useState(false);
     const [groups, setGroups] = useState([]);
 
@@ -17,7 +15,7 @@ export function AddSchedule() {
     }, [showGroups]);
 
     const clickGroup = (group) => {
-        groupsActions.joinGroup(user.id, group.id);
+        groupsActions.joinGroup(group.id);
         setShowGroups(false);
     };
 

@@ -1,189 +1,248 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import NewStudentDrawer from "./NewStudentDrawer";
-import EditStudentDrawer from "./EditStudentDrawer";
-import { deleteDoc, doc } from "firebase/firestore";
-import { db } from "@/utils/firebase/firebase";
-import { Trash2 } from "lucide-react";
-import { addAdmin, createGroup, removeAdmin } from "../actions/group actions";
+import { useEffect, useState } from "react";
+import { membersActions, useMembers } from "@/utils/useMembers";
+import { Edit2, XIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-export default function AdminGroups({ groups, students, staff }) {
-
-    const [drawerOpen, setDrawerOpen] = useState(false);
-    const [editDrawerOpen, setEditDrawerOpen] = useState(false);
-    const [selectedStudent, setSelectedStudent] = useState(null);
-    const [currentGroupName, setCurrentGroupName] = useState("");
-    const [newGroupName, setNewGroupName] = useState("");
-    const [showNewGroupInput, setShowNewGroupInput] = useState(false);
-
-    const displayGroups = [...groups];
-    displayGroups.sort((a, b) => a.name.localeCompare(b.name));
-    displayGroups.forEach(group => group.members = []);
-    students.forEach(student => {
-        const groupName = student.className
-        const group = displayGroups.find(g => g.name === groupName);
-        if (group) group.members.push(student);
-        else throw new Error(`Group ${groupName} not found for student ${student.firstName} ${student.lastName}`);
-    });
-    displayGroups.forEach(group => {
-        group.displayAdmins = group.admins
-            .map(adminId => staff.find(s => s.id === adminId))
-            .filter(admin => admin !== undefined);
-    });
-
-    function handleNewMember(group) {
-        setCurrentGroupName(group.name);
-        setDrawerOpen(true);
-    }
-
-    function handleEditStudent(student) {
-        setSelectedStudent(student);
-        setEditDrawerOpen(true);
-    }
-
-    const handleCreateGroup = async () => {
-        await createGroup(newGroupName);
-        setNewGroupName("");
-        setShowNewGroupInput(false);
-    }
+export default function AdminGroups() {
+    const groups = useMembers(state => state.groups);
 
     return (
-        <div className="p-4 rounded-2xl bg-white shadow-md w-full">
-            <div className="flex items-center mb-2 gap-2">
-                <Button size="sm" variant="outline" onClick={() => setShowNewGroupInput(v => !v)}>
-                    + New Group
-                </Button>
-                {showNewGroupInput && (
-                    <form onSubmit={e => { e.preventDefault(); handleCreateGroup(); }} className="flex gap-2">
-                        <input
-                            className="border rounded px-2 py-1 text-sm"
-                            type="text"
-                            value={newGroupName}
-                            onChange={e => setNewGroupName(e.target.value)}
-                            placeholder="Group name"
-                            autoFocus
-                        />
-                        <Button size="sm" type="submit">Add</Button>
-                    </form>
-                )}
-            </div>
-            <Accordion type="single" collapsible className="w-full">
-                {displayGroups.map((group, index) => (
-                    <AccordionItem key={group.id} value={group.id}>
-                        <AccordionTrigger className="flex items-center justify-start w-full">
-                            <GroupTitle group={group} />
-                        </AccordionTrigger>
-                        <AccordionContent className="p-2">
-                            <GroupOpen group={group} groups={groups} clickNew={() => handleNewMember(group)} clickStudent={handleEditStudent} staff={staff} />
-                        </AccordionContent>
-                    </AccordionItem>
-                ))}
-            </Accordion>
-
-            <NewStudentDrawer
-                open={drawerOpen}
-                onOpenChange={setDrawerOpen}
-                groupName={currentGroupName}
-                groups={groups}
-            />
-            <EditStudentDrawer
-                open={editDrawerOpen}
-                onOpenChange={setEditDrawerOpen}
-                student={selectedStudent}
-                groups={groups}
-            />
+        <div>
+            {groups.map(group => (
+                <div key={group.id} className="mb-4 p-4 bg-gray-100">
+                    <GroupHeader group={group} />
+                    <GroupMentors group={group} />
+                    <GroupStudents group={group} />
+                </div>
+            ))}
+            <NewGroupButton />
         </div>
-    );
+    )
 }
 
-function GroupTitle({ group }) {
-    const handleDeleteGroup = (e) => {
-        e.stopPropagation();
-        deleteDoc(doc(db, 'groups', group.id))
+
+
+
+
+function GroupHeader({ group }) {
+    const [isEditing, setIsEditing] = useState(false);
+    if (isEditing) {
+        const handleSubmit = (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const updatedGroup = {
+                name: formData.get('name'),
+                year: parseInt(formData.get('year'), 10)
+            };
+            membersActions.updateClass(group.id, updatedGroup);
+            setIsEditing(false);
+        };
+
+        return (
+            <form className="flex items-center mb-2 group gap-2" onSubmit={handleSubmit}>
+                <input type="text" name="name" defaultValue={group.name} className="p-1 border rounded" />
+                <input type="number" name="year" defaultValue={group.year} className="p-1 border rounded" />
+                <button type="submit" className="px-4 py-1 bg-blue-500 text-white text-xs hover:bg-blue-600">
+                    שמור
+                </button>
+                <XIcon className="w-4 h-4 cursor-pointer" onClick={() => setIsEditing(false)} />
+                <Edit2 className="w-4 h-4 opacity-0 group-hover:opacity-100 cursor-pointer"
+                    onClick={() => setIsEditing(false)} />
+            </form>
+        );
+    } else {
+        return (
+            <div className="flex items-center mb-2 group gap-2">
+                <h2 className="text-lg font-semibold">{group.name}</h2>
+                <span className="text-sm text-gray-500">שנה {group.year}</span>
+                <Edit2 className="w-4 h-4 opacity-0 group-hover:opacity-100 cursor-pointer"
+                    onClick={() => setIsEditing(true)} />
+            </div>
+        );
+    }
+}
+
+
+
+function GroupMentors({ group }) {
+    const staff = useMembers(state => state.staff);
+
+    const handleRemoveMentor = (mentorId) => {
+        membersActions.removeMentorFromGroup(group.id, mentorId);
+    };
+    const addMentorToGroup = (mentorId) => {
+        membersActions.addMentorToGroup(group.id, mentorId);
     };
 
     return (
-        <div className="flex items-center justify-between w-full group">
-            <span className="text-lg font-semibold">{group.name}</span>
-            {group.members.length == 0 && (
-                <div
-                    type="button"
-                    className="ml-2 opacity-0 group-hover:opacity-100 transition-all hover:bg-gray-100 hover:scale-110 rounded p-1 cursor-pointer"
-                    onClick={handleDeleteGroup}
-                    tabIndex={-1}
-                    aria-label="Delete group"
-                >
-                    <Trash2 className="w-4 h-4 text-red-500" />
-                </div>
-            )}
+        <div className="mb-2">
+            <h3 className="text-sm">מנטורים</h3>
+            <div className="flex flex-wrap gap-2 pr-4">
+                {group.mentors && group.mentors.map(mentor => (
+                    <div key={mentor.id} className="flex gap-2 items-center bg-blue-100 text-blue-800 px-2 py-1 group relative">
+                        <span>{mentor.firstName} {mentor.lastName}</span>
+                        <XIcon className="w-4 h-4 opacity-0 group-hover:opacity-100 cursor-pointer"
+                            onClick={() => handleRemoveMentor(mentor.id)} />
+                    </div>
+                ))}
+                <select className="ml-2 p-1 border rounded" onChange={(e) => addMentorToGroup(e.target.value)} defaultValue="">
+                    <option value="" disabled>הוסף מנטור</option>
+                    {staff.filter(mentor => !group.mentors.some(m => m.id === mentor.id)).map(mentor => (
+                        <option key={mentor.id} value={mentor.id}>{mentor.firstName} {mentor.lastName}</option>
+                    ))}
+                </select>
+            </div>
         </div>
     );
 }
 
-function GroupOpen({ group, clickNew, clickStudent, staff }) {
+function GroupStudents({ group }) {
+    return (
+        <div>
+            <h3 className="text-sm">תלמידים</h3>
+            <div className="flex flex-wrap gap-2 pr-4">
+                {group.students && group.students.map(student => (
+                    <SingleStudent key={student.id} student={student} />
+                ))}
+                <NewStudentButton group={group} />
+            </div>
+        </div>
+    );
+}
 
-    const [selectedStaffId, setSelectedStaffId] = useState(null)
-    const clickAddAdmin = () => addAdmin(group.name, selectedStaffId)
-    const clickRemoveAdmin = staffId => removeAdmin(group.name, staffId)
+function SingleStudent({ student }) {
+    const groups = useMembers(state => state.groups);
+    const [isOpen, setIsOpen] = useState(false);
+
+    const saveChanges = (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const values = Object.fromEntries(formData);
+        membersActions.updateMember(student.id, {
+            firstName: values.first,
+            lastName: values.last,
+            className: values.className
+        });
+        setIsOpen(false);
+    }
 
     return (
-        <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-500">Admins:</span>
-                {group.displayAdmins.map(admin => (
-                    <div className="flex justify-between" key={admin.id}>
-                        <span className="text-sm font-semibold">
-                            {admin.firstName} {admin.lastName}
-                        </span>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="ml-2 text-red-500 hover:bg-red-100"
-                            onClick={() => clickRemoveAdmin(admin.id)}
-                        >
-                            <Trash2 className="w-4 h-4" />
-                        </Button>
-                    </div>
-                ))}
-                <div className="flex items-center gap-2">
-                    <select
-                        className="border rounded px-2 py-1 text-sm"
-                        defaultValue=""
-                        onChange={e => setSelectedStaffId(e.target.value)}
-                    >
-                        <option value="" disabled>
-                            Add admin...
-                        </option>
-                        {staff.filter(staffMember => !group.displayAdmins.some(admin => admin.id === staffMember.id))
-                            .map(staffMember => (
-                                <option key={staffMember.id} value={staffMember.id}>
-                                    {staffMember.firstName} {staffMember.lastName}
-                                </option>
-                            ))}
-                    </select>
-                    <Button variant="outline" size="sm" className="ml-2" onClick={clickAddAdmin}>
-                        Add Admin
-                    </Button>
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger asChild>
+                <div className="cursor-pointer hover:bg-gray-200 p-1">
+                    {student.firstName} {student.lastName}
                 </div>
-            </div>
-            <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-500">Members:</span>
-                {group.members.sort((a, b) => a.firstName.localeCompare(b.firstName)).map(member => (
-                    <Button
-                        key={member.id}
-                        variant="ghost"
-                        className="w-full justify-between text-left"
-                        onClick={() => clickStudent(member)}
-                    >
-                        <span>{member.firstName} {member.lastName}</span>
-                    </Button>
-                ))}
-            </div>
-            <Button variant="outline" size="sm" className="w-full"
-                onClick={clickNew}>
-                Add Member
-            </Button>
-        </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 pt-12">
+                <XIcon className="absolute left-4 top-4 w-4 h-4 cursor-pointer" onClick={() => setIsOpen(false)} />
+                <form onSubmit={saveChanges} className="flex flex-col gap-2">
+                    <input name="first" type="text" placeholder="שם פרטי" defaultValue={student.firstName} className="p-1 border" />
+                    <input name="last" type="text" placeholder="שם משפחה" defaultValue={student.lastName} className="p-1 border" />
+                    <select name="className" className="p-1 border">
+                        <option value="" disabled>בחר קבוצה</option>
+                        {groups.map(group => (
+                            <option key={group.id} value={group.id} >
+                                {group.name}
+                            </option>
+                        ))}
+                    </select>
+                    <button type="submit" className="mt-2 px-4 py-1 bg-blue-500 text-white text-xs hover:bg-blue-600">
+                        שמור
+                    </button>
+                    <button type="button" className="mt-2 px-4 py-1 bg-red-500 text-white text-xs hover:bg-red-600"
+                        onClick={() => membersActions.removeMember(student.uid, student.username)}>
+                        הסר תלמיד
+                    </button>
+                </form>
+            </PopoverContent>
+        </Popover>
+    );
+}
+
+function NewStudentButton({ group }) {
+    const [showForm, setShowForm] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const newStudent = Object.fromEntries(formData);
+        const res = await membersActions.createStudent(
+            newStudent.firstName,
+            newStudent.lastName,
+            newStudent.username,
+            group.id
+        );
+        if (res instanceof Error) {
+            alert(res.message);
+            return;
+        }
+        setShowForm(false);
+    };
+
+    return (
+        <Popover open={showForm} onOpenChange={setShowForm}>
+            <PopoverTrigger asChild>
+                <button className="px-4 py-1 bg-emerald-500 text-white text-xs hover:bg-emerald-600">
+                    {showForm ? '-' : '+'}
+                </button>
+            </PopoverTrigger>
+            <PopoverContent>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-2 mt-2">
+                    <input type="text" name="firstName"
+                        placeholder="שם פרטי"
+                        className="p-1 border"
+                    />
+                    <input type="text" name="lastName"
+                        placeholder="שם משפחה"
+                        className="p-1 border"
+                    />
+                    <input type="text" name="username"
+                        placeholder="שם משתמש"
+                        className="p-1 border"
+                    />
+                    <button type="submit" className="px-4 py-1 bg-blue-500 text-white text-xs hover:bg-blue-600">
+                        הוסף תלמיד
+                    </button>
+                </form>
+            </PopoverContent>
+        </Popover>
+    );
+}
+
+
+
+
+function NewGroupButton() {
+    const [showForm, setShowForm] = useState(false);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const newGroupName = formData.get('groupName');
+        const newYear = formData.get('year');
+        membersActions.createClass(newGroupName, newYear);
+        setShowForm(false);
+    };
+
+    return (
+        <Popover open={showForm} onOpenChange={setShowForm}>
+            <PopoverTrigger asChild>
+                <button className="px-4 py-1 bg-blue-500 text-white text-xs hover:bg-blue-600">
+                    {showForm ? '-' : '+'}
+                </button>
+            </PopoverTrigger>
+            <PopoverContent>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-2 mt-2">
+                    <input type="text" name="groupName"
+                        placeholder="שם קבוצה חדש"
+                        className="p-1 border"
+                    />
+                    <input type="number" name="year" placeholder="מחזור" className="p-1 border" />
+                    <button type="submit" className="px-4 py-1 bg-green-500 text-white text-xs hover:bg-green-600">
+                        צור קבוצה
+                    </button>
+                </form>
+            </PopoverContent>
+        </Popover>
     );
 }

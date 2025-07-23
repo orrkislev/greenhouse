@@ -25,7 +25,6 @@ export const useGoogleCalendar = create((set, get) => ({
         set(state => ({ loadedRanges: [...state.loadedRanges, { start, end }], isLoading: true }));
         try {
             const events = await fetchEventsFromGoogleCalendar(userRefreshToken, start, end);
-            console.log('Fetched Google Calendar events:', events);
             set({ events, isLoading: false });
         } catch (error) {
             console.error('Error fetching Google Calendar events:', error);

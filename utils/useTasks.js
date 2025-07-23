@@ -10,6 +10,7 @@ export const useTasks = create((set, get) => {
 
     return {
         tasks: [],
+        clear: () => set({ tasks: [] }),
 
         loadWeekTasks: async (week) => {
             const uid = userId()
@@ -78,6 +79,7 @@ export const tasksActions = {
     deleteTask: (taskId) => useTasks.getState().deleteTask(taskId),
     addGroupTask: (task) => useTasks.getState().addGroupTask(task),
     removeGroupTask: (taskId) => useTasks.getState().removeGroupTask(taskId),
+    clear: useTasks.getState().clear
 };
 
 
