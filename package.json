@@ -25,6 +25,7 @@
     "date-fns": "^3.6.0",
     "firebase": "^11.8.1",
     "firebase-admin": "^13.4.0",
+    "googleapis": "^153.0.0",
     "input-otp": "^1.4.2",
     "lodash": "^4.17.21",
     "lucide-react": "^0.511.0",
@@ -42,6 +43,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/react": "19.1.8",
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
     "tailwindcss": "^4.1.7",

@@ -10,6 +10,7 @@ import { useState } from "react";
 import { AddSchedule } from "./GroupSchedule/AddSchedule";
 import GroupSchedules from "./GroupSchedule/GroupSchedules";
 import Meetings from "./meetings/Meetings";
+import GoogleCalendar from "./Google/GoogleCalendar";
 
 const ScheduleOuter = tw`w-full h-full px-16 pt-8`;
 
@@ -43,6 +44,7 @@ export default function Schedule() {
                         <Tasks />
                         <Meetings />
                         <ScheduleEvents />
+                        <GoogleCalendar />
                         <GroupSchedules />
                         {/* <Gantt /> */}
                         <AddSchedule />
