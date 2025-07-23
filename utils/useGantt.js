@@ -10,17 +10,19 @@ export const useGantt = create((set, get) => ({
     loadedRanges: [],
 
     initialLoad: async () => {
-        const ganttInfo = doc(db, 'school', 'gantt')
+
+        const ganttInfo = doc(db, 'school', 'gantt');
         const ganttSnapshot = await getDoc(ganttInfo);
-        if (!ganttSnapshot.exists()) {
-            console.error("Gantt info not found");
-            return;
-        }
         const ganttData = ganttSnapshot.data();
-        const terms = ganttData.terms || [];
+        const terms = ganttData?.terms || [];
+
         const currDate = format(new Date(), 'yyyy-MM-dd');
         const currTerm = terms.find(term => term.start <= currDate && term.end >= currDate) || null;
-        set({ terms, currTerm });
+
+        set({
+            terms,
+            currTerm,
+        });
     },
 
     loadRangeEvents: async (start, end) => {
@@ -74,3 +76,6 @@ export const ganttActions = {
     createEvent: useGantt.getState().createEvent,
     updateTerm: useGantt.getState().updateTerm
 };
+
+
+ganttActions.initialLoad();

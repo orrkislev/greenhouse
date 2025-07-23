@@ -1,3 +1,4 @@
+import { useWeek } from "@/app/schedule/utils/useWeek";
 import { db } from "@/utils/firebase/firebase";
 import { useUser } from "@/utils/useUser";
 import { addDoc, collection, deleteDoc, doc, onSnapshot, query, updateDoc, where } from "firebase/firestore";
@@ -18,7 +19,6 @@ export const useMeetings = create((set, get) => {
             const meetingsQuery = query(meetingsRef, where("participants", "array-contains", uid));
             onSnapshot(meetingsQuery, snapshot => {
                 const meetings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                console.log("Meetings snapshot:", meetings);
                 meetings.forEach(meeting => {
                     meeting.isCreator = meeting.created === uid;
                 });
@@ -50,3 +50,9 @@ export const meetingsActions = {
         await deleteDoc(meetingRef);
     }
 }
+
+const onUpdateWeek = (week) => {
+    if (week && week.length > 0) meetingsActions.loadMeetings();
+};
+onUpdateWeek(useWeek.getState().week);
+useWeek.subscribe(state => state.week, onUpdateWeek);

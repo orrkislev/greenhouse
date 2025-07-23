@@ -1,17 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { useProject } from "@/app/project/utils/projectStore";
+import { useProject } from "@/utils/useProject";
 
 export default function ProjectOverview() {
     const project = useProject((state) => state.project);
-    const setProject = useProject((state) => state.setProject);
-    const setView = useProject((state) => state.setView);
 
-    const goToIntentions = () => setView('intentions');
     return (
         <div className="min-h-screen p-4" dir="rtl">
-            <Button className="mb-4" onClick={goToIntentions}>
-                הצהרת כוונות
-            </Button>
             <div className="max-w-7xl mx-auto grid grid-cols-12 gap-6 h-screen">
                 {/* Main content area */}
                 <div className="col-span-9 space-y-4">

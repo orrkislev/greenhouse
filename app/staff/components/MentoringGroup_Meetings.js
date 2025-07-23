@@ -12,13 +12,7 @@ const daysOfWeek = ['א', 'ב', 'ג', 'ד', 'ה'];
 export default function MentoringGroup_Meetings({ group, styles }) {
     const week = useWeek(state => state.week);
     const meetings = useMeetings(state => state.meetings);
-
-    useEffect(() => {
-        eventsActions.loadWeekEvents(week);
-        tasksActions.loadWeekTasks(week);
-        meetingsActions.loadMeetings();
-    }, [week])
-
+    
     const studentsWithMeetings = []
     const studentsWithoutMeetings = []
     if (!group.students) return null;

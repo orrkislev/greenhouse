@@ -3,7 +3,7 @@ import { tw } from "@/utils/tw";
 import { Pencil } from "lucide-react";
 
 const Card = tw.div`
-    bg-white rounded-2xl shadow-sm p-4 flex flex-col space-y-2 min-h-[120px] transition-all duration-200
+    flex-1 bg-white rounded-2xl shadow-sm p-4 flex flex-col space-y-2 transition-all duration-200
 `;
 const CardHeader = tw.span`
     font-semibold text-gray-700 text-sm flex items-center gap-2
@@ -21,7 +21,7 @@ const EditButton = tw.button`
     ml-auto text-gray-400 hover:text-lime-500 transition-colors p-1
 `;
 const CollapsedAnswer = tw.div`
-    text-xs text-gray-700 min-h-[40px] whitespace-pre-line
+    text-xs text-gray-700 whitespace-pre-line
 `;
 const Placeholder = tw.span`
     text-gray-300

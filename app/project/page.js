@@ -3,12 +3,11 @@
 import WithAuth from "@/components/WithAuth";
 import ProjectIntentions from "./components/ProjectIntentions";
 import ProjectOverview from "./components/ProjectOverview";
-import { motion, AnimatePresence } from "motion/react"
-import useProjectDataManager from "@/app/project/utils/useProjectDataManager";
-import { useProject } from "@/app/project/utils/projectStore";
+import { useProject } from "@/utils/useProject";
+import NewProjectDialog from "./components/NewProjectDialog";
+import NewTermDialog from "./components/NewTermDialog";
 
 export default function ProjectPage() {
-    useProjectDataManager()
 
     return <WithAuth>
         <ProjectPageActual />
@@ -16,29 +15,10 @@ export default function ProjectPage() {
 }
 
 function ProjectPageActual() {
-    const view = useProject((state) => state.view);
+    const project = useProject((state) => state.project);
 
-    let viewComponent = null;
-    if (view === 'intentions') {
-        viewComponent = <ProjectIntentions />;
-    } else if (view === 'overview') {
-        viewComponent = <ProjectOverview />;
-    }
-
-    return (
-        <div style={{ position: 'relative', width: '100%' }}>
-            <AnimatePresence>
-                <motion.div
-                    key={view}
-                    initial={{ opacity: 0, x: 30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -30 }}
-                    transition={{ type: "spring", bounce: 0.4 }}
-                    style={{ position: 'absolute', width: '100%' }}
-                >
-                    {viewComponent}
-                </motion.div>
-            </AnimatePresence>
-        </div>
-    )
+    if (!project) return <NewProjectDialog />;
+    if (project.isOld) return <NewTermDialog />;
+    if (!project.master) return <ProjectIntentions />;
+    else return <ProjectOverview />;
 }

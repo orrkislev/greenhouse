@@ -1,3 +1,4 @@
+import { useWeek } from "@/app/schedule/utils/useWeek";
 import { db } from "@/utils/firebase/firebase";
 import { useUser } from "@/utils/useUser";
 import { addDoc, and, collection, deleteDoc, doc, getDocs, or, query, updateDoc, where } from "firebase/firestore";
@@ -78,3 +79,10 @@ export const tasksActions = {
     addGroupTask: (task) => useTasks.getState().addGroupTask(task),
     removeGroupTask: (taskId) => useTasks.getState().removeGroupTask(taskId),
 };
+
+
+const onUpdateWeek = (week) => {
+    if (week && week.length > 0) tasksActions.loadWeekTasks(week);
+};
+onUpdateWeek(useWeek.getState().week);
+useWeek.subscribe(state => state.week, onUpdateWeek);

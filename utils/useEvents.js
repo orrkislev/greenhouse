@@ -1,3 +1,4 @@
+import { useWeek } from "@/app/schedule/utils/useWeek";
 import { db } from "@/utils/firebase/firebase";
 import { useUser } from "@/utils/useUser";
 import { addDoc, and, collection, deleteDoc, doc, getDocs, or, query, updateDoc, where } from "firebase/firestore";
@@ -92,3 +93,9 @@ export const eventsActions = {
     addGroupEvent: (event) => useEvents.getState().addGroupEvent(event),
     removeGroupEvent: (eventId) => useEvents.getState().removeGroupEvent(eventId),
 }
+
+const onUpdateWeek = (week) => {
+    if (week && week.length > 0) eventsActions.loadWeekEvents(week);
+};
+onUpdateWeek(useWeek.getState().week);
+useWeek.subscribe(state => state.week, onUpdateWeek);

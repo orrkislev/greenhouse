@@ -1,6 +1,5 @@
 "use client"
 
-import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { tw } from "@/utils/tw";
 import { ganttActions, useGantt } from "@/utils/useGantt";
 import { useEffect, useState } from "react";
@@ -48,12 +47,15 @@ export default function AdminYearSchedule() {
     const ganttTerms = useGantt(state => state.terms);
 
     useEffect(() => {
-        ganttActions.initialLoad()
-        ganttActions.loadRangeEvents('2025-08-01', '2026-07-31');
+        const date = new Date();
+        const month = date.getMonth() + 1;
+        const startYear = month < 6 ? date.getFullYear() - 1 : date.getFullYear();
+        const endYear = month < 6 ? date.getFullYear() : date.getFullYear() + 1;
+        ganttActions.loadRangeEvents(`${startYear}-08-01`, `${endYear}-07-31`);
     }, []);
 
-    const currentYear = new Date().getFullYear();
-    const academicYear = `${currentYear}-${currentYear + 1}`;
+    const startYear = new Date().getMonth() < 7 ? new Date().getFullYear() - 1 : new Date().getFullYear();
+    const academicYear = `${startYear}-${startYear + 1}`;
 
     const terms = ganttTerms.map((term, index) => ({
         ...term,
@@ -170,12 +172,18 @@ function DateContext({ dayNumber, month, term, dateEvents, dateString }) {
 
     const dayOfTheWeek = new Date(dateString).toLocaleDateString('he-IL', { weekday: 'long' })
 
+
+    const startOfYear = month.monthIndex < 8 ? new Date(month.year - 1, 8, 1) : new Date(month.year, 8, 1);
+    const weekLength = 7 * 24 * 60 * 60 * 1000;
+    const weekNumber = Math.ceil((((new Date(dateString).getTime() - startOfYear.getTime()) / weekLength)));
+
     return (
         <div className="absolute top-[100%] bg-white border border-gray-300 rounded-lg shadow-lg p-2 z-50 w-80">
             <div className="flex items-start justify-between mb-2">
                 <div>
                     <div className="text-sm font-semibold text-gray-800 mb-1">{dayOfTheWeek} ,{dayNumber} ב{month.nameHe} </div>
                     <div className="text-xs text-gray-600 mb-2">{new Date(dateString).toLocaleDateString('he-IL')}</div>
+                    <div className="text-xs text-gray-500">שבוע {weekNumber}</div>
                 </div>
                 {term && (
                     <div className="text-xs mb-2 cursor-pointer hover:bg-gray-100 transition-colors" onClick={_ => setEditTerm(!editTerm)}>
