@@ -1,9 +1,9 @@
-import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDocs, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { create } from "zustand"
 import { db } from "./firebase/firebase";
-import { createUser, deleteUser } from "@/app/admin/actions/createUser";
+import { createUser, deleteUser } from "@/utils/admin actions";
 
-export const useMembers = create((set, get) => ({
+export const useAdmin = create((set, get) => ({
     staff: [],
     groups: [],
 
@@ -89,7 +89,7 @@ export const useMembers = create((set, get) => ({
     addMentorToGroup: async (groupId, mentorId) => {
         const groupRef = doc(db, "groups", groupId);
         await updateDoc(groupRef, { mentors: arrayUnion(mentorId) });
-        const staffMember = useMembers.getState().staff.find(mentor => mentor.id === mentorId);
+        const staffMember = useAdmin.getState().staff.find(mentor => mentor.id === mentorId);
         if (staffMember) {
             set(state => ({
                 groups: state.groups.map(group => {
@@ -124,16 +124,40 @@ export const useMembers = create((set, get) => ({
         }));
     },
 
+
+    loadProjects: async () => {
+        const groups = get().groups;
+        if (groups.flatMap(group => group.students).some(student => student.project)) return
+        for (const group of groups) {
+            const studentsWithProjectIds = group.students.filter(student => student.projectId);
+            for (const student of studentsWithProjectIds) {
+                const projectRef = doc(db, "users", student.id, "projects", student.projectId);
+                const projectSnapshot = await getDoc(projectRef);
+                if (projectSnapshot.exists()) {
+                    const projectData = projectSnapshot.data();
+                    set(state => ({
+                        groups: state.groups.map(g => {
+                            if (g.id === group.id) {
+                                g.students = g.students.map(s => s.id === student.id ? { ...s, project: projectData } : s);
+                            }
+                            return g;
+                        })
+                    }));
+                }
+            }
+        }
+    },
 }));
 
-export const membersActions = {
-    initialize: useMembers.getState().initialize,
-    updateMember: useMembers.getState().updateMember,
-    createStudent: useMembers.getState().createStudent,
-    createStaff: useMembers.getState().createStaff,
-    removeMember: useMembers.getState().removeMember,
-    addMentorToGroup: useMembers.getState().addMentorToGroup,
-    removeMentorFromGroup: useMembers.getState().removeMentorFromGroup,
-    createClass: useMembers.getState().createClass,
-    updateClass: useMembers.getState().updateClass
+export const adminActions = {
+    initialize: useAdmin.getState().initialize,
+    updateMember: useAdmin.getState().updateMember,
+    createStudent: useAdmin.getState().createStudent,
+    createStaff: useAdmin.getState().createStaff,
+    removeMember: useAdmin.getState().removeMember,
+    addMentorToGroup: useAdmin.getState().addMentorToGroup,
+    removeMentorFromGroup: useAdmin.getState().removeMentorFromGroup,
+    createClass: useAdmin.getState().createClass,
+    updateClass: useAdmin.getState().updateClass,
+    loadProjects: useAdmin.getState().loadProjects
 }

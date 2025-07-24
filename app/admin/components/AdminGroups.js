@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { membersActions, useMembers } from "@/utils/useMembers";
+import { adminActions, useAdmin } from "@/utils/useAdmin";
 import { Edit2, XIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export default function AdminGroups() {
-    const groups = useMembers(state => state.groups);
+    const groups = useAdmin(state => state.groups);
 
     return (
         <div>
@@ -34,7 +34,7 @@ function GroupHeader({ group }) {
                 name: formData.get('name'),
                 year: parseInt(formData.get('year'), 10)
             };
-            membersActions.updateClass(group.id, updatedGroup);
+            adminActions.updateClass(group.id, updatedGroup);
             setIsEditing(false);
         };
 
@@ -65,13 +65,13 @@ function GroupHeader({ group }) {
 
 
 function GroupMentors({ group }) {
-    const staff = useMembers(state => state.staff);
+    const staff = useAdmin(state => state.staff);
 
     const handleRemoveMentor = (mentorId) => {
-        membersActions.removeMentorFromGroup(group.id, mentorId);
+        adminActions.removeMentorFromGroup(group.id, mentorId);
     };
     const addMentorToGroup = (mentorId) => {
-        membersActions.addMentorToGroup(group.id, mentorId);
+        adminActions.addMentorToGroup(group.id, mentorId);
     };
 
     return (
@@ -111,14 +111,14 @@ function GroupStudents({ group }) {
 }
 
 function SingleStudent({ student }) {
-    const groups = useMembers(state => state.groups);
+    const groups = useAdmin(state => state.groups);
     const [isOpen, setIsOpen] = useState(false);
 
     const saveChanges = (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const values = Object.fromEntries(formData);
-        membersActions.updateMember(student.id, {
+        adminActions.updateMember(student.id, {
             firstName: values.first,
             lastName: values.last,
             className: values.className
@@ -150,7 +150,7 @@ function SingleStudent({ student }) {
                         שמור
                     </button>
                     <button type="button" className="mt-2 px-4 py-1 bg-red-500 text-white text-xs hover:bg-red-600"
-                        onClick={() => membersActions.removeMember(student.uid, student.username)}>
+                        onClick={() => adminActions.removeMember(student.uid, student.username)}>
                         הסר תלמיד
                     </button>
                 </form>
@@ -166,7 +166,7 @@ function NewStudentButton({ group }) {
         e.preventDefault();
         const formData = new FormData(e.target);
         const newStudent = Object.fromEntries(formData);
-        const res = await membersActions.createStudent(
+        const res = await adminActions.createStudent(
             newStudent.firstName,
             newStudent.lastName,
             newStudent.username,
@@ -220,7 +220,7 @@ function NewGroupButton() {
         const formData = new FormData(e.target);
         const newGroupName = formData.get('groupName');
         const newYear = formData.get('year');
-        membersActions.createClass(newGroupName, newYear);
+        adminActions.createClass(newGroupName, newYear);
         setShowForm(false);
     };
 

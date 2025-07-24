@@ -153,3 +153,9 @@ export const groupsActions = {
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     }
 };
+
+useUser.subscribe(state => state.user, 
+    (user) => {
+        if (!user) groupsActions.clear();
+    }
+);

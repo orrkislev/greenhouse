@@ -5,7 +5,6 @@ const ScheduleTitle = tw`text-xs text-gray-800 absolute top-0 right-0 translate-
 const ScheduleGrid = tw`grid grid-cols-6 w-full relative h-full grid-cols-[repeat(6,1fr)] gap-[2px]`;
 
 export function ScheduleSection({ children, className = '', name, edittable = true, withLabel = true}) {
-
     const bgColor = !edittable ? 'opacity-70' : '';
 
     return (

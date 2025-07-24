@@ -88,3 +88,6 @@ const onUpdateWeek = (week) => {
 };
 onUpdateWeek(useWeek.getState().week);
 useWeek.subscribe(state => state.week, onUpdateWeek);
+useUser.subscribe(state => state.user,
+    (user) => { if (!user) tasksActions.clear(); }
+);

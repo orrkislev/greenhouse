@@ -1,7 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import TopBar from "@/components/TopBar";
-import { MainContainer, PageContainer } from "@/components/ui/StyledLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,11 +26,7 @@ export default function RootLayout({ children }) {
           rtl bg-linear-to-br from-white via-stone-100/50 to-stone-300/50 min-h-screen
       `} >
         <TopBar />
-        {/* <PageContainer> */}
-          {/* <MainContainer> */}
             {children}
-          {/* </MainContainer> */}
-        {/* </PageContainer> */}
       </body>
     </html>
   );

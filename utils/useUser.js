@@ -3,10 +3,8 @@ import { persist } from 'zustand/middleware';
 import { AuthService } from './firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from './firebase/firebase';
-import { eventsActions } from './useEvents';
-import { tasksActions } from './useTasks';
-import { groupsActions } from './useGroups';
 
+console.log('useUser store initialized');
 export const useUser = create(
 	persist(
 		(set, get) => {
@@ -34,9 +32,6 @@ export const useUser = create(
 				logout: () => {
 					unsubscribe();
 					set({ user: null, error: null });
-					eventsActions.clear();
-					tasksActions.clear();
-					groupsActions.clear();
 					AuthService.signOut();
 				},
 

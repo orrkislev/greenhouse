@@ -5,6 +5,7 @@ import { addDoc, and, collection, deleteDoc, doc, getDocs, or, query, updateDoc,
 import { debounce } from "lodash";
 import { create } from "zustand";
 
+console.log('useEvents store initialized');
 export const useEvents = create((set, get) => {
     const userId = () => useUser.getState().user.id;
     const getRef = (collectionName) => collection(db, `users/${userId()}/${collectionName}`);
@@ -28,8 +29,7 @@ export const useEvents = create((set, get) => {
         clear: () => set({ events: [] }),
 
         loadWeekEvents: async (week) => {
-            const uid = useUser.getState().user.id;
-            if (!uid || !week || week.length === 0) return;
+            if (!userId() || !week || week.length === 0) return;
 
             const eventsRef = getRef("events");
             const eventsQuery = query(eventsRef,
@@ -101,3 +101,9 @@ const onUpdateWeek = (week) => {
 };
 onUpdateWeek(useWeek.getState().week);
 useWeek.subscribe(state => state.week, onUpdateWeek);
+useUser.subscribe(
+    state => state.user, 
+    (user) => {
+        if (!user) eventsActions.clear();
+    }
+);

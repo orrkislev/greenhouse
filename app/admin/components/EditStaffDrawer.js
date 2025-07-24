@@ -2,61 +2,37 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { resetPin } from "../actions/createUser";
-import { updateUserData } from "../actions/member actions";
-import { useForm } from "@/utils/useForm";
+import { resetPin } from "../../../utils/admin actions";
+import { FormInput, useForm } from "@/components/ui/form/FormInput";
+import { adminActions } from "@/utils/useAdmin";
 
 export default function EditStaffDrawer({ open, onOpenChange, staff }) {
     const [resetPinLoading, setResetPinLoading] = useState(false);
     const [resetPinMessage, setResetPinMessage] = useState("");
 
-    const { fields, handleSubmit, populate, isSubmitting, errors } = useForm(
-        {
-            firstName: "",
-            lastName: "",
-            job: ""
-        },
-        {
-            validation: {
-                firstName: {
-                    required: "First name is required",
-                    min: 1,
-                    max: 50
-                },
-                lastName: {
-                    required: "Last name is required",
-                    min: 1,
-                    max: 50
-                },
-                job: {
-                    required: "Job is required",
-                    min: 1,
-                    max: 100
-                }
-            },
-            onSubmit: async (values) => {
-                if (!staff?.username) return;
-                
-                await updateUserData(staff.username, {
-                    firstName: values.firstName,
-                    lastName: values.lastName,
-                    job: values.job
-                });
-                
-                onOpenChange(false);
-            }
-        }
-    );
+    const form = useForm({
+        firstName: "",
+        lastName: "",
+        job: ""
+    }, async (values) => {
+        if (!staff?.username) return;
+        
+        await adminActions.updateMember(staff.username, {
+            firstName: values.firstName,
+            lastName: values.lastName,
+            job: values.job
+        });
+        
+        onOpenChange(false);
+    });
 
     useEffect(() => {
         if (staff) {
-            populate({
-                firstName: staff.firstName || "",
-                lastName: staff.lastName || "",
-                job: staff.job || ""
-            });
+            form.setValue('firstName', staff.firstName || "");
+            form.setValue('lastName', staff.lastName || "");
+            form.setValue('job', staff.job || "");
         }
-    }, [staff]);
+    }, [staff, form]);
 
     async function handleResetPin() {
         if (!staff?.id) return;
@@ -72,53 +48,29 @@ export default function EditStaffDrawer({ open, onOpenChange, staff }) {
                 <DrawerHeader>
                     <DrawerTitle>צוות</DrawerTitle>
                 </DrawerHeader>
-                <form className="flex flex-col gap-4 p-4" onSubmit={handleSubmit()}>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">שם פרטי</label>
-                        <Input
-                            {...fields.firstName}
-                            className={fields.firstName.hasError ? "border-red-500" : ""}
-                        />
-                        {fields.firstName.error && (
-                            <p className="text-red-500 text-xs mt-1">{fields.firstName.error}</p>
-                        )}
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">שם משפחה</label>
-                        <Input
-                            {...fields.lastName}
-                            className={fields.lastName.hasError ? "border-red-500" : ""}
-                        />
-                        {fields.lastName.error && (
-                            <p className="text-red-500 text-xs mt-1">{fields.lastName.error}</p>
-                        )}
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">תפקיד</label>
-                        <Input
-                            {...fields.job}
-                            className={fields.job.hasError ? "border-red-500" : ""}
-                        />
-                        {fields.job.error && (
-                            <p className="text-red-500 text-xs mt-1">{fields.job.error}</p>
-                        )}
-                    </div>
+                <form className="flex flex-col gap-4 p-4" {...form.formProps}>
+                    <FormInput label="שם פרטי" {...form.props.firstName} />
+                    <FormInput label="שם משפחה" {...form.props.lastName} />
+                    <FormInput label="תפקיד" {...form.props.job} />
+                    
                     <div>
                         <label className="block text-sm font-medium mb-1">שם משתמש</label>
                         <Input value={staff?.username || ""} disabled />
                     </div>
+                    
                     <div className="flex gap-2 items-center">
                         <Button type="button" variant="secondary" onClick={handleResetPin} disabled={resetPinLoading || !staff?.id}>
                             {resetPinLoading ? "מתאפס..." : "איפוס סיסמה"}
                         </Button>
                         {resetPinMessage && <span className="text-xs text-green-600">{resetPinMessage}</span>}
                     </div>
+                    
                     <div className="flex gap-2 justify-end">
                         <DrawerClose asChild>
                             <Button type="button" variant="outline">ביטול</Button>
                         </DrawerClose>
-                        <Button type="submit" disabled={isSubmitting || !staff?.id}>
-                            {isSubmitting ? "שומר..." : "שמור שינויים"}
+                        <Button type="submit" disabled={!staff?.id}>
+                            שמור שינויים
                         </Button>
                     </div>
                 </form>

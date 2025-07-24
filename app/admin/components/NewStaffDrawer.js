@@ -1,9 +1,9 @@
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import PINInput from "@/components/ui/PIN";
-import { createStaff } from "../actions/member actions";
 import { FormInput, useForm } from "@/components/ui/form/FormInput";
 import { useState } from "react";
+import { adminActions } from "@/utils/useAdmin";
 
 export default function NewStaffDrawer({ open, onOpenChange }) {
     const [error, setError] = useState("");
@@ -14,7 +14,7 @@ export default function NewStaffDrawer({ open, onOpenChange }) {
         pin: "",
         job: ""
     }, async (values) => {
-        await createStaff(values.firstName, values.lastName, values.username, values.pin, values.job)
+        await adminActions.createStaff(values.firstName, values.lastName, values.username, values.job)
         form.clear()
         onOpenChange(false);
     });

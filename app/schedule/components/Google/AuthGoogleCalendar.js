@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { getAuthUrl, getRefreshToken } from "@/utils/GoogleCalendarActions";
 import { useUser } from "@/utils/useUser";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -13,7 +12,7 @@ export default function AuthGoogleCalendar() {
 
     if (code) {
         (async () => {
-            const origin = router.basePath || window.location.origin;
+            const origin = window.location.origin;
             const token = await getRefreshToken(origin, code);
             if (token) {
                 useUser.getState().updateUserDoc({
@@ -25,7 +24,7 @@ export default function AuthGoogleCalendar() {
     }
 
     const clickAuth = async () => {
-        const origin = router.basePath || window.location.origin;
+        const origin = window.location.origin;
         const url = await getAuthUrl(origin);
         router.push(url);
     }

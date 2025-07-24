@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import NewStaffDrawer from "./NewStaffDrawer";
 import EditStaffDrawer from "./EditStaffDrawer";
-import { useMembers } from "@/utils/useMembers";
+import { useAdmin } from "@/utils/useAdmin";
 
 export default function AdminStaff() {
-    const staff = useMembers(state => state.staff);
+    const staff = useAdmin(state => state.staff);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [editDrawerOpen, setEditDrawerOpen] = useState(false);
     const [selectedStaff, setSelectedStaff] = useState(null);
