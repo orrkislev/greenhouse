@@ -1,81 +1,65 @@
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
-import { create } from "zustand";
-import { db } from "./firebase/firebase";
+import { getGanttEventsWithDateRange } from "@/utils/gantt actions";
 import { format } from "date-fns";
+import { create } from "zustand";
+
+const toKey = (date) => {
+    if (typeof date === "string") return date;
+    return format(date, "yyyy-MM-dd");
+}
 
 export const useGantt = create((set, get) => ({
-    events: [],
-    terms: [],
-    currTerm: null,
-    loadedRanges: [],
-
-    initialLoad: async () => {
-
-        const ganttInfo = doc(db, 'school', 'gantt');
-        const ganttSnapshot = await getDoc(ganttInfo);
-        const ganttData = ganttSnapshot.data();
-        const terms = ganttData?.terms || [];
-
-        const currDate = format(new Date(), 'yyyy-MM-dd');
-        const currTerm = terms.find(term => term.start <= currDate && term.end >= currDate) || null;
-
-        set({
-            terms,
-            currTerm,
-        });
+    terms: [], 
+    gantt: new Map(),
+    loadTodayGantt: () => {
+        get().fetchGanttEvents(new Date(), new Date());
     },
-
-    loadRangeEvents: async (start, end) => {
-        if (get().loadedRanges.some(range => range.start === start && range.end === end))
+    fetchGanttEvents: async (start, end) => {
+        const ganttItems = get().gantt;
+        if (ganttItems.has(toKey(start)) && (end && ganttItems.has(toKey(end)))) {
             return;
-        set(state => ({ loadedRanges: [...state.loadedRanges, { start, end }] }));
+        }
+        const data = await getGanttEventsWithDateRange(start, end);
+        if (!data.items || data.items.length === 0) {
+            return;
+        }
 
-        const eventsCollection = collection(db, 'school', 'gantt', 'events')
-        const eventsQuery = query(eventsCollection, where('start', '>=', start), where('start', '<=', end));
-        const eventsSnapshot = await getDocs(eventsQuery);
-        const events = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        set(state => ({ events: [...state.events.filter(e => !events.find(ev => ev.id === e.id)), ...events] }));
-    },
+        let current = new Date(start);
+        while (current <= end) {
+            const currentKey = toKey(current);
+            if (!ganttItems.has(currentKey)) {
+                ganttItems.set(currentKey, []);
+            }
+            current.setDate(current.getDate() + 1);
+        }
+        const finalKey = toKey(current);
+        if (!ganttItems.has(finalKey)) {
+            ganttItems.set(finalKey, []);
+        }
 
-    updateEvent: async (eventId, updates) => {
-        const eventRef = doc(db, 'school', 'gantt', 'events', eventId);
-        await updateDoc(eventRef, updates);
-        set(state => ({
-            events: state.events.map(event => event.id === eventId ? { ...event, ...updates } : event)
-        }));
-    },
-    createEvent: async (eventData) => {
-        const eventsCollection = collection(db, 'school', 'gantt', 'events');
-        const newEventDoc = await addDoc(eventsCollection, eventData);
-        set(state => ({
-            events: [...state.events, { id: newEventDoc.id, ...eventData }]
-        }));
-    },
-    deleteEvent: async (eventId) => {
-        const eventRef = doc(db, 'school', 'gantt', 'events', eventId);
-        await deleteDoc(eventRef);
-        set(state => ({
-            events: state.events.filter(event => event.id !== eventId)
-        }));
-    },
-    updateTerm: async (termId, updates) => {
-        const termRef = doc(db, 'school', 'gantt');
-        const newTerms = get().terms.map(term => term.id === termId ? { ...term, ...updates } : term);
-        await updateDoc(termRef, {
-            terms: newTerms
+        data.items.filter(e => e.summary).forEach(event => {
+            const eventStart = new Date(event.start.dateTime || event.start.date);
+            const eventEnd = new Date(event.end.dateTime || event.end.date);
+            const isAllDay = !event.start.dateTime;
+            let current = new Date(eventStart);
+            const last = new Date(eventEnd);
+            if (isAllDay) last.setDate(last.getDate() - 1);
+            while (current <= last) {
+                const currentKey = toKey(current);
+                const currentEvents = ganttItems.get(currentKey) || [];
+                if (!currentEvents.includes(event.summary)) {
+                    currentEvents.push(event.summary);
+                    ganttItems.set(currentKey, currentEvents);
+                }
+                current.setDate(current.getDate() + 1);
+            }
         });
-        set({ terms: newTerms });
-    }
+        set({ gantt: ganttItems });
+    },
+    getGanttForDay: (date) => {
+        return get().gantt.get(toKey(date)) || [];
+    },
 }));
 
-export const ganttActions = {
-    initialLoad: useGantt.getState().initialLoad,
-    loadRangeEvents: useGantt.getState().loadRangeEvents,
-    updateEvent: useGantt.getState().updateEvent,
-    deleteEvent: useGantt.getState().deleteEvent,
-    createEvent: useGantt.getState().createEvent,
-    updateTerm: useGantt.getState().updateTerm
-};
-
-
-ganttActions.initialLoad();
+export const ganttActions = Object.fromEntries(
+    Object.entries(useGantt.getState()).filter(([key, value]) => typeof value === 'function')
+);

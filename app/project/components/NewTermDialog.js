@@ -1,8 +1,8 @@
-import { useGantt } from "@/utils/useGantt";
 import { projectActions } from "@/utils/useProject";
+import { useTime } from "@/utils/useTime";
 
 export default function NewTermDialog() {
-    const term = useGantt((state) => state.currTerm);
+    const term = useTime((state) => state.currTerm);
 
     return (
         <div className='flex flex-col items-center justify-center h-screen'>

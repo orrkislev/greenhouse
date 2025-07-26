@@ -1,8 +1,10 @@
 import { create } from "zustand";
-import { useUser } from "./useUser";
+import { userActions, useUser } from "./useUser";
 import { addDoc, arrayUnion, collection, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase/firebase";
-import { useGantt } from "./useGantt";
+import { useTime } from "./useTime";
+import { useLogs } from "./useLogs";
+import { LOG_RECORDS, LOG_TYPES } from "./constants/constants";
 
 export const useProject = create((set, get) => ({
     project: null,
@@ -19,7 +21,7 @@ export const useProject = create((set, get) => ({
         if (projectSnapshot.exists()) {
             const projectData = projectSnapshot.data();
             set({ project: { id: projectSnapshot.id, ...projectData } });
-            get().checkTerm(useGantt.getState().currTerm?.id);
+            get().checkTerm(useTime.getState().currTerm?.id);
         } else {
             set({ project: null });
         }
@@ -28,7 +30,7 @@ export const useProject = create((set, get) => ({
         if (!termId) return;
         if (!get().project) return;
         if (!get().project.terms.includes(termId)) {
-            set(state => ({ project: { ...state.project, idOld: true } }));
+            set(state => ({ project: { ...state.project, isOld: true } }));
         }
     },
     continueProject: async () => {
@@ -36,10 +38,17 @@ export const useProject = create((set, get) => ({
         const userId = useUser.getState().user.id;
         if (!userId || !project) return;
         const projectRef = doc(db, 'users', userId, 'projects', project.id);
-        const termId = useGantt.getState().currTerm.id;
+        const termId = useTime.getState().currTerm.id;
         await updateDoc(projectRef, { terms: arrayUnion(termId) });
-        delete project.idOld;
+        delete project.isOld;
         set({ project: { ...project, terms: [...project.terms, termId] } });
+
+        useLogs.getState().addLog({
+            type: LOG_TYPES.SYSTEM_NOTIFICATION,
+            record: LOG_RECORDS.STARTED_PROJECT,
+            text: "בחרתי להמשיך את הפרויקט הנוכחי",
+            projectId: project.id,
+        });
     },
 
     createProject: async () => {
@@ -47,10 +56,17 @@ export const useProject = create((set, get) => ({
         if (!userId) return;
 
         const projectRef = collection(db, 'users', userId, 'projects');
-        const termId = useGantt.getState().currTerm.id;
+        const termId = useTime.getState().currTerm.id;
         const newProjectRef = await addDoc(projectRef, { terms: [termId] });
         set({ project: { id: newProjectRef.id, terms: [termId] } });
-        useUser.getState().updateUserDoc({ projectId: newProjectRef.id });
+        userActions.updateUserDoc({ projectId: newProjectRef.id });
+
+        useLogs.getState().addLog({
+            type: LOG_TYPES.SYSTEM_NOTIFICATION,
+            record: LOG_RECORDS.STARTED_PROJECT,
+            text: "יצרתי פרויקט חדש",
+            projectId: newProjectRef.id,
+        });
     },
     updateProject: async (updates) => {
         const userId = useUser.getState().user.id;
@@ -64,14 +80,9 @@ export const useProject = create((set, get) => ({
 }));
 
 
-export const projectActions = {
-    setProject: useProject.getState().setProject,
-    loadProject: useProject.getState().loadProject,
-    checkTerm: useProject.getState().checkTerm,
-    continueProject: useProject.getState().continueProject,
-    createProject: useProject.getState().createProject,
-    updateProject: useProject.getState().updateProject
-};
+export const projectActions = Object.fromEntries(
+    Object.entries(useProject.getState()).filter(([key, value]) => typeof value === 'function')
+);
 
 
 
@@ -80,5 +91,5 @@ onUserUpdate(useUser.getState().user);
 useUser.subscribe(state => state.user.projectId, onUserUpdate);
 
 const onGanttTerm = (term) => useProject.getState().checkTerm(term?.id);
-onGanttTerm(useGantt.getState().currTerm);
-useGantt.subscribe(state => state.currTerm, onGanttTerm);
+onGanttTerm(useTime.getState().currTerm);
+useTime.subscribe(state => state.currTerm, onGanttTerm);

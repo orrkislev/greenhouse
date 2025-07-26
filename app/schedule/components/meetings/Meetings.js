@@ -1,8 +1,9 @@
 import { tw } from "@/utils/tw";
-import { useWeek } from "@/app/schedule/utils/useWeek";
-import { useMeetings } from "@/utils/useMeetings";
+import { useTime } from "@/utils/useTime";
+import { meetingsActions, useMeetings } from "@/utils/useMeetings";
 import { ScheduleSection } from "../Layout";
 import { useUser } from "@/utils/useUser";
+import { useEffect } from "react";
 
 const MeetingContainer = tw`flex flex-col items-center justify-center text-gray-800 text-xs p-2
     gap-2 divide-y divide-black/10 z-[10]
@@ -10,9 +11,13 @@ const MeetingContainer = tw`flex flex-col items-center justify-center text-gray-
     `;
 
 export default function Meetings() {
-    const week = useWeek((state) => state.week);
+    const week = useTime((state) => state.week);
     const meetings = useMeetings(state => state.meetings);
     const user = useUser(state => state.user);
+
+    useEffect(()=>{
+        if (week && week.length > 0) meetingsActions.loadMeetings();
+    },[week]);
 
     return (
         <ScheduleSection name="פגישות" edittable={false}>

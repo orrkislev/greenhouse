@@ -1,33 +1,31 @@
 import { tw } from "@/utils/tw";
-import { useWeek } from "../../utils/useWeek";
-import { useTasks } from "@/utils/useTasks";
+import { tasksActions} from "@/utils/useTasks";
+import { TASK_FORMATS, TASK_STATUSES, TASK_TYPES } from "@/utils/constants/constants";
 
 const AddTaskButtonDiv = tw`flex items-center justify-center text-gray-800 text-sm
         pointer-events-auto cursor-pointer 
         transition-all bg-[#FADFC199] hover:bg-[#FADFC1]
         text-transparent hover:text-gray-800
+        flex-1
         z-5
 `;
 
-export default function AddTaskButton({ col, row }) {
-    const addTask = useTasks(state => state.addTask);
-    const week = useWeek(state => state.week);
+export default function AddTaskButton({ date }) {
 
     const handleClick = () => {
-        const date = week[col - 1];
-        addTask({
-            start: date,
-            end: date,
+        console.log("Adding task for date:", date);
+        tasksActions.createTask({
+            date: date,
             title: "משימה חדשה",
             description: "",
-            type: "task",
+            type: TASK_TYPES.STUDENT_CREATED,
+            status: TASK_STATUSES.ACTIVE,
+            format: TASK_FORMATS.DATE_BASED,
         });
     }
 
     return (
-        <AddTaskButtonDiv className={`col-${col} row-start-${row} row-end-5`}
-            onClick={handleClick}
-        >
+        <AddTaskButtonDiv onClick={handleClick}>
             +
         </AddTaskButtonDiv>
     );

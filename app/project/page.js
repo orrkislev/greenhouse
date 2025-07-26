@@ -1,11 +1,11 @@
 'use client'
 
 import WithAuth from "@/components/WithAuth";
-import ProjectIntentions from "./components/ProjectIntentions";
-import ProjectOverview from "./components/ProjectOverview";
 import { useProject } from "@/utils/useProject";
 import NewProjectDialog from "./components/NewProjectDialog";
 import NewTermDialog from "./components/NewTermDialog";
+import ProjectProposal from "./components/ProjectProposal";
+import ProjectDashboard from "./components/ProjectDashboard";
 
 export default function ProjectPage() {
 
@@ -19,6 +19,6 @@ function ProjectPageActual() {
 
     if (!project) return <NewProjectDialog />;
     if (project.isOld) return <NewTermDialog />;
-    if (!project.master) return <ProjectIntentions />;
-    else return <ProjectOverview />;
+    if (!project.master) return <ProjectProposal />;
+    else return <ProjectDashboard />;
 }

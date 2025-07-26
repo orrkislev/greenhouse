@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import QuestionCard from "./QuestionCard";
 import { projectActions, useProject } from "@/utils/useProject";
 import { useUser } from "@/utils/useUser";
+import { useLogSender } from "@/utils/useLogs";
+import { LOG_RECORDS, LOG_TYPES } from "@/utils/constants/constants";
 
 const QUESTIONS = [
     {
@@ -21,10 +23,16 @@ const QUESTIONS = [
     },
 ]
 
-export default function ProjectIntentions() {
+export default function ProjectProposal() {
     const user = useUser(state => state.user)
     const project = useProject((state) => state.project);
     const [questions, setQuestions] = useState(QUESTIONS);
+    const sendLog = useLogSender({
+        type: LOG_TYPES.SYSTEM_NOTIFICATION,
+        projectId: project.id,
+        record: LOG_RECORDS.FINISHED_PROJECT_PROPOSAL,
+        text: 'השלמתי את הצהרת הכוונות לפרויקט',
+    })
 
     useEffect(() => {
         if (project && project.questions) {
@@ -40,6 +48,7 @@ export default function ProjectIntentions() {
     };
 
     const filledThreeQuestions = questions.slice(0, 3).every(q => q.value && q.value.trim() !== '');
+    if (filledThreeQuestions) sendLog();
 
     return (
         <div className='rtl'>

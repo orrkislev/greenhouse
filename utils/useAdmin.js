@@ -17,6 +17,7 @@ export const useAdmin = create((set, get) => ({
         allMembers = allMembers.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const studentsList = allMembers.filter(member => !member.roles || member.roles.includes('student'));
         const staffList = allMembers.filter(member => member.roles && member.roles.includes('staff'));
+        console.log({ groups, studentsList, staffList });
         groups.forEach(group => {
             group.students = studentsList.filter(student => student.className == group.id);
             group.mentors = group.mentors.map(mentorId => staffList.find(staff => staff.id === mentorId)).filter(Boolean);
@@ -47,7 +48,7 @@ export const useAdmin = create((set, get) => ({
             updateDoc(userDocRef, userData);
             set(state => ({
                 groups: state.groups.map(g => {
-                    if (g.id === group) g.students.push({ id: username, ...userData });
+                    g.students = (g.students || []).concat({ id: username, ...userData });
                     return g;
                 }),
             }));
@@ -147,17 +148,23 @@ export const useAdmin = create((set, get) => ({
             }
         }
     },
+    assignMasterToProject: async (studentId, projectId, master) => {
+        const studentRef = doc(db, "users", studentId, "projects", projectId);
+        await updateDoc(studentRef, { master });
+        set(state => ({
+            groups: state.groups.map(group => ({
+                ...group,
+                students: group.students.map(student => {
+                    if (student.id === studentId && student.projectId === projectId) {
+                        return { ...student, project: { ...student.project, master } };
+                    }
+                    return student;
+                })
+            }))
+        }));
+    },
 }));
 
-export const adminActions = {
-    initialize: useAdmin.getState().initialize,
-    updateMember: useAdmin.getState().updateMember,
-    createStudent: useAdmin.getState().createStudent,
-    createStaff: useAdmin.getState().createStaff,
-    removeMember: useAdmin.getState().removeMember,
-    addMentorToGroup: useAdmin.getState().addMentorToGroup,
-    removeMentorFromGroup: useAdmin.getState().removeMentorFromGroup,
-    createClass: useAdmin.getState().createClass,
-    updateClass: useAdmin.getState().updateClass,
-    loadProjects: useAdmin.getState().loadProjects
-}
+export const adminActions = Object.fromEntries(
+    Object.entries(useAdmin.getState()).filter(([key, value]) => typeof value === 'function')
+);

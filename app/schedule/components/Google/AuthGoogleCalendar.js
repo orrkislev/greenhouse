@@ -1,5 +1,5 @@
 import { getAuthUrl, getRefreshToken } from "@/utils/GoogleCalendarActions";
-import { useUser } from "@/utils/useUser";
+import { userActions } from "@/utils/useUser";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ScheduleSection } from "../Layout";
 
@@ -15,7 +15,7 @@ export default function AuthGoogleCalendar() {
             const origin = window.location.origin;
             const token = await getRefreshToken(origin, code);
             if (token) {
-                useUser.getState().updateUserDoc({
+                userActions.updateUserDoc({
                     googleRefreshToken: token
                 })
                 router.push('/');

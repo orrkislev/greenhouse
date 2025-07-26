@@ -1,6 +1,6 @@
 import { ScheduleEvents } from "@/app/schedule/components/events/Events";
 import { ScheduleSection } from "@/app/schedule/components/Layout";
-import { useWeek } from "@/app/schedule/utils/useWeek";
+import { useTime } from "@/utils/useTime";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import TimeRangePicker from "@/components/ui/timerange-picker";
 import { eventsActions } from "@/utils/useEvents";
@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 
 const daysOfWeek = ['א', 'ב', 'ג', 'ד', 'ה'];
 export default function MentoringGroup_Meetings({ group, styles }) {
-    const week = useWeek(state => state.week);
+    const week = useTime(state => state.week);
     const meetings = useMeetings(state => state.meetings);
     
     const studentsWithMeetings = []

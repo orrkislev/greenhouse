@@ -1,4 +1,4 @@
-import { useWeek } from "@/app/schedule/utils/useWeek";
+import { useTime } from "@/utils/useTime";
 import { tw } from "@/utils/tw";
 import { ScheduleSection } from "./Layout";
 
@@ -7,7 +7,7 @@ const DayColumn = tw`bg-[#F3ECE6] py-2 flex flex-col items-center justify-start 
 
 export const daysOfTheWeek = ['א', 'ב', 'ג', 'ד', 'ה', 'סופשבוע'];
 export default function ScheduleTop({ view }) {
-    const week = useWeek((state) => state.week);
+    const week = useTime((state) => state.week);
 
     const labels = week.map((date, i) => {
         const dateObj = new Date(date);

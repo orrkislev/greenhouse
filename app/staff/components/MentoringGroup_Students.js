@@ -1,8 +1,9 @@
 import Events from "@/app/schedule/components/events/Events";
 import { StudentCard } from "./StudentCard";
 import { useEffect, useState } from "react";
-import { useWeek } from "@/app/schedule/utils/useWeek";
-import { getUserEventsForWeek, getUserGroupEntriesForWeek } from "@/app/schedule/utils/firebase actions";
+import { useTime } from "@/utils/useTime";
+import { groupsActions } from "@/utils/useGroups";
+import { eventsActions } from "@/utils/useEvents";
 
 export default function MentoringGroup_Students({ group, mode, styles }) {
     const [selectedStudent, setSelectedStudent] = useState(null)
@@ -44,19 +45,17 @@ export default function MentoringGroup_Students({ group, mode, styles }) {
 
 
 function StudentSchedule({ student }) {
-    const week = useWeek(state => state.week);
+    const week = useTime(state => state.week);
     const [events, setEvents] = useState([]);
     useEffect(() => {
         if (!student || !week) return;
         (async () => {
-            const studentEvents = await getUserEventsForWeek(student.id, week);
+            const studentEvents = await eventsActions.getUserEventsForWeek(student.id, week);
             for (const group of student.groups || []) {
-                const studentGroupEvents = await getUserGroupEntriesForWeek(group, student.id, week);
+                const studentGroupEvents = await groupsActions.getUserGroupEntriesForWeek(group, student.id, week);
 
                 studentEvents.push(...studentGroupEvents.map(event => ({
                     ...event,
-                    start: event.timeRange.start,
-                    end: event.timeRange.end,
                     group: group,
                 })));
             }

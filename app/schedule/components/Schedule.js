@@ -5,7 +5,7 @@ import Gantt from "./Gantt";
 import Tasks from "./tasks/Tasks";
 import { ScheduleEvents } from "./events/Events";
 import ScheduleTop from "./ScheduleTop";
-import Semester from "./Semester/Semester";
+// import Semester from "./Semester/Semester";
 import { useState } from "react";
 import { AddSchedule } from "./GroupSchedule/AddSchedule";
 import GroupSchedules from "./GroupSchedule/GroupSchedules";
@@ -46,13 +46,13 @@ export default function Schedule() {
                         <ScheduleEvents />
                         <GoogleCalendar />
                         <GroupSchedules />
-                        {/* <Gantt /> */}
+                        <Gantt />
                         <AddSchedule />
                     </>
                 )}
                 {view === 'semester' && (
                     <>
-                        <Semester />
+                        {/* <Semester /> */}
                     </>
                 )}
             </ScheduleOuter>

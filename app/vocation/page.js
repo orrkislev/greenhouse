@@ -1,13 +1,13 @@
 'use client';
 
 import WithAuth from '@/components/WithAuth';
-import MainPage from './main/Main';
+import Vocation from './components/Vocation';
 
 export default function Home() {
 
   return (
     <WithAuth>
-        <MainPage/>
+        <Vocation/>
     </WithAuth>
   );
 }

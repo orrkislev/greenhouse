@@ -1,42 +1,48 @@
-import { useWeek } from "@/app/schedule/utils/useWeek";
 import { db } from "@/utils/firebase/firebase";
 import { useUser } from "@/utils/useUser";
+import { format } from "date-fns";
 import { addDoc, and, collection, deleteDoc, doc, getDocs, or, query, updateDoc, where } from "firebase/firestore";
 import { create } from "zustand";
+import { LOG_TYPES, TASK_FORMATS, TASK_STATUSES, TASK_TYPES } from "./constants/constants";
 
 export const useTasks = create((set, get) => {
     const userId = () => useUser.getState().user.id;
-    const getRef = (collectionName) => collection(db, `users/${userId()}/${collectionName}`);
+    const getRef = () => collection(db, `users/${userId()}/tasks`);
 
     return {
         tasks: [],
         clear: () => set({ tasks: [] }),
 
+        loadTodayTasks: async () => {
+            const uid = userId();
+            if (!uid) return;
+            const today = format(new Date(), 'yyyy-MM-dd');
+            const tasksQuery = query(getRef(), and(
+                where("date", "==", today),
+            ));
+            const tasksSnap = await getDocs(tasksQuery);
+            const tasks = tasksSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            set({ tasks });
+        },
         loadWeekTasks: async (week) => {
             const uid = userId()
             if (!uid || !week || week.length === 0) return;
 
-            const tasksRef = getRef("tasks");
-            const tasksQuery = query(tasksRef,
-                or(
-                    and(where("start", ">=", week[0]), where("start", "<=", week[week.length - 1])),
-                    and(where("end", ">=", week[0]), where("end", "<=", week[week.length - 1])),
-                    and(where("start", "<=", week[0]), where("end", ">=", week[week.length - 1]))
-                )
+            const tasksQuery = query(getRef(),
+                where("date", ">=", week[0]), where("date", "<=", week[week.length - 1]),
             );
             const tasksSnap = await getDocs(tasksQuery);
             const tasks = tasksSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             set({ tasks });
         },
-        addTask: async (task) => {
-            const newDoc = await addDoc(getRef("tasks"), task);
-            task.id = newDoc.id;
-            set((state) => ({
-                tasks: [...state.tasks, task]
-            }));
+        createTask: async (task) => {
+            console.log("Creating task:", task);
+            const newDoc = await addDoc(getRef(), task);
+            console.log("Task created with ID:", newDoc);
+            set((state) => ({ tasks: [...state.tasks, { ...task, id: newDoc.id }] }));
         },
         updateTask: (taskId, updatedTask) => {
-            updateDoc(doc(getRef("tasks"), taskId), updatedTask);
+            updateDoc(doc(getRef(), taskId), updatedTask);
             set((state) => {
                 const updatedTasks = state.tasks.map(task =>
                     task.id === taskId ? { ...task, ...updatedTask } : task
@@ -45,49 +51,72 @@ export const useTasks = create((set, get) => {
             });
         },
         deleteTask: (taskId) => {
-            deleteDoc(doc(getRef("tasks"), taskId));
+            deleteDoc(doc(getRef(), taskId));
             set((state) => ({
                 tasks: state.tasks.filter(task => task.id !== taskId)
             }));
         },
-        addGroupTask: task => {
-            task.start = task.date
-            task.end = task.date;
-            set((state) => {
-                const exists = state.tasks.some(t => t.id === task.id);
-                if (exists) {
-                    return {
-                        tasks: state.tasks.map(t => t.id === task.id ? { ...t, ...task } : t)
-                    };
-                } else {
-                    return { tasks: [...state.tasks, task] };
+
+
+        onLogTask: async (taskId, log) => {
+            const task = useTasks.getState().tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            // Case 1: Log marks task complete
+            if (log.type === LOG_TYPES.COMPLETE_TASK)
+                get().setTaskStatus(taskId, TASK_STATUSES.COMPLETED);
+
+            // Case 2: Log adds progress to a progress-based task
+            else if (log.type === LOG_TYPES.TASK_PROGRESS && task.type === TASK_FORMATS.PROGRESS_BASED) {
+                const current = task.progressCurrent || 0;
+                const amount = log.amount || 1;
+                const newProgress = current + amount;
+                await get().updateTask(taskId, {
+                    progressCurrent: newProgress
+                });
+
+                if (newProgress >= task.progressGoal) {
+                    get().setTaskStatus(taskId, TASK_STATUSES.COMPLETED);
                 }
-            });
+            }
+
+            // Apply task updates if any
+            if (Object.keys(updates).length > 0) {
+                await get().updateTask(taskId, updates);
+            }
         },
-        removeGroupTask: (taskId) => {
-            set((state) => ({
-                tasks: state.tasks.filter(task => task.id !== taskId)
-            }));
+        onLogRecord: async (recordId) => {
+            const tasks = useTasks.getState().tasks.filter(t => t.dependency === recordId);
+            tasks.forEach(task => get().setTaskStatus(task.id, TASK_STATUSES.COMPLETED));
+        },
+        setTaskStatus: async (taskId, status) => {
+            await get().updateTask(taskId, { status });
+
+            // If task is now completed, check for dependent tasks
+            if (status === TASK_STATUSES.COMPLETED) {
+                const dependentsQuery = query(getRef(),
+                    where("dependency", "==", taskId),
+                );
+                const dependentsSnap = await getDocs(dependentsQuery);
+                const dependents = dependentsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                for (const dependent of dependents) {
+                    await get().updateTask(dependent.id, { status: TASK_STATUSES.ACTIVE });
+                }
+                dependents.forEach(dependent => dependent.status = TASK_STATUSES.ACTIVE);
+                set((state) => ({
+                    tasks: [...state.tasks.filter(task => task.id !== dependent.id), ...dependents]
+                }));
+            }
         },
     }
 });
 
-export const tasksActions = {
-    loadWeekTasks: (week) => useTasks.getState().loadWeekTasks(week),
-    addTask: (task) => useTasks.getState().addTask(task),
-    updateTask: (taskId, updatedTask) => useTasks.getState().updateTask(taskId, updatedTask),
-    deleteTask: (taskId) => useTasks.getState().deleteTask(taskId),
-    addGroupTask: (task) => useTasks.getState().addGroupTask(task),
-    removeGroupTask: (taskId) => useTasks.getState().removeGroupTask(taskId),
-    clear: useTasks.getState().clear
-};
+export const tasksActions = Object.fromEntries(
+    Object.entries(useTasks.getState()).filter(([key, value]) => typeof value === 'function')
+);
 
 
-const onUpdateWeek = (week) => {
-    if (week && week.length > 0) tasksActions.loadWeekTasks(week);
-};
-onUpdateWeek(useWeek.getState().week);
-useWeek.subscribe(state => state.week, onUpdateWeek);
+
 useUser.subscribe(state => state.user,
     (user) => { if (!user) tasksActions.clear(); }
 );

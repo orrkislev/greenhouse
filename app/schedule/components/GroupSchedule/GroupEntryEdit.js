@@ -18,7 +18,8 @@ export function GroupEntryEdit({ onClose, groupName, date, obj }) {
             date: format(date, 'yyyy-MM-dd'),
         };
         if (values.type === 'event') {
-            newObj.timeRange = values.timeRange;
+            newObj.start = values.timeRange.start;
+            newObj.end = values.timeRange.end;
         }
         if (obj) {
             await groupsActions.updateGroupEntry(groupName, { ...newObj, id: obj.id });

@@ -21,7 +21,7 @@ export function GroupCellEntry({ groupName, date, obj, edittable }) {
                 <GroupObjectCellDiv>
                     <GroupObjectText>
                         {obj.type === 'event' ? (
-                            <div>{obj.timeRange.start} - {obj.timeRange.end}</div>
+                            <div>{obj.start} - {obj.end}</div>
                         ) : (
                             <div>
                                 {obj.isMember ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}

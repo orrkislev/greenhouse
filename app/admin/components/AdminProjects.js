@@ -1,13 +1,14 @@
 import { adminActions, useAdmin } from "@/utils/useAdmin";
-import { useGantt } from "@/utils/useGantt";
+import { useTime } from "@/utils/useTime";
 import { useEffect } from "react";
 
 
 
 
 export default function AdminProjects() {
+    const staff = useAdmin(state => state.staff);
     const groups = useAdmin(state => state.groups);
-    const currTerm = useGantt(state => state.currentTerm);
+    const currTerm = useTime(state => state.currTerm);
 
     useEffect(() => {
         adminActions.loadProjects();
@@ -81,7 +82,20 @@ export default function AdminProjects() {
                                         )}
                                     </Cell>
                                     <Cell>{data.requested}</Cell>
-                                    <Cell>{data.master}</Cell>
+                                    <Cell>
+                                        <select
+                                            value={data.master || ''}
+                                            onChange={e => adminActions.assignMasterToProject(student.id, student.project.id, e.target.value)}
+                                            className="bg-white border border-gray-300 rounded-md p-1"
+                                        >
+                                            <option value="">בחר מנחה</option>
+                                            {staff.map(mentor => (
+                                                <option key={mentor.id} value={mentor.id}>
+                                                    {mentor.firstName} {mentor.lastName}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </Cell>
                                 </tr>
                             );
                         });

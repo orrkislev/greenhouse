@@ -1,8 +1,8 @@
-import { useGantt } from "@/utils/useGantt";
 import { projectActions } from "@/utils/useProject";
+import { useTime } from "@/utils/useTime";
 
 export default function NewProjectDialog(){
-    const term = useGantt((state) => state.currTerm);
+    const term = useTime(state => state.currTerm);
 
     const onSubmit = async () => {
         await projectActions.createProject();

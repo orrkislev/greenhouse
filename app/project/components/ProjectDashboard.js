@@ -1,7 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { useProject } from "@/utils/useProject";
 
-export default function ProjectOverview() {
+export default function ProjectDashboard() {
     const project = useProject((state) => state.project);
 
     return (

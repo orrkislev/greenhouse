@@ -1,9 +1,9 @@
-import { useWeek } from "../../utils/useWeek";
+import { useTime } from "../../../../utils/useTime";
 import { ScheduleSection } from "../Layout";
 import GroupCell from "./GroupCell";
 
 export default function GroupSchedule({ group }) {
-    const week = useWeek(state => state.week);
+    const week = useTime(state => state.week);
 
     const weekEntries = week.map(date => {
         return { date, entries: group.entries ? group.entries.filter(entry => entry.date === date) : [] };

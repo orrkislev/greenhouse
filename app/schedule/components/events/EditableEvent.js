@@ -34,7 +34,7 @@ export function EditableEvent({ event, onStartDrag, onEndDrag, onStartResize, on
     const eventClasses = `
         bg-[#EF98A1] py-2 pr-10 pl-2 text-gray-800
         flex items-center justify-start text-sm
-        pointer-events-auto cursor-pointer transition-all
+        pointer-events-auto transition-all cursor-grab
         z-5 relative
         h-full outline-2 outline-white
         hover:bg-[#E77885] hover:scale-102

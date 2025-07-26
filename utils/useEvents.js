@@ -1,11 +1,11 @@
-import { useWeek } from "@/app/schedule/utils/useWeek";
+import { useTime } from "@/utils/useTime";
 import { db } from "@/utils/firebase/firebase";
 import { useUser } from "@/utils/useUser";
+import { format } from "date-fns";
 import { addDoc, and, collection, deleteDoc, doc, getDocs, or, query, updateDoc, where } from "firebase/firestore";
 import { debounce } from "lodash";
 import { create } from "zustand";
 
-console.log('useEvents store initialized');
 export const useEvents = create((set, get) => {
     const userId = () => useUser.getState().user.id;
     const getRef = (collectionName) => collection(db, `users/${userId()}/${collectionName}`);
@@ -28,6 +28,15 @@ export const useEvents = create((set, get) => {
         events: [],
         clear: () => set({ events: [] }),
 
+        loadTodayEvents: async () => {
+            if (!userId()) return;
+            const today = format(new Date(), "yyyy-MM-dd");
+            const eventsRef = getRef("events");
+            const eventsQuery = query(eventsRef, where("date", "==", today));
+            const eventsSnap = await getDocs(eventsQuery);
+            const events = eventsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            set({ events });
+        },
         loadWeekEvents: async (week) => {
             if (!userId() || !week || week.length === 0) return;
 
@@ -68,15 +77,7 @@ export const useEvents = create((set, get) => {
             }));
         },
         addGroupEvent: event => {
-            const newEvent = {
-                group: event.group,
-                start: event.timeRange.start,
-                end: event.timeRange.end,
-                title: event.title,
-                date: event.date,
-                id: event.id,
-            }
-            set((state) => ({ events: [...state.events, newEvent] }));
+            set((state) => ({ events: [...state.events, event] }));
         },
         removeGroupEvent: (eventId) => {
             set((state) => ({
@@ -86,24 +87,20 @@ export const useEvents = create((set, get) => {
     }
 });
 
-export const eventsActions = {
-    loadWeekEvents: (week) => useEvents.getState().loadWeekEvents(week),
-    addEvent: (event) => useEvents.getState().addEvent(event),
-    updateEvent: (eventId, updatedEvent) => useEvents.getState().updateEvent(eventId, updatedEvent),
-    deleteEvent: (eventId) => useEvents.getState().deleteEvent(eventId),
-    addGroupEvent: (event) => useEvents.getState().addGroupEvent(event),
-    removeGroupEvent: (eventId) => useEvents.getState().removeGroupEvent(eventId),
-    clear: useEvents.getState().clear
+export const eventsActions = Object.fromEntries(
+    Object.entries(useEvents.getState()).filter(([key, value]) => typeof value === 'function')
+);
+eventsActions.getUserEventsForWeek = async (userId, week) => {
+    const eventsRef = collection(db, `users/${userId}/events`);
+    const eventsQuery = query(eventsRef,
+        where("date", ">=", week[0]),
+        where("date", "<=", week[week.length - 1])
+    );
+    const eventsSnap = await getDocs(eventsQuery);
+    const events = eventsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return events;
 }
 
-const onUpdateWeek = (week) => {
-    if (week && week.length > 0) eventsActions.loadWeekEvents(week);
-};
-onUpdateWeek(useWeek.getState().week);
-useWeek.subscribe(state => state.week, onUpdateWeek);
-useUser.subscribe(
-    state => state.user, 
-    (user) => {
-        if (!user) eventsActions.clear();
-    }
+useUser.subscribe(state => state.user,
+    (user) => { if (!user) eventsActions.clear(); }
 );

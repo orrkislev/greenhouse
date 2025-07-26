@@ -1,5 +1,5 @@
 import { Event } from "./Event";
-import { HOURS, useWeek } from "@/app/schedule/utils/useWeek";
+import { HOURS, useTime } from "@/utils/useTime";
 import { tw } from "@/utils/tw";
 import { ScheduleSection } from "../Layout";
 
@@ -10,7 +10,7 @@ const EmptySlot = tw`min-h-8 z-1
 const TimeSlot = tw.div`flex items-start justify-start text-black/50 text-xs pointer-events-none z-6 p-1`;
 
 export default function ReadOnlyEvents({ events }) {
-    const week = useWeek(state => state.week);
+    const week = useTime(state => state.week);
     const positions = Array(6).fill(0).map((_, col) => Array(5).fill(0).map((_, row) => (
         { row: row + 1, col: col + 1 }))).flat();
         

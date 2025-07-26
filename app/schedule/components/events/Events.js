@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Event } from "./Event";
-import { HOURS, useWeek } from "@/app/schedule/utils/useWeek";
+import { HOURS, useTime } from "@/utils/useTime";
 import { tw } from "@/utils/tw";
 import { ScheduleSection } from "../Layout";
 import useWeeksEvents, { getEventDuration, getTimeWithOffset, prepareEventsForSchedule } from "./useWeeksEvents";
@@ -26,7 +26,7 @@ const newEventTitles = [
     "שיחה אישית",
 ];
 export function ScheduleEvents({ withLabel = true }) {
-    const week = useWeek(state => state.week);
+    const week = useTime(state => state.week);
     const allEvents = useWeeksEvents(week, true);
     if (!week || week.length === 0) return null;
 

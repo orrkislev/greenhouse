@@ -1,10 +1,15 @@
 import { useGroups } from "@/utils/useGroups";
-import { HOURS } from "../../utils/useWeek";
-import { useEvents } from "@/utils/useEvents";
+import { eventsActions, useEvents } from "@/utils/useEvents";
+import { useEffect } from "react";
+import { HOURS } from "@/utils/useTime";
 
 export default function useWeeksEvents(week) {
     const events = useEvents(state => state.events);
     const groups = useGroups(state => state.groups);
+
+    useEffect(()=>{
+        if (week && week.length > 0) eventsActions.loadWeekEvents(week);
+    },[week]);
 
     if (!week || week.length === 0) return [];
 
@@ -15,11 +20,6 @@ export default function useWeeksEvents(week) {
             .filter(entry => entry.type === 'event')
             .filter(event => event.date >= week[0] && event.date <= week[week.length - 1])
             .filter(event => event.isMember)
-            .map(event => ({
-                ...event,
-                start: event.timeRange.start,
-                end: event.timeRange.end,
-            }))
     );
 
     return [...userEvents, ...groupEvents]

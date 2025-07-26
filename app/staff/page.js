@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import WithAuth from "@/components/WithAuth";
 import MentoringGroup from "./components/MentoringGroup";
 import StaffStudents from "./components/StaffStudents";
 import { tw } from "@/utils/tw";
-import { useGroups } from "@/utils/useGroups";
+import { groupsActions, useGroups } from "@/utils/useGroups";
 
 export default function StaffPage() {
     return (
@@ -28,6 +28,10 @@ function StaffPageActual() {
 
     const [activeTab, setActiveTab] = useState(mentoringGroups.length > 0 ? mentoringGroups[0].id : "students");
     const [mode, setMode] = useState("schedule");
+
+    useEffect(() => {
+        groupsActions.loadMentoringGroups();
+    }, []);
 
     return (
         <div className="min-h-screen p-4" dir="rtl">
@@ -76,7 +80,7 @@ function StaffPageActual() {
                     </div>
                 </div>
 
-                
+
                 {activeTab === "students" ? (
                     <StaffStudents
                         students={[]}

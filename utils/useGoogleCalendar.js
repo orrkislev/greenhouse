@@ -1,16 +1,34 @@
-import { useWeek } from "@/app/schedule/utils/useWeek";
+import { useTime } from "@/utils/useTime";
 import { create } from "zustand";
 import { fetchEventsFromGoogleCalendar } from "./GoogleCalendarActions";
 import { useUser } from "./useUser";
+import { format, getDay } from "date-fns";
 
 export const useGoogleCalendar = create((set, get) => ({
     events: [],
     isLoading: false,
     loadedRanges: [],
 
-    getWeeksCalendarEvents: async () => {
-        console.log('getWeeksCalendarEvents called');
-        const week = useWeek.getState().week;
+    getTodayEvents: async () => {
+        const userRefreshToken = useUser.getState().user.googleRefreshToken;
+        if (!userRefreshToken) return;
+        const day = format(new Date(), 'yyyy-MM-dd');
+
+        if (get().isLoading) return;
+        if (get().loadedRanges.some(range => range.start === day && range.end === day)) {
+            return;
+        }
+        set(state => ({ loadedRanges: [...state.loadedRanges, { start: day, end: day }], isLoading: true }));
+        try {
+            const events = await fetchEventsFromGoogleCalendar(userRefreshToken, day, day);
+            set({ events, isLoading: false });
+        } catch (error) {
+            console.error('Error fetching Google Calendar events:', error);
+            set({ isLoading: false });
+        }
+    },
+    getWeeksEvents: async () => {
+        const week = useTime.getState().week;
         if (!week || week.length === 0) return
         const userRefreshToken = useUser.getState().user.googleRefreshToken;
         if (!userRefreshToken) return
@@ -32,3 +50,7 @@ export const useGoogleCalendar = create((set, get) => ({
         }
     }
 }));
+
+export const googleCalendarActions = Object.fromEntries(
+    Object.entries(useGoogleCalendar.getState()).filter(([key, value]) => typeof value === 'function')
+);
