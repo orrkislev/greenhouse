@@ -56,7 +56,7 @@ export default function MainPage() {
             {groups.map(group => (
                 <div key={group.id}>
                     <h3>{group.name}</h3>
-                    {group.entries.map(entry => (
+                    {group.entries && group.entries.map(entry => (
                         <div key={entry.id}>
                             <p>{entry.type} - {entry.title}</p>
                         </div>

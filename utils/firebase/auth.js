@@ -1,6 +1,5 @@
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
-import { auth, db } from './firebase';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { auth, } from './firebase';
 
 
 export const prepareEmailPassword = (username, pinPass) => {
@@ -14,8 +13,7 @@ export class AuthService {
     const [email, password] = prepareEmailPassword(username, pinPass);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = await this.getUserData(userCredential.user);
-      return user;
+      return userCredential.user;
     } catch (error) {
       throw new Error(this.getErrorMessage(error));
     }
@@ -27,46 +25,6 @@ export class AuthService {
     } catch (error) {
       throw new Error(this.getErrorMessage(error));
     }
-  }
-
-  static async getUserData(firebaseUser) {
-    const username = firebaseUser.email ? firebaseUser.email.split('@')[0] : null;
-    if (!username) {
-      throw new Error('Username not found in Firebase user data');
-    }
-
-    const userDoc = await getDoc(doc(db, 'users', username));
-    if (userDoc.exists()) {
-      const data = userDoc.data();
-      return { id: username, ...data };
-    } else {
-      console.error('No user data found for this username:', username);
-      throw new Error('User data not found');
-    }
-  }
-
-  // static onAuthStateChange(callback) {
-  //   return onAuthStateChanged(auth, async (firebaseUser) => {
-  //     if (firebaseUser) {
-  //       try {
-  //         const user = await this.getUserData(firebaseUser);
-  //         callback(user);
-  //       } catch (error) {
-  //         console.error('Error getting user data:', error);
-  //         callback(null);
-  //       }
-  //     } else {
-  //       callback(null);
-  //     }
-  //   });
-  // }
-
-  static subscribeToUserDoc(username, callback) {
-    const userRef = doc(db, 'users', username);
-    return onSnapshot(userRef, (docSnap) => {
-      if (docSnap.exists()) callback({ username, ...docSnap.data() });
-      else callback(null);
-    });
   }
 
   static getErrorMessage(error) {

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, subscribeWithSelector } from 'zustand/middleware';
 import { AuthService } from './firebase/auth';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, or, updateDoc } from 'firebase/firestore';
 import { db } from './firebase/firebase';
 
 export const useUser = create(subscribeWithSelector(persist((set, get) => {
@@ -17,6 +17,7 @@ export const useUser = create(subscribeWithSelector(persist((set, get) => {
 	return {
 		user: {},
 		loading: true,
+		originalUser: null,
 
 		logout: () => {
 			unsubscribe();
@@ -27,13 +28,12 @@ export const useUser = create(subscribeWithSelector(persist((set, get) => {
 		signIn: async (username, pinPass) => {
 			set({ loading: true });
 			try {
-				const user = await AuthService.signIn(username, pinPass);
-				console.log("User signed in:", user);
-				set({ user });
+				const userCredential = await AuthService.signIn(username, pinPass);
 				unsubscribe();
-				if (user && user.username) {
-					unsubscribeUserDoc = AuthService.subscribeToUserDoc(user.username, (userDoc) => {
-						set({ user: { ...get().user, ...userDoc } });
+				if (userCredential) {
+					const userRef = doc(db, 'users', username);
+					unsubscribeUserDoc = onSnapshot(userRef, (docSnap) => {
+						if (docSnap.exists()) set({ user: { ...docSnap.data(), id: username } });
 					});
 				}
 			} catch (error) {
@@ -53,11 +53,40 @@ export const useUser = create(subscribeWithSelector(persist((set, get) => {
 				},
 			}));
 		},
+
+		switchToStudent: async (studentId) => {
+			const user = get().user;
+			if (!user || !user.roles || !user.roles.includes('staff')) {
+				throw new Error("User does not have permission to switch to student.");
+			}
+			set({ originalUser: user });
+			const studentRef = doc(db, 'users', studentId);
+			unsubscribe();
+			unsubscribeUserDoc = onSnapshot(studentRef, (docSnapshot) => {
+				if (docSnapshot.exists()) {
+					set({ user: { ...docSnapshot.data(), id: studentId } });
+				}
+			})
+			window.location.href = '/';
+		},
+		switchBackToOriginal: () => {
+			const originalUser = get().originalUser;
+			if (!originalUser) {
+				throw new Error("No original user to switch back to.");
+			}
+			unsubscribe();
+			const userRef = doc(db, 'users', originalUser.id);
+			unsubscribeUserDoc = onSnapshot(userRef, (docSnap) => {
+				if (docSnap.exists()) set({ user: { ...docSnap.data(), id: originalUser.id } });
+			});
+			set({ user: originalUser, originalUser: null });
+			window.location.href = '/staff';
+		}
 	};
 },
 	{
 		name: 'auth-storage',
-		partialize: (state) => ({ user: state.user }),
+		partialize: (state) => ({ user: state.user, originalUser: state.originalUser }),
 		merge: (persistedState, currentState) => ({ ...currentState, ...persistedState, loading: false }),
 	}
 )));

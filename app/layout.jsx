@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import TopBar from "@/components/TopBar";
+import SwitchBackPanel from "./staff/components/SwitchBackPanel";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,7 +19,7 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  
+
 
   return (
     <html lang="en">
@@ -26,7 +27,8 @@ export default function RootLayout({ children }) {
           rtl bg-linear-to-br from-white via-stone-100/50 to-stone-300/50 min-h-screen
       `} >
         <TopBar />
-            {children}
+        {children}
+        <SwitchBackPanel />
       </body>
     </html>
   );

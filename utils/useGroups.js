@@ -178,11 +178,7 @@ groupsActions.getUserGroupEntriesForWeek = async (group, userId, week) => {
 
 
 
-useUser.subscribe(state => state.user?.id,
-    (userId) => {
-        if (!userId) groupsActions.clear()
-    }
-);
+useUser.subscribe(state => state.user?.id, groupsActions.clear)
 useUser.subscribe(state => state.user?.groups,
     (userGroups) => {
         if (userGroups && userGroups.length > 0)
