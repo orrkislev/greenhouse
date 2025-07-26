@@ -26,14 +26,16 @@ export const useGroups = create(persist(
         },
         loadMentoringGroups: async () => {
             const userId = useUser.getState().user?.id;
+            console.log("Loading mentoring groups for user:", userId);
             if (!userId) return;
             const groupsQuery = query(
                 collection(db, "groups"),
                 where("mentors", "array-contains", userId)
             );
             const snapshot = await getDocs(groupsQuery);
+            console.log("Mentoring groups loaded:", snapshot.docs.length);
             const mentoringGroups = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id, isMentor: true }));
-            set({ groups: [...get().groups, ...mentoringGroups.filter(g => !get().groups.find(existingGroup => existingGroup.id === g.id))] });
+            set({ groups: [...get().groups.filter(g => mentoringGroups.find(mg => mg.id === g.id)), ...mentoringGroups] });
         },
         loadGroup: async (group) => {
             if (get().groups.find(g => g.id === group)) return;

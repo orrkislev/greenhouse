@@ -23,6 +23,7 @@ const TabButton = tw`px-6 py-2 rounded-lg font-medium transition-all
 
 
 function StaffPageActual() {
+    const userId = useGroups(state => state.user?.id);
     const groups = useGroups(state => state.groups);
     const mentoringGroups = groups.filter(group => group.isMentor)
 
@@ -31,7 +32,7 @@ function StaffPageActual() {
 
     useEffect(() => {
         groupsActions.loadMentoringGroups();
-    }, []);
+    }, [userId]);
 
     return (
         <div className="min-h-screen p-4" dir="rtl">

@@ -1,6 +1,6 @@
 import { adminActions, useAdmin } from "@/utils/useAdmin";
 import { useTime } from "@/utils/useTime";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 
 
@@ -10,18 +10,22 @@ export default function AdminProjects() {
     const groups = useAdmin(state => state.groups);
     const currTerm = useTime(state => state.currTerm);
 
+    const totalStudents = useMemo(() => {
+        return groups.reduce((total, group) => total + (group.students ? group.students.length : 0), 0);
+    }, [groups]);
+
     useEffect(() => {
         adminActions.loadProjects();
-    }, []);
+    }, [totalStudents]);
 
     const getStudentData = (student) => {
         let project = null, requested = '', master = '', major = null;
 
         if (student.major) major = student.major.name;
-        if (student.project && student.project.terms.includes(currTerm)) {
-            requested = student.project.requestedMaster;
+        if (student.project && student.project.terms.includes(currTerm.id)) {
+            requested = student.project.questions[2].value;
             master = student.project.master ? student.project.master : null;
-            project = student.project.title;
+            project = student.project.name;
             if (student.project.terms.length > 1)
                 project += ' (המשך)';
         }
@@ -75,7 +79,7 @@ export default function AdminProjects() {
                                     <Cell>{data.major}</Cell>
                                     <Cell>
                                         {data.project ? (
-                                            <a href={projectUrl = `/projects/${student.id}/${student.project.id}`} className="bg-blue-300 rounded-sm hover:bg-blue-500 text-gray-400 hover:text-white px-2 py-1">
+                                            <a href={`/projects/${student.id}/${student.project.id}`} className="bg-blue-300 rounded-sm hover:bg-blue-500 text-gray-400 hover:text-white px-2 py-1">
                                                 {data.project}
                                             </a>
                                         ) : (<span className="text-gray-500">אין פרויקט</span>
@@ -85,7 +89,7 @@ export default function AdminProjects() {
                                     <Cell>
                                         <select
                                             value={data.master || ''}
-                                            onChange={e => adminActions.assignMasterToProject(student.id, student.project.id, e.target.value)}
+                                            onChange={e => adminActions.assignMasterToProject(student.id, student.projectId, e.target.value)}
                                             className="bg-white border border-gray-300 rounded-md p-1"
                                         >
                                             <option value="">בחר מנחה</option>

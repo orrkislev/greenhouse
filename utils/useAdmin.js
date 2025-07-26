@@ -17,7 +17,6 @@ export const useAdmin = create((set, get) => ({
         allMembers = allMembers.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const studentsList = allMembers.filter(member => !member.roles || member.roles.includes('student'));
         const staffList = allMembers.filter(member => member.roles && member.roles.includes('staff'));
-        console.log({ groups, studentsList, staffList });
         groups.forEach(group => {
             group.students = studentsList.filter(student => student.className == group.id);
             group.mentors = group.mentors.map(mentorId => staffList.find(staff => staff.id === mentorId)).filter(Boolean);
