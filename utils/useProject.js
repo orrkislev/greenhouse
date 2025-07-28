@@ -101,10 +101,10 @@ export const projectActions = Object.fromEntries(
 
 
 
-const onUserUpdate = (user) => useProject.getState().loadProject(user.projectId);
+const onUserUpdate = (user) => projectActions.loadProject(user?.projectId);
 onUserUpdate(useUser.getState().user);
-useUser.subscribe(state => state.user.projectId, onUserUpdate);
+useUser.subscribe(state => state.user?.projectId, onUserUpdate);
 
-const onGanttTerm = (term) => useProject.getState().checkTerm(term?.id);
+const onGanttTerm = (term) => projectActions.checkTerm(term?.id);
 onGanttTerm(useTime.getState().currTerm);
 useTime.subscribe(state => state.currTerm, onGanttTerm);
