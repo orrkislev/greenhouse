@@ -139,6 +139,9 @@ function DraggableTask({ task, taskIndex, weekIndex, onTaskMove, setIsDragging }
     const [dragState, setDragState] = useState('idle');
 
     useEffect(() => {
+        if (!task) return;
+        if (task.completed) return;
+
         const element = elementRef.current;
         const gripElement = gripRef.current;
         if (!element || !gripElement) return;
@@ -187,7 +190,7 @@ function DraggableTask({ task, taskIndex, weekIndex, onTaskMove, setIsDragging }
                 }
             })
         );
-    }, [task.id, taskIndex, weekIndex, onTaskMove, setIsDragging]);
+    }, [task, taskIndex, weekIndex, onTaskMove, setIsDragging]);
 
     return (
         <div
@@ -197,12 +200,14 @@ function DraggableTask({ task, taskIndex, weekIndex, onTaskMove, setIsDragging }
                 : dragState === 'over'
                     ? 'border-blue-300 bg-blue-50'
                     : 'hover:bg-gray-100 border-gray-200'
-                }`}>
-            <div 
+                }
+                ${task.completed ? 'opacity-50 line-through bg-emerald-100 hover:bg-emerald-100' : ''}
+                `}>
+            <div
                 ref={gripRef}
                 className="flex items-center gap-2 text-gray-400 cursor-move hover:text-gray-600 transition-colors p-1 rounded"
             >
-                <Grip className="w-4 h-4" />
+                {!task.completed && <Grip className="w-4 h-4" />}
             </div>
             {dragState === 'over' && (
                 <DropIndicator edge="right" gap="4px" />

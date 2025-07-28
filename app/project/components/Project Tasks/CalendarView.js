@@ -142,6 +142,8 @@ function TaskItem({ task }) {
     };
 
     useEffect(() => {
+        if (!task) return;
+        if (task.completed) return;
         const element = elementRef.current;
         const gripElement = gripRef.current;
         if (!element || !gripElement) return;
@@ -172,12 +174,12 @@ function TaskItem({ task }) {
                 onDrop: ({ source }) => setDragState('idle')
             })
         );
-    }, [task.id]);
+    }, [task]);
 
     return (
-        <TaskItemDiv ref={elementRef} $dragging={dragState === 'dragging'} $over={dragState === 'over'}>
+        <TaskItemDiv ref={elementRef} $dragging={dragState === 'dragging'} $over={dragState === 'over'} $active={!task.completed}>
             <div ref={gripRef} className="flex items-center gap-2 text-gray-400 cursor-move hover:text-gray-600 transition-colors p-1 rounded mr-2" >
-                <Grip className="w-3 h-3" />
+                {!task.completed && <Grip className="w-3 h-3" />}
             </div>
             <div className="text-sm text-gray-700 flex-1">{task.title}</div>
             <button className="text-red-500 hover:text-red-700 ml-2" onClick={() => onDelete(task.id)}>
@@ -191,4 +193,5 @@ const TaskItemDiv = tw`
     relative flex items-center justify-between p-2 bg-white border-b border-gray-200 transition-all duration-200
     ${props => props.$dragging ? 'opacity-50 transform rotate-2 shadow-lg scale-105' : 'hover:bg-gray-50'}
     ${props => props.$over ? 'border-l-4 border-l-blue-400 bg-blue-50' : ''}
+    ${props => props.$active ? '' : 'opacity-50 line-through bg-emerald-100 hover:bg-emerald-100'}
 `;

@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import { projectActions, useProject } from "./useProject";
-import { addDoc, collection, deleteDoc, doc, getDocs, limit, query, updateDoc, where } from "firebase/firestore";
-import { endOfWeek, format } from "date-fns";
-import { orderBy, over } from "lodash";
+import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, limit, query, updateDoc, where } from "firebase/firestore";
+import { format } from "date-fns";
 import { useTime } from "./useTime";
+import { logsActions } from "./useLogs";
+import { LOG_TYPES } from "./constants/constants";
 
 export const useProjectTasks = create((set, get) => {
     const getCollectionRef = () => {
@@ -62,8 +63,8 @@ export const useProjectTasks = create((set, get) => {
                 const todayDocs = todaySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id, mark: 'today' }));
                 const nextSnapshot = await getDocs(query(collectionRef,
                     where('completed', '==', false),
-                    orderBy('startDate', 'asc'),
                     where('startDate', '>', today),
+                    orderBy('startDate', 'asc'),
                     limit(1)
                 ));
                 const nextDocs = nextSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id, mark: 'next' }));
@@ -114,6 +115,31 @@ export const useProjectTasks = create((set, get) => {
             const newTasks = get().tasks.filter(t => t.id !== taskId);
             newTasks.splice(newSpot, 0, task);
             get().setTasks(newTasks);
+        },
+
+
+
+        completeTask: (taskId) => {
+            const task = get().tasks.find(t => t.id === taskId);
+            if (!task) return;
+            get().updateTask(taskId, { completed: true });
+            logsActions.addLog({
+                type: LOG_TYPES.COMPLETE_TASK,
+                text: `השלמתי את המשימה ${task.title} בפרויקט`,
+                taskId: task.id,
+                projectId: useProject.getState().project.id,
+            });
+        },
+        cancelTask: (taskId) => {
+            const task = get().tasks.find(t => t.id === taskId);
+            if (!task) return;
+            get().updateTask(taskId, { completed: false });
+            logsActions.addLog({
+                type: LOG_TYPES.CANCEL_TASK,
+                text: `ביטלתי את המשימה ${task.title} בפרויקט`,
+                taskId: task.id,
+                projectId: useProject.getState().project.id,
+            });
         }
     }
 });

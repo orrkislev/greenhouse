@@ -1,7 +1,7 @@
 import { tw } from "@/utils/tw";
 import { useProject } from "@/utils/useProject";
-import { useProjectTasks } from "@/utils/useProjectTasks";
-import { Check, ChevronLeft, Trash } from "lucide-react";
+import { projectTasksActions, useProjectTasks } from "@/utils/useProjectTasks";
+import { Check, ChevronLeft, Trash, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 
@@ -54,6 +54,8 @@ function Tasks() {
         useProjectTasks.getState().loadNextTasks();
     }, []);
 
+    console.log({ tasks })
+
     if (tasks.length === 0) {
         return <div className='text-gray-500 text-center p-4'>אין משימות</div>;
     }
@@ -62,7 +64,12 @@ function Tasks() {
             {view === 'list' && (
                 <>
                     <div>המשימה הבאה</div>
-                    <Task key={tasks[0].id} tag="next" task={tasks[0]} />
+                    {tasks.filter(task => task.completed).slice(0, 1).map(task => (
+                        <Task key={task.id} tag="completed" task={task} description={'משימה הושלמה'} />
+                    ))}
+                    {tasks.filter(task => !task.completed).slice(0, 1).map(task => (
+                        <Task key={task.id} tag="next" task={task} />
+                    ))}
                 </>
             )}
             {view === 'weekly' && (
@@ -83,9 +90,9 @@ function Tasks() {
             )}
             {view === 'calendar' && (
                 <>
-                    {tasks.filter(task => task.mark === 'overdue').length > 0 && (
+                    {tasks.filter(task => task.mark === 'overdue').map(task => (
                         <Task key={task.id} tag="overdue" task={task} description={'משימה באיחור'} />
-                    )}
+                    ))}
 
                     {tasks.filter(task => task.mark === 'today').length > 0 && (
                         <>
@@ -116,25 +123,34 @@ const TaskPill = tw`
     ${props => props.tag === 'overdue' && 'bg-red-200 text-red-800'}
     ${props => props.tag === 'active' && 'bg-green-200 text-green-800'}
     ${props => props.tag === 'next' && 'bg-yellow-200 text-yellow-800'}
+    ${props => props.tag === 'completed' && 'bg-gray-200 text-gray-800'}
 `;
 
 function Task({ task, description, tag }) {
-    const onCheck = () => { }
-    const onDelete = () => { }
+
+    const onCheck = () => {
+        projectTasksActions.completeTask(task.id);
+    }
+    const onDelete = () => {
+        projectTasksActions.cancelTask(task.id);
+    }
+
     return (
         <div key={task.id} className='flex items-center gap-2 group'>
             <TaskPill tag={tag}>
                 {task.title}
                 <span className='text-xs text-gray-500'> ({description || task.description})</span>
             </TaskPill>
-            <div className='flex gap-2 items-center group-hover:opacity-100 opacity-0 transition-opacity'>
-                <button className='p-1 border border-gray-200 hover:bg-gray-200 rounded-full' onClick={onCheck}>
-                    <Check className='w-4 h-4' />
-                </button>
-                <button className='border border-gray-200 hover:bg-gray-200 rounded-full' onClick={onDelete}>
-                    <Trash className='w-4 h-4' />
-                </button>
-            </div>
+            {tag != 'completed' && (
+                <div className='flex gap-2 items-center group-hover:opacity-100 opacity-0 transition-opacity'>
+                    <button className='p-1 border border-emerald-400 hover:bg-emerald-200 rounded-full' onClick={onCheck}>
+                        <Check className='w-4 h-4 text-emerald-400' />
+                    </button>
+                    <button className='p-1 border border-rose-400 hover:bg-rose-200 rounded-full' onClick={onDelete}>
+                        <X className='w-4 h-4 text-rose-400' />
+                    </button>
+                </div>
+            )}
         </div>
     )
 }

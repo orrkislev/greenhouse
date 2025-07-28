@@ -37,6 +37,7 @@ export const CONTEXT_TAGS = {
 
 export const LOG_TYPES = {
     COMPLETE_TASK: "complete_task",
+    CANCEL_TASK: "cancel_task",
     TASK_PROGRESS: "task_progress",
     COMMENT: "comment",
     MEETING: "meeting",

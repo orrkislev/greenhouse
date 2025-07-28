@@ -1,4 +1,4 @@
-import { GripVertical, Trash } from "lucide-react";
+import { Check, GripVertical, Trash, X } from "lucide-react";
 import { Reorder, useDragControls } from "framer-motion";
 import { useState } from "react";
 import { projectTasksActions, useProjectTasks } from "@/utils/useProjectTasks";
@@ -6,20 +6,53 @@ import { projectTasksActions, useProjectTasks } from "@/utils/useProjectTasks";
 export default function ListView() {
     const tasks = useProjectTasks((state) => state.tasks);
 
-    const onReorder = (newTasks) => {
-        projectTasksActions.setTasks(newTasks);
+    // Separate completed and non-completed tasks
+    const activeTasks = tasks.filter(task => !task.completed);
+    const completedTasks = tasks.filter(task => task.completed);
+
+    const onReorder = (newActiveTasks) => {
+        // Preserve completed tasks at the end when reordering
+        const allTasks = [...newActiveTasks, ...completedTasks];
+        projectTasksActions.setTasks(allTasks);
     }
+
     return (
-        <Reorder.Group className="divide-y divide-gray-200" values={tasks} onReorder={onReorder}>
-            {tasks.map((task) => (
-                <SingleTask key={task.id} task={task} />
+        <div className="divide-y divide-gray-200">
+            {/* Draggable active tasks */}
+            <Reorder.Group values={activeTasks} onReorder={onReorder}>
+                {activeTasks.map((task) => (
+                    <SingleTask key={task.id} task={task} isDraggable={true} />
+                ))}
+            </Reorder.Group>
+
+            {/* Non-draggable completed tasks */}
+            {completedTasks.map((task) => (
+                <SingleTask key={task.id} task={task} isDraggable={false} />
             ))}
-        </Reorder.Group>
+        </div>
     );
 }
 
-function SingleTask({ task}) {
+function SingleTask({ task, isDraggable = true }) {
     const controls = useDragControls();
+
+    if (!isDraggable) {
+        // Non-draggable completed task - non-editable and no delete button
+        return (
+            <div className='flex gap-4 w-full items-center hover:bg-gray-100 py-1 group opacity-60'>
+                <div className="w-4 h-4"></div> {/* Placeholder for grip space */}
+                <div className="flex justify-between items-center w-full">
+                    <div className="flex-1 text-sm text-gray-500">
+                        {task.title || ''}
+                    </div>
+                    <div className="flex-1 text-sm text-gray-500">
+                        {task.description || ''}
+                    </div>
+                    <div className="w-6 h-6"></div> {/* Placeholder for delete button space */}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <Reorder.Item key={task.id}
@@ -32,10 +65,16 @@ function SingleTask({ task}) {
             <div className="flex justify-between items-center w-full">
                 <EditLabel task={task} field="title" />
                 <EditLabel task={task} field="description" />
-                <button className="bg-gray-200 hover:bg-gray-300 cursor-pointer transition-colors rounded-full p-1 opacity-0 group-hover:opacity-100"
-                    onClick={() => projectTasksActions.deleteTask(task.id)}>
-                    <Trash className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                    <button className="bg-gray-200 hover:bg-gray-300 cursor-pointer transition-colors rounded-full p-1 opacity-0 group-hover:opacity-100"
+                        onClick={() => projectTasksActions.completeTask(task.id)}>
+                        <Check className="w-4 h-4" />
+                    </button>
+                    <button className="bg-gray-200 hover:bg-gray-300 cursor-pointer transition-colors rounded-full p-1 opacity-0 group-hover:opacity-100"
+                        onClick={() => projectTasksActions.deleteTask(task.id)}>
+                        <X className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
         </Reorder.Item>
     )
@@ -43,7 +82,7 @@ function SingleTask({ task}) {
 
 
 
-function EditLabel({ task, field}) {
+function EditLabel({ task, field }) {
     const [editing, setEditing] = useState(false);
 
     const update = (newValue) => {
