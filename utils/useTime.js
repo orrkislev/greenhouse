@@ -62,6 +62,36 @@ export const useTime = create(subscribeWithSelector((set, get) => {
 })();
 
 
-const timeActions = Object.fromEntries(
+export const timeActions = Object.fromEntries(
     Object.entries(useTime.getState()).filter(([key, value]) => typeof value === 'function')
 );
+
+
+
+
+// ---------- utility functions -----------
+export function getTermWeeks(term) {
+    const startDate = new Date(term.start);
+    const endDate = new Date(term.end);
+    const firstSunday = new Date(startDate);
+    firstSunday.setDate(firstSunday.getDate() - firstSunday.getDay());
+    const lastSaturday = new Date(endDate);
+    lastSaturday.setDate(lastSaturday.getDate() + (6 - lastSaturday.getDay()));
+    const termWeeks = [];
+    let weekStart = new Date(firstSunday);
+    while (weekStart <= lastSaturday) {
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        termWeeks.push({
+            dates: Array.from({ length: 6 }, (_, i) => {
+                const d = new Date(weekStart);
+                d.setDate(weekStart.getDate() + i);
+                return format(d, 'yyyy-MM-dd');
+            }),
+            start: new Date(weekStart),
+            end: new Date(weekEnd)
+        });
+        weekStart.setDate(weekStart.getDate() + 7);
+    }
+    return termWeeks;
+}

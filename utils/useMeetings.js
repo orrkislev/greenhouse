@@ -1,6 +1,6 @@
 import { db } from "@/utils/firebase/firebase";
 import { useUser } from "@/utils/useUser";
-import { addDoc, collection, deleteDoc, doc, getDocs, onSnapshot, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from "firebase/firestore";
 import { create } from "zustand";
 
 export const useMeetings = create((set, get) => {
@@ -51,6 +51,31 @@ export const useMeetings = create((set, get) => {
                 meetings: [...state.meetings, { id: newMeetingDoc.id, ...meeting }],
             }));
         },
+
+        findMeetingById: (meetingId) => {
+            const meeting = get().meetings.find(meeting => meeting.id === meetingId);
+            if (meeting) return meeting;
+            const meetingRef = doc(db, `meetings`, meetingId);
+            const meetingSnap = getDoc(meetingRef);
+            if (meetingSnap.exists()) {
+                const meetingData = meetingSnap.data();
+                return { id: meetingId, ...meetingData };
+            }
+            return null;
+        },
+
+        findMeetingByParticipants: (p1, p2) => {
+            const meeting = get().meetings.find(meeting => {
+                return meeting.participants.includes(p1) && meeting.participants.includes(p2);
+            });
+            if (meeting) return meeting;
+            const meetingsRef = collection(db, `meetings`);
+            const meetingsQuery = query(meetingsRef, where("participants", "array-contains", p1), where("participants", "array-contains", p2));
+            const meetingsSnap = getDocs(meetingsQuery);
+            if (meetingsSnap.empty) return null;
+            const meetingData = meetingsSnap.docs[0].data();
+            return { id: meetingsSnap.docs[0].id, ...meetingData };
+        }
     }
 });
 

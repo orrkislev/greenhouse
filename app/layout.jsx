@@ -25,6 +25,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased 
           rtl bg-linear-to-br from-white via-stone-100/50 to-stone-300/50 min-h-screen
+          pb-32
       `} >
         <TopBar />
         {children}

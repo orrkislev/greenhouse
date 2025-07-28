@@ -9,16 +9,6 @@ export const TASK_STATUSES = {
     FAILED: "failed", // marked as failed
 };
 
-export const LOG_TYPES = {
-    COMPLETE_TASK: "complete_task",
-    TASK_PROGRESS: "task_progress",
-    COMMENT: "comment",
-    MEETING: "meeting",
-    JOURNAL: "journal",
-    BREAKTHROUGH: "breakthrough",
-    SYSTEM_NOTIFICATION: "system_notification",
-};
-
 export const TASK_TYPES = {
     STUDENT_CREATED: "student_created",
     MENTOR_CREATED: "mentor_created",
@@ -43,6 +33,17 @@ export const CONTEXT_TAGS = {
 };
 
 
+
+
+export const LOG_TYPES = {
+    COMPLETE_TASK: "complete_task",
+    TASK_PROGRESS: "task_progress",
+    COMMENT: "comment",
+    MEETING: "meeting",
+    JOURNAL: "journal",
+    BREAKTHROUGH: "breakthrough",
+    SYSTEM_NOTIFICATION: "system_notification",
+};
 
 export const LOG_RECORDS = {
     STARTED_PROJECT: "started_project",

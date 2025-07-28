@@ -94,7 +94,7 @@ export default function AdminProjects() {
                                         >
                                             <option value="">בחר מנחה</option>
                                             {staff.map(mentor => (
-                                                <option key={mentor.id} value={mentor.id}>
+                                                <option key={mentor.id} value={{ id: mentor.id, firstName: mentor.firstName, lastName: mentor.lastName }}>
                                                     {mentor.firstName} {mentor.lastName}
                                                 </option>
                                             ))}

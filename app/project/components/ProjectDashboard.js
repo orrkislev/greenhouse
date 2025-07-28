@@ -1,4 +1,9 @@
 import { useProject } from "@/utils/useProject";
+import ProjectTasks from "./Project Tasks/ProjectTasks";
+import ProjectGoals from "./ProjectGoals";
+import ProjectMaster from "./ProjectMaster";
+
+
 
 export default function ProjectDashboard() {
     const project = useProject((state) => state.project);
@@ -13,9 +18,7 @@ export default function ProjectDashboard() {
                         <div className="flex-3 bg-white rounded-xl p-6 shadow-sm border">
                             <h3 className="text-center text-gray-700 font-medium">מצב נוכחי של הפרויקט</h3>
                         </div>
-                        <div className="flex-1 bg-white rounded-xl p-6 shadow-sm border">
-                            <h3 className="text-center text-gray-700 font-medium">המאסטר שלי</h3>
-                        </div>
+                        <ProjectMaster />
                     </div>
 
                     {/* Action buttons row */}
@@ -34,15 +37,8 @@ export default function ProjectDashboard() {
                         </div>
                     </div>
 
-                    {/* Middle section - Tasks/Meetings */}
-                    <div className="bg-white rounded-xl p-6 shadow-sm border h-40 flex items-center justify-center">
-                        <span className="text-gray-600">מטרות - ידיעם - משימות</span>
-                    </div>
-
-                    {/* Bottom section - Time board */}
-                    <div className="bg-white rounded-xl p-6 shadow-sm border h-32 flex items-center justify-center">
-                        <span className="text-gray-600">לוח זמנים</span>
-                    </div>
+                    <ProjectGoals />
+                    <ProjectTasks />
                 </div>
 
                 <div className="col-span-3 space-y-4">
@@ -50,8 +46,11 @@ export default function ProjectDashboard() {
                     <div className="bg-white rounded-xl p-6 h-64 flex items-center justify-center shadow-sm border">
                         <div className="text-center text-gray-600">
                             <p className="text-sm leading-relaxed">
-                                תיאור הפרויקט, מאן סיכום של החברת<br />
-                                המנותח, והצגת המטרות
+                                {project.questions.map((question, index) => (
+                                    <span key={index} className="block mb-2">
+                                        <strong>{question.title}</strong> - {question.value}
+                                    </span>
+                                ))}
                             </p>
                             <div className="mt-8 text-lg font-medium">
                                 עריכה
