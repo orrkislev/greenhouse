@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, subscribeWithSelector } from 'zustand/middleware';
 import { AuthService } from './firebase/auth';
-import { doc, onSnapshot, or, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from './firebase/firebase';
 
 export const useUser = create(subscribeWithSelector(persist((set, get) => {
@@ -15,7 +15,7 @@ export const useUser = create(subscribeWithSelector(persist((set, get) => {
 
 
 	return {
-		user: {},
+		user: null,
 		loading: true,
 		originalUser: null,
 
@@ -54,12 +54,12 @@ export const useUser = create(subscribeWithSelector(persist((set, get) => {
 			}));
 		},
 
-		switchToStudent: async (studentId) => {
+		switchToStudent: async (studentId, currUrl) => {
 			const user = get().user;
 			if (!user || !user.roles || !user.roles.includes('staff')) {
 				throw new Error("User does not have permission to switch to student.");
 			}
-			set({ originalUser: user });
+			set({ originalUser: { user, lastPage: currUrl } });
 			const studentRef = doc(db, 'users', studentId);
 			unsubscribe();
 			unsubscribeUserDoc = onSnapshot(studentRef, (docSnapshot) => {
@@ -67,20 +67,20 @@ export const useUser = create(subscribeWithSelector(persist((set, get) => {
 					set({ user: { ...docSnapshot.data(), id: studentId } });
 				}
 			})
-			window.location.href = '/';
 		},
 		switchBackToOriginal: () => {
 			const originalUser = get().originalUser;
+			const lastPage = originalUser.lastPage;
 			if (!originalUser) {
 				throw new Error("No original user to switch back to.");
 			}
 			unsubscribe();
-			const userRef = doc(db, 'users', originalUser.id);
+			const userRef = doc(db, 'users', originalUser.user.id);
 			unsubscribeUserDoc = onSnapshot(userRef, (docSnap) => {
-				if (docSnap.exists()) set({ user: { ...docSnap.data(), id: originalUser.id } });
+				if (docSnap.exists()) set({ user: { ...docSnap.data(), id: originalUser.user.id } });
 			});
 			set({ user: originalUser, originalUser: null });
-			window.location.href = '/staff';
+			return lastPage;
 		}
 	};
 },

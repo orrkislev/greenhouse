@@ -27,16 +27,13 @@ export async function getRefreshToken(redirect_url, code) {
     );
     try {
         const { tokens } = await oauth2Client.getToken(code);
-        console.log('tokens:', tokens);
         return tokens.refresh_token;
     } catch (err) {
-        console.error('OAuth error:', err.response?.data || err.message);
         throw err;
     }
 }
 
 export async function fetchEventsFromGoogleCalendar(refreshToken, start, end) {
-    console.log('Fetching events from Google Calendar:', start, end, 'with refresh token:', refreshToken);
     const oauth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET
@@ -55,7 +52,6 @@ export async function fetchEventsFromGoogleCalendar(refreshToken, start, end) {
 
         return response.data.items;
     } catch (error) {
-        console.error('Error fetching events:', error);
         throw error;
     }
 }

@@ -47,6 +47,9 @@ export const LOG_TYPES = {
 };
 
 export const LOG_RECORDS = {
+    CREATED_PROJECT: "created_project",
     STARTED_PROJECT: "started_project",
     FINISHED_PROJECT_PROPOSAL: "finished_project_proposal",
+    CLOSED_PROJECT: "closed_project",
+    UPDATED_PROJECT: "updated_project",
 }

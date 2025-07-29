@@ -2,12 +2,15 @@ import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, ge
 import { create } from "zustand"
 import { db } from "./firebase/firebase";
 import { createUser, deleteUser } from "@/utils/admin actions";
+import { projectTasksActions } from "./useProjectTasks";
 
 export const useAdmin = create((set, get) => ({
     staff: [],
     groups: [],
 
     initialize: async () => {
+        if (get().groups.length > 0) return;
+        
         const groupsQuery = query(collection(db, "groups"), where("type", "==", 'class'));
         const snapshot = await getDocs(groupsQuery);
         const groups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -127,7 +130,7 @@ export const useAdmin = create((set, get) => ({
 
     loadProjects: async () => {
         const groups = get().groups;
-        if (groups.flatMap(group => group.students).some(student => student.project)) return
+        if (groups.flatMap(group => group.students).some(student => student.project)) return;
         for (const group of groups) {
             const studentsWithProjectIds = group.students.filter(student => student.projectId);
             for (const student of studentsWithProjectIds) {
@@ -161,6 +164,12 @@ export const useAdmin = create((set, get) => ({
                 })
             }))
         }));
+        projectTasksActions.addTaskToStudentProject({
+            title: 'לקבוע פגישה שבועית',
+            description: `לקבוע פגישה שבועית עם המנחה ${master.firstName} ${master.lastName}`,
+            startDate: format(new Date(), 'yyyy-MM-dd'),
+            endDate: format(new Date(), 'yyyy-MM-dd')
+        }, studentId);
     },
 }));
 

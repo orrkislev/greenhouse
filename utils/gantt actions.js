@@ -26,7 +26,6 @@ export async function getGanttEvents(startDate, endDate) {
         const data = await response.json();
         return data.items || [];
     } catch (error) {
-        console.error('Error fetching calendar events:', error);
         throw error;
     }
 }

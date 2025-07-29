@@ -23,7 +23,6 @@ export const useGoogleCalendar = create((set, get) => ({
             const events = await fetchEventsFromGoogleCalendar(userRefreshToken, day, day);
             set({ events, isLoading: false });
         } catch (error) {
-            console.error('Error fetching Google Calendar events:', error);
             set({ isLoading: false });
         }
     },
@@ -45,7 +44,6 @@ export const useGoogleCalendar = create((set, get) => ({
             const events = await fetchEventsFromGoogleCalendar(userRefreshToken, start, end);
             set({ events, isLoading: false });
         } catch (error) {
-            console.error('Error fetching Google Calendar events:', error);
             set({ isLoading: false });
         }
     }

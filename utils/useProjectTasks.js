@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { projectActions, useProject } from "./useProject";
-import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, limit, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, limit, query, updateDoc, where, arrayUnion } from "firebase/firestore";
 import { format } from "date-fns";
 import { useTime } from "./useTime";
 import { logsActions } from "./useLogs";
@@ -16,20 +16,25 @@ export const useProjectTasks = create((set, get) => {
     return {
         tasks: [],
         view: 'list',
+        loaded: false,
 
 
         loadAllTasks: async () => {
+            if (get().loaded === 'all') return;
             const collectionRef = getCollectionRef();
             if (!collectionRef) return
             const querySnapshot = await getDocs(collectionRef);
             const tasksDocs = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
             const tasks = useProject.getState().project?.tasks?.map(taskId => tasksDocs.find(task => task.id === taskId)).filter(e => e) || [];
             tasks.push(...tasksDocs.filter(task => !tasks.find(t => t.id === task.id)));
-            set({ tasks, view: useProject.getState().project?.taskStyle || 'list' });
+            set({ tasks, view: useProject.getState().project?.taskStyle || 'list', loaded: 'all' });
         },
         loadNextTasks: async () => {
+            if (get().loaded === 'next') return;
+
             const collectionRef = getCollectionRef();
             if (!collectionRef) return
+
             const view = useProject.getState().project?.taskStyle || 'list';
             let docs
             if (view === 'list') {
@@ -72,7 +77,7 @@ export const useProjectTasks = create((set, get) => {
             }
             const tasks = useProject.getState().project?.tasks?.map(taskId => docs.find(task => task.id === taskId)).filter(e => e) || [];
             tasks.push(...docs.filter(task => !tasks.find(t => t.id === task.id)));
-            set({ tasks, view });
+            set({ tasks, view, loaded: 'next' });
         },
 
 
@@ -91,7 +96,7 @@ export const useProjectTasks = create((set, get) => {
         addTask: async (task) => {
             const collectionRef = getCollectionRef();
             if (!collectionRef) return;
-            const newDoc = await addDoc(collectionRef, task)
+            const newDoc = await addDoc(collectionRef, {...task, completed: false });
             get().setTasks([...get().tasks, { ...task, id: newDoc.id }]);
         },
         updateTask: async (taskId, updatedFields) => {
@@ -139,6 +144,20 @@ export const useProjectTasks = create((set, get) => {
                 text: `ביטלתי את המשימה ${task.title} בפרויקט`,
                 taskId: task.id,
                 projectId: useProject.getState().project.id,
+            });
+        },
+
+
+        addTaskToStudentProject: async (task, studentId) => {
+            const userDoc = await getDoc(doc(db, 'users', studentId));
+            if (!userDoc.exists()) return;
+            const userData = userDoc.data();
+            if (!userData.projectId) return;
+            const projectRef = doc(db, 'users', studentId, 'projects', userData.projectId);
+            const tasksCollection = collection(projectRef, 'tasks');
+            const newDoc = await addDoc(tasksCollection, task);
+            await updateDoc(projectRef, {
+                tasks: arrayUnion(newDoc.id)
             });
         }
     }

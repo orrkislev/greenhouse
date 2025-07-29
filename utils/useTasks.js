@@ -36,9 +36,7 @@ export const useTasks = create((set, get) => {
             set({ tasks });
         },
         createTask: async (task) => {
-            console.log("Creating task:", task);
             const newDoc = await addDoc(getRef(), task);
-            console.log("Task created with ID:", newDoc);
             set((state) => ({ tasks: [...state.tasks, { ...task, id: newDoc.id }] }));
         },
         updateTask: (taskId, updatedTask) => {
