@@ -6,7 +6,7 @@ const GroupCellDiv = tw`bg-white flex flex-col h-full gap-[2px]
     ${props => !props.$edittable ? 'bg-[#C4BBB2]/60' : ''}
     `;
 
-export default function GroupCell({ date, groupName, edittable, entries = [] }) {
+export default function GroupCell({ date, groupId, edittable, entries = [] }) {
 
     if (entries.length == 0 && !edittable) {
         return (
@@ -19,9 +19,9 @@ export default function GroupCell({ date, groupName, edittable, entries = [] }) 
     return (
         <GroupCellDiv $edittable={edittable}>
             {entries.map((obj, index) => (
-                <GroupCellEntry key={index} {...{ groupName, date, obj, edittable }} />
+                <GroupCellEntry key={index} {...{ groupId, date, obj, edittable }} />
             ))}
-            {edittable && <NewGroupEntry {...{ groupName, date }} />}
+            {edittable && <NewGroupEntry {...{ groupId, date }} />}
         </GroupCellDiv>
     );
 }

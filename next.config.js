@@ -1,6 +1,8 @@
 const nextConfig = {
   reactStrictMode: false,
-  /* config options here */
+  experimental: {
+    webpackMemoryOptimizations: true
+  }
 };
 
 module.exports = nextConfig;

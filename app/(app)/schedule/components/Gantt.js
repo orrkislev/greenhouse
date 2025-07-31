@@ -19,7 +19,7 @@ export default function Gantt() {
     }, [week]);
 
     return (
-        <ScheduleSection name="גאנט" edittable={false}>
+        <ScheduleSection name="כללי" edittable={false}>
             {week.map((date, index) => (
                 <GanttDay key={`empty-${index}`} className={`pointer-events-none col-${index + 1}`}>
                     {ganttActions.getGanttForDay(date).map((event, i) => (

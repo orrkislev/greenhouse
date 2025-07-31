@@ -1,14 +1,10 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Noto_Sans_Hebrew } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const notoSansHebrew = Noto_Sans_Hebrew({
+  subsets: ["hebrew"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-noto-sans-hebrew",
 });
 
 export const metadata = {
@@ -19,11 +15,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
 
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased 
-          rtl bg-linear-to-br from-white via-stone-100/50 to-stone-300/50 min-h-screen
-          pb-32
-      `} >
+    <html lang="he" className={notoSansHebrew.variable}>
+      <body className={`${notoSansHebrew.className} antialiased rtl min-h-screen pb-32 overflow-hidden`} 
+      style={{
+        backgroundImage: "radial-gradient(circle at bottom left, #eee 0%, white 70%)",
+      }}
+      >
         {children}
       </body>
     </html>

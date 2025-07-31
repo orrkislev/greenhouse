@@ -12,7 +12,7 @@ const GroupObjectText = tw`h-full
         whitespace-pre-line py-1 cursor-pointer text-xs
     `;
 
-export function GroupCellEntry({ groupName, date, obj, edittable }) {
+export function GroupCellEntry({ groupId, date, obj, edittable }) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -20,13 +20,7 @@ export function GroupCellEntry({ groupName, date, obj, edittable }) {
             <PopoverTrigger asChild>
                 <GroupObjectCellDiv>
                     <GroupObjectText>
-                        {obj.type === 'event' ? (
-                            <div>{obj.start} - {obj.end}</div>
-                        ) : (
-                            <div>
-                                {obj.isMember ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
-                            </div>
-                        )}
+                        <div>{obj.start} - {obj.end}</div>
                         <div>{obj.title}</div>
                     </GroupObjectText>
                 </GroupObjectCellDiv>
@@ -35,14 +29,14 @@ export function GroupCellEntry({ groupName, date, obj, edittable }) {
                 {edittable ? (
                     <GroupEntryEdit
                         onClose={() => setIsOpen(false)}
-                        groupName={groupName}
+                        groupId={groupId}
                         date={date}
                         obj={obj}
                     />
                 ) : (
                     <GroupEntryContext
                         onClose={() => setIsOpen(false)}
-                        groupName={groupName}
+                        groupId={groupId}
                         obj={obj}
                     />
                 )}

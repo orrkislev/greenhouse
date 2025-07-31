@@ -5,143 +5,121 @@ import { userActions, useUser } from "./useUser";
 import { useTime } from "@/utils/useTime";
 
 export const useGroups = create((set, get) => ({
-        groups: [],
-        clear: () => {
-            set({ groups: [] })
-        },
+    groups: [],
+    clear: () => {
+        set({ groups: [] })
+    },
 
-        // ----------- Group Loading -----------
-        // -------------------------------------
-        loadUserGroups: async () => {
-            const user = useUser.getState().user;
-            if (!user || !user.id) return;
-
-            // if user is staff, load mentoring groups
-            const newGroups = [];
-            if (user.roles.includes('staff')) {
-                const groupsQuery = query(
-                    collection(db, "groups"),
-                    where("mentors", "array-contains", user.id)
-                );
-                const snapshot = await getDocs(groupsQuery);
-                newGroups.push(...snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id, isMentor: true })));
-            }
-
-            const currGroups = get().groups;
-            const userGroups = user.groups || [];
-            const groupsToLoad = userGroups.filter(group => !currGroups.find(g => g.id === group) && !newGroups.find(g => g.id === group));
-            for (const group of groupsToLoad) {
-                const groupDocRef = doc(db, "groups", group);
-                const groupDoc = await getDoc(groupDocRef);
-                if (groupDoc.exists()) {
-                    newGroups.push({ ...groupDoc.data(), id: groupDoc.id });
-                }
-            }
-            newGroups.forEach(group => {
-                group.isMember = userGroups.includes(group.id);
-                group.isAdmin = group.admins && group.admins.includes(user.id);
-            })
-            const oldGroups = currGroups.filter(g => !newGroups.find(g2 => g2.id === g.id));
-            set({ groups: [...oldGroups, ...newGroups] });
-        },
+    // ----------- Group Loading -----------
+    // -------------------------------------
+    loadGroups: async () => {
+        if (get().groups.length > 0) return;
         
-        // ----------- Group Management --------
-        // -------------------------------------
-        joinGroup: async (groupName) => {
-            userActions.updateUserDoc({
-                groups: useUser.getState().user.groups.concat(groupName)
-            });
-        },
-        leaveGroup: async (groupName) => {
-            set((state) => ({
-                groups: state.groups.map(group => {
-                    if (group.id === groupName) {
-                        return { ...group, isMember: false };
-                    }
-                    return group;
-                })
-            }));
-            userActions.updateUserDoc({
-                groups: arrayRemove(groupName)
-            });
-        },
+        const user = useUser.getState().user;
+        if (!user || !user.id) return;
 
-        // ----------- Group Entries Management -----------
-        // ------------------------------------------------
-        updateWeek: async () => {
-            const week = useTime.getState().week;
-            if (!week || week.length === 0) return;
-            for (const group of get().groups) {
-                get().loadGroupEntries(group, week[0], week[week.length - 1]);
+        const userGroups = [];
+        if (user.roles.includes('staff')) userGroups.push({ id: 'צוות', type: 'staff' });
+        if (user.class) userGroups.push({ id: user.class, type: 'class' });
+        if (user.major) userGroups.push({ id: user.major, type: 'major' });
+
+        const currGroups = get().groups;
+        const groupsToLoad = userGroups.filter(group => !currGroups.find(g => g.id === group.id));
+        
+        const newGroups = [];
+        for (const group of groupsToLoad) {
+            const groupDocRef = doc(db, "groups", group.id);
+            const groupDoc = await getDoc(groupDocRef);
+            if (groupDoc.exists()) {
+                newGroups.push({ ...groupDoc.data(), id: groupDoc.id, type: group.type });
             }
-        },
-        loadTodayEntries: async () => {
-            const today = useTime.getState().today;
-            const groups = get().groups;
-            for (const group of groups) {
-                get().loadGroupEntries(group, today, today);
-            }
-        },
-        loadGroupEntries: async (group, start, end) => {
-            if (!group || !group.name) return;
-            const userId = useUser.getState().user?.id;
-            if (group.unsubscribe) group.unsubscribe();
-            const entriesRef = collection(db, 'groups', group.name, 'entries');
-            const entriesQuery = query(entriesRef,
-                where('date', '>=', start),
-                where('date', '<=', end)
-            );
-            group.unsubscribe = onSnapshot(entriesQuery, snapshot => {
-                const entries = snapshot.docs.map(doc => ({ id: doc.id, group: group.name, ...doc.data() }));
-                entries.forEach(entry => { entry.isMember = entry.members && entry.members.includes(userId); });
-                set((state) => ({ groups: state.groups.map(g => g.name === group.name ? { ...g, entries } : g) }));
-            });
-            set((state) => ({
-                groups: state.groups.map(g => g.name === group.name ? group : g)
-            }));
-        },
-
-        // ----------- Group Students Management -----------
-        // -------------------------------------------------
-        loadClassStudents: async (groupId) => {
-            const group = get().groups.find(g => g.id === groupId);
-            if (!group) return;
-            if (group.students) return;
-
-            const studentQuery = query(
-                collection(db, "users"),
-                where("className", "==", groupId)
-            )
-            const snapshot = await getDocs(studentQuery);
-            const students = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-            set((state) => ({
-                groups: state.groups.map(group => group.id === groupId ? { ...group, students } : group)
-            }));
         }
-    })
+        newGroups.forEach(group => {
+            group.isMentor = group.mentors && group.mentors.includes(user.id);
+        })
+        const oldGroups = currGroups.filter(g => !newGroups.find(g2 => g2.id === g.id));
+        set({ groups: [...oldGroups, ...newGroups] });
+    },
+    updateGroup: async (group, updates) => {
+        const groupDocRef = doc(db, "groups", group.id);
+        await updateDoc(groupDocRef, updates);
+        set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...group, ...updates } : g) }));
+    },
+
+    // ----------- Group Entries Management -----------
+    // ------------------------------------------------
+    updateWeek: async () => {
+        const week = useTime.getState().week;
+        if (!week || week.length === 0) return;
+        for (const group of get().groups) {
+            get().loadGroupEntries(group, week[0], week[week.length - 1]);
+        }
+    },
+    loadTodayEntries: async () => {
+        const today = useTime.getState().today;
+        const groups = get().groups;
+        for (const group of groups) {
+            get().loadGroupEntries(group, today, today);
+        }
+    },
+    loadGroupEntries: async (group, start, end) => {
+        if (!group || !group.id) return;
+        const userId = useUser.getState().user?.id;
+        if (group.unsubscribe) group.unsubscribe();
+        const entriesRef = collection(db, 'groups', group.id, 'entries');
+        const entriesQuery = query(entriesRef,
+            where('date', '>=', start),
+            where('date', '<=', end)
+        );
+        group.unsubscribe = onSnapshot(entriesQuery, snapshot => {
+            const entries = snapshot.docs.map(doc => ({ id: doc.id, group: group.id, ...doc.data() }));
+            entries.forEach(entry => { entry.isMember = entry.members && entry.members.includes(userId); });
+            set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, entries } : g) }));
+        });
+        set((state) => ({
+            groups: state.groups.map(g => g.id === group.id ? group : g)
+        }));
+    },
+
+    // ----------- Group Students Management -----------
+    // -------------------------------------------------
+    loadClassStudents: async (group) => {
+        if (group.students) return;
+
+        let queryFilter = null
+        if (group.type === 'class') queryFilter = where("class", "==", group.id);
+        else if (group.type === 'major') queryFilter = where("major", "==", group.id);
+        else if (group.type === 'staff') queryFilter = where("roles", "array-contains", "staff");
+        if (!queryFilter) return;
+
+        const snapshot = await getDocs(query(collection(db, "users"), queryFilter));
+        const students = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, students } : g) }));
+    }
+})
 );
 
 export const groupsActions = Object.fromEntries(
     Object.entries(useGroups.getState()).filter(([key, value]) => typeof value === 'function')
 );
-groupsActions.createGroupEntry = async (groupName, obj) => {
-    const collectionRef = collection(db, 'groups', groupName, 'entries');
+groupsActions.createGroupEntry = async (groupId, obj) => {
+    const collectionRef = collection(db, 'groups', groupId, 'entries');
     await addDoc(collectionRef, obj);
 }
-groupsActions.updateGroupEntry = (groupName, obj) => {
-    const docRef = doc(db, 'groups', groupName, 'entries', obj.id);
+groupsActions.updateGroupEntry = (groupId, obj) => {
+    const docRef = doc(db, 'groups', groupId, 'entries', obj.id);
     return updateDoc(docRef, obj);
 }
-groupsActions.removeGroupEntry = (groupName, objId) => {
-    const docRef = doc(db, 'groups', groupName, 'entries', objId);
+groupsActions.removeGroupEntry = (groupId, objId) => {
+    const docRef = doc(db, 'groups', groupId, 'entries', objId);
     return deleteDoc(docRef);
 }
-groupsActions.joinGroupEntry = (groupName, objId, userId) => {
-    const docRef = doc(db, 'groups', groupName, 'entries', objId);
+groupsActions.joinGroupEntry = (groupId, objId, userId) => {
+    const docRef = doc(db, 'groups', groupId, 'entries', objId);
     return updateDoc(docRef, { members: arrayUnion(userId) });
 }
-groupsActions.leaveGroupEntry = (groupName, objId, userId) => {
-    const docRef = doc(db, 'groups', groupName, 'entries', objId);
+groupsActions.leaveGroupEntry = (groupId, objId, userId) => {
+    const docRef = doc(db, 'groups', groupId, 'entries', objId);
     return updateDoc(docRef, { members: arrayRemove(userId) });
 }
 groupsActions.getAllGroups = async () => {
@@ -149,8 +127,8 @@ groupsActions.getAllGroups = async () => {
     const snapshot = await getDocs(groupsRef);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
-groupsActions.getUserGroupEntriesForWeek = async (group, userId, week) => {
-    const eventsRef = collection(db, `groups/${group}/entries`);
+groupsActions.getUserGroupEntriesForWeek = async (groupId, userId, week) => {
+    const eventsRef = collection(db, `groups/${groupId}/entries`);
     const eventsQuery = query(eventsRef,
         where("date", ">=", week[0]),
         where("date", "<=", week[week.length - 1]),
@@ -164,5 +142,3 @@ groupsActions.getUserGroupEntriesForWeek = async (group, userId, week) => {
 
 
 useUser.subscribe(state => state.user?.id, groupsActions.clear)
-useUser.subscribe(state => state.user?.groups, groupsActions.loadUserGroups);
-groupsActions.loadUserGroups();

@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import { useTime } from "@/utils/useTime";
 import { groupsActions } from "@/utils/useGroups";
 import { eventsActions } from "@/utils/useEvents";
+import { useRouter } from "next/navigation";
+import { userActions } from "@/utils/useUser";
 
-export default function MentoringGroup_Students({ group, mode, styles }) {
+export default function MentoringGroup_Students({ group }) {
+    const router = useRouter();
     const [selectedStudent, setSelectedStudent] = useState(null)
 
     if (!group.students) return null;
@@ -14,31 +17,38 @@ export default function MentoringGroup_Students({ group, mode, styles }) {
         setSelectedStudent(prev => prev && prev.id === student.id ? null : student);
     }
 
-    return (
-        <>
-            <div className="p-4">
-                <div className="flex flex-wrap gap-2">
-                    {group.students
-                        .sort((a, b) => a.firstName.localeCompare(b.firstName, 'he'))
-                        .map((student) => (
-                            <StudentCard
-                                key={student.id}
-                                student={student}
-                                mode={mode}
-                                styles={styles}
-                                onSelect={() => onSelect(student)}
-                            />
-                        ))
-                    }
-                </div>
-            </div>
+    const goToStudent = async (student) => {
+        await userActions.switchToStudent(student.id, 'staff');
+        router.push('/')
+    }
 
+    let displayStudents = group.students;
+    if (group.type === 'class' || group.type === 'major') displayStudents = displayStudents.filter(student => student.roles.includes('student'));
+    if (selectedStudent) {
+        displayStudents = displayStudents.filter(student => student.id !== selectedStudent.id);
+    }
+
+
+    return (
+        <div className="flex gap-4">
             {selectedStudent && (
-                <div className="p-4 border-t">
-                    <StudentSchedule student={selectedStudent} />
+                <div className="p-4 border border-gray-200" onClick={() => goToStudent(selectedStudent)}>
+                    <div>{selectedStudent.firstName} {selectedStudent.lastName}</div>
                 </div>
             )}
-        </>
+            <div className="flex flex-wrap gap-2">
+                {displayStudents
+                    .sort((a, b) => a.firstName.localeCompare(b.firstName, 'he'))
+                    .map((student) => (
+                        <StudentCard key={student.id}
+                            student={student}
+                            onSelect={() => onSelect(student)}
+                            selected={selectedStudent && selectedStudent.id === student.id}
+                        />
+                    ))
+                }
+            </div>
+        </div>
     );
 }
 

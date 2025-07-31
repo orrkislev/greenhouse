@@ -36,11 +36,9 @@ export const createUser = async (username, firstName, lastName) => {
 
     userDoc.set({
         uid: userRecord.uid,
-        username,
         firstName,
         lastName,
         roles: [],
-        groups: [],
     });
 }
 

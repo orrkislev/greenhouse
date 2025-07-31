@@ -1,8 +1,8 @@
 import { Users } from "lucide-react";
 
-export default function MentoringGroup_Header({ group, styles }) {
+export default function MentoringGroup_Header({ group }) {
     return (
-        <div className={`${styles.header} p-4 border-b`}>
+        <div className="p-4">
             <div className="flex items-center justify-between">
                 <h3 className="text-lg font-bold">{group.name}</h3>
                 {group.students && (

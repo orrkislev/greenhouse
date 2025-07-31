@@ -2,15 +2,14 @@
 
 import { tw } from "@/utils/tw";
 import Gantt from "./components/Gantt";
-import Tasks from "./components/tasks/Tasks";
 import { ScheduleEvents } from "./components/events/Events";
 import ScheduleTop from "./components/ScheduleTop";
 // import Semester from "./Semester/Semester";
 import { useState } from "react";
-import { AddSchedule } from "./components/GroupSchedule/AddSchedule";
 import GroupSchedules from "./components/GroupSchedule/GroupSchedules";
 import Meetings from "./components/meetings/Meetings";
 import GoogleCalendar from "./components/Google/GoogleCalendar";
+import Notes from "./components/notes/Notes";
 
 const ScheduleOuter = tw`w-full h-full px-16 pt-8`;
 
@@ -21,7 +20,7 @@ export default function SchedulePage() {
         <>
             <ScheduleOuter>
                 <div className="flex items-center justify-between mb-4">
-                    <h1 className="text-2xl font-bold">לוח זמנים</h1>
+                    <h1 className="text-2xl">לוח זמנים</h1>
                     <div className="flex space-x-4">
                         <button
                             className={`px-4 py-2 rounded ${view === 'week' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}
@@ -41,13 +40,12 @@ export default function SchedulePage() {
 
                 {view === 'week' && (
                     <>
-                        <Tasks />
+                        <Notes />
                         <Meetings />
                         <ScheduleEvents />
                         <GoogleCalendar />
                         <GroupSchedules />
                         <Gantt />
-                        <AddSchedule />
                     </>
                 )}
                 {view === 'semester' && (

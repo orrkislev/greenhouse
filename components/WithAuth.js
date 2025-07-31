@@ -24,7 +24,6 @@ export default function WithAuth({ children, role }) {
         if (!role || (role && user.roles && user.roles.includes(role))) {
             return children;
         } else {
-            console.warn('Unauthorized access attempt:', user);
             redirect('/')
         }
     }

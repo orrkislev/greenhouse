@@ -1,9 +1,9 @@
 import { db } from "@/utils/firebase/firebase";
 import { useUser } from "@/utils/useUser";
 import { format } from "date-fns";
-import { addDoc, and, collection, deleteDoc, doc, getDocs, or, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, and, collection, deleteDoc, doc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { create } from "zustand";
-import { LOG_TYPES, TASK_FORMATS, TASK_STATUSES, TASK_TYPES } from "./constants/constants";
+import { LOG_TYPES, TASK_FORMATS, TASK_STATUSES } from "./constants/constants";
 
 export const useTasks = create((set, get) => {
     const userId = () => useUser.getState().user.id;

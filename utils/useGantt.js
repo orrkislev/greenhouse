@@ -1,6 +1,8 @@
 import { getGanttEventsWithDateRange } from "@/utils/gantt actions";
 import { format } from "date-fns";
+import { doc, getDoc } from "firebase/firestore";
 import { create } from "zustand";
+import { db } from "./firebase/firebase";
 
 const toKey = (date) => {
     if (typeof date === "string") return date;
@@ -10,6 +12,11 @@ const toKey = (date) => {
 export const useGantt = create((set, get) => ({
     terms: [],
     gantt: new Map(),
+    schoolMessage: '',
+    loadSchoolMessage: async () => {
+        const message = await getDoc(doc(db,'school','messages'));
+        set({ message: message.data().text });
+    },
     loadTodayGantt: () => {
         get().fetchGanttEvents(new Date(), new Date());
     },

@@ -8,7 +8,7 @@ export const useAdmin = create((set, get) => ({
     staff: [],
     groups: [],
 
-    initialize: async () => {
+    loadData: async () => {
         if (get().groups.length > 0) return;
         
         const groupsQuery = query(collection(db, "groups"), where("type", "==", 'class'));
@@ -21,15 +21,22 @@ export const useAdmin = create((set, get) => ({
         const studentsList = allMembers.filter(member => !member.roles || member.roles.includes('student'));
         const staffList = allMembers.filter(member => member.roles && member.roles.includes('staff'));
         groups.forEach(group => {
-            group.students = studentsList.filter(student => student.className == group.id);
-            group.mentors = group.mentors.map(mentorId => staffList.find(staff => staff.id === mentorId)).filter(Boolean);
+            group.students = studentsList.filter(student => student.class == group.id);
         });
+
+        const majorsDoc = await getDoc(doc(db, 'school', 'majors'));
+        const majors = majorsDoc.exists() ? majorsDoc.data().majors : [];
 
         set({
             staff: staffList,
             groups: groups,
+            majors: majors,
         });
     },
+
+    // ------------------------------
+    // Users
+    // ------------------------------
     updateMember: async (memberId, updates) => {
         const memberRef = doc(db, "users", memberId);
         await updateDoc(memberRef, updates);
@@ -41,93 +48,66 @@ export const useAdmin = create((set, get) => ({
             }))
         }));
     },
-
-    createStudent: async (firstName, lastName, username, group) => {
-        try {
-            await createUser(username, firstName, lastName);
-            const userDocRef = doc(db, 'users', username);
-            const userData = { firstName, lastName, className: group, groups: [group], roles: ['student'] };
-            updateDoc(userDocRef, userData);
+    createMember: async (memberData) => {
+        await createUser(memberData.username, memberData.firstName, memberData.lastName);
+        const memberRef = doc(db, "users", memberData.username);
+        delete memberData.username;
+        await updateDoc(memberRef, memberData);
+        if (memberData.roles.includes('student')) {
             set(state => ({
-                groups: state.groups.map(g => {
-                    g.students = (g.students || []).concat({ id: username, ...userData });
-                    return g;
-                }),
+                groups: state.groups.map(group => ({
+                    ...group,
+                    students: group.students.concat({ id: memberData.username, ...memberData })
+                }))
             }));
-            return;
-        } catch (error) {
-            return error;
+        } else if (memberData.roles.includes('staff')) {
+            set(state => ({
+                staff: state.staff.concat({ id: memberData.username, ...memberData })
+            }));
         }
     },
-    createStaff: async (firstName, lastName, username, job) => {
-        try {
-            await createUser(username, firstName, lastName);
-            const userDocRef = doc(db, 'users', username);
-            updateDoc(userDocRef, {
-                firstName,
-                lastName,
-                job,
-                roles: ['staff'],
-            });
-            set(state => ({
-                staff: [...state.staff, { id: userDocRef.id, firstName, lastName, username, job, roles: ['staff'] }]
-            }));
-            return
-        } catch (error) {
-            return error.message;
-        }
-    },
-    removeMember: async (memberId, username) => {
-        await deleteUser(memberId);
-        await deleteDoc(doc(db, 'users', username));
+    deleteMember: async (member) => {
+        await deleteUser(member.uid);
+        await deleteDoc(doc(db, "users", member.id));
         set(state => ({
-            staff: state.staff.filter(member => member.id !== username),
-            groups: state.groups.map(group => ({
-                ...group,
-                students: group.students.filter(student => student.id !== username)
-            }))
+            staff: state.staff.filter(m => m.id !== member.id),
+            groups: state.groups.map(group => ({ ...group, students: group.students.filter(student => student.id !== member.id) }))
         }));
     },
 
-    addMentorToGroup: async (groupId, mentorId) => {
-        const groupRef = doc(db, "groups", groupId);
-        await updateDoc(groupRef, { mentors: arrayUnion(mentorId) });
-        const staffMember = useAdmin.getState().staff.find(mentor => mentor.id === mentorId);
-        if (staffMember) {
-            set(state => ({
-                groups: state.groups.map(group => {
-                    if (group.id === groupId) group.mentors.push(staffMember);
-                    return group;
-                })
-            }));
-        }
+    // ------------------------------
+    // Groups
+    // ------------------------------
+    assignMentorToClass: async (classId, mentorId) => {
+        const group = get().groups.find(g => g.id === classId);
+        if (!group) return;
+        get().updateGroup(classId, { mentors: [...group.mentors, mentorId] });
+        get().updateMember(mentorId, { class: classId });
     },
-    removeMentorFromGroup: async (groupId, mentorId) => {
-        const groupRef = doc(db, "groups", groupId);
-        await updateDoc(groupRef, { mentors: arrayRemove(mentorId) });
-        set(state => ({
-            groups: state.groups.map(group => {
-                if (group.id === groupId) group.mentors = group.mentors.filter(mentor => mentor.id !== mentorId);
-                return group;
-            })
-        }));
+    removeMentorFromClass: async (classId, mentorId) => {
+        const group = get().groups.find(g => g.id === classId);
+        if (!group) return;
+        get().updateGroup(classId, { mentors: group.mentors.filter(m => m !== mentorId) });
+        get().updateMember(mentorId, { class: null });
     },
-
-    createClass: async (name, year) => {
-        const groupData = { name, year, type: 'class', open: false, mentors: [] };
+    createGroup: async (name, type, data = {}) => {
+        const groupData = { name, type, open: false, mentors: [], ...data };
         const newDoc = await addDoc(collection(db, "groups"), groupData);
         groupData.id = newDoc.id;
         set(state => ({ groups: [...state.groups, groupData] }));
     },
-    updateClass: async (classId, updates) => {
-        const classRef = doc(db, "groups", classId);
-        await updateDoc(classRef, updates);
+    updateGroup: async (groupId, updates) => {
+        const groupRef = doc(db, "groups", groupId);
+        await updateDoc(groupRef, updates);
         set(state => ({
-            groups: state.groups.map(group => group.id === classId ? { ...group, ...updates } : group)
+            groups: state.groups.map(group => group.id === groupId ? { ...group, ...updates } : group)
         }));
     },
 
 
+    // ------------------------------
+    // Projects
+    // ------------------------------
     loadProjects: async () => {
         const groups = get().groups;
         if (groups.flatMap(group => group.students).some(student => student.project)) return;
@@ -170,6 +150,27 @@ export const useAdmin = create((set, get) => ({
             startDate: format(new Date(), 'yyyy-MM-dd'),
             endDate: format(new Date(), 'yyyy-MM-dd')
         }, studentId);
+    },
+
+    // ------------------------------
+    // Majors
+    // ------------------------------
+    updateMajors: async (majors) => {
+        await updateDoc(doc(db, 'school', 'majors'), { majors });
+        set({ majors });
+    },
+
+    // ------------------------------
+    // Messages
+    // ------------------------------
+    message: '',
+    loadMessage: async () => {
+        const message = await getDoc(doc(db,'school','messages'))
+        set({ message: message.data().text });
+    },
+    updateMessage: async (text) => {
+        await updateDoc(doc(db,'school','messages'), { text });
+        set({ message: text });
     },
 }));
 

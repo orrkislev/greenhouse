@@ -10,12 +10,12 @@ export default function GroupSchedule({ group }) {
     });
 
     return (
-        <ScheduleSection edittable={group.isMentor || group.isAdmin} name={group.name}>
+        <ScheduleSection edittable={group.isMentor} name={group.name}>
             {weekEntries.map((entry, index) => (
                 <GroupCell key={index}
                     date={entry.date} 
-                    groupName={group.name} 
-                    edittable={group.isMentor || group.isAdmin}
+                    groupId={group.id} 
+                    edittable={group.isMentor}
                     entries={entry.entries}
                 />
             ))}

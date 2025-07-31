@@ -1,15 +1,7 @@
-import { userActions } from "@/utils/useUser";
-import { useRouter } from "next/navigation";
-
-export function StudentCard({ student, mode, styles }) {
-    const router = useRouter();
-    const onClick = async () => {
-        await userActions.switchToStudent(student.id, 'staff');
-        router.push('/')
-    }
+export function StudentCard({ student, onSelect, selected }) {
     return (
-        <div className="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors cursor-pointer border border-gray-200"
-            onClick={onClick}>
+        <div className={`bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors cursor-pointer border border-gray-200 ${selected ? 'bg-gray-100' : ''}`}
+            onClick={onSelect}>
             <div className="text-center">
                 <div className="w-8 h-8 bg-gray-300 rounded-full mx-auto mb-2 flex items-center justify-center">
                     <span className="text-xs font-medium text-gray-600">
@@ -19,12 +11,7 @@ export function StudentCard({ student, mode, styles }) {
                 <p className="text-sm font-medium text-gray-800 truncate">
                     {student.firstName} {student.lastName}
                 </p>
-                {mode === "schedule" && <StudentSchedule student={student} />}
-                {mode === "project" && (
-                    <p className={`text-xs ${styles.accent} mt-1`}>
-                        פרויקט
-                    </p>
-                )}
+                {/* <StudentSchedule student={student} /> */}
             </div>
         </div>
     );
