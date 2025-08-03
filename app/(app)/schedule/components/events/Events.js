@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Event } from "./Event";
-import { HOURS, useTime } from "@/utils/useTime";
+import { HOURS, useTime } from "@/utils/store/useTime";
 import { tw } from "@/utils/tw";
 import { ScheduleSection } from "../Layout";
 import useWeeksEvents, { getEventDuration, getTimeWithOffset, prepareEventsForSchedule } from "./useWeeksEvents";
-import { eventsActions } from "@/utils/useEvents";
+import { eventsActions } from "@/utils/store/useEvents";
 
 const EmptySlot = tw`min-h-8 z-1
     flex items-center justify-center text-xs

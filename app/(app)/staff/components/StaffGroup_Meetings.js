@@ -2,12 +2,12 @@
 import { ScheduleSection } from "@/app/(app)/schedule/components/Layout";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import TimeRangePicker from "@/components/ui/timerange-picker";
-import { meetingsActions, useMeetings } from "@/utils/useMeetings";
+import { meetingsActions, useMeetings } from "@/utils/store/useMeetings";
 import { useState } from "react";
 
 const daysOfWeek = ['א', 'ב', 'ג', 'ד', 'ה'];
 
-export default function MentoringGroup_Meetings({ group, styles }) {
+export default function StaffGroup_Meetings({ group, styles }) {
     const meetings = useMeetings(state => state.meetings);
     
     const studentsWithMeetings = []

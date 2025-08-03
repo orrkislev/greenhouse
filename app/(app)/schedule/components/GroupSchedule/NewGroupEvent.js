@@ -1,6 +1,6 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { tw } from "@/utils/tw";
-import { GroupEntryEdit } from "./GroupEntryEdit";
+import { GroupEventEdit } from "./GroupEventEdit";
 import { useState } from "react";
 
 const AddObjectDiv = tw`flex items-center justify-center text-gray-800 text-sm
@@ -13,7 +13,7 @@ const AddObjectDiv = tw`flex items-center justify-center text-gray-800 text-sm
 
 
 
-export function NewGroupEntry({ groupId, date }) {
+export function NewGroupEvent({ groupId, date }) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -24,7 +24,7 @@ export function NewGroupEntry({ groupId, date }) {
                 </AddObjectDiv>
             </PopoverTrigger>
             <PopoverContent className="w-80 bg-white p-4 border border-gray-300 z-[999]">
-                <GroupEntryEdit
+                <GroupEventEdit
                     onClose={() => setIsOpen(false)}
                     groupId={groupId}
                     date={date}

@@ -1,5 +1,5 @@
 import { Edit2, Trash2 } from "lucide-react";
-import { eventsActions } from "@/utils/useEvents";
+import { eventsActions } from "@/utils/store/useEvents";
 
 export function EventControls({ event, onSelect, visible }) {
 

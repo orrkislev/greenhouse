@@ -1,4 +1,4 @@
-import { useTime } from "@/utils/useTime";
+import { useTime } from "@/utils/store/useTime";
 import { tw } from "@/utils/tw";
 import { ScheduleSection } from "./Layout";
 

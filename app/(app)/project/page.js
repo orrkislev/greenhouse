@@ -1,6 +1,6 @@
 'use client'
 
-import { useProject } from "@/utils/useProject";
+import { useProject } from "@/utils/store/useProject";
 import NewProjectDialog from "./components/NewProjectDialog";
 import NewTermDialog from "./components/NewTermDialog";
 import ProjectProposal from "./components/ProjectProposal";

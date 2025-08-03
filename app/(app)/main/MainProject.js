@@ -1,6 +1,6 @@
 import { tw } from "@/utils/tw";
-import { useProject } from "@/utils/useProject";
-import { projectTasksActions, useProjectTasks } from "@/utils/useProjectTasks";
+import { useProject } from "@/utils/store/useProject";
+import { projectTasksActions, useProjectTasks } from "@/utils/store/useProjectTasks";
 import { Check, ChevronLeft, Trash, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";

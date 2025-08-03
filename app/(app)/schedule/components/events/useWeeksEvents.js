@@ -1,25 +1,22 @@
-import { useGroups } from "@/utils/useGroups";
-import { eventsActions, useEvents } from "@/utils/useEvents";
+import { useGroups } from "@/utils/store/useGroups";
+import { eventsActions, useEvents } from "@/utils/store/useEvents";
 import { useEffect } from "react";
-import { HOURS } from "@/utils/useTime";
+import { HOURS } from "@/utils/store/useTime";
 
 export default function useWeeksEvents(week) {
     const events = useEvents(state => state.events);
     const groups = useGroups(state => state.groups);
 
-    useEffect(()=>{
+    useEffect(() => {
         if (week && week.length > 0) eventsActions.loadWeekEvents(week);
-    },[week]);
+    }, [week]);
 
     if (!week || week.length === 0) return [];
 
     const userEvents = events.filter(event => event.date >= week[0] && event.date <= week[week.length - 1]);
 
-    const groupEvents = groups.filter(group => group.entries).flatMap(group =>
-        group.entries
-            .filter(entry => entry.type === 'event')
-            .filter(event => event.date >= week[0] && event.date <= week[week.length - 1])
-            .filter(event => event.isMember)
+    const groupEvents = groups.filter(group => group.events).flatMap(group =>
+        group.events.filter(event => event.date >= week[0] && event.date <= week[week.length - 1])
     );
 
     return [...userEvents, ...groupEvents]
@@ -30,7 +27,7 @@ export function prepareEventsForSchedule(events, week, edittable = false) {
         event.edittable = event.group ? false : edittable;
     })
 
-// ------ event position --------
+    // ------ event position --------
     events.forEach(event => {
         event.dayIndex = week.findIndex(date => date === event.date);
         event.startIndex = getHourIndex(event.start);
@@ -45,17 +42,17 @@ export function prepareEventsForSchedule(events, week, edittable = false) {
         const startIndex = getHourIndex(event.start);
         const endIndex = getHourIndex(event.end, true);
         // Find an existing block that fits either by startIndex or endIndex
-        const existingBlock = blocks.find(block => 
+        const existingBlock = blocks.find(block =>
             block.dayIndex === dayIndex &&
             (
-            // Event is fully inside block
-            (event.startIndex >= block.startIndex && event.endIndex <= block.endIndex) ||
-            // Event overlaps block end
-            (event.endIndex > block.startIndex && event.endIndex <= block.endIndex) ||
-            // Event overlaps block start
-            (event.startIndex >= block.startIndex && event.startIndex < block.endIndex) ||
-            // Block is fully inside event
-            (block.startIndex >= event.startIndex && block.endIndex <= event.endIndex)
+                // Event is fully inside block
+                (event.startIndex >= block.startIndex && event.endIndex <= block.endIndex) ||
+                // Event overlaps block end
+                (event.endIndex > block.startIndex && event.endIndex <= block.endIndex) ||
+                // Event overlaps block start
+                (event.startIndex >= block.startIndex && event.startIndex < block.endIndex) ||
+                // Block is fully inside event
+                (block.startIndex >= event.startIndex && block.endIndex <= event.endIndex)
             )
         );
 

@@ -1,13 +1,13 @@
 import Events from "@/app/(app)/schedule/components/events/Events";
 import { StudentCard } from "./StudentCard";
 import { useEffect, useState } from "react";
-import { useTime } from "@/utils/useTime";
-import { groupsActions } from "@/utils/useGroups";
-import { eventsActions } from "@/utils/useEvents";
+import { useTime } from "@/utils/store/useTime";
+import { groupsActions } from "@/utils/store/useGroups";
+import { eventsActions } from "@/utils/store/useEvents";
 import { useRouter } from "next/navigation";
-import { userActions } from "@/utils/useUser";
+import { userActions } from "@/utils/store/useUser";
 
-export default function MentoringGroup_Students({ group }) {
+export default function StaffGroup_Students({ group }) {
     const router = useRouter();
     const [selectedStudent, setSelectedStudent] = useState(null)
 
@@ -62,7 +62,7 @@ function StudentSchedule({ student }) {
         (async () => {
             const studentEvents = await eventsActions.getUserEventsForWeek(student.id, week);
             for (const group of student.groups || []) {
-                const studentGroupEvents = await groupsActions.getUserGroupEntriesForWeek(group, student.id, week);
+                const studentGroupEvents = await groupsActions.getUserGroupEventsForWeek(group, student.id, week);
 
                 studentEvents.push(...studentGroupEvents.map(event => ({
                     ...event,

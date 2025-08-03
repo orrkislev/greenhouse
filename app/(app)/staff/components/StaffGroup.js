@@ -1,13 +1,13 @@
 'use client'
 
-import MentoringGroup_Students from "./MentoringGroup_Students";
-// import MentoringGroup_Meetings from "./MentoringGroup_Meetings";
-import MentoringGroup_Header from "./MentoringGroup_Header";
+import StaffGroup_Students from "./StaffGroup_Students";
+// import StaffGroup_Meetings from "./StaffGroup_Meetings";
+import StaffGroup_Header from "./StaffGroup_Header";
 import { useEffect } from "react";
-import { groupsActions } from "@/utils/useGroups";
+import { groupsActions } from "@/utils/store/useGroups";
 
 
-export default function MentoringGroup({ group }) {
+export default function StaffGroup({ group }) {
     useEffect(() => {
         groupsActions.loadClassStudents(group);
     }, [group])
@@ -18,7 +18,7 @@ export default function MentoringGroup({ group }) {
 
     return (
         <div className="flex flex-col gap-4">
-            <MentoringGroup_Header group={group} />
+            <StaffGroup_Header group={group} />
             <div className="flex gap-4 ">
                 <div className='flex-1 flex gap-4 p-4 border border-gray-200'>
                     <div className=''>הודעה</div>
@@ -30,8 +30,8 @@ export default function MentoringGroup({ group }) {
                     <div className=''>משימות</div>
                 </div>
             </div>
-            <MentoringGroup_Students group={group} />
-            {/* <MentoringGroup_Meetings group={group} /> */}
+            <StaffGroup_Students group={group} />
+            {/* <StaffGroup_Meetings group={group} /> */}
         </div>
     );
 }

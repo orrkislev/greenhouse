@@ -1,22 +1,22 @@
-import { useTime } from "../../../../../utils/useTime";
+import { useTime } from "@/utils/store/useTime";
 import { ScheduleSection } from "../Layout";
 import GroupCell from "./GroupCell";
 
 export default function GroupSchedule({ group }) {
     const week = useTime(state => state.week);
 
-    const weekEntries = week.map(date => {
-        return { date, entries: group.entries ? group.entries.filter(entry => entry.date === date) : [] };
+    const weekEvents = week.map(date => {
+        return { date, events: group.events ? group.events.filter(event => event.date === date) : [] };
     });
 
     return (
         <ScheduleSection edittable={group.isMentor} name={group.name}>
-            {weekEntries.map((entry, index) => (
+            {weekEvents.map(({ date, events }, index) => (
                 <GroupCell key={index}
-                    date={entry.date} 
+                    date={date} 
                     groupId={group.id} 
                     edittable={group.isMentor}
-                    entries={entry.entries}
+                    events={events}
                 />
             ))}
         </ScheduleSection>

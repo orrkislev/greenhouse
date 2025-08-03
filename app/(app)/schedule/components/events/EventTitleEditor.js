@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
-import { eventsActions } from "@/utils/useEvents";
+import { eventsActions } from "@/utils/store/useEvents";
 
-function SmartTextArea(props) {
+export function SmartTextArea(props) {
     const ref = useRef();
 
     useEffect(() => {

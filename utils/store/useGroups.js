@@ -1,8 +1,8 @@
 import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from "firebase/firestore";
 import { create } from "zustand"
-import { db } from "./firebase/firebase";
-import { userActions, useUser } from "./useUser";
-import { useTime } from "@/utils/useTime";
+import { db } from "@/utils//firebase/firebase";
+import { useUser } from "@/utils/store/useUser";
+import { useTime } from "@/utils/store/useTime";
 
 export const useGroups = create((set, get) => ({
     groups: [],
@@ -46,35 +46,35 @@ export const useGroups = create((set, get) => ({
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...group, ...updates } : g) }));
     },
 
-    // ----------- Group Entries Management -----------
+    // ----------- Group Events Management -----------
     // ------------------------------------------------
     updateWeek: async () => {
         const week = useTime.getState().week;
         if (!week || week.length === 0) return;
         for (const group of get().groups) {
-            get().loadGroupEntries(group, week[0], week[week.length - 1]);
+            get().loadGroupEvents(group, week[0], week[week.length - 1]);
         }
     },
-    loadTodayEntries: async () => {
+    loadTodayEvents: async () => {
         const today = useTime.getState().today;
         const groups = get().groups;
         for (const group of groups) {
-            get().loadGroupEntries(group, today, today);
+            get().loadGroupEvents(group, today, today);
         }
     },
-    loadGroupEntries: async (group, start, end) => {
+    loadGroupEvents: async (group, start, end) => {
         if (!group || !group.id) return;
         const userId = useUser.getState().user?.id;
         if (group.unsubscribe) group.unsubscribe();
-        const entriesRef = collection(db, 'groups', group.id, 'entries');
-        const entriesQuery = query(entriesRef,
+        const eventsRef = collection(db, 'groups', group.id, 'events');
+        const eventsQuery = query(eventsRef,
             where('date', '>=', start),
             where('date', '<=', end)
         );
-        group.unsubscribe = onSnapshot(entriesQuery, snapshot => {
-            const entries = snapshot.docs.map(doc => ({ id: doc.id, group: group.id, ...doc.data() }));
-            entries.forEach(entry => { entry.isMember = entry.members && entry.members.includes(userId); });
-            set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, entries } : g) }));
+        group.unsubscribe = onSnapshot(eventsQuery, snapshot => {
+            const events = snapshot.docs.map(doc => ({ id: doc.id, group: group.id, ...doc.data() }));
+            events.forEach(event => { event.isMember = event.members && event.members.includes(userId); });
+            set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, events } : g) }));
         });
         set((state) => ({
             groups: state.groups.map(g => g.id === group.id ? group : g)
@@ -102,24 +102,24 @@ export const useGroups = create((set, get) => ({
 export const groupsActions = Object.fromEntries(
     Object.entries(useGroups.getState()).filter(([key, value]) => typeof value === 'function')
 );
-groupsActions.createGroupEntry = async (groupId, obj) => {
-    const collectionRef = collection(db, 'groups', groupId, 'entries');
+groupsActions.createGroupEvent = async (groupId, obj) => {
+    const collectionRef = collection(db, 'groups', groupId, 'events');
     await addDoc(collectionRef, obj);
 }
-groupsActions.updateGroupEntry = (groupId, obj) => {
-    const docRef = doc(db, 'groups', groupId, 'entries', obj.id);
+groupsActions.updateGroupEvent = (groupId, obj) => {
+    const docRef = doc(db, 'groups', groupId, 'events', obj.id);
     return updateDoc(docRef, obj);
 }
-groupsActions.removeGroupEntry = (groupId, objId) => {
-    const docRef = doc(db, 'groups', groupId, 'entries', objId);
+groupsActions.removeGroupEvent = (groupId, objId) => {
+    const docRef = doc(db, 'groups', groupId, 'events', objId);
     return deleteDoc(docRef);
 }
-groupsActions.joinGroupEntry = (groupId, objId, userId) => {
-    const docRef = doc(db, 'groups', groupId, 'entries', objId);
+groupsActions.joinGroupEvent = (groupId, objId, userId) => {
+    const docRef = doc(db, 'groups', groupId, 'events', objId);
     return updateDoc(docRef, { members: arrayUnion(userId) });
 }
-groupsActions.leaveGroupEntry = (groupId, objId, userId) => {
-    const docRef = doc(db, 'groups', groupId, 'entries', objId);
+groupsActions.leaveGroupEvent = (groupId, objId, userId) => {
+    const docRef = doc(db, 'groups', groupId, 'events', objId);
     return updateDoc(docRef, { members: arrayRemove(userId) });
 }
 groupsActions.getAllGroups = async () => {
@@ -127,8 +127,8 @@ groupsActions.getAllGroups = async () => {
     const snapshot = await getDocs(groupsRef);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
-groupsActions.getUserGroupEntriesForWeek = async (groupId, userId, week) => {
-    const eventsRef = collection(db, `groups/${groupId}/entries`);
+groupsActions.getUserGroupEventsForWeek = async (groupId, userId, week) => {
+    const eventsRef = collection(db, `groups/${groupId}/events`);
     const eventsQuery = query(eventsRef,
         where("date", ">=", week[0]),
         where("date", "<=", week[week.length - 1]),

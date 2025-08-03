@@ -1,21 +1,22 @@
 "use client"
 
 import * as React from "react"
-import { userActions, useUser } from "@/utils/useUser";
+import { userActions, useUser } from "@/utils/store/useUser";
 import { tw } from "@/utils/tw";
-import { LogOut, User, BookOpen, Briefcase, Calendar, Settings, Snail, UsersRound, TreePalm, Skull, ChevronDown } from "lucide-react";
+import { LogOut, User, BookOpen, Briefcase, Calendar, Settings, Snail, UsersRound, TreePalm, Skull, ChevronDown, Brain } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 
-const SideBarDiv = tw` z-50 flex flex-col border-l border-gray-600 bg-gray-100`
+const SideBarDiv = tw`flex flex-col border-l border-gray-600 bg-gray-100`
 const SideBarHeader = tw`aspect-square flex items-center justify-center p-2 relative`
 const SideBarContent = tw`h-full flex flex-col gap-1 pt-8 flex-1`
 const SideBarFooter = tw`flex flex-col gap-1 p-2`
 
 const NavigationMenuItem = tw`flex gap-2 rtl items-center p-2 text-gray-500 hover:text-gray-700 mr-4
     ${props => props.$active ? 'bg-white text-blue-700 rounded-r-full -ml-px border-y border-r border-gray-600' : ''}
+    ${props => props.$disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
     `
 
 const LinkClasses = `flex justify-center gap-1 text-sm hover:bg-white rounded-lg p-2`
@@ -67,8 +68,16 @@ export default function SideBar() {
                     </Link>
                 </NavigationMenuItem>
 
+                {/* Research */}
+                <NavigationMenuItem $active={pathname === '/research'}>
+                    <Link href="/research" className={LinkClasses}>
+                        <Brain className="w-4 h-4" />
+                        <div>חקר</div>
+                    </Link>
+                </NavigationMenuItem>
+
                 {/* Vocation */}
-                <NavigationMenuItem $active={pathname === '/vocation'}>
+                <NavigationMenuItem $active={pathname === '/vocation'} $disabled={true}>
                     <Link href="/vocation" className={LinkClasses}>
                         <Briefcase className="w-4 h-4" />
                         <div>תעסוקה</div>

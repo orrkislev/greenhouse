@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { useUser } from "./useUser";
-import { db } from "./firebase/firebase";
-import { useTime } from "./useTime";
-import { useTasks } from "./useTasks";
+import { useUser } from "@/utils/store/useUser";
+import { db } from "@/utils//firebase/firebase";
+import { useTime } from "@/utils/store/useTime";
+import { useTasks } from "@/utils/store/useTasks";
 import { useRef } from "react";
 import { arrayUnion, doc, setDoc } from "firebase/firestore";
 

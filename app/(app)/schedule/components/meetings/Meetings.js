@@ -1,8 +1,8 @@
 import { tw } from "@/utils/tw";
-import { useTime } from "@/utils/useTime";
-import { meetingsActions, useMeetings } from "@/utils/useMeetings";
+import { useTime } from "@/utils/store/useTime";
+import { meetingsActions, useMeetings } from "@/utils/store/useMeetings";
 import { ScheduleSection } from "../Layout";
-import { useUser } from "@/utils/useUser";
+import { useUser } from "@/utils/store/useUser";
 import { useEffect } from "react";
 
 const MeetingContainer = tw`flex flex-col items-center justify-center text-gray-800 text-xs p-2

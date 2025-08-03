@@ -1,5 +1,5 @@
-import { ganttActions, useGantt } from "@/utils/useGantt"
-import { useGroups } from "@/utils/useGroups";
+import { ganttActions, useGantt } from "@/utils/store/useGantt"
+import { useGroups } from "@/utils/store/useGroups";
 import { useEffect } from "react";
 
 export default function MainMessages() {

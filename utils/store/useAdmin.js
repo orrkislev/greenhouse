@@ -1,8 +1,9 @@
-import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { create } from "zustand"
-import { db } from "./firebase/firebase";
-import { createUser, deleteUser } from "@/utils/admin actions";
-import { projectTasksActions } from "./useProjectTasks";
+import { db } from "@/utils/firebase/firebase";
+import { createUser, deleteUser } from "@/utils/actions/admin actions";
+import { projectTasksActions } from "@/utils/store/useProjectTasks";
+import { format } from "date-fns";
 
 export const useAdmin = create((set, get) => ({
     staff: [],
@@ -132,13 +133,18 @@ export const useAdmin = create((set, get) => ({
     },
     assignMasterToProject: async (studentId, projectId, master) => {
         const studentRef = doc(db, "users", studentId, "projects", projectId);
-        await updateDoc(studentRef, { master });
+        const masterData = {
+            id: master.id,
+            firstName: master.firstName,
+            lastName: master.lastName,
+        }
+        await updateDoc(studentRef, { master: masterData });
         set(state => ({
             groups: state.groups.map(group => ({
                 ...group,
                 students: group.students.map(student => {
                     if (student.id === studentId && student.projectId === projectId) {
-                        return { ...student, project: { ...student.project, master } };
+                        return { ...student, project: { ...student.project, master: masterData } };
                     }
                     return student;
                 })
@@ -146,7 +152,7 @@ export const useAdmin = create((set, get) => ({
         }));
         projectTasksActions.addTaskToStudentProject({
             title: 'לקבוע פגישה שבועית',
-            description: `לקבוע פגישה שבועית עם המנחה ${master.firstName} ${master.lastName}`,
+            description: `לקבוע פגישה שבועית עם ${master.firstName} ${master.lastName}`,
             startDate: format(new Date(), 'yyyy-MM-dd'),
             endDate: format(new Date(), 'yyyy-MM-dd')
         }, studentId);

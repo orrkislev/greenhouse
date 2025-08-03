@@ -1,9 +1,9 @@
-import { tasksActions, useTasks } from "@/utils/useTasks";
+import { tasksActions, useTasks } from "@/utils/store/useTasks";
 import { ScheduleSection } from "../Layout";
 import AddTaskButton from "./AddTaskButton";
 import { Task } from "./Task";
-import { useGroups } from "@/utils/useGroups";
-import { useTime } from "@/utils/useTime";
+import { useGroups } from "@/utils/store/useGroups";
+import { useTime } from "@/utils/store/useTime";
 import { useEffect } from "react";
 
 

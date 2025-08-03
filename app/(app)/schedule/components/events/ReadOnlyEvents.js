@@ -1,5 +1,5 @@
 import { Event } from "./Event";
-import { HOURS, useTime } from "@/utils/useTime";
+import { HOURS, useTime } from "@/utils/store/useTime";
 import { tw } from "@/utils/tw";
 import { ScheduleSection } from "../Layout";
 

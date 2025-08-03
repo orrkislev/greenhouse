@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import QuestionCard from "./QuestionCard";
-import { projectActions, useProject } from "@/utils/useProject";
-import { useUser } from "@/utils/useUser";
-import { useLogSender } from "@/utils/useLogs";
-import { LOG_RECORDS, LOG_TYPES } from "@/utils/constants/constants";
+import { projectActions, useProject } from "@/utils/store/useProject";
+import { useUser } from "@/utils/store/useUser";
+import { adminActions } from "@/utils/store/useAdmin";
+import { projectTasksActions } from "@/utils/store/useProjectTasks";
 
 const QUESTIONS = [
     {
@@ -27,12 +27,6 @@ export default function ProjectProposal() {
     const user = useUser(state => state.user)
     const project = useProject((state) => state.project);
     const [questions, setQuestions] = useState(QUESTIONS);
-    const sendLog = useLogSender({
-        type: LOG_TYPES.SYSTEM_NOTIFICATION,
-        projectId: project.id,
-        record: LOG_RECORDS.FINISHED_PROJECT_PROPOSAL,
-        text: 'השלמתי את הצהרת הכוונות לפרויקט',
-    })
 
     useEffect(() => {
         if (project && project.questions) {
@@ -40,6 +34,15 @@ export default function ProjectProposal() {
         }
     }, [project]);
 
+    const filledThreeQuestions = useMemo(() => questions.slice(0, 3).every(q => q.value && q.value.trim() !== ''), [questions]);
+
+    useEffect(()=>{
+        if (filledThreeQuestions) {
+            projectTasksActions.completeTaskByLabel('הצהרת כוונות');
+            window.location.reload()
+        }
+    },[filledThreeQuestions])
+    
     const saveQuestionValue = (index, value) => {
         const newQuestions = [...questions];
         newQuestions[index].value = value;
@@ -47,8 +50,6 @@ export default function ProjectProposal() {
         projectActions.updateProject({ questions: newQuestions });
     };
 
-    const filledThreeQuestions = questions.slice(0, 3).every(q => q.value && q.value.trim() !== '');
-    if (filledThreeQuestions) sendLog();
 
     return (
         <div className='rtl'>
@@ -80,16 +81,20 @@ export default function ProjectProposal() {
                 <div className="text-gray-500 text-sm mt-4 text-center">
                     {filledThreeQuestions ?
                         'מעולה! עכשיו מחכים לשיבוץ המנחה שלך כדי להמשיך לפרויקט' :
-                        'יש להשלים לפחות שלושה שאלות כדי להמשיך לפרויקט'
+                        'יש להשלים לפחות שלוש שאלות כדי להמשיך לפרויקט'
                     }
                 </div>
+                {filledThreeQuestions && user.roles.includes('staff') && (
+                    <div className="flex justify-center mt-4">
+                        <button className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                            onClick={() => adminActions.assignMasterToProject(user.id, project.id, user)}
+                        >
+                            I AM MY OWN MASTER
+                        </button>
+                    </div>
+                )}
             </div>
 
-            <div className="flex justify-center mt-4">
-                <button className="bg-blue-500 text-white px-4 py-2 rounded-md" onClick={() => projectActions.closeProject()}>
-                    סגירת הפרויקט
-                </button>
-            </div>
         </div>
     );
 }

@@ -1,11 +1,11 @@
-import { getTermWeeks, useTime } from "@/utils/useTime";
+import { getTermWeeks, useTime } from "@/utils/store/useTime";
 import { add, format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { Grip } from "lucide-react";
-import { projectTasksActions, useProjectTasks } from "@/utils/useProjectTasks";
+import { projectTasksActions, useProjectTasks } from "@/utils/store/useProjectTasks";
 
 export default function WeeklyView() {
     const tasks = useProjectTasks((state) => state.tasks);
@@ -125,7 +125,7 @@ function WeekRow({ week, weekIndex, onTaskMove, isDragging, setIsDragging }) {
                 ))}
                 {week.tasks.length === 0 && (
                     <div className="text-gray-400 text-sm p-2">
-                        אין משימות השבוע
+                        -
                     </div>
                 )}
             </div>

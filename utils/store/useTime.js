@@ -1,8 +1,8 @@
 import { format, startOfWeek } from "date-fns";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { create } from "zustand";
-import { db } from "./firebase/firebase";
-import { useGantt } from "./useGantt";
+import { db } from "@/utils//firebase/firebase";
+import { useGantt } from "@/utils/store/useGantt";
 import { subscribeWithSelector } from "zustand/middleware";
 
 export const HOURS = ['9:30', '10:30', '11:30', '12:30', 'ערב'];

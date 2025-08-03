@@ -1,6 +1,6 @@
 'use client';
 
-import { userActions, useUser } from "@/utils/useUser";
+import { userActions, useUser } from "@/utils/store/useUser";
 import { useRouter } from "next/navigation";
 
 export default function SwitchBackPanel() {

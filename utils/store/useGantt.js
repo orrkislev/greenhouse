@@ -1,8 +1,8 @@
-import { getGanttEventsWithDateRange } from "@/utils/gantt actions";
+import { getGanttEventsWithDateRange } from "@/utils/actions/gantt actions";
 import { format } from "date-fns";
 import { doc, getDoc } from "firebase/firestore";
 import { create } from "zustand";
-import { db } from "./firebase/firebase";
+import { db } from "@/utils/firebase/firebase";
 
 const toKey = (date) => {
     if (typeof date === "string") return date;

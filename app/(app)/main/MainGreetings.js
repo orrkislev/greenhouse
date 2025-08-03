@@ -1,4 +1,4 @@
-import { useTime } from "@/utils/useTime";
+import { useTime } from "@/utils/store/useTime";
 
 export default function MainGreetings() {
     const currTerm = useTime((state) => state.currTerm);

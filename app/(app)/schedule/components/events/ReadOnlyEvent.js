@@ -2,9 +2,9 @@ import { useState } from "react";
 import { tw } from "@/utils/tw";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { useUser } from "@/utils/useUser";
-import { groupsActions } from "@/utils/useGroups"
-import { eventsActions } from "@/utils/useEvents";
+import { useUser } from "@/utils/store/useUser";
+import { groupsActions } from "@/utils/store/useGroups"
+import { eventsActions } from "@/utils/store/useEvents";
 
 const EventDiv = tw`
     bg-[#EF98A1] py-2 px-4 text-gray-800
@@ -24,17 +24,16 @@ export function ReadOnlyEvent({ event, onSelect }) {
                 </EventDiv>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-4" sideOffset={5}>
-                <GroupEventContext event={event} onClose={() => setIsPopoverOpen(false)} />
+                <ReadOnlyEventContext event={event} onClose={() => setIsPopoverOpen(false)} />
             </PopoverContent>
         </Popover>
     );
 }
 
-function GroupEventContext({ event, onClose }) {
-    const userId = useUser(state => state.user.id);
+function ReadOnlyEventContext({ event, onClose }) {
 
     const handleRemove = () => {
-        groupsActions.leaveGroupEntry(event.group, event.id, userId)
+        groupsActions.leaveGroupEvent(event.group, event.id, useUser.getState().user.id)
         eventsActions.removeGroupEvent(event.id);
         onClose();
     };

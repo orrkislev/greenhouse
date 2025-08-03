@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { groupsActions } from "@/utils/useGroups";
-import { useUser } from "@/utils/useUser";
+import { groupsActions } from "@/utils/store/useGroups";
+import { useUser } from "@/utils/store/useUser";
 import { Input } from "@/components/ui/input";
-import { tasksActions } from "@/utils/useTasks";
+import { tasksActions } from "@/utils/store/useTasks";
 import { useState } from "react";
 
 export default function TaskContext({task, onClose}) {
@@ -18,7 +18,7 @@ function GroupTaskContext({ task, onClose }) {
     const userId = useUser(state => state.user.id);
 
     const handleRemove = () => {
-        groupsActions.leaveGroupEntry(task.group, task.id, userId)
+        groupsActions.leaveGroupEvent(task.group, task.id, userId)
         tasksActions.removeGroupTask(task.id);
         onClose();
     };

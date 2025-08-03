@@ -1,5 +1,5 @@
-import { getAuthUrl, getRefreshToken } from "@/utils/GoogleCalendarActions";
-import { userActions } from "@/utils/useUser";
+import { getAuthUrl, getRefreshToken } from "@/utils/actions/GoogleCalendarActions";
+import { userActions } from "@/utils/store/useUser";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ScheduleSection } from "../Layout";
 

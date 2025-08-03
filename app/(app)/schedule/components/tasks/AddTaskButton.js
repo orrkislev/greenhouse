@@ -1,5 +1,5 @@
 import { tw } from "@/utils/tw";
-import { tasksActions} from "@/utils/useTasks";
+import { tasksActions} from "@/utils/store/useTasks";
 import { TASK_FORMATS, TASK_STATUSES, TASK_TYPES } from "@/utils/constants/constants";
 
 const AddTaskButtonDiv = tw`flex items-center justify-center text-gray-800 text-sm

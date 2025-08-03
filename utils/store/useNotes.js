@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { useUser } from "./useUser";
-import { useTime } from "./useTime";
+import { useUser } from "@/utils/store/useUser";
+import { useTime } from "@/utils/store/useTime";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "./firebase/firebase";
+import { db } from "@/utils//firebase/firebase";
 
 export const useNotes = create((set, get) => ({
     userNotes: {},

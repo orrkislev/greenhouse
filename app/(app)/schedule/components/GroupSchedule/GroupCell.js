@@ -1,14 +1,14 @@
 import { tw } from "@/utils/tw";
-import { GroupCellEntry } from "./GroupCellEntry";
-import { NewGroupEntry } from "./NewGroupEntry";
+import { GroupCellEvent } from "./GroupCellEvent";
+import { NewGroupEvent } from "./NewGroupEvent";
 
 const GroupCellDiv = tw`bg-white flex flex-col h-full gap-[2px]
     ${props => !props.$edittable ? 'bg-[#C4BBB2]/60' : ''}
     `;
 
-export default function GroupCell({ date, groupId, edittable, entries = [] }) {
+export default function GroupCell({ date, groupId, edittable, events = [] }) {
 
-    if (entries.length == 0 && !edittable) {
+    if (events.length == 0 && !edittable) {
         return (
             <GroupCellDiv $edittable={edittable}>
                 <div className="h-5" />
@@ -18,10 +18,10 @@ export default function GroupCell({ date, groupId, edittable, entries = [] }) {
 
     return (
         <GroupCellDiv $edittable={edittable}>
-            {entries.map((obj, index) => (
-                <GroupCellEntry key={index} {...{ groupId, date, obj, edittable }} />
+            {events.map((event, index) => (
+                <GroupCellEvent key={index} {...{ groupId, date, event, edittable }} />
             ))}
-            {edittable && <NewGroupEntry {...{ groupId, date }} />}
+            {edittable && <NewGroupEvent {...{ groupId, date }} />}
         </GroupCellDiv>
     );
 }

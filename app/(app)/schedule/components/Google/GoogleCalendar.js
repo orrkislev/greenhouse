@@ -1,10 +1,10 @@
-import { useUser } from "@/utils/useUser";
+import { useUser } from "@/utils/store/useUser";
 import AuthGoogleCalendar from "./AuthGoogleCalendar";
-import { googleCalendarActions, useGoogleCalendar } from "@/utils/useGoogleCalendar";
+import { googleCalendarActions, useGoogleCalendar } from "@/utils/store/useGoogleCalendar";
 import { useEffect } from "react";
 import { ScheduleSection } from "../Layout";
 import { tw } from "@/utils/tw";
-import { useTime } from "@/utils/useTime";
+import { useTime } from "@/utils/store/useTime";
 
 const GanttDay = tw`flex flex-col items-center justify-center text-gray-800 text-xs p-2
     gap-2 divide-y divide-black/10 z-[10]

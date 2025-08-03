@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { persist, subscribeWithSelector } from 'zustand/middleware';
-import { AuthService } from './firebase/auth';
+import { AuthService } from '@/utils/firebase/auth';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { db } from './firebase/firebase';
+import { db } from '@/utils//firebase/firebase';
 
 export const useUser = create(subscribeWithSelector(persist((set, get) => {
 	let unsubscribeUserDoc = null;

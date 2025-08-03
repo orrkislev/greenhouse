@@ -1,6 +1,6 @@
-import { useTime } from "@/utils/useTime";
+import { useTime } from "@/utils/store/useTime";
 import { db } from "@/utils/firebase/firebase";
-import { useUser } from "@/utils/useUser";
+import { useUser } from "@/utils/store/useUser";
 import { format } from "date-fns";
 import { addDoc, and, collection, deleteDoc, doc, getDocs, or, query, updateDoc, where } from "firebase/firestore";
 import { debounce } from "lodash";

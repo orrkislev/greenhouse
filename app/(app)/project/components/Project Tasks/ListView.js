@@ -1,7 +1,7 @@
 import { Check, GripVertical, Trash, X } from "lucide-react";
 import { Reorder, useDragControls } from "framer-motion";
 import { useState } from "react";
-import { projectTasksActions, useProjectTasks } from "@/utils/useProjectTasks";
+import { projectTasksActions, useProjectTasks } from "@/utils/store/useProjectTasks";
 
 export default function ListView() {
     const tasks = useProjectTasks((state) => state.tasks);
@@ -48,7 +48,12 @@ function SingleTask({ task, isDraggable = true }) {
                     <div className="flex-1 text-sm text-gray-500">
                         {task.description || ''}
                     </div>
-                    <div className="w-6 h-6"></div> {/* Placeholder for delete button space */}
+                    <div className="w-6 h-6">
+                        <button className="bg-gray-200 hover:bg-gray-300 cursor-pointer transition-colors rounded-full p-1 opacity-0 group-hover:opacity-100"
+                        onClick={() => projectTasksActions.deleteTask(task.id)}>
+                        <X className="w-4 h-4" />
+                    </button>
+                    </div>
                 </div>
             </div>
         );

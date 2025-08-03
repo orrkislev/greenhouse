@@ -1,10 +1,10 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { GroupEntryEdit, NewGroupObjectModal } from "./GroupEntryEdit";
+import { GroupEventEdit } from "./GroupEventEdit";
 import { tw } from "@/utils/tw";
-import AcceptObjectModal from "./AcceptObjectModal";
 import { useState } from "react";
-import { Bookmark, BookmarkCheck } from "lucide-react";
-import GroupEntryContext from "./AcceptObjectModal";
+import { Button } from "@/components/ui/button";
+import { groupsActions } from "@/utils/store/useGroups";
+import { useUser } from "@/utils/store/useUser";
 
 const GroupObjectCellDiv = tw.div`bg-[#C4BBB2] flex-1 hover:bg-[#9F8770] cursor-pointer hover:text-white transition-all`;
 const GroupObjectText = tw`h-full 
@@ -12,7 +12,7 @@ const GroupObjectText = tw`h-full
         whitespace-pre-line py-1 cursor-pointer text-xs
     `;
 
-export function GroupCellEntry({ groupId, date, obj, edittable }) {
+export function GroupCellEvent({ groupId, date, event, edittable }) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -20,27 +20,41 @@ export function GroupCellEntry({ groupId, date, obj, edittable }) {
             <PopoverTrigger asChild>
                 <GroupObjectCellDiv>
                     <GroupObjectText>
-                        <div>{obj.start} - {obj.end}</div>
-                        <div>{obj.title}</div>
+                        <div>{event.start} - {event.end}</div>
+                        <div>{event.title}</div>
                     </GroupObjectText>
                 </GroupObjectCellDiv>
             </PopoverTrigger>
             <PopoverContent className="w-80 bg-white p-4 border border-gray-300 z-[999]">
                 {edittable ? (
-                    <GroupEntryEdit
+                    <GroupEventEdit
                         onClose={() => setIsOpen(false)}
                         groupId={groupId}
                         date={date}
-                        obj={obj}
+                        event={event}
                     />
                 ) : (
-                    <GroupEntryContext
+                    <AcceptEventModal
                         onClose={() => setIsOpen(false)}
                         groupId={groupId}
-                        obj={obj}
+                        event={event}
                     />
                 )}
             </PopoverContent>
         </Popover >
+    );
+}
+
+function AcceptEventModal({ groupId, event, onClose }) {
+
+    const handleAccept = async () => {
+        groupsActions.joinGroupEvent(groupId, event.id, useUser.getState().user.id)
+        onClose()
+    };
+
+    return (
+        <Button onClick={handleAccept}>
+            כן
+        </Button>
     );
 }

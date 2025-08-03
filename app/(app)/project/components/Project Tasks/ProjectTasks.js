@@ -5,9 +5,9 @@ import { List, CalendarDays, Route, BetweenHorizonalEnd, TableOfContents } from 
 import WeeklyView from "./WeeklyView";
 import CalendarView from "./CalendarView";
 import { format } from "date-fns";
-import { projectTasksActions, useProjectTasks } from "@/utils/useProjectTasks";
+import { projectTasksActions, useProjectTasks } from "@/utils/store/useProjectTasks";
 
-const NewTaskButton = tw`px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors`;
+const NewTaskButton = tw`px-4 py-1 bg-blue-500 text-white hover:bg-blue-600 transition-colors`;
 
 const ViewButton = tw`px-3 py-1 flex items-center gap-1 transition-colors
     hover:bg-gray-100 cursor-pointer ${props => props.$active ? 'bg-gray-200' : ''}`;
@@ -33,8 +33,8 @@ export default function ProjectTasks() {
     const ViewComponent = views[view].component;
 
     return (
-        <div className="bg-white rounded-xl p-6 shadow-sm border flex flex-col gap-2">
-            <div className="flex items-center gap-4 mb-4">
+        <div className="p-6 border border-gray-400 flex flex-col gap-2">
+            <div className="flex items-center gap-4 mb-4 justify-between">
                 <div className="text-xl">
                     תכנית עבודה
                 </div>
@@ -87,8 +87,9 @@ function ViewSelector() {
     }
 
     return (
-        <div className="flex items-center p-2 border border-gray-300 rounded">
-            <h2 className="text-xl font-semibold hover:bg-gray-100 hover:underline cursor-pointer transition-colors duration-200"
+        <div className="flex items-center gap-2 text-sm">
+            <span>שיטת עבודה:</span>
+            <h2 className="underline hover:bg-gray-100 hover:underline cursor-pointer transition-colors duration-200"
                 onClick={() => setIsOpen(!isOpen)}>
                 {views[view].label}
             </h2>

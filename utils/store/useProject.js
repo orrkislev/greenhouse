@@ -1,13 +1,13 @@
 import { create } from "zustand";
-import { userActions, useUser } from "./useUser";
-import { addDoc, arrayUnion, collection, doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "./firebase/firebase";
-import { useTime } from "./useTime";
-import { logsActions, useLogs } from "./useLogs";
-import { LOG_RECORDS, LOG_TYPES } from "./constants/constants";
+import { userActions, useUser } from "@/utils/store/useUser";
+import { addDoc, arrayUnion, collection, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { db } from "@/utils//firebase/firebase";
+import { useTime } from "@/utils/store/useTime";
+import { logsActions, useLogs } from "@/utils/store/useLogs";
+import { LOG_RECORDS, LOG_TYPES } from "@/utils/constants/constants";
 import { subscribeWithSelector } from "zustand/middleware";
 import { debounce } from "lodash";
-import { projectTasksActions } from "./useProjectTasks";
+import { projectTasksActions } from "@/utils/store/useProjectTasks";
 import { format } from "date-fns";
 
 
@@ -88,7 +88,8 @@ export const useProject = create(subscribeWithSelector((set, get) => {
             });
 
             projectTasksActions.addTask({
-                title: 'למלא הצהרת כוונת',
+                title: 'למלא הצהרת כוונות',
+                label: 'הצהרת כוונות',
                 description: 'זה חשוב',
                 startDate: format(new Date(), 'yyyy-MM-dd'),
                 endDate: format(new Date(), 'yyyy-MM-dd')
@@ -97,14 +98,6 @@ export const useProject = create(subscribeWithSelector((set, get) => {
         updateProject: async (updates) => {
             set(state => ({ project: { ...state.project, ...updates } }));
             debouncedUpdateProject();
-        },
-
-
-        getProjectRef: () => {
-            const userId = useUser.getState().user?.id;
-            const projectId = get().project?.id;
-            if (!userId || !projectId) return null
-            return doc(db, 'users', userId, 'projects', projectId);
         },
 
         closeProject: async () => {
@@ -120,7 +113,27 @@ export const useProject = create(subscribeWithSelector((set, get) => {
 
             await userActions.updateUserDoc({ projectId: null });
             set({ project: null });
-        }
+        },
+
+
+        // ------ Project Goals ------
+        goals: {},
+        loadGoals: async () => {
+            const user = useUser.getState().user;
+            if (!user.id) return
+            const goalsRef = doc(db, 'users', user.id, 'projects', user.projectId, 'documents', 'goals');
+            const goalsSnapshot = await getDoc(goalsRef);
+            if (goalsSnapshot.exists()) {
+                set({ goals: goalsSnapshot.data() });
+            }
+        },
+        saveGoal: async (goalName, content) => {
+            const user = useUser.getState().user;
+            if (!user.id) return
+            const goalsRef = doc(db, 'users', user.id, 'projects', user.projectId, 'documents', 'goals');
+            await setDoc(goalsRef, { [goalName]: content }, { merge: true });
+            set(state => ({ goals: { ...state.goals, [goalName]: content } }));
+        },
     }
 }));
 

@@ -2,12 +2,12 @@ import { FormInput, useForm } from "@/components/ui/form/FormInput";
 import { Button } from "@/components/ui/button";
 import TimeRangePicker from "@/components/ui/timerange-picker";
 import { format } from "date-fns";
-import { groupsActions } from "@/utils/useGroups";
+import { groupsActions } from "@/utils/store/useGroups";
 
-export function GroupEntryEdit({ onClose, groupId, date, obj }) {
+export function GroupEventEdit({ onClose, groupId, date, event }) {
     const form = useForm({
-        title: obj?.title || '',
-        timeRange: obj?.timeRange || { start: '09:30', end: '11:00' }
+        title: event?.title || '',
+        timeRange: event?.timeRange || { start: '09:30', end: '11:00' }
     }, async (values) => {
         const newObj = {
             title: values.title,
@@ -16,17 +16,17 @@ export function GroupEntryEdit({ onClose, groupId, date, obj }) {
             end: values.timeRange.end,
         };
 
-        if (obj) {
-            await groupsActions.updateGroupEntry(groupId, { ...newObj, id: obj.id });
+        if (event) {
+            await groupsActions.updateGroupEvent(groupId, { ...newObj, id: event.id });
         } else {
-            await groupsActions.createGroupEntry(groupId, newObj);
+            await groupsActions.createGroupEvent(groupId, newObj);
         }
         form.clear();
         onClose()
     });
 
     const clickDelete = async () => {
-        await groupsActions.removeGroupEntry(groupId, obj.id);
+        await groupsActions.removeGroupEvent(groupId, event.id);
         onClose();
     };
 
@@ -43,7 +43,7 @@ export function GroupEntryEdit({ onClose, groupId, date, obj }) {
                 <Button type="submit" className="mt-2 flex-1">
                     שמירה
                 </Button>
-                {obj && (
+                {event && (
                     <Button type="button" variant="destructive" className="mt-2 flex-1" onClick={clickDelete}>
                         מחיקה
                     </Button>

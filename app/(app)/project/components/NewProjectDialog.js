@@ -1,5 +1,5 @@
-import { projectActions } from "@/utils/useProject";
-import { useTime } from "@/utils/useTime";
+import { projectActions } from "@/utils/store/useProject";
+import { useTime } from "@/utils/store/useTime";
 
 export default function NewProjectDialog(){
     const term = useTime(state => state.currTerm);

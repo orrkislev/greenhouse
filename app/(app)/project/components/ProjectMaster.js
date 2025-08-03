@@ -1,8 +1,8 @@
 import { tw } from "@/utils/tw";
-import { useProject } from "@/utils/useProject";
+import { useProject } from "@/utils/store/useProject";
 
-const MasterSection = tw`flex-1 bg-white rounded-xl p-6 shadow-sm border
-    ${props => props.$alert ? 'bg-red-400 flashing' : 'bg-white'}`;
+const MasterSection = tw`flex-1 p-4 border border-gray-300
+    ${props => props.$alert ? 'bg-red-400 flashing' : ''}`;
 
 export default function ProjectMaster() {
     const master = useProject((state) => state.project?.master);

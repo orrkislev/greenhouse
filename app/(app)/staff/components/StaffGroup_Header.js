@@ -1,6 +1,6 @@
 import { Users } from "lucide-react";
 
-export default function MentoringGroup_Header({ group }) {
+export default function StaffGroup_Header({ group }) {
     return (
         <div className="p-4">
             <div className="flex items-center justify-between">

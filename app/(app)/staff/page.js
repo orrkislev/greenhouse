@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useMemo, useState } from "react";
-import MentoringGroup from "./components/MentoringGroup";
+import StaffGroup from "./components/StaffGroup";
 import StaffStudents from "./components/StaffStudents";
-import { staffActions, useStaff } from "@/utils/useStaff";
-import { groupsActions, useGroups } from "@/utils/useGroups";
+import { staffActions, useStaff } from "@/utils/store/useStaff";
+import { groupsActions, useGroups } from "@/utils/store/useGroups";
 import { DashboardLayout, DashboardPanel, DashboardPanelButton, DashboardMain } from "@/components/DashboardLayout"
-import { useUser } from "@/utils/useUser";
+import { useUser } from "@/utils/store/useUser";
 import Staff_Admin from "./components/Staff_Admin";
 
 export default function StaffPage() {
@@ -15,7 +15,7 @@ export default function StaffPage() {
     const students = useStaff(state => state.students);
     const [activeTab, setActiveTab] = useState("students");
 
-    const mentoringGroups = useMemo(() => groups.filter(g => g.isMentor), [groups]);
+    const staffGroups = useMemo(() => groups.filter(g => g.isStaff), [groups]);
 
     useEffect(() => {
         groupsActions.loadGroups();
@@ -23,15 +23,15 @@ export default function StaffPage() {
     }, []);
 
     useEffect(() => {
-        setActiveTab(mentoringGroups.length > 0 ? mentoringGroups[0].id : "students");
-    }, [mentoringGroups]);
+        setActiveTab(staffGroups.length > 0 ? staffGroups[0].id : "students");
+    }, [staffGroups]);
 
-    const selectedGroup = mentoringGroups.find(g => g.id === activeTab) || groups.find(g => g.id === activeTab);
+    const selectedGroup = staffGroups.find(g => g.id === activeTab) || groups.find(g => g.id === activeTab);
 
     return (
         <DashboardLayout>
             <DashboardPanel>
-                {mentoringGroups.map(group => (
+                {staffGroups.map(group => (
                     <DashboardPanelButton key={group.id} onClick={() => setActiveTab(group.id)} $active={activeTab === group.id}>{group.name}</DashboardPanelButton>
                 ))}
                 {students.length > 0 && (
@@ -44,7 +44,7 @@ export default function StaffPage() {
             <DashboardMain>
                 {activeTab === 'students' && <StaffStudents students={students} />}
                 {activeTab === 'admin' && <Staff_Admin />}
-                {selectedGroup && <MentoringGroup group={selectedGroup} />}
+                {selectedGroup && <StaffGroup group={selectedGroup} />}
             </DashboardMain>
         </DashboardLayout>
     );

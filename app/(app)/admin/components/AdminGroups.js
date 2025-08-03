@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { adminActions, useAdmin } from "@/utils/useAdmin";
+import { adminActions, useAdmin } from "@/utils/store/useAdmin";
 import { Edit2, Meh, Plus, UserRoundX, XIcon } from "lucide-react";
 import { tw } from "@/utils/tw";
 import { Cell, Edittable, TableHeader } from "./Common";

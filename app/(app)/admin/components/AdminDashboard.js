@@ -1,4 +1,4 @@
-import { adminActions, useAdmin } from "@/utils/useAdmin";
+import { adminActions, useAdmin } from "@/utils/store/useAdmin";
 import { useState } from "react";
 
 export default function AdminDashboard() {

@@ -1,7 +1,7 @@
 import { ScheduleSection } from "../Layout";
 import { useEffect, useState } from "react";
-import { notesActions, useNotes } from "@/utils/useNotes";
-import { useTime } from "@/utils/useTime";
+import { notesActions, useNotes } from "@/utils/store/useNotes";
+import { useTime } from "@/utils/store/useTime";
 import { tw } from "@/utils/tw";
 
 const NoteDiv = tw`bg-[#e4d852] min-h-4

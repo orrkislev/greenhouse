@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import { useUser } from "./useUser";
+import { useUser } from "@/utils/store/useUser";
 import { collection, collectionGroup, getDocs, query, where } from "firebase/firestore";
-import { db } from "./firebase/firebase";
+import { db } from "@/utils//firebase/firebase";
 
 export const useStaff = create((set) => ({
     students: [],

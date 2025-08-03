@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { tw } from "@/utils/tw";
-import { useTime } from "@/utils/useTime";
+import { useTime } from "@/utils/store/useTime";
 import { ScheduleSection } from "./Layout";
-import { ganttActions, useGantt } from "@/utils/useGantt";
+import { ganttActions, useGantt } from "@/utils/store/useGantt";
 
 const GanttDay = tw`flex flex-col items-center justify-center text-gray-800 text-xs p-2
     gap-2 divide-y divide-black/10 z-[10]

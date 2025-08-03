@@ -1,17 +1,19 @@
 import { create } from "zustand";
-import { projectActions, useProject } from "./useProject";
-import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, limit, query, updateDoc, where, arrayUnion } from "firebase/firestore";
+import { projectActions, useProject } from "@/utils/store/useProject";
+import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, limit, query, updateDoc, where, arrayUnion, getDoc } from "firebase/firestore";
 import { format } from "date-fns";
-import { useTime } from "./useTime";
-import { logsActions } from "./useLogs";
-import { LOG_TYPES } from "./constants/constants";
-import { useUser } from "./useUser";
+import { useTime } from "@/utils/store/useTime";
+import { logsActions } from "@/utils/store/useLogs";
+import { LOG_TYPES } from "@/utils/constants/constants";
+import { useUser } from "@/utils/store/useUser";
+import { db } from "@/utils//firebase/firebase";
 
 export const useProjectTasks = create((set, get) => {
     const getCollectionRef = () => {
-        const projectRef = useProject.getState().getProjectRef();
-        if (!projectRef) return null;
-        return collection(projectRef, 'tasks');
+        const userId = useUser.getState().user?.id;
+        const projectId = useProject.getState().project?.id;
+        if (!userId || !projectId) return null
+        return collection(db, 'users', userId, 'projects', projectId, 'tasks')
     }
 
     return {
@@ -40,7 +42,7 @@ export const useProjectTasks = create((set, get) => {
             const view = useProject.getState().project?.taskStyle || 'list';
             let docs
             if (view === 'list') {
-                const snapshot = await getDocs(query(collectionRef, where('completed', '==', false) ));
+                const snapshot = await getDocs(query(collectionRef, where('completed', '==', false)));
                 docs = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
             } else if (view === 'weekly') {
                 const week = useTime.getState().week;
@@ -98,7 +100,7 @@ export const useProjectTasks = create((set, get) => {
         addTask: async (task) => {
             const collectionRef = getCollectionRef();
             if (!collectionRef) return;
-            const newDoc = await addDoc(collectionRef, {...task, completed: false });
+            const newDoc = await addDoc(collectionRef, { ...task, completed: false });
             get().setTasks([...get().tasks, { ...task, id: newDoc.id }]);
         },
         updateTask: async (taskId, updatedFields) => {
@@ -126,6 +128,11 @@ export const useProjectTasks = create((set, get) => {
 
 
 
+        completeTaskByLabel: (label) => {
+            const task = get().tasks.find(t => t.label === label);
+            if (!task || task.completed) return;
+            get().completeTask(task.id);
+        },
         completeTask: (taskId) => {
             const task = get().tasks.find(t => t.id === taskId);
             if (!task) return;

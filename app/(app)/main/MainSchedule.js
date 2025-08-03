@@ -1,7 +1,7 @@
-import { eventsActions, useEvents } from "@/utils/useEvents";
-import { groupsActions, useGroups } from "@/utils/useGroups";
-import { notesActions, useNotes } from "@/utils/useNotes"
-import { useTime } from "@/utils/useTime";
+import { eventsActions, useEvents } from "@/utils/store/useEvents";
+import { groupsActions, useGroups } from "@/utils/store/useGroups";
+import { notesActions, useNotes } from "@/utils/store/useNotes"
+import { useTime } from "@/utils/store/useTime";
 import { useEffect } from "react";
 
 export default function MainSchedule() {
@@ -26,7 +26,11 @@ export default function MainSchedule() {
     if (!today) return null;
     const todayNote = notes[today];
     const todayEvents = events.filter(event => event.date === today).sort((a, b) => a.start.localeCompare(b.start));
-    const todayGroupEvents = groups.map(group => ({ group: group.name, entries: group.entries ? group.entries.filter(entry => entry.date === today) : [] })).filter(group => group.entries.length > 0);
+    const todayGroupEvents = groups.map(group => (
+        { group: group.name, 
+            events: group.events ? group.events.filter(event => event.date === today) : [] 
+        }))
+        .filter(group => group.events.length > 0)
 
     return (
         <div className="flex flex-col gap-2">
@@ -54,10 +58,10 @@ export default function MainSchedule() {
                 {todayGroupEvents.map(group => (
                     <div key={group.group} className="flex flex-col gap-1">
                         <div className="text-sm font-bold">{group.group}</div>
-                        {group.entries.map(entry => (
-                            <div key={entry.id} className="flex gap-1 items-center">
-                                <div className="text-xs">ב{entry.start}</div>
-                                <div className="text-sm font-bold">{entry.title}</div>
+                        {group.events.map(event => (
+                            <div key={event.id} className="flex gap-1 items-center">
+                                <div className="text-xs">ב{event.start}</div>
+                                <div className="text-sm font-bold">{event.title}</div>
                             </div>
                         ))}
                     </div>

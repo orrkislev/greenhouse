@@ -1,5 +1,5 @@
 import { db } from "@/utils/firebase/firebase";
-import { useUser } from "@/utils/useUser";
+import { useUser } from "@/utils/store/useUser";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from "firebase/firestore";
 import { create } from "zustand";
 

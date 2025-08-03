@@ -208,3 +208,44 @@
     opacity: 1;
   }
 }
+
+.grain{
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.84' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-size: 100px 100px;
+  background-position: center;
+  background-repeat: repeat;
+}
+
+.grid_bg {
+  /* Fade to white on the right */
+  background:
+    linear-gradient(to right, rgba(255,255,255,0) 60%, #fff 100%),
+    /* Vertical stripes */
+    repeating-linear-gradient(
+      to right,
+      rgba(0,0,0,0.07) 0,
+      rgba(0,0,0,0.07) 1px,
+      transparent 1px,
+      transparent 1rem
+    ),
+    /* Horizontal stripes */
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.07) 0,
+      rgba(0,0,0,0.07) 1px,
+      transparent 1px,
+      transparent 1rem
+    );
+  background-size:
+    100% 100%, /* fade covers all */
+    1rem 1rem, /* vertical stripes */
+    1rem 1rem; /* horizontal stripes */
+  background-repeat: no-repeat, repeat, repeat;
+}
+
+.custom-delay {
+  transition-delay: 0s;
+}
+.group:hover .custom-delay {
+  transition-delay: 0.5s; /* 500ms delay only on hover-in */
+}

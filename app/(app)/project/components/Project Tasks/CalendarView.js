@@ -1,13 +1,13 @@
 import { tw } from "@/utils/tw";
-import { ganttActions, useGantt } from "@/utils/useGantt";
-import { useTime } from "@/utils/useTime";
+import { ganttActions, useGantt } from "@/utils/store/useGantt";
+import { useTime } from "@/utils/store/useTime";
 import { endOfWeek, format, startOfWeek, add } from "date-fns";
 import { Trash, Grip } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
-import { projectTasksActions, useProjectTasks } from "@/utils/useProjectTasks";
+import { projectTasksActions, useProjectTasks } from "@/utils/store/useProjectTasks";
 
 const CalendarHeader = tw`flex items-center justify-between p-4 bg-gray-100`;
 const CalendarCell = tw`p-2 flex flex-col gap-1 transition-all duration-200 border border-gray-200 relative

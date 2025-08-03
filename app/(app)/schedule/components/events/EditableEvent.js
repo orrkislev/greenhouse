@@ -9,7 +9,7 @@ import { EventTitleEditor } from "./EventTitleEditor";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useState } from "react";
 import TimeRangePicker from "@/components/ui/timerange-picker";
-import { eventsActions } from "@/utils/useEvents";
+import { eventsActions } from "@/utils/store/useEvents";
 
 export function EditableEvent({ event, onStartDrag, onEndDrag, onStartResize, onEndResize, onSelect }) {
     const { isDragging, isResizing, isHovered,

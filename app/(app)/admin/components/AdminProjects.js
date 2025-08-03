@@ -1,7 +1,7 @@
-import { adminActions, useAdmin } from "@/utils/useAdmin";
-import { useTime } from "@/utils/useTime";
-import { userActions } from "@/utils/useUser";
-import { usePathname, useRouter } from "next/navigation";
+import { adminActions, useAdmin } from "@/utils/store/useAdmin";
+import { useTime } from "@/utils/store/useTime";
+import { userActions } from "@/utils/store/useUser";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 
 
@@ -63,11 +63,7 @@ export default function AdminProjects() {
     const selectMaster = async (studentId, projectId, masterId) => {
         const master = staff.find(staff => staff.id === masterId);
         if (!master) return;
-        await adminActions.assignMasterToProject(studentId, projectId, {
-            id: masterId,
-            firstName: master.firstName,
-            lastName: master.lastName,
-        });
+        await adminActions.assignMasterToProject(studentId, projectId, master);
     }
 
     return (

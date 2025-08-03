@@ -1,6 +1,6 @@
 "use client"
 
-import { useGantt } from "@/utils/useGantt";
+import { useGantt } from "@/utils/store/useGantt";
 
 export default function AdminYearSchedule() {
     const terms = useGantt(state => state.terms);

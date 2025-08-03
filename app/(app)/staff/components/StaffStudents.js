@@ -1,7 +1,7 @@
 'use client'
 
 import { StudentCard } from "./StudentCard";
-import { useStaff } from "@/utils/useStaff";
+import { useStaff } from "@/utils/store/useStaff";
 
 export default function StaffStudents() {
     const students = useStaff(state => state.students);
