@@ -111,7 +111,7 @@ export default function SideBar() {
 
             {/* User Menu */}
             <SideBarFooter>
-                <NavigationMenuItem $active={pathname === '/admin'}>
+                <NavigationMenuItem>
                     <div className={LinkClasses} onClick={() => userActions.logout()}>
                         <User className="w-4 h-4" />
                         <div>{user.firstName}</div>

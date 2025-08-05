@@ -4,12 +4,12 @@ import { tw } from "@/utils/tw";
 import Gantt from "./components/Gantt";
 import { ScheduleEvents } from "./components/events/Events";
 import ScheduleTop from "./components/ScheduleTop";
-// import Semester from "./Semester/Semester";
 import { useState } from "react";
 import GroupSchedules from "./components/GroupSchedule/GroupSchedules";
 import Meetings from "./components/meetings/Meetings";
 import GoogleCalendar from "./components/Google/GoogleCalendar";
 import Notes from "./components/notes/Notes";
+import Term from "./components/term/Term";
 
 const ScheduleOuter = tw`w-full h-full px-16 pt-8`;
 
@@ -50,7 +50,7 @@ export default function SchedulePage() {
                 )}
                 {view === 'semester' && (
                     <>
-                        {/* <Semester /> */}
+                        <Term />
                     </>
                 )}
             </ScheduleOuter>

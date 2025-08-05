@@ -8,8 +8,8 @@ const notoSansHebrew = Noto_Sans_Hebrew({
 });
 
 export const metadata = {
-  title: "Weekly Schedule Manager",
-  description: "Organize your week, achieve your goals",
+  title: "תיכון החממה - האפליקציה",
+  description: "חברה מקיימת מרחב התפתחותי!"
 };
 
 export default function RootLayout({ children }) {
