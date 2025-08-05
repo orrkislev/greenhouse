@@ -28,10 +28,7 @@ export default function GoogleCalendar() {
     const weeksEvents = week.map(day => {
         return {
             date: day,
-            events: googleEvents.filter(event => {
-                const eventStart = new Date(event.start.dateTime || event.start.date);
-                return eventStart.toDateString() === new Date(day).toDateString();
-            })
+            events: googleEvents.filter(event => event.date === day)
         }
     });
 
@@ -44,15 +41,7 @@ export default function GoogleCalendar() {
                             <div key={eventIndex} className="text-xs">
                                 <div className="font-medium">{event.summary || 'No Title'}</div>
                                 <div className="text-xs">
-                                    {new Date(event.start.dateTime || event.start.date).toLocaleTimeString([], {
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                        hour12: false
-                                    })} - {new Date(event.end.dateTime || event.end.date).toLocaleTimeString([], {
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                        hour12: false
-                                    })}
+                                    {event.start} - {event.end}
                                 </div>
                             </div>
                         ))

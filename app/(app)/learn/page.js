@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { DashboardLayout, DashboardPanel, DashboardPanelButton, DashboardMain } from "@/components/DashboardLayout"
 import { studyActions, useStudy } from "@/utils/store/useStudy"
 import StudyMain from "./components/StudyMain"
-import StudyPath from "./components/StudyPath"
+import StudyPath, { newSubjectData } from "./components/StudyPath"
 import { tw } from "@/utils/tw"
 
 const PathButtonSpan = tw.span`
@@ -19,13 +19,17 @@ export default function LearnPage() {
         studyActions.loadPaths()
     }, [])
 
+    useEffect(() => {
+        if (paths.length > 0) setView(paths[paths.length - 1].id)
+    }, [paths])
+
     const selectedPath = paths.find(path => path.id === view)
 
     const newPath = () => {
         studyActions.addPath({
-            name: "נתיב חדש",
-            description: "להצליח להבין נתיב חדש",
-            subjects: [],
+            name: "תחום חדש",
+            description: "מה המטרה שלך בתחום הזה?",
+            subjects: [newSubjectData()],
             active: true,
         })
     }

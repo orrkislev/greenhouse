@@ -7,7 +7,7 @@ import { useState } from "react";
 
 const daysOfWeek = ['א', 'ב', 'ג', 'ד', 'ה'];
 
-export default function StaffGroup_Meetings({ group, styles }) {
+export default function StaffGroup_Meetings({ group }) {
     const meetings = useMeetings(state => state.meetings);
     
     const studentsWithMeetings = []
@@ -23,8 +23,8 @@ export default function StaffGroup_Meetings({ group, styles }) {
     studentsWithoutMeetings.sort((a, b) => a.firstName.localeCompare(b.firstName));
 
     return (
-        <div className={`p-4 border-t ${styles.border}`}>
-            <h4 className={`font-bold ${styles.accent}`}>שיחות אישיות</h4>
+        <div className={`p-4 border-t`}>
+            <h4 className={`font-bold`}>שיחות אישיות</h4>
 
             <ScheduleSection withLabel={false}>
                 <div className="bg-gray-100 px-2 py-1 text-sm">

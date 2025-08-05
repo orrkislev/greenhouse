@@ -104,6 +104,10 @@ export const useAdmin = create((set, get) => ({
             groups: state.groups.map(group => group.id === groupId ? { ...group, ...updates } : group)
         }));
     },
+    deleteGroup: async (groupId) => {
+        await deleteDoc(doc(db, "groups", groupId));
+        set(state => ({ groups: state.groups.filter(group => group.id !== groupId) }));
+    },
 
 
     // ------------------------------

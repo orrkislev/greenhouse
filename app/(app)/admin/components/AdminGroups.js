@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { adminActions, useAdmin } from "@/utils/store/useAdmin";
-import { Edit2, Meh, Plus, UserRoundX, XIcon } from "lucide-react";
+import { Edit2, Meh, Plus, Trash, UserRoundX, XIcon } from "lucide-react";
 import { tw } from "@/utils/tw";
 import { Cell, Edittable, TableHeader } from "./Common";
 
@@ -26,6 +26,12 @@ export default function AdminGroups() {
                         <GroupStudents group={group} />
                     </div>
                     <GroupMentors group={group} />
+                    {group.students && group.students.length == 0 && (
+                        <div className="text-sm text-gray-500 flex items-center gap-2 cursor-pointer" onClick={() => adminActions.deleteGroup(group.id)}>
+                            <Trash className="w-4 h-4" />
+                            מחק קבוצה
+                        </div>
+                    )}
                 </div>
             ))}
             <AdminMajors />

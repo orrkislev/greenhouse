@@ -24,16 +24,19 @@ export default function StaffGroup_Students({ group }) {
 
     let displayStudents = group.students;
     if (group.type === 'class' || group.type === 'major') displayStudents = displayStudents.filter(student => student.roles.includes('student'));
-    if (selectedStudent) {
-        displayStudents = displayStudents.filter(student => student.id !== selectedStudent.id);
-    }
 
 
     return (
         <div className="flex gap-4">
             {selectedStudent && (
-                <div className="p-4 border border-gray-200" onClick={() => goToStudent(selectedStudent)}>
-                    <div>{selectedStudent.firstName} {selectedStudent.lastName}</div>
+                <div className="p-4 border border-gray-200 flex flex-col gap-2" onClick={() => goToStudent(selectedStudent)}>
+                    <div className="font-bold">{selectedStudent.firstName} {selectedStudent.lastName}</div>
+                    {/* TODO */}
+                    <div>מה יש לו היום</div>
+                    <div>מה הפרויקט שלו והמשימות</div>
+                    <div>איזה דברים הוא לומד</div>
+                    <div />
+                    <div>אולי עדכונים של דברים שהוא עשה באפליקציה</div>
                 </div>
             )}
             <div className="flex flex-wrap gap-2">

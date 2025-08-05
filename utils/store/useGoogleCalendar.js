@@ -1,8 +1,8 @@
 import { useTime } from "@/utils/store/useTime";
 import { create } from "zustand";
-import { fetchEventsFromGoogleCalendar } from "@/utils/actions/GoogleCalendarActions";
+import { fetchEventsFromGoogleCalendar } from "@/utils/actions/google actions";
 import { useUser } from "@/utils/store/useUser";
-import { format, getDay } from "date-fns";
+import { addDays, format, getDay } from "date-fns";
 
 export const useGoogleCalendar = create((set, get) => ({
     events: [],
@@ -13,15 +13,16 @@ export const useGoogleCalendar = create((set, get) => ({
         const userRefreshToken = useUser.getState().user.googleRefreshToken;
         if (!userRefreshToken) return;
         const day = format(new Date(), 'yyyy-MM-dd');
+        const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
 
         if (get().isLoading) return;
-        if (get().loadedRanges.some(range => range.start === day && range.end === day)) {
+        if (get().loadedRanges.some(range => range.start === day && range.end === tomorrow)) {
             return;
         }
-        set(state => ({ loadedRanges: [...state.loadedRanges, { start: day, end: day }], isLoading: true }));
+        set(state => ({ loadedRanges: [...state.loadedRanges, { start: day, end: tomorrow }], isLoading: true }));
         try {
-            const events = await fetchEventsFromGoogleCalendar(userRefreshToken, day, day);
-            set({ events, isLoading: false });
+            const events = await fetchEventsFromGoogleCalendar(userRefreshToken, day, tomorrow);
+            set({ events: events.map(formatEvent), isLoading: false });
         } catch (error) {
             set({ isLoading: false });
         }
@@ -42,7 +43,7 @@ export const useGoogleCalendar = create((set, get) => ({
         set(state => ({ loadedRanges: [...state.loadedRanges, { start, end }], isLoading: true }));
         try {
             const events = await fetchEventsFromGoogleCalendar(userRefreshToken, start, end);
-            set({ events, isLoading: false });
+            set({ events: events.map(formatEvent), isLoading: false });
         } catch (error) {
             set({ isLoading: false });
         }
@@ -52,3 +53,21 @@ export const useGoogleCalendar = create((set, get) => ({
 export const googleCalendarActions = Object.fromEntries(
     Object.entries(useGoogleCalendar.getState()).filter(([key, value]) => typeof value === 'function')
 );
+
+const formatEvent = (event) => {
+    return {
+        ...event,
+        start: new Date(event.start.dateTime).toLocaleString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        }),
+        end: new Date(event.end.dateTime).toLocaleString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        }),
+        date: format(new Date(event.start.dateTime), 'yyyy-MM-dd'),
+        title: event.summary
+    }
+}

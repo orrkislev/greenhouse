@@ -34,6 +34,7 @@ export async function getRefreshToken(redirect_url, code) {
 }
 
 export async function fetchEventsFromGoogleCalendar(refreshToken, start, end) {
+    console.log('fetchEventsFromGoogleCalendar', start, end)
     const oauth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET
@@ -54,4 +55,38 @@ export async function fetchEventsFromGoogleCalendar(refreshToken, start, end) {
     } catch (error) {
         throw error;
     }
+}
+
+
+export async function getLatestVideoFromPlaylist(playlistId) {
+    const apiKey = process.env.GOOGLE_CLOUD_API;
+    const maxResults = 50;
+    let nextPageToken = null;
+    let lastItems = [];
+
+    // First, get the total number of videos
+    const firstUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=1&key=${apiKey}`;
+    const firstResponse = await fetch(firstUrl);
+    const firstData = await firstResponse.json();
+    const totalVideos = firstData.pageInfo.totalResults;
+
+    // Calculate how many pages we need
+    const totalPages = Math.ceil(totalVideos / maxResults);
+
+    // Now, page through to the last page
+    let pageCount = 0;
+    let url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=${maxResults}&key=${apiKey}`;
+    let data;
+
+    do {
+        const response = await fetch(url + (nextPageToken ? `&pageToken=${nextPageToken}` : ''));
+        data = await response.json();
+        pageCount++;
+        nextPageToken = data.nextPageToken;
+        lastItems = data.items;
+    } while (nextPageToken && pageCount < totalPages);
+
+    // The last item in the last page is the latest video
+    const latestVideo = lastItems[lastItems.length - 1];
+    return latestVideo.snippet.resourceId.videoId;
 }

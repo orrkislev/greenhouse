@@ -15,7 +15,7 @@ export default function StaffPage() {
     const students = useStaff(state => state.students);
     const [activeTab, setActiveTab] = useState("students");
 
-    const staffGroups = useMemo(() => groups.filter(g => g.isStaff), [groups]);
+    const staffGroups = useMemo(() => groups.filter(g => g.isMentor), [groups]);
 
     useEffect(() => {
         groupsActions.loadGroups();

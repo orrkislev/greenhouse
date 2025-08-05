@@ -93,8 +93,10 @@ export const useGroups = create((set, get) => ({
         if (!queryFilter) return;
 
         const snapshot = await getDocs(query(collection(db, "users"), queryFilter));
-        const students = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, students } : g) }));
+        const members = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        const students = members.filter(m => m.roles.includes('student'));
+        const mentors = members.filter(m => m.roles.includes('staff'));
+        set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, students, mentors } : g) }));
     }
 })
 );

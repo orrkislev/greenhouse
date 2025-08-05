@@ -1,6 +1,7 @@
 import { ganttActions, useGantt } from "@/utils/store/useGantt"
 import { useGroups } from "@/utils/store/useGroups";
 import { useEffect } from "react";
+import Box2 from "@/components/Box2";
 
 export default function MainMessages() {
     const message = useGantt((state) => state.message);
@@ -11,29 +12,23 @@ export default function MainMessages() {
     }, []);
 
     return (
-        <div className="flex flex-col gap-2">
-            <div className="text-sm text-gray-500">
-                הודעות
-            </div>
-            <div className="flex gap-2">
-                    <div className="text-sm text-gray-500 font-bold">
-                        כלל בית הספר
-                    </div>
-                    <div className="text-sm text-gray-500">
-                        {message || 'אין הודעה'}
-                    </div>
+        <Box2 label="הודעות">
+            <div className="flex flex-col gap-4">
+                <div className="text-sm text-gray-500 w-full">
+                    {message || 'אין הודעה'}
                 </div>
 
-            {groups.map(group => (
-                <div key={group.id} className="flex gap-2">
-                    <div className="text-sm text-gray-500 font-bold">
-                        {group.name}
+                {groups.map(group => (
+                    <div key={group.id} className="flex gap-4">
+                        <div className="text-sm text-gray-500 font-bold w-16">
+                            {group.name}
+                        </div>
+                        <div className="text-sm text-gray-500 w-full">
+                            {group.message || 'אין הודעה'}
+                        </div>
                     </div>
-                    <div className="text-sm text-gray-500">
-                        {group.message || 'אין הודעה'}
-                    </div>
-                </div>
-            ))}
-        </div>
+                ))}
+            </div>
+        </Box2>
     )
 }

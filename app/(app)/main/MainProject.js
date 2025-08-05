@@ -4,6 +4,7 @@ import { projectTasksActions, useProjectTasks } from "@/utils/store/useProjectTa
 import { Check, ChevronLeft, Trash, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
+import Box2 from "@/components/Box2";
 
 export default function MainProject() {
     const project = useProject((state) => state.project);
@@ -13,31 +14,24 @@ export default function MainProject() {
     if (project && !project.master) state = 'proposal'
 
     return (
-        <div className='flex flex-col'>
-            <div className='text-xs text-gray-600'>הפרויקט שלי</div>
-            <div className='mr-2'>
-                <div className='flex flex-col gap-2 p-4 border-b border-gray-200'>
-                    <div className='flex gap-16 items-center'>
-                        <div className='font-semibold'>
-                            {state === 'no project' ? 'אין פרויקט פעיל' : project.name || 'פרויקט חדש'}
-                        </div>
-
-                        <Link href="/project">
-                            <div className='flex items-center gap-2 px-2 py-1 border border-gray-300 rounded-full hover:bg-gray-100 transition-all'>
-                                <div className='text-sm'>
-                                    {state === 'no project' && 'פרויקט חדש'}
-                                    {state === 'proposal' && 'הצהרת כוונות'}
-                                    {state === 'tasks' && 'ניהול משימות'}
-                                </div>
-                                <ChevronLeft className='inline w-4 h-4 text-gray-500' />
-                            </div>
-                        </Link>
-                    </div>
-
-                    {state !== 'no project' && <Tasks />}
+        <Box2 label="הפרויקט שלי" className="group/project pb-8">
+            <div className='flex flex-col gap-2'>
+                <div className='font-semibold'>
+                    {state === 'no project' ? 'אין פרויקט פעיל' : project.name || 'פרויקט חדש'}
                 </div>
+
+                {state !== 'no project' && <Tasks />}
             </div>
-        </div>
+
+            <Link href="/project">
+                <div className='absolute bottom-2 left-2 flex items-center gap-2 px-2 py-1 border border-gray-300 rounded-full hover:bg-gray-100 transition-all group-hover/project:opacity-100 opacity-0'>
+                    <div className='text-xs'>
+                        לדף הפרויקט
+                    </div>
+                    <ChevronLeft className='inline w-4 h-4 text-gray-500' />
+                </div>
+            </Link>
+        </Box2>
     );
 }
 
@@ -57,15 +51,16 @@ function Tasks() {
     if (tasks.length === 0) {
         return <div className='text-gray-500 text-center p-4'>אין משימות</div>;
     }
+
     return (
         <div className='flex flex-col gap-2'>
             {view === 'list' && (
                 <>
-                    <div>המשימה הבאה</div>
-                    {tasks.filter(task => task.completed).slice(0, 1).map(task => (
+                    <div className='text-xs text-gray-600'>המשימות הבאות</div>
+                    {tasks.filter(task => task.completed).slice(0, 2).map(task => (
                         <Task key={task.id} tag="completed" task={task} description={'משימה הושלמה'} />
                     ))}
-                    {tasks.filter(task => !task.completed).slice(0, 1).map(task => (
+                    {tasks.filter(task => !task.completed).slice(0, 2).map(task => (
                         <Task key={task.id} tag="next" task={task} />
                     ))}
                 </>
@@ -103,9 +98,13 @@ function Tasks() {
 
                     {tasks.filter(task => task.mark === 'next').length > 0 && (
                         <>
-                            <div className='text-xs text-gray-600'>המשימה הבאה</div>
+                            <div className='text-xs text-gray-600'>המשימות הבאות</div>
                             {tasks.filter(task => task.mark === 'next').map(task => (
-                                <Task key={task.id} tag="next" task={task} />
+                                <Task key={task.id} tag="next" task={task} description={new Date(task.startDate).toLocaleDateString('he-IL', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    weekday: 'short'
+                                })} />
                             ))}
                         </>
                     )}
@@ -125,7 +124,6 @@ const TaskPill = tw`
 `;
 
 function Task({ task, description, tag }) {
-
     const onCheck = () => {
         projectTasksActions.completeTask(task.id);
     }
@@ -134,13 +132,13 @@ function Task({ task, description, tag }) {
     }
 
     return (
-        <div key={task.id} className='flex items-center gap-2 group'>
+        <div key={task.id} className='flex items-center gap-2 group/task'>
             <TaskPill tag={tag}>
                 {task.title}
                 <span className='text-xs text-gray-500'> ({description || task.description})</span>
             </TaskPill>
             {tag != 'completed' && (
-                <div className='flex gap-2 items-center group-hover:opacity-100 opacity-0 transition-opacity'>
+                <div className='flex gap-2 items-center group-hover/task:opacity-100 opacity-0 transition-opacity'>
                     <button className='p-1 border border-emerald-400 hover:bg-emerald-200 rounded-full' onClick={onCheck}>
                         <Check className='w-4 h-4 text-emerald-400' />
                     </button>

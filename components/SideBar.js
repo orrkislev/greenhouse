@@ -31,7 +31,8 @@ export default function SideBar() {
     return (
         <SideBarDiv>
             <SideBarHeader>
-                <Image src="/logo.png" alt="logo" fill={true} objectFit="contain" />
+                <Image src="/logo.png" alt="logo" fill={true} style={{ objectFit: 'contain' }} priority={true} 
+                    sizes="(max-width: 768px) 20vw, (max-width: 1200px) 20vw, 20vw" />
             </SideBarHeader>
             <SideBarContent>
                 {/* Home */}

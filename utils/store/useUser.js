@@ -44,6 +44,7 @@ export const useUser = create(subscribeWithSelector(persist((set, get) => {
 		},
 
 		updateUserDoc: async (updates) => {
+			console.log('updateUserDoc', updates)
 			const userDocRef = doc(db, 'users', get().user.id);
 			await updateDoc(userDocRef, updates);
 			set((state) => ({

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { userActions, useUser } from "./useUser";
-import { collection, updateDoc, deleteDoc, addDoc, getDocs, doc } from "firebase/firestore";
+import { collection, updateDoc, deleteDoc, addDoc, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from '@/utils/firebase/firebase'
 
 export const useStudy = create((set, get) => ({
@@ -9,9 +9,14 @@ export const useStudy = create((set, get) => ({
     loadPaths: async () => {
         const user = useUser.getState().user;
         if (!user) return;
-        const study = collection(db, 'users', user.id, 'study')
-        const querySnapshot = await getDocs(study)
-        const paths = querySnapshot.docs.map(doc => doc.data())
+        if (!user.study) return;
+        const paths = []    
+        for (const studyId of user.study) {
+            const studyDoc = await getDoc(doc(db, 'users', user.id, 'study', studyId))
+            if (studyDoc.exists()) {
+                paths.push({ ...studyDoc.data(), id: studyDoc.id });
+            }
+        }
         set({ paths })
     },
 
@@ -26,8 +31,7 @@ export const useStudy = create((set, get) => ({
     },
     deletePath: async (pathId) => {
         const user = useUser.getState().user;
-        if (!user.id) return;
-        userActions.updateUserDoc({ study: user.study.filter(id => id !== pathId) })
+        userActions.updateUserDoc({ study: user.study ? user.study.filter(id => id !== pathId) : [] })
         set(state => ({ paths: state.paths.filter(path => path.id !== pathId) }))
     },
     updatePath: async (pathId, pathData) => {

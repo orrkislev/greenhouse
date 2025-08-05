@@ -74,7 +74,7 @@ export const useProjectTasks = create((set, get) => {
                     where('completed', '==', false),
                     where('startDate', '>', today),
                     orderBy('startDate', 'asc'),
-                    limit(1)
+                    limit(2)
                 ));
                 const nextDocs = nextSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id, mark: 'next' }));
                 docs = [...overDueDocs, ...todayDocs, ...nextDocs];

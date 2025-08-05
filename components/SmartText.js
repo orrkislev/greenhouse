@@ -31,6 +31,7 @@ export default function SmartText({ text, className, onEdit }) {
 
 
 function SmartLabel({ text, className }) {
+    className += ' cursor-default'
     const isLink = text.includes("http") || text.includes("www.");
     if (isLink) return <LinkText text={text} className={className} />
     return <span className={className}>{text}</span>

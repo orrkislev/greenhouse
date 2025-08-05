@@ -6,15 +6,24 @@ import { tw } from "@/utils/tw"
 
 const SpecialButton = tw`p-4 border border-gray-200 rounded-md flex items-center gap-2 text-xs hover:bg-gray-100 cursor-pointer`;
 
+const newStepData = () => ({
+    id: new Date().getTime(),
+    source: "איך אני לומד את זה",
+    text: "מה למדתי מזה",
+    finished: false,
+})
+export const newSubjectData = () => ({
+    id: new Date().getTime(),
+    name: "שם הנושא החדש",
+    description: "תיאור הנושא החדש",
+    steps: [newStepData()],
+})
+
 
 export default function StudyPath({ path }) {
 
     const newSubject = () => {
-        studyActions.addSubject(path.id, {
-            name: "שם הנושא החדש",
-            description: "תיאור הנושא החדש",
-            steps: [],
-        })
+        studyActions.addSubject(path.id, newSubjectData())
     }
 
     return (
@@ -23,7 +32,7 @@ export default function StudyPath({ path }) {
             <div className="flex gap-4">
                 <SpecialButton onClick={() => studyActions.deletePath(path.id)}>
                     <Trash2 className="w-4 h-4" />
-                    מחק נתיב
+                    מחק תחום
                 </SpecialButton>
                 <SpecialButton onClick={newSubject}>
                     <Plus className="w-4 h-4" />
@@ -46,12 +55,7 @@ export default function StudyPath({ path }) {
 function Subject({ path, subject }) {
 
     const newStep = () => {
-        studyActions.addStep(path.id, subject.id, {
-            id: new Date().getTime(),
-            source: "איך אני לומד את זה",
-            text: "מה למדתי מזה",
-            finished: false,
-        })
+        studyActions.addStep(path.id, subject.id, newStepData())
     }
     return (
         <div key={subject.name} className="flex gap-1">
@@ -84,16 +88,13 @@ function Subject({ path, subject }) {
 function Step({ path, subject, step }) {
     const [isHovered, setIsHovered] = useState(false)
 
-    const editStep = (source, text) => {
-        studyActions.updateStep(path.id, subject.id, step.id, { ...step, source, text })
-    }
     return (
         <div className="flex border border-gray-300" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
             <div className={`${step.finished ? "bg-emerald-500" : ""} border-l border-gray-300 w-4`} />
             <div className="flex-1 flex gap-4 justify-between p-4">
                 <div className="flex-1 flex flex-col gap-1">
-                    <SmartText text={step.source} onEdit={(source) => editStep(source, step.text)} />
-                    <SmartText text={step.text} className="text-sm text-gray-500" onEdit={(text) => editStep(step.source, text)} />
+                    <SmartText text={step.source} onEdit={(source) => studyActions.updateStep(path.id, subject.id, step.id, { ...step, source })} />
+                    <SmartText text={step.text} className="text-sm text-gray-500" onEdit={(text) => studyActions.updateStep(path.id, subject.id, step.id, { ...step, text })} />
                 </div>
                 <div className={`flex flex-col gap-1 ${isHovered ? "opacity-100" : "opacity-0"} transition-all`}>
                     <Trash2 className="p-2 w-8 h-8 cursor-pointer hover:bg-gray-300/50 transition-colors rounded-full" onClick={() => studyActions.deleteStep(path.id, subject.id, step.id)} />
