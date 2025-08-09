@@ -101,8 +101,8 @@ export default function SynthesisStage() {
         </CardHeader>
         <CardContent>
           {materialsWithSources.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <div className="text-center py-8 text-stone-500">
+              <FileText className="h-12 w-12 mx-auto mb-4 text-stone-300" />
               <p>אין חומרים זמינים. יש להוסיף מקורות וחומרים בשלב האחזור קודם.</p>
             </div>
           ) : (
@@ -130,7 +130,7 @@ export default function SynthesisStage() {
                   </CardHeader>
                   <CardContent>
                     {source.materials.length === 0 ? (
-                      <p className="text-sm text-gray-500 italic">אין חומרים במקור זה</p>
+                      <p className="text-sm text-stone-500 italic">אין חומרים במקור זה</p>
                     ) : (
                       <div className="space-y-4">
                         {source.materials.map((material) => (
@@ -138,7 +138,7 @@ export default function SynthesisStage() {
                             <div className="flex items-center justify-between mb-3">
                               <div>
                                 <h4 className="font-medium">{material.title}</h4>
-                                <p className="text-sm text-gray-600">{material.description}</p>
+                                <p className="text-sm text-stone-600">{material.description}</p>
                               </div>
                               <Dialog
                                 open={isAddingNote?.sourceId === source.id && isAddingNote?.materialId === material.id}
@@ -212,7 +212,7 @@ export default function SynthesisStage() {
                             </div>
 
                             {material.notes.length === 0 ? (
-                              <p className="text-sm text-gray-500 italic">אין פתקים נוספים</p>
+                              <p className="text-sm text-stone-500 italic">אין פתקים נוספים</p>
                             ) : (
                               <div className="space-y-3">
                                 {material.notes.map((note) => (

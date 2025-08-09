@@ -12,14 +12,15 @@ export function SmartTextArea(props) {
         }
     }, [props.value]);
 
-    const textSize = props.value.length > 20 ? "text-xs" : "text-sm"
+    // const textSize = props.value.length > 20 ? "text-xs" : "text-sm"
 
     return (
         <textarea
             ref={ref}
             rows={1}
-            className={`bg-transparent text-gray-800 rounded px-1 w-full outline-none pointer-events-auto focus:bg-white/50 resize-none ${textSize}`}
+            className={`bg-transparent text-stone-800 rounded px-1 w-full outline-none pointer-events-auto focus:bg-white/50 resize-none text-sm`}
             style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', minHeight: '0', ...props.style }}
+            onChange={props.onChange || (() => { })}
             {...props}
         />
     );

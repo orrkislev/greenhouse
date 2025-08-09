@@ -7,6 +7,7 @@ export const useStudy = create((set, get) => ({
     paths: [],
 
     loadPaths: async () => {
+        if (get().paths.length > 0) return;
         const user = useUser.getState().user;
         if (!user) return;
         if (!user.study) return;

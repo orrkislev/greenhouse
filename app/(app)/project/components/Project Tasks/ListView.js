@@ -17,7 +17,7 @@ export default function ListView() {
     }
 
     return (
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-stone-200">
             {/* Draggable active tasks */}
             <Reorder.Group values={activeTasks} onReorder={onReorder}>
                 {activeTasks.map((task) => (
@@ -39,17 +39,17 @@ function SingleTask({ task, isDraggable = true }) {
     if (!isDraggable) {
         // Non-draggable completed task - non-editable and no delete button
         return (
-            <div className='flex gap-4 w-full items-center hover:bg-gray-100 py-1 group opacity-60'>
+            <div className='flex gap-4 w-full items-center hover:bg-stone-100 py-1 group opacity-60'>
                 <div className="w-4 h-4"></div> {/* Placeholder for grip space */}
                 <div className="flex justify-between items-center w-full">
-                    <div className="flex-1 text-sm text-gray-500">
+                    <div className="flex-1 text-sm text-stone-500">
                         {task.title || ''}
                     </div>
-                    <div className="flex-1 text-sm text-gray-500">
+                    <div className="flex-1 text-sm text-stone-500">
                         {task.description || ''}
                     </div>
                     <div className="w-6 h-6">
-                        <button className="bg-gray-200 hover:bg-gray-300 cursor-pointer transition-colors rounded-full p-1 opacity-0 group-hover:opacity-100"
+                        <button className="bg-stone-200 hover:bg-stone-300 cursor-pointer transition-colors rounded-full p-1 opacity-0 group-hover:opacity-100"
                         onClick={() => projectTasksActions.deleteTask(task.id)}>
                         <X className="w-4 h-4" />
                     </button>
@@ -61,7 +61,7 @@ function SingleTask({ task, isDraggable = true }) {
 
     return (
         <Reorder.Item key={task.id}
-            className='flex gap-4 w-full items-center hover:bg-gray-100 py-1 group'
+            className='flex gap-4 w-full items-center hover:bg-stone-100 py-1 group'
             value={task}
             dragListener={false}
             dragControls={controls}
@@ -71,11 +71,11 @@ function SingleTask({ task, isDraggable = true }) {
                 <EditLabel task={task} field="title" />
                 <EditLabel task={task} field="description" />
                 <div className="flex items-center gap-2">
-                    <button className="bg-gray-200 hover:bg-gray-300 cursor-pointer transition-colors rounded-full p-1 opacity-0 group-hover:opacity-100"
+                    <button className="bg-stone-200 hover:bg-stone-300 cursor-pointer transition-colors rounded-full p-1 opacity-0 group-hover:opacity-100"
                         onClick={() => projectTasksActions.completeTask(task.id)}>
                         <Check className="w-4 h-4" />
                     </button>
-                    <button className="bg-gray-200 hover:bg-gray-300 cursor-pointer transition-colors rounded-full p-1 opacity-0 group-hover:opacity-100"
+                    <button className="bg-stone-200 hover:bg-stone-300 cursor-pointer transition-colors rounded-full p-1 opacity-0 group-hover:opacity-100"
                         onClick={() => projectTasksActions.deleteTask(task.id)}>
                         <X className="w-4 h-4" />
                     </button>
@@ -108,7 +108,7 @@ function EditLabel({ task, field }) {
                     className="border rounded px-2 py-1"
                 />
             ) : (
-                <div onClick={() => setEditing(true)} className="cursor-pointer text-gray-700 hover:text-gray-900 transition-colors user-select-none">
+                <div onClick={() => setEditing(true)} className="cursor-pointer text-stone-700 hover:text-stone-900 transition-colors user-select-none">
                     {task[field] || ''}
                 </div>
             )}

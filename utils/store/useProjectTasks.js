@@ -20,8 +20,6 @@ export const useProjectTasks = create((set, get) => {
         tasks: [],
         view: 'list',
         loaded: false,
-        clear: () => set({ tasks: [], view: 'list', loaded: false }),
-
 
         loadAllTasks: async () => {
             if (get().loaded === 'all') return;
@@ -175,5 +173,3 @@ export const useProjectTasks = create((set, get) => {
 export const projectTasksActions = Object.fromEntries(
     Object.entries(useProjectTasks.getState()).filter(([key, value]) => typeof value === 'function')
 );
-
-useUser.subscribe(state => state.user?.id, projectTasksActions.clear);

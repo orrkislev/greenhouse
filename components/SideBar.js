@@ -1,124 +1,110 @@
 "use client"
 
-import * as React from "react"
 import { userActions, useUser } from "@/utils/store/useUser";
 import { tw } from "@/utils/tw";
-import { LogOut, User, BookOpen, Briefcase, Calendar, Settings, Snail, UsersRound, TreePalm, Skull, ChevronDown, Brain } from "lucide-react";
+import { BookOpen, Briefcase, Calendar, Snail, UsersRound, TreePalm, Skull, Brain, LogOut } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { AnimatePresence, motion } from "motion/react";
+import { AvatarEdit }    from "./Avatar";
 
-const SideBarDiv = tw`flex flex-col border-l border-gray-600 bg-gray-100`
+const SideBarDiv = tw`flex flex-col border-l border-stone-400 bg-stone-200 -my-6`
 const SideBarHeader = tw`aspect-square flex items-center justify-center p-2 relative`
 const SideBarContent = tw`h-full flex flex-col gap-1 pt-8 flex-1`
-const SideBarFooter = tw`flex flex-col gap-1 p-2`
+const SideBarFooter = tw`flex flex-col gap-1 pb-4`
 
-const NavigationMenuItem = tw`flex gap-2 rtl items-center p-2 text-gray-500 hover:text-gray-700 mr-4
-    ${props => props.$active ? 'bg-white text-blue-700 rounded-r-full -ml-px border-y border-r border-gray-600' : ''}
-    ${props => props.$disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
-    `
+const NavigationMenuItem = tw`flex gap-2 rtl items-center p-2 text-stone-500 hover:text-stone-700 mr-4 z-2 relative overflow-hidden -ml-px
+${props => props.$disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
+`
+const LinkClasses = `flex justify-center gap-1 text-sm rounded-lg p-2 z-2 items-center`
+const Separator = tw`h-px w-8 bg-stone-300 mx-auto`
 
-const LinkClasses = `flex justify-center gap-1 text-sm hover:bg-white rounded-lg p-2`
-const Separator = tw`h-px w-8 bg-gray-300 mx-auto`
+
 
 export default function SideBar() {
     const pathname = usePathname();
-    const user = useUser((state) => state.user);
-
+    const user = useUser((state) => state.user)
     if (!user) return null;
+
 
     return (
         <SideBarDiv>
             <SideBarHeader>
-                <Image src="/logo.png" alt="logo" fill={true} style={{ objectFit: 'contain' }} priority={true} 
+                <Image src="/logo.png" alt="logo" fill={true} style={{ objectFit: 'contain' }} priority={true}
                     sizes="(max-width: 768px) 20vw, (max-width: 1200px) 20vw, 20vw" />
             </SideBarHeader>
+            <Separator className='w-full'/>
+            <div className="flex gap-2 items-center p-2 justify-center text-sm">
+                <AvatarEdit />
+                <div>{user.firstName}</div>
+            </div>
+            <Separator className='w-full'/>
             <SideBarContent>
                 {/* Home */}
-                <NavigationMenuItem $active={pathname === '/'}>
-                    <Link href="/" className={LinkClasses}>
-                        <TreePalm className="w-4 h-4" />
-                        <div>בית</div>
-                    </Link>
-                </NavigationMenuItem>
+                <SideBarItem href="/" icon={<TreePalm className="w-4 h-4" />} label="בית" active={pathname === '/'} />
 
                 {/* Schedule */}
-                <NavigationMenuItem $active={pathname === '/schedule'}>
-                    <Link href="/schedule" className={LinkClasses}>
-                        <Calendar className="w-4 h-4" />
-                        <div>לוח זמנים</div>
-                    </Link>
-                </NavigationMenuItem>
+                <SideBarItem href="/schedule" icon={<Calendar className="w-4 h-4" />} label="לוח זמנים" active={pathname === '/schedule'} />
 
                 <Separator />
 
                 {/* Learning */}
-                <NavigationMenuItem $active={pathname === '/learn'}>
-                    <Link href="/learn" className={LinkClasses}>
-                        <BookOpen className="w-4 h-4" />
-                        <div>למידה</div>
-                    </Link>
-                </NavigationMenuItem>
+                <SideBarItem href="/learn" icon={<BookOpen className="w-4 h-4" />} label="למידה" active={pathname === '/learn'} />
 
                 {/* Projects */}
-                <NavigationMenuItem $active={pathname === '/project'}>
-                    <Link href="/project" className={LinkClasses}>
-                        <Snail className="w-4 h-4" />
-                        <div>הפרויקט</div>
-                    </Link>
-                </NavigationMenuItem>
+                <SideBarItem href="/project" icon={<Snail className="w-4 h-4" />} label="הפרויקט" active={pathname === '/project'} />
 
                 {/* Research */}
-                <NavigationMenuItem $active={pathname === '/research'}>
-                    <Link href="/research" className={LinkClasses}>
-                        <Brain className="w-4 h-4" />
-                        <div>חקר</div>
-                    </Link>
-                </NavigationMenuItem>
+                <SideBarItem href="/research" icon={<Brain className="w-4 h-4" />} label="חקר" active={pathname === '/research'} />
 
                 {/* Vocation */}
-                <NavigationMenuItem $active={pathname === '/vocation'} $disabled={true}>
-                    <Link href="/vocation" className={LinkClasses}>
-                        <Briefcase className="w-4 h-4" />
-                        <div>תעסוקה</div>
-                    </Link>
-                </NavigationMenuItem>
+                <SideBarItem href="/vocation" icon={<Briefcase className="w-4 h-4" />} label="תעסוקה" active={pathname === '/vocation'} disabled={true} />
 
                 <Separator />
 
                 {/* Staff only */}
                 {user && user.roles && user.roles.includes('staff') && (
-                    <NavigationMenuItem $active={pathname === '/staff'}>
-                        <Link href="/staff" className={LinkClasses}>
-                            <UsersRound className="w-4 h-4" />
-                            <div>החניכים שלי</div>
-                        </Link>
-                    </NavigationMenuItem>
+                    <SideBarItem href="/staff" icon={<UsersRound className="w-4 h-4" />} label="החניכים שלי" active={pathname === '/staff'} />
                 )}
 
                 {user && user.roles && user.roles.includes('admin') && (
-                    <NavigationMenuItem $active={pathname === '/admin'}>
-                        <Link href="/admin" className={LinkClasses}>
-                            <Skull className="w-4 h-4" />
-                            <div>ניהול</div>
-                        </Link>
-                    </NavigationMenuItem>
+                    <SideBarItem href="/admin" icon={<Skull className="w-4 h-4" />} label="ניהול" active={pathname === '/admin'} />
                 )}
-
-
             </SideBarContent>
 
             {/* User Menu */}
             <SideBarFooter>
                 <NavigationMenuItem>
-                    <div className={LinkClasses} onClick={() => userActions.logout()}>
-                        <User className="w-4 h-4" />
-                        <div>{user.firstName}</div>
+                    <div className={LinkClasses + ' cursor-pointer hover:bg-white'} onClick={() => userActions.logout()}>
+                        <LogOut className="w-4 h-4" />
+                        <div>יציאה</div>
                     </div>
                 </NavigationMenuItem>
             </SideBarFooter>
 
-        </SideBarDiv>
+        </SideBarDiv >
     );
+}
+
+function SideBarItem({ href, icon, label, active, disabled }) {
+
+    return (
+        <NavigationMenuItem $active={active} $disabled={disabled}>
+            <AnimatePresence>
+                {active && (
+                    <motion.div
+                        initial={{ x: '-100%' }}
+                        animate={{ x: 0, transition: { duration: .2, ease: 'circInOut' } }}
+                        exit={{ x: '-100%', transition: { duration: .2, ease: 'circInOut' } }}
+                        className="w-full h-full rounded-r-full absolute left-0 z-1 -translate-x-px border-r border-y border-stone-400 bg-stone-50"
+                    />
+                )}
+            </AnimatePresence>
+            <Link href={href} className={LinkClasses + ' ' + (active ? 'text-black' : 'hover:bg-white')} >
+                {icon}
+                <div>{label}</div>
+            </Link>
+        </NavigationMenuItem>
+    )
 }

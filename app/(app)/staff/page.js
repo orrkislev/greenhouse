@@ -24,7 +24,7 @@ export default function StaffPage() {
 
     useEffect(() => {
         setActiveTab(staffGroups.length > 0 ? staffGroups[0].id : "students");
-    }, [staffGroups]);
+    }, [staffGroups.length]);
 
     const selectedGroup = staffGroups.find(g => g.id === activeTab) || groups.find(g => g.id === activeTab);
 
@@ -32,7 +32,11 @@ export default function StaffPage() {
         <DashboardLayout>
             <DashboardPanel>
                 {staffGroups.map(group => (
-                    <DashboardPanelButton key={group.id} onClick={() => setActiveTab(group.id)} $active={activeTab === group.id}>{group.name}</DashboardPanelButton>
+                    <DashboardPanelButton key={group.id} onClick={() => setActiveTab(group.id)} $active={activeTab === group.id}>
+                        {group.type == 'major' && 'מגמת '}
+                        {group.type == 'class' && 'קבוצת '}
+                        {group.name}
+                    </DashboardPanelButton>
                 ))}
                 {students.length > 0 && (
                     <DashboardPanelButton onClick={() => setActiveTab('students')} $active={activeTab === 'students'}>ליווי</DashboardPanelButton>

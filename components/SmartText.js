@@ -1,5 +1,5 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Pencil } from "lucide-react";
 
 
@@ -12,7 +12,7 @@ export default function SmartText({ text, className, onEdit }) {
         <div className="flex gap-4 group">
             {isEditing
                 // ? <input type="text" defaultValue={text} autoFocus onBlur={(e) => { onEdit(e.target.value); setIsEditing(false) }} />
-                ? <AutoSizeTextarea value={text} onFinish={(value) => { onEdit(value); setIsEditing(false) }} autoFocus={true} />
+                ? <AutoSizeTextarea value={text} onFinish={(value) => { onEdit(value); setIsEditing(false) }} autoFocus={true} className={className} />
                 : (
                     <>
                         <SmartLabel text={text} className={className} />
@@ -59,7 +59,7 @@ function LinkWords({ word, className }) {
     if (title) {
         const favicon = `https://www.google.com/s2/favicons?sz=64&domain=${word}`;
         const formattedUrl = word.startsWith('http') ? word : `https://${word}`;
-        return <a href={formattedUrl} target="_blank" className={`flex gap-1 items-center ${className} border-b border-gray-600 hover:text-blue-500 hover:border-blue-500`}>
+        return <a href={formattedUrl} target="_blank" className={`flex gap-1 items-center ${className} border-b border-stone-600 hover:text-blue-500 hover:border-blue-500`}>
             <Image src={favicon} alt="favicon" width={16} height={16} />
             <span className="truncate">{title.length > 20 ? title.slice(0, 20) + "..." : title}</span>
         </a>
@@ -157,7 +157,7 @@ const OEMBED_PROVIDERS = [
 
 
 
-function AutoSizeTextarea({ value, onFinish, autoFocus }) {
+export function AutoSizeTextarea({ value, onFinish, autoFocus, className }) {
     const ref = useRef(null);
 
     useLayoutEffect(() => {
@@ -176,10 +176,11 @@ function AutoSizeTextarea({ value, onFinish, autoFocus }) {
 
     return (
         <textarea ref={ref}
+            rows={1}
             defaultValue={value}
             autoFocus={autoFocus}
             onBlur={(e) => onFinish(e.target.value)}
-            className="w-full h-auto resize-none whitespace-pre-wrap leading-loose"
+            className={`resize-none whitespace-pre-wrap ${className} w-full`}
             onChange={onChange}
         />
     )

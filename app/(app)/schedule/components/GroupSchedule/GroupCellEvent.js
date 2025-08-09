@@ -25,7 +25,7 @@ export function GroupCellEvent({ groupId, date, event, edittable }) {
                     </GroupObjectText>
                 </GroupObjectCellDiv>
             </PopoverTrigger>
-            <PopoverContent className="w-80 bg-white p-4 border border-gray-300 z-[999]">
+            <PopoverContent className="w-80 bg-white p-4 border border-stone-300 z-[999]">
                 {edittable ? (
                     <GroupEventEdit
                         onClose={() => setIsOpen(false)}

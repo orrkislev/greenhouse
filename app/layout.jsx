@@ -16,11 +16,7 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="he" className={notoSansHebrew.variable}>
-      <body className={`${notoSansHebrew.className} antialiased rtl min-h-screen pb-32 overflow-hidden`} 
-      style={{
-        backgroundImage: "radial-gradient(circle at bottom left, #eee 0%, white 70%)",
-      }}
-      >
+      <body className={`${notoSansHebrew.className} antialiased rtl min-h-screen bg-stone-50`} >
         {children}
       </body>
     </html>

@@ -19,8 +19,7 @@ export const useStaff = create((set) => ({
         const projects = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const studentsIDs = querySnapshot.docs.map(doc => doc.ref.parent.parent.id);
 
-
-        const allStudents = []
+        let allStudents = []
         while (studentsIDs.length > 0) {
             const first30 = studentsIDs.splice(0, 30);
             const students = await getDocs(query(collection(db, "users"), where("__name__", "in", first30)));
@@ -30,6 +29,8 @@ export const useStaff = create((set) => ({
                 projectId: projects.find(project => project.userId === doc.id)?.id
             })));
         }
+        allStudents = allStudents.filter(student => student.roles.includes('student'));
+
         set({ students: allStudents });
     },
 }));

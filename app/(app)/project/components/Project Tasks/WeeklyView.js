@@ -4,10 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
-import { Grip } from "lucide-react";
+import { ArrowDownToLine, Grip } from "lucide-react";
 import { projectTasksActions, useProjectTasks } from "@/utils/store/useProjectTasks";
+import { tw } from "@/utils/tw";
 
 export default function WeeklyView() {
+    const [fullView, setFullView] = useState(false);
     const tasks = useProjectTasks((state) => state.tasks);
     const currTerm = useTime((state) => state.currTerm);
     const [isDragging, setIsDragging] = useState(false);
@@ -50,23 +52,41 @@ export default function WeeklyView() {
         projectTasksActions.changeOrder(taskId, newTaskIndex);
     };
 
+    let displayWeeks = termWeeks;
+    if (!fullView) {
+        const currentIndex = termWeeks.findIndex(week => week.isCurrent);
+        displayWeeks = termWeeks.slice(currentIndex - 1, currentIndex + 2);
+    }
+
     return (
-        <div className='flex flex-col divide-y divide-gray-200'>
-            {termWeeks.map((week, weekIndex) => (
+        <div className='flex flex-col relative'>
+            {displayWeeks.map((week) => (
                 <WeekRow
-                    key={weekIndex}
+                    key={week.weekNumber}
                     week={week}
-                    weekIndex={weekIndex}
                     onTaskMove={handleTaskMove}
                     isDragging={isDragging}
                     setIsDragging={setIsDragging}
                 />
             ))}
+            {!fullView && (
+                <>
+                    <div className="absolute top-0 left-0 right-0 h-32 bg-linear-to-t from-transparent to-white" />
+                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-b from-transparent to-white" />
+                    <ArrowDownToLine className="w-8 h-8 border border-stone-200 absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 text-stone-400 bg-white p-1 rounded-full hover:bg-stone-100  hover:scale-110 cursor-pointer transition-all" onClick={() => setFullView(true)} />
+                </>
+            )}
         </div>
     );
 }
 
-function WeekRow({ week, weekIndex, onTaskMove, isDragging, setIsDragging }) {
+
+const WeekRowDiv = tw.div`
+    flex gap-4 divide-x divide-stone-200 py-2 transition-colors ${({ $dragOver }) => $dragOver ? 'bg-blue-50' : ''}
+    ${({ $isCurrent }) => $isCurrent ? 'bg-blue-50' : ''}
+`
+
+function WeekRow({ week, onTaskMove, isDragging, setIsDragging }) {
     const elementRef = useRef(null);
     const [dragOverState, setDragOverState] = useState(null);
 
@@ -76,7 +96,7 @@ function WeekRow({ week, weekIndex, onTaskMove, isDragging, setIsDragging }) {
 
         return dropTargetForElements({
             element,
-            getData: () => ({ weekIndex, type: 'week' }),
+            getData: () => ({ weekNumber: week.weekNumber, type: 'week' }),
             onDragEnter: () => {
                 // Only show feedback if week has no tasks
                 if (week.tasks.length === 0) {
@@ -100,14 +120,10 @@ function WeekRow({ week, weekIndex, onTaskMove, isDragging, setIsDragging }) {
                 }
             }
         });
-    }, [week.tasks.length, weekIndex, onTaskMove]);
+    }, [week.tasks.length, week.weekNumber, onTaskMove]);
 
     return (
-        <div
-            ref={elementRef}
-            className={`flex gap-4 divide-x divide-gray-200 py-2 transition-colors ${dragOverState === 'over' ? 'bg-blue-50' : ''
-                }`}
-        >
+        <WeekRowDiv ref={elementRef} $dragOver={dragOverState === 'over'} $isCurrent={week.isCurrent}>
             <div className='flex flex-col items-center justify-center w-16'>
                 <div className="">{dateLabel(week.start)}</div>
                 <div className="text-xs ">{monthLabel(week.start)}</div>
@@ -118,22 +134,22 @@ function WeekRow({ week, weekIndex, onTaskMove, isDragging, setIsDragging }) {
                         key={task.id}
                         task={task}
                         taskIndex={taskIndex}
-                        weekIndex={weekIndex}
+                        weekNumber={week.weekNumber}
                         onTaskMove={onTaskMove}
                         setIsDragging={setIsDragging}
                     />
                 ))}
                 {week.tasks.length === 0 && (
-                    <div className="text-gray-400 text-sm p-2">
+                    <div className="text-stone-400 text-sm p-2">
                         -
                     </div>
                 )}
             </div>
-        </div>
+        </WeekRowDiv>
     );
 }
 
-function DraggableTask({ task, taskIndex, weekIndex, onTaskMove, setIsDragging }) {
+function DraggableTask({ task, taskIndex, weekNumber, onTaskMove, setIsDragging }) {
     const elementRef = useRef(null);
     const gripRef = useRef(null);
     const [dragState, setDragState] = useState('idle');
@@ -151,7 +167,7 @@ function DraggableTask({ task, taskIndex, weekIndex, onTaskMove, setIsDragging }
                 element: gripElement, // Only the grip is draggable
                 getInitialData: () => ({
                     taskId: task.id,
-                    sourceWeekIndex: weekIndex,
+                    sourceWeekNumber: weekNumber,
                     sourceTaskIndex: taskIndex
                 }),
                 onDragStart: () => {
@@ -167,7 +183,7 @@ function DraggableTask({ task, taskIndex, weekIndex, onTaskMove, setIsDragging }
                 element, // The entire task is a drop target
                 getData: () => ({
                     taskIndex,
-                    weekIndex,
+                    weekNumber,
                     type: 'task'
                 }),
                 canDrop: ({ source }) => {
@@ -185,12 +201,12 @@ function DraggableTask({ task, taskIndex, weekIndex, onTaskMove, setIsDragging }
                     setDragState('idle');
                     const sourceTaskId = source.data.taskId;
                     if (sourceTaskId !== task.id) {
-                        onTaskMove(sourceTaskId, weekIndex, taskIndex);
+                        onTaskMove(sourceTaskId, weekNumber, taskIndex);
                     }
                 }
             })
         );
-    }, [task, taskIndex, weekIndex, onTaskMove, setIsDragging]);
+    }, [task, taskIndex, weekNumber, onTaskMove, setIsDragging]);
 
     return (
         <div
@@ -199,13 +215,13 @@ function DraggableTask({ task, taskIndex, weekIndex, onTaskMove, setIsDragging }
                 ? 'opacity-50 transform rotate-2 shadow-lg'
                 : dragState === 'over'
                     ? 'border-blue-300 bg-blue-50'
-                    : 'hover:bg-gray-100 border-gray-200'
+                    : 'hover:bg-stone-100 border-stone-200'
                 }
                 ${task.completed ? 'opacity-50 line-through bg-emerald-100 hover:bg-emerald-100' : ''}
                 `}>
             <div
                 ref={gripRef}
-                className="flex items-center gap-2 text-gray-400 cursor-move hover:text-gray-600 transition-colors p-1 rounded"
+                className="flex items-center gap-2 text-stone-400 cursor-move hover:text-stone-600 transition-colors p-1 rounded"
             >
                 {!task.completed && <Grip className="w-4 h-4" />}
             </div>
@@ -214,7 +230,7 @@ function DraggableTask({ task, taskIndex, weekIndex, onTaskMove, setIsDragging }
             )}
             <div className="flex-1">
                 <div className="font-medium">{task.title}</div>
-                <div className="text-sm text-gray-600">{task.description}</div>
+                <div className="text-sm text-stone-600">{task.description}</div>
             </div>
 
         </div>

@@ -2,7 +2,6 @@ import { format, startOfWeek } from "date-fns";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { create } from "zustand";
 import { db } from "@/utils//firebase/firebase";
-import { useGantt } from "@/utils/store/useGantt";
 import { subscribeWithSelector } from "zustand/middleware";
 
 export const HOURS = ['9:30', '10:30', '11:30', '12:30', 'ערב'];
@@ -38,6 +37,8 @@ export const useTime = create(subscribeWithSelector((set, get) => {
             return { week: newWeek };
         }),
 
+        // ------ Terms ------
+        terms: [],
         currTerm: null,
         updateTerm: async (termId, updates) => {
             const termRef = doc(db, 'school', 'gantt');
@@ -46,7 +47,7 @@ export const useTime = create(subscribeWithSelector((set, get) => {
                 terms: newTerms
             });
             set({ terms: newTerms });
-        }
+        },
     };
 }));
 
@@ -57,8 +58,7 @@ export const useTime = create(subscribeWithSelector((set, get) => {
     const terms = ganttData?.terms || [];
     const currDate = format(new Date(), 'yyyy-MM-dd');
     const currTerm = terms.find(term => term.start <= currDate && term.end >= currDate) || null;
-    useTime.setState({ currTerm });
-    useGantt.setState({ terms });
+    useTime.setState({ currTerm, terms });
 })();
 
 
@@ -89,7 +89,9 @@ export function getTermWeeks(term) {
                 return format(d, 'yyyy-MM-dd');
             }),
             start: new Date(weekStart),
-            end: new Date(weekEnd)
+            end: new Date(weekEnd),
+            isCurrent: weekStart <= new Date() && weekEnd >= new Date(),
+            weekNumber: termWeeks.length,
         });
         weekStart.setDate(weekStart.getDate() + 7);
     }

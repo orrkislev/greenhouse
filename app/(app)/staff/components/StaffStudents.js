@@ -8,7 +8,7 @@ export default function StaffStudents() {
 
     if (!students.length) {
         return (
-            <div className="text-center text-gray-500 py-12">
+            <div className="text-center text-stone-500 py-12">
                 אין חניכים להצגה
             </div>
         );

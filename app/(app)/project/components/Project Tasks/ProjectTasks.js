@@ -6,17 +6,18 @@ import WeeklyView from "./WeeklyView";
 import CalendarView from "./CalendarView";
 import { format } from "date-fns";
 import { projectTasksActions, useProjectTasks } from "@/utils/store/useProjectTasks";
+import Box2 from "@/components/Box2";
 
 const NewTaskButton = tw`px-4 py-1 bg-blue-500 text-white hover:bg-blue-600 transition-colors`;
 
 const ViewButton = tw`px-3 py-1 flex items-center gap-1 transition-colors
-    hover:bg-gray-100 cursor-pointer ${props => props.$active ? 'bg-gray-200' : ''}`;
+    hover:bg-stone-100 cursor-pointer ${props => props.$active ? 'bg-stone-200' : ''}`;
 
 export default function ProjectTasks() {
     const view = useProjectTasks((state) => state.view);
     const tasks = useProjectTasks((state) => state.tasks);
 
-    useEffect(()=>{
+    useEffect(() => {
         projectTasksActions.loadAllTasks();
     }, [])
 
@@ -33,21 +34,15 @@ export default function ProjectTasks() {
     const ViewComponent = views[view].component;
 
     return (
-        <div className="p-6 border border-gray-400 flex flex-col gap-2">
-            <div className="flex items-center gap-4 mb-4 justify-between">
-                <div className="text-xl">
-                    תכנית עבודה
-                </div>
-                <ViewSelector />
-            </div>
-            <div className='flex justify-between items-center'>
+        <Box2 label="תכנית עבודה" className="bg-white pb-6">
+            <div className="flex gap-4 mb-4 justify-between">
                 <NewTaskButton onClick={createNewTask}>
                     הוספת משימה חדשה
                 </NewTaskButton>
+                <ViewSelector />
             </div>
-
             <ViewComponent />
-        </div>
+        </Box2>
     )
 }
 
@@ -89,7 +84,7 @@ function ViewSelector() {
     return (
         <div className="flex items-center gap-2 text-sm">
             <span>שיטת עבודה:</span>
-            <h2 className="underline hover:bg-gray-100 hover:underline cursor-pointer transition-colors duration-200"
+            <h2 className="underline hover:bg-stone-100 hover:underline cursor-pointer transition-colors duration-200"
                 onClick={() => setIsOpen(!isOpen)}>
                 {views[view].label}
             </h2>

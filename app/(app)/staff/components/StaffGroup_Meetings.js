@@ -14,7 +14,7 @@ export default function StaffGroup_Meetings({ group }) {
     const studentsWithoutMeetings = []
     if (!group.students) return null;
     group.students.map(student => {
-        const meeting = meetings.find(m => m.participants.length == 2 && m.participants.includes(student.id));
+        const meeting = meetings.find(m => m.participants.includes(student.id));
         if (meeting) studentsWithMeetings.push({ ...student, meeting: meeting });
         else studentsWithoutMeetings.push(student);
     });
@@ -27,11 +27,11 @@ export default function StaffGroup_Meetings({ group }) {
             <h4 className={`font-bold`}>שיחות אישיות</h4>
 
             <ScheduleSection withLabel={false}>
-                <div className="bg-gray-100 px-2 py-1 text-sm">
+                <div className="bg-stone-100 px-2 py-1 text-sm">
                     חניכים
                 </div>
                 {daysOfWeek.map((day, index) => (
-                    <div key={day} className="bg-gray-100 text-sm flex items-center justify-center">
+                    <div key={day} className="bg-stone-100 text-sm flex items-center justify-center">
                         {day}
                     </div>
                 ))}
@@ -44,7 +44,7 @@ export default function StaffGroup_Meetings({ group }) {
                 </div>
 
                 {daysOfWeek.map((day, index) => (
-                    <div key={day} className="bg-gray-100 flex flex-col gap-2">
+                    <div key={day} className="bg-stone-100 flex flex-col gap-2">
                         {studentsWithMeetings.filter(s => s.meeting?.day === index + 1).map(student => (
                             <StudentMeetingSlot key={student.id} student={student} meeting={student.meeting} />
                         ))}
@@ -63,24 +63,24 @@ function StudentNoMeetingSlot({ student }) {
     return (
         <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
-                <div className="bg-gray-200 px-2 py-1 border border-gray-300 flex gap-2 text-sm cursor-pointer hover:bg-gray-300 transition-colors"
+                <div className="bg-stone-200 px-2 py-1 border border-stone-300 flex gap-2 text-sm cursor-pointer hover:bg-stone-300 transition-colors"
                     onClick={() => setIsOpen(true)}
                 >
                     <span className="">{student.firstName} {student.lastName}</span>
-                    <span className="text-gray-600">אין שיחה מתוכננת</span>
+                    <span className="text-stone-600">אין שיחה מתוכננת</span>
                 </div>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-4">
                 <div className="flex flex-col gap-2">
                     <h4 className="font-bold">שיחה עם {student.firstName}</h4>
-                    <p className="text-sm text-gray-600">אין שיחה מתוכננת כרגע.</p>
-                    <p className="text-sm text-gray-600">ניתן לתאם שיחה חדשה עם החניך.</p>
+                    <p className="text-sm text-stone-600">אין שיחה מתוכננת כרגע.</p>
+                    <p className="text-sm text-stone-600">ניתן לתאם שיחה חדשה עם החניך.</p>
                     <div>
                         <label className="block text-sm mb-1">בחר יום:</label>
                         <select
                             value={day}
                             onChange={(e) => setDay(Number(e.target.value))}
-                            className="border border-gray-300 rounded px-2 py-1 w-full"
+                            className="border border-stone-300 rounded px-2 py-1 w-full"
                         >
                             {Array.from({ length: 5 }, (_, i) => (
                                 <option key={i} value={i + 1}>
@@ -97,7 +97,7 @@ function StudentNoMeetingSlot({ student }) {
                         <button
                             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
                             onClick={() => {
-                                meetingsActions.createMeeting([student.id], day, time.start, time.end)
+                                meetingsActions.createMeeting(student, day, time.start, time.end)
                                 setIsOpen(false);
                             }}
                         >
@@ -135,11 +135,11 @@ function StudentMeetingSlot({ student, meeting }) {
     return (
         <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
-                <div className="bg-gray-200 px-2 py-1 border border-gray-300 flex gap-2 text-sm cursor-pointer hover:bg-gray-300 transition-colors"
+                <div className="bg-stone-200 px-2 py-1 border border-stone-300 flex gap-2 text-sm cursor-pointer hover:bg-stone-300 transition-colors"
                     onClick={() => setIsOpen(true)}
                 >
                     <span className="">{student.firstName} {student.lastName}</span>
-                    <span className="text-gray-600">
+                    <span className="text-stone-600">
                         {daysOfWeek[meeting.day]} {meeting.start} - {meeting.end}
                     </span>
                 </div>

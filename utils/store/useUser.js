@@ -1,8 +1,11 @@
 import { create } from 'zustand';
 import { persist, subscribeWithSelector } from 'zustand/middleware';
 import { AuthService } from '@/utils/firebase/auth';
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { db } from '@/utils//firebase/firebase';
+import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { db, storage } from '@/utils/firebase/firebase';
+import { resizeImageTo128 } from '@/utils/actions/storage actions';
+
 
 export const useUser = create(subscribeWithSelector(persist((set, get) => {
 	let unsubscribeUserDoc = null;
@@ -44,7 +47,6 @@ export const useUser = create(subscribeWithSelector(persist((set, get) => {
 		},
 
 		updateUserDoc: async (updates) => {
-			console.log('updateUserDoc', updates)
 			const userDocRef = doc(db, 'users', get().user.id);
 			await updateDoc(userDocRef, updates);
 			set((state) => ({
@@ -60,7 +62,8 @@ export const useUser = create(subscribeWithSelector(persist((set, get) => {
 			if (!user || !user.roles || !user.roles.includes('staff')) {
 				throw new Error("User does not have permission to switch to student.");
 			}
-			set({ originalUser: { user, lastPage: currUrl } });
+
+			set({ originalUser: { user, lastPage: currUrl }, user: null });
 			const studentRef = doc(db, 'users', studentId);
 			unsubscribe();
 			unsubscribeUserDoc = onSnapshot(studentRef, (docSnapshot) => {
@@ -81,8 +84,25 @@ export const useUser = create(subscribeWithSelector(persist((set, get) => {
 				if (docSnap.exists()) set({ user: { ...docSnap.data(), id: originalUser.user.id } });
 			});
 			set({ user: originalUser, originalUser: null });
-			return lastPage;
-		}
+			if (lastPage) setTimeout(() => window.location.href = lastPage, 100);
+		},
+		updateProfilePicture: async (image) => {
+			const user = get().user;
+			if (!user) return;
+			const storageRef = ref(storage, `profilePictures/${user.id}`);
+			const resizedBlob = await resizeImageTo128(image);
+			const uploadTask = uploadBytesResumable(storageRef, resizedBlob);
+			uploadTask.on('success', async () => {
+				const url = await getDownloadURL(uploadTask.snapshot.ref);
+				get().updateUserDoc({ profilePicture: url });
+			});
+		},
+
+		getUserData: async (userId) => {
+			const userRef = doc(db, 'users', userId);
+			const userDoc = await getDoc(userRef);
+			return userDoc.data();
+		},
 	};
 },
 	{

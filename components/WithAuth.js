@@ -14,7 +14,7 @@ export default function WithAuth({ children, role }) {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                <div className="text-lg text-gray-600">טוען...</div>
+                <div className="text-lg text-stone-600">טוען...</div>
             </div>
         );
     }
@@ -43,8 +43,8 @@ export default function WithAuth({ children, role }) {
                         <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full mx-auto mb-4 flex items-center justify-center">
                             <UserCircle2 className="h-8 w-8 text-white" />
                         </div>
-                        <h1 className="text-2xl font-bold text-gray-800 mb-2">הי!</h1>
-                        <p className="text-sm text-gray-600">
+                        <h1 className="text-2xl font-bold text-stone-800 mb-2">הי!</h1>
+                        <p className="text-sm text-stone-600">
                             היכנסו עם שם המשתמש והסיסמא שלהם
                             אם אתם לא זוכרים, פנו למנטורים
                         </p>
@@ -58,14 +58,14 @@ export default function WithAuth({ children, role }) {
                         )}
 
                         <div className="space-y-2">
-                            <label htmlFor="username-sidebar" className="text-sm font-medium text-gray-700">
+                            <label htmlFor="username-sidebar" className="text-sm font-medium text-stone-700">
                                 שם משתמש
                             </label>
                             <input
                                 id="username-sidebar"
                                 type="text"
                                 placeholder="שם משתמש"
-                                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                className="w-full border border-stone-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                 value={username}
                                 onChange={e => setUsername(e.target.value)}
                                 autoComplete="username"
@@ -73,7 +73,7 @@ export default function WithAuth({ children, role }) {
                         </div>
 
                         <div className="space-y-2">
-                            <label htmlFor="password-sidebar" className="text-sm font-medium text-gray-700">
+                            <label htmlFor="password-sidebar" className="text-sm font-medium text-stone-700">
                                 סיסמא (4 ספרות)
                             </label>
                             <div className="flex gap-2 justify-center">

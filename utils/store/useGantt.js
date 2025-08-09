@@ -10,7 +10,6 @@ const toKey = (date) => {
 }
 
 export const useGantt = create((set, get) => ({
-    terms: [],
     gantt: new Map(),
     schoolMessage: '',
     loadSchoolMessage: async () => {

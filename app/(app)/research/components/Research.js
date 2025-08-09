@@ -63,12 +63,12 @@ export default function ResearchManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">החקר שלך</h1>
-          <p className="text-gray-600">ארגן את תהליך החקר שלך מההתחלה ועד לסיום</p>
+          <h1 className="text-3xl font-bold text-stone-900 mb-2">החקר שלך</h1>
+          <p className="text-stone-600">ארגן את תהליך החקר שלך מההתחלה ועד לסיום</p>
         </div>
 
         {/* Stage Navigation */}
@@ -88,7 +88,7 @@ export default function ResearchManagement() {
               >
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-full ${isCurrent ? "bg-blue-500 text-white" : "bg-gray-100"}`}>
+                    <div className={`p-2 rounded-full ${isCurrent ? "bg-blue-500 text-white" : "bg-stone-100"}`}>
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="flex-1">
@@ -97,10 +97,10 @@ export default function ResearchManagement() {
                         {isComplete ? (
                           <CheckCircle2 className="h-4 w-4 text-green-500" />
                         ) : (
-                          <Circle className="h-4 w-4 text-gray-300" />
+                          <Circle className="h-4 w-4 text-stone-300" />
                         )}
                       </div>
-                      <p className="text-xs text-gray-500">{stage.description}</p>
+                      <p className="text-xs text-stone-500">{stage.description}</p>
                     </div>
                   </div>
                 </CardContent>

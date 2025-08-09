@@ -8,6 +8,7 @@ import { format } from "date-fns";
 export const useAdmin = create((set, get) => ({
     staff: [],
     groups: [],
+    majors: [],
 
     loadData: async () => {
         if (get().groups.length > 0) return;
@@ -25,14 +26,12 @@ export const useAdmin = create((set, get) => ({
             group.students = studentsList.filter(student => student.class == group.id);
         });
 
-        const majorsDoc = await getDoc(doc(db, 'school', 'majors'));
-        const majors = majorsDoc.exists() ? majorsDoc.data().majors : [];
-
         set({
             staff: staffList,
             groups: groups,
-            majors: majors,
         });
+
+        get().loadMajors();
     },
 
     // ------------------------------
@@ -165,9 +164,29 @@ export const useAdmin = create((set, get) => ({
     // ------------------------------
     // Majors
     // ------------------------------
-    updateMajors: async (majors) => {
-        await updateDoc(doc(db, 'school', 'majors'), { majors });
+    loadMajors: async () => {
+        const majorsQuery = query(collection(db, 'groups'), where('type', '==', 'major'));
+        const snapshot = await getDocs(majorsQuery);
+        const majors = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         set({ majors });
+    },
+    createMajor: async (majorData) => {
+        const newDoc = await addDoc(collection(db, 'groups'), {
+            name: majorData.name,
+            type: 'major',
+            open: false,
+        });
+        majorData.id = newDoc.id;
+        set(state => ({ majors: [...state.majors, majorData] }));
+    },
+    updateMajor: async (majorId, updates) => {
+        const majorRef = doc(db, 'groups', majorId);
+        await updateDoc(majorRef, updates);
+        set(state => ({ majors: state.majors.map(major => major.id === majorId ? { ...major, ...updates } : major) }));
+    },
+    deleteMajor: async (majorId) => {
+        await deleteDoc(doc(db, 'groups', majorId));
+        set(state => ({ majors: state.majors.filter(major => major.id !== majorId) }));
     },
 
     // ------------------------------

@@ -1,4 +1,3 @@
-import { useTime } from "@/utils/store/useTime";
 import { db } from "@/utils/firebase/firebase";
 import { useUser } from "@/utils/store/useUser";
 import { format } from "date-fns";
@@ -24,9 +23,7 @@ export const useEvents = create((set, get) => {
     }, 1000);
 
     return {
-
         events: [],
-        clear: () => set({ events: [] }),
 
         loadTodayEvents: async () => {
             if (!userId()) return;
@@ -100,7 +97,3 @@ eventsActions.getUserEventsForWeek = async (userId, week) => {
     const events = eventsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     return events;
 }
-
-useUser.subscribe(state => state.user,
-    (user) => { if (!user) eventsActions.clear(); }
-);

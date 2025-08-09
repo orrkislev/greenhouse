@@ -73,8 +73,8 @@ export default function AdminStaff() {
     ];
 
     return (
-        <div className='flex gap-4 border border-gray-200 p-4'>
-            <table className="text-left text-xs border-collapse border-gray-200 border">
+        <div className='flex gap-4 border border-stone-200 p-4'>
+            <table className="text-left text-xs border-collapse border-stone-200 border">
                 <TableHeader headers={headers} />
                 <tbody>
                     {staffData.map((staff, index) => (
@@ -83,7 +83,7 @@ export default function AdminStaff() {
                             {staff.isNew ? (
                                 <Cell><Edittable value={staff.username} onChange={(value) => updateStaffData(staff.id, 'username', value)} /></Cell>
                             ) : (
-                                <Cell className='text-gray-500'>{staff.username}</Cell>
+                                <Cell className='text-stone-500'>{staff.username}</Cell>
                             )}
                             <Cell><Edittable value={staff.firstName} onChange={(value) => updateStaffData(staff.id, 'firstName', value)} /></Cell>
                             <Cell><Edittable value={staff.lastName} onChange={(value) => updateStaffData(staff.id, 'lastName', value)} /></Cell>

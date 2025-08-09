@@ -5,7 +5,7 @@ import { useTime } from "@/utils/store/useTime";
 import { tw } from "@/utils/tw";
 
 const NoteDiv = tw`bg-[#e4d852] min-h-4
-        flex items-center justify-center gap-2 text-gray-800 text-sm
+        flex items-center justify-center gap-2 text-stone-800 text-sm
         pointer-events-auto cursor-pointer        
         hover:bg-[#a08e2a] transition-all z-10 text-xs py-1
 `;

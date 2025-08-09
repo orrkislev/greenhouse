@@ -10,6 +10,7 @@ import Meetings from "./components/meetings/Meetings";
 import GoogleCalendar from "./components/Google/GoogleCalendar";
 import Notes from "./components/notes/Notes";
 import Term from "./components/term/Term";
+import { PageMain } from "@/components/ContextBar";
 
 const ScheduleOuter = tw`w-full h-full px-16 pt-8`;
 
@@ -17,19 +18,19 @@ export default function SchedulePage() {
     const [view, setView] = useState('week');
 
     return (
-        <>
+        <PageMain>
             <ScheduleOuter>
                 <div className="flex items-center justify-between mb-4">
                     <h1 className="text-2xl">לוח זמנים</h1>
                     <div className="flex space-x-4">
                         <button
-                            className={`px-4 py-2 rounded ${view === 'week' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}
+                            className={`px-4 py-2 rounded ${view === 'week' ? 'bg-blue-500 text-white' : 'bg-stone-200 text-stone-800'}`}
                             onClick={() => setView('week')}
                         >
                             שבוע
                         </button>
                         <button
-                            className={`px-4 py-2 rounded ${view === 'semester' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}
+                            className={`px-4 py-2 rounded ${view === 'semester' ? 'bg-blue-500 text-white' : 'bg-stone-200 text-stone-800'}`}
                             onClick={() => setView('semester')}
                         >
                             תקופה
@@ -54,7 +55,7 @@ export default function SchedulePage() {
                     </>
                 )}
             </ScheduleOuter>
-        </>
+        </PageMain>
 
     )
 }

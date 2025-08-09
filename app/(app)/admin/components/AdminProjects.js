@@ -1,14 +1,12 @@
 import { adminActions, useAdmin } from "@/utils/store/useAdmin";
 import { useTime } from "@/utils/store/useTime";
 import { userActions } from "@/utils/store/useUser";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 
 
 
 
 export default function AdminProjects() {
-    const router = useRouter();
     const staff = useAdmin(state => state.staff);
     const groups = useAdmin(state => state.groups);
     const currTerm = useTime(state => state.currTerm);
@@ -57,7 +55,7 @@ export default function AdminProjects() {
 
     const clickOnProject = async (studentId) => {
         await userActions.switchToStudent(studentId, 'admin');
-        router.push('/project');
+        window.location.href = '/project';
     }
 
     const selectMaster = async (studentId, projectId, masterId) => {
@@ -72,8 +70,8 @@ export default function AdminProjects() {
                 <thead>
                     <tr>
                         {headers.map(header => (
-                            <th key={header.key} className="cursor-pointer border-b border-blue-gray-100 bg-blue-gray-50/50 py-4 transition-colors hover:bg-blue-gray-50">
-                                <p className="antialiased font-sans text-blue-gray-900 flex items-center gap-2 font-normal leading-none opacity-70">
+                            <th key={header.key} className="cursor-pointer border-b border-blue-stone-100 bg-blue-stone-50/50 py-4 transition-colors hover:bg-blue-stone-50">
+                                <p className="antialiased font-sans text-blue-stone-900 flex items-center gap-2 font-normal leading-none opacity-70">
                                     {header.sortable && (
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" aria-hidden="true" className="h-4 w-4">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"></path>
@@ -93,11 +91,11 @@ export default function AdminProjects() {
                             <Cell>{student.major}</Cell>
                             <Cell>
                                 {student.project ? (
-                                    <div className="bg-blue-300 rounded-sm hover:bg-blue-500 text-gray-400 hover:text-white px-2 py-1"
+                                    <div className="bg-blue-300 rounded-sm hover:bg-blue-500 text-stone-400 hover:text-white px-2 py-1"
                                         onClick={() => clickOnProject(student.id)}>
                                         {student.project}
                                     </div>
-                                ) : (<span className="text-gray-500">אין פרויקט</span>
+                                ) : (<span className="text-stone-500">אין פרויקט</span>
                                 )}
                             </Cell>
                             <Cell>{student.requested}</Cell>
@@ -105,7 +103,7 @@ export default function AdminProjects() {
                                 <select
                                     value={student.master?.id || ''}
                                     onChange={e => selectMaster(student.id, student.projectId, e.target.value)}
-                                    className="bg-white border border-gray-300 rounded-md p-1"
+                                    className="bg-white border border-stone-300 rounded-md p-1"
                                 >
                                     <option value="">בחר מנחה</option>
                                     {staff.map(mentor => (
@@ -124,9 +122,9 @@ export default function AdminProjects() {
 }
 
 const Cell = ({ children }) => (
-    <td className="p-1 border-b border-blue-gray-50">
+    <td className="p-1 border-b border-blue-stone-50">
         <div className="flex items-center">
-            <div className="block antialiased font-sans leading-normal text-blue-gray-900 font-normal">
+            <div className="block antialiased font-sans leading-normal text-blue-stone-900 font-normal">
                 {children}
             </div>
         </div>

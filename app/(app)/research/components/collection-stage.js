@@ -168,8 +168,8 @@ export default function CollectionStage() {
                 </CardHeader>
                 <CardContent>
                     {sources.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                        <div className="text-center py-8 text-stone-500">
+                            <FileText className="h-12 w-12 mx-auto mb-4 text-stone-300" />
                             <p>אין מקורות נוספים. יש ללחוץ על &quot;הוסף מקור&quot; כדי להתחיל.</p>
                         </div>
                     ) : (
@@ -255,17 +255,17 @@ export default function CollectionStage() {
                                             </div>
 
                                             {source.materials.length === 0 ? (
-                                                <p className="text-sm text-gray-500 italic">אין חומרים נוספים</p>
+                                                <p className="text-sm text-stone-500 italic">אין חומרים נוספים</p>
                                             ) : (
                                                 <div className="space-y-2">
                                                     {source.materials.map((material) => (
                                                         <div
                                                             key={material.id}
-                                                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                                                            className="flex items-center justify-between p-3 bg-stone-50 rounded-lg"
                                                         >
                                                             <div>
                                                                 <h5 className="font-medium text-sm">{material.title}</h5>
-                                                                <p className="text-xs text-gray-600">{material.description}</p>
+                                                                <p className="text-xs text-stone-600">{material.description}</p>
                                                                 <Badge variant="outline" className="mt-1 text-xs">
                                                                     {material.notes.length} פתקים
                                                                 </Badge>

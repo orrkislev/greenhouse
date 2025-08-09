@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { userActions, useUser } from "@/utils/store/useUser";
-import { addDoc, arrayUnion, collection, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { addDoc, arrayUnion, collection, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/utils//firebase/firebase";
 import { useTime } from "@/utils/store/useTime";
 import { logsActions, useLogs } from "@/utils/store/useLogs";
@@ -24,15 +24,14 @@ export const useProject = create(subscribeWithSelector((set, get) => {
         project: null,
 
         setProject: (project) => set({ project }),
-        loadProject: async (projectId) => {
-            if (!projectId) return;
-            if (get().project && get().project.id === projectId) return;
-            const userId = useUser.getState().user.id;
-            if (!userId) return;
+        loadProject: async () => {
+            const user = useUser.getState().user;
+            if (!user || !user.projectId) return;
+            if (get().project && get().project.id === user.projectId) return;
 
             set({ project: null });
 
-            const projectRef = doc(db, 'users', userId, 'projects', projectId);
+            const projectRef = doc(db, 'users', user.id, 'projects', user.projectId);
             const projectSnapshot = await getDoc(projectRef);
             if (projectSnapshot.exists()) {
                 const projectData = projectSnapshot.data();
@@ -95,15 +94,19 @@ export const useProject = create(subscribeWithSelector((set, get) => {
                 endDate: format(new Date(), 'yyyy-MM-dd')
             })
         },
-        updateProject: async (updates) => {
-            set(state => ({ project: { ...state.project, ...updates } }));
-            debouncedUpdateProject();
+        updateProject: async (updates, withDebounce = true) => {
+            const project = get().project;
+            const user = useUser.getState().user;
+            if (!project || !user.id) return;
+            set({ project: { ...project, ...updates } });
+            if (withDebounce) debouncedUpdateProject();
+            else updateDoc(doc(db, 'users', user.id, 'projects', project.id), updates);
         },
 
         closeProject: async () => {
             const project = get().project;
             if (!project) return;
-            await get().updateProject({ status: "closed" });
+            await get().updateProject({ status: "closed" }, false);
             logsActions.addLog({
                 type: LOG_TYPES.SYSTEM_NOTIFICATION,
                 record: LOG_RECORDS.CLOSED_PROJECT,
@@ -120,8 +123,9 @@ export const useProject = create(subscribeWithSelector((set, get) => {
         goals: {},
         loadGoals: async () => {
             const user = useUser.getState().user;
-            if (!user.id) return
-            const goalsRef = doc(db, 'users', user.id, 'projects', user.projectId, 'documents', 'goals');
+            const project = get().project;
+            if (!user.id || !project) return
+            const goalsRef = doc(db, 'users', user.id, 'projects', project.id, 'documents', 'goals');
             const goalsSnapshot = await getDoc(goalsRef);
             if (goalsSnapshot.exists()) {
                 set({ goals: goalsSnapshot.data() });
@@ -129,11 +133,65 @@ export const useProject = create(subscribeWithSelector((set, get) => {
         },
         saveGoal: async (goalName, content) => {
             const user = useUser.getState().user;
-            if (!user.id) return
-            const goalsRef = doc(db, 'users', user.id, 'projects', user.projectId, 'documents', 'goals');
+            const project = get().project;
+            if (!user.id || !project) return
+            const goalsRef = doc(db, 'users', user.id, 'projects', project.id, 'documents', 'goals');
             await setDoc(goalsRef, { [goalName]: content }, { merge: true });
             set(state => ({ goals: { ...state.goals, [goalName]: content } }));
         },
+
+        // ------ Other Projects ------
+        otherProjects: [],
+        loadOtherProjects: async () => {
+            const user = useUser.getState().user;
+            if (!user.id) return
+            const otherProjectsRef = collection(db, 'users', user.id, 'projects');
+            const otherProjectsSnapshot = await getDocs(otherProjectsRef);
+            let otherProjects = otherProjectsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            otherProjects = otherProjects.filter(project => project.id !== user.projectId);
+            set({ otherProjects });
+        },
+
+        // ------ Project Library ------
+        library: [],
+        loadProjectLibrary: async () => {
+            const user = useUser.getState().user;
+            const project = get().project;
+            if (!user.id || !project) return
+            const projectLibraryRef = doc(db, 'users', user.id, 'projects', project.id, 'documents', 'library');
+            const projectLibrarySnapshot = await getDoc(projectLibraryRef);
+            if (projectLibrarySnapshot.exists()) {
+                set({ library: projectLibrarySnapshot.data().items || [] });
+            }
+        },
+        addLibraryItem: async (item) => {
+            const user = useUser.getState().user;
+            const project = get().project;
+            if (!user.id || !project) return
+            const projectLibraryRef = doc(db, 'users', user.id, 'projects', project.id, 'documents', 'library');
+            await setDoc(projectLibraryRef, { items: arrayUnion(item) }, { merge: true });
+            set(state => ({ library: [...state.library, item] }));
+        },
+        updateLibraryItem: async (itemIndex, text) => {
+            const user = useUser.getState().user;
+            const project = get().project;
+            if (!user.id || !project) return
+            const projectLibraryRef = doc(db, 'users', user.id, 'projects', project.id, 'documents', 'library');
+            const newItems = get().library
+            newItems[itemIndex] = text;
+            await setDoc(projectLibraryRef, { items: newItems }, { merge: true });
+            set({ library: newItems });
+        },
+        deleteLibraryItem: async (itemIndex) => {
+            const user = useUser.getState().user;
+            const project = get().project;
+            if (!user.id || !project) return
+            const projectLibraryRef = doc(db, 'users', user.id, 'projects', project.id, 'documents', 'library');
+            const newItems = get().library;
+            newItems.splice(itemIndex, 1);
+            await setDoc(projectLibraryRef, { items: newItems }, { merge: true });
+            set({ library: [...newItems] });
+        }
     }
 }));
 
@@ -141,12 +199,3 @@ export const useProject = create(subscribeWithSelector((set, get) => {
 export const projectActions = Object.fromEntries(
     Object.entries(useProject.getState()).filter(([key, value]) => typeof value === 'function')
 );
-
-
-
-useUser.subscribe(state => state.user?.projectId, (pid) => projectActions.loadProject(pid));
-projectActions.loadProject(useUser.getState().user?.projectId);
-
-const onGanttTerm = (term) => projectActions.checkTerm(term?.id);
-onGanttTerm(useTime.getState().currTerm);
-useTime.subscribe(state => state.currTerm, onGanttTerm);

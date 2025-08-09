@@ -3,11 +3,11 @@ import { tw } from "@/utils/tw";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/utils/store/useUser";
-import { groupsActions } from "@/utils/store/useGroups"
+import { groupsActions, useGroups } from "@/utils/store/useGroups"
 import { eventsActions } from "@/utils/store/useEvents";
 
 const EventDiv = tw`
-    bg-[#EF98A1] py-2 px-4 text-gray-800
+    bg-[#EF98A1] py-2 px-4 text-stone-800
     flex flex-col justify-center text-sm
     pointer-events-auto cursor-pointer transition-colors duration-200
     z-5 hover:bg-[#E77885] stripes outline-2 outline-white
@@ -32,15 +32,19 @@ export function ReadOnlyEvent({ event, onSelect }) {
 
 function ReadOnlyEventContext({ event, onClose }) {
 
+    const groups = useGroups(state => state.groups);
+
     const handleRemove = () => {
         groupsActions.leaveGroupEvent(event.group, event.id, useUser.getState().user.id)
         eventsActions.removeGroupEvent(event.id);
         onClose();
     };
 
+    const groupData = groups.find(g => g.id === event.group);
+
     return (
         <div className="p-4">
-            <h3 className="text-lg font-semibold mb-2">אירוע של קבוצת {event.group}</h3>
+            <h3 className="text-lg font-semibold mb-2">אירוע של קבוצת {groupData.name}</h3>
             <p className="mb-4">האם אתה רוצה לעזוב את האירוע הזה?</p>
             <Button variant="destructive" onClick={handleRemove}>
                 עזוב אירוע

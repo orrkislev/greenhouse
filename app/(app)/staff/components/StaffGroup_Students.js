@@ -4,11 +4,10 @@ import { useEffect, useState } from "react";
 import { useTime } from "@/utils/store/useTime";
 import { groupsActions } from "@/utils/store/useGroups";
 import { eventsActions } from "@/utils/store/useEvents";
-import { useRouter } from "next/navigation";
 import { userActions } from "@/utils/store/useUser";
+import Avatar from "@/components/Avatar";
 
 export default function StaffGroup_Students({ group }) {
-    const router = useRouter();
     const [selectedStudent, setSelectedStudent] = useState(null)
 
     if (!group.students) return null;
@@ -19,7 +18,7 @@ export default function StaffGroup_Students({ group }) {
 
     const goToStudent = async (student) => {
         await userActions.switchToStudent(student.id, 'staff');
-        router.push('/')
+        window.location.href = '/';
     }
 
     let displayStudents = group.students;
@@ -29,14 +28,15 @@ export default function StaffGroup_Students({ group }) {
     return (
         <div className="flex gap-4">
             {selectedStudent && (
-                <div className="p-4 border border-gray-200 flex flex-col gap-2" onClick={() => goToStudent(selectedStudent)}>
-                    <div className="font-bold">{selectedStudent.firstName} {selectedStudent.lastName}</div>
-                    {/* TODO */}
+                <div className="p-4 border border-stone-200 flex flex-col gap-2 cursor-pointer hover:bg-stone-100" onClick={() => goToStudent(selectedStudent)}>
+                    <div className="flex items-center gap-2">
+                        <Avatar user={selectedStudent} />
+                        <div className="font-bold">{selectedStudent.firstName} {selectedStudent.lastName}</div>
+                    </div>
                     <div>מה יש לו היום</div>
                     <div>מה הפרויקט שלו והמשימות</div>
                     <div>איזה דברים הוא לומד</div>
-                    <div />
-                    <div>אולי עדכונים של דברים שהוא עשה באפליקציה</div>
+                    <div className="text-xl">אפשר ללחוץ כאן</div>
                 </div>
             )}
             <div className="flex flex-wrap gap-2">

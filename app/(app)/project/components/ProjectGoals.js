@@ -45,7 +45,7 @@ export default function ProjectGoals() {
     }, []);
 
     return (
-        <div className="flex gap-1">
+        <div className="flex gap-3">
             <FocusedGoal index={0} />
             <FocusedGoal index={1} />
             <FocusedGoal index={2} />
@@ -93,9 +93,13 @@ function FocusedGoal({ index }) {
 
     return (
         <>
-            <div ref={ref} className="flex gap-2 p-2 border border-gray-300 flex-1 group relative">
+            <div ref={ref} className="flex gap-2 p-2 border border-stone-300 flex-1 group relative">
                 <div className="p-1">{goalIcons[index]}</div>
-                <div className="text-gray-600 text-sm whitespace-pre-wrap leading-loose">{goal.title}</div>
+                <div className="flex-1 flex flex-col gap-1">
+                    <div className="text-stone-600 text-sm whitespace-pre-wrap leading-relaxed">{goal.title}</div>
+                    <div className="text-stone-500 text-xs whitespace-pre-wrap leading-relaxed">{goal.description}</div>
+                </div>
+
                 <button className="absolute opacity-0 group-hover:opacity-50 hover:opacity-100 transition-opacity cursor-pointer left-2 top-2"
                     onClick={() => setIsFocused(true)}>
                     <Pencil className="w-4 h-4" />
@@ -103,20 +107,20 @@ function FocusedGoal({ index }) {
             </div>
             {isFocused && ref.current && (
                 <div className="absolute top-0 left-0 w-full h-full bg-black/30 backdrop-blur-xs z-10" onClick={closeAndSave}>
-                    <div style={boxStyle} className="flex gap-2 p-2 border border-gray-300 gap-2 flex-1 bg-white pointer-events-auto"
+                    <div style={boxStyle} className="flex gap-2 p-2 border border-stone-300 gap-2 flex-1 bg-white pointer-events-auto"
                         onClick={e => e.stopPropagation()}>
 
                         <div className="p-1">{goalIcons[index]}</div>
                         <div className="flex-1 flex flex-col gap-2">
-                            <div className="text-gray-700 text-sm">
+                            <div className="text-stone-700 text-sm">
                                 <AutoSizeTextarea type="text"
                                     autoFocus={true}
                                     value={goal.title}
                                     onFinish={value => updateContent("title", value)}
                                 />
                             </div>
-                            <div className="w-full h-px bg-gray-300" />
-                            <div className="text-gray-500 text-sm">
+                            <div className="w-full h-px bg-stone-300" />
+                            <div className="text-stone-500 text-sm">
                                 <AutoSizeTextarea
                                     value={goal.description}
                                     onFinish={value => updateContent("description", value)}
@@ -133,7 +137,7 @@ function FocusedGoal({ index }) {
                         }}
                     >
                         {goal.leadingQuestions.map((question, index) => (
-                            <div key={question} className="px-4 py-1 bg-white border border-gray-300 flex gap-2 group w-full text-xs">
+                            <div key={question} className="px-4 py-1 bg-white border border-stone-300 flex gap-2 group w-full text-xs">
                                 <AutoSizeTextarea
                                     value={question}
                                     onFinish={value => updateQuestion(index, value)}
@@ -155,7 +159,7 @@ function FocusedGoal({ index }) {
     )
 }
 
-function AutoSizeTextarea({ value, onFinish, autoFocus }) {
+export function AutoSizeTextarea({ value, onFinish, autoFocus }) {
     const ref = useRef(null);
 
     useEffect(() => {

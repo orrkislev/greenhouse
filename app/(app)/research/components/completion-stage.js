@@ -65,16 +65,16 @@ export default function CompletionStage() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <p className="text-sm text-gray-600">שדה החקר</p>
+                <p className="text-sm text-stone-600">שדה החקר</p>
                 <p className="font-medium">{research.foundation.field}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">נושא החקר</p>
+                <p className="text-sm text-stone-600">נושא החקר</p>
                 <p className="font-medium">{research.foundation.topic}</p>
               </div>
             </div>
             <div>
-              <p className="text-sm text-gray-600">שאלת החקר</p>
+              <p className="text-sm text-stone-600">שאלת החקר</p>
               <p className="font-medium italic">&quot;{research.foundation.question}&quot;</p>
             </div>
           </div>
@@ -103,7 +103,7 @@ export default function CompletionStage() {
           <div className="space-y-4">
             <div>
               <Label htmlFor="summary">תקציר החקר</Label>
-              <p className="text-sm text-gray-500 mb-2">
+              <p className="text-sm text-stone-500 mb-2">
                 כתוב תקציר קצר של המצאות והמסקנות של החקר
               </p>
               <Textarea
@@ -120,7 +120,7 @@ export default function CompletionStage() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="google-doc">פתק סופי (Google Docs)</Label>
-                  <p className="text-sm text-gray-500">צור או קשר אל הפתק הסופי שלך</p>
+                  <p className="text-sm text-stone-500">צור או קשר אל הפתק הסופי שלך</p>
                 </div>
                 <Button onClick={createGoogleDoc} variant="outline">
                   <FileText className="h-4 w-4 mr-2" />
@@ -156,7 +156,7 @@ export default function CompletionStage() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h4 className="font-medium text-sm">{source.title}</h4>
-                        <p className="text-xs text-gray-600">by {source.author}</p>
+                        <p className="text-xs text-stone-600">by {source.author}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <Badge variant="secondary" className="text-xs">
                             {source.type}

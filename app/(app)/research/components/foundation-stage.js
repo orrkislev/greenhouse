@@ -86,7 +86,7 @@ export default function FoundationStage() {
             onChange={(e) => handleChange("question", e.target.value)}
             rows={4}
           />
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-stone-500">
             שאלה טובה בחקר היא מדויקת, מדידה וניתנת לעניין באמצעות החקר.
           </p>
         </div>

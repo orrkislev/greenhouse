@@ -1,18 +1,15 @@
 'use client';
 
 import { userActions, useUser } from "@/utils/store/useUser";
-import { useRouter } from "next/navigation";
 
 export default function SwitchBackPanel() {
     const originalUser = useUser(state => state.originalUser);
     const user = useUser(state => state.user);
-    const router = useRouter();
     
     if (!originalUser) return null;
 
     const onClick = async () => {
-        const lastPage = await userActions.switchBackToOriginal();
-        router.push(lastPage);
+        await userActions.switchBackToOriginal();
     }
 
     return (

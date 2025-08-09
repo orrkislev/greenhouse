@@ -10,6 +10,25 @@ export const useMeetings = create((set, get) => {
         meetings: [],
         loaded: false,
 
+        addMeetings: (meetingsData) => {
+            const user = useUser.getState().user;
+            if (!user) return;
+            const newMeetings = meetingsData.map(meetingData => {
+                const otherIndex = meetingData.participants.findIndex(p => p !== user.id);
+                return {
+                    ...meetingData,
+                    other: {
+                        id: meetingData.participants[otherIndex],
+                        name: meetingData.names[otherIndex],
+                    },
+                    isCreator: meetingData.created === user.id,
+                }
+            })
+            set(state => ({
+                meetings: [...state.meetings, ...newMeetings],
+            }));
+        },
+
         loadTodayMeetings: async () => {
             const uid = userId();
             if (!uid) return;
@@ -18,10 +37,7 @@ export const useMeetings = create((set, get) => {
             const meetingsQuery = query(meetingsRef, where("day", "==", dayOfTheWeek), where("participants", "array-contains", uid));
             const meetingsSnap = await getDocs(meetingsQuery);
             const meetings = meetingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            meetings.forEach(meeting => {
-                meeting.isCreator = meeting.created === uid;
-            });
-            set({ meetings });
+            get().addMeetings(meetings);
         },
         loadMeetings: async () => {
             if (get().loaded) return;
@@ -31,20 +47,19 @@ export const useMeetings = create((set, get) => {
             const meetingsQuery = query(meetingsRef, where("participants", "array-contains", uid));
             onSnapshot(meetingsQuery, snapshot => {
                 const meetings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                meetings.forEach(meeting => {
-                    meeting.isCreator = meeting.created === uid;
-                });
-                set({ meetings, loaded: true });
+                get().addMeetings(meetings);
+                set({ loaded: true });
             });
         },
 
-        createMeeting: async (participants, day, start, end) => {
-            const uid = userId();
-            if (!uid) return;
+        createMeeting: async (otherUser, day, start, end) => {
+            const user = useUser.getState().user;
+            if (!user) return;
 
             const meeting = {
-                participants: [...participants, uid],
-                day, start, end, created: uid,
+                participants: [otherUser.id, user.id],
+                names: [otherUser.firstName + " " + otherUser.lastName, user.firstName + " " + user.lastName],
+                day, start, end, created: user.id,
             };
             const newMeetingDoc = await addDoc(collection(db, `meetings`), meeting);
             set(state => ({

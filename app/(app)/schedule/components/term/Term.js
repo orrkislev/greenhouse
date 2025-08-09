@@ -3,10 +3,10 @@ import { ScheduleSection } from "../Layout";
 import { addDays, addWeeks, differenceInWeeks, endOfWeek, isSameDay, isToday, startOfWeek, subDays } from "date-fns";
 import { tw } from "@/utils/tw";
 
-const TermCell = tw`w-full h-full border border-gray-300 p-2 text-gray-500
+const TermCell = tw`w-full h-full border border-stone-300 p-2 text-stone-500
     ${({ isWeekend }) => isWeekend ? 'bg-blue-200/50' : ''}
     ${({ isToday }) => isToday ? 'bg-green-200/50' : ''}
-    ${({ inTerm }) => inTerm ? '' : 'bg-gray-200'}
+    ${({ inTerm }) => inTerm ? '' : 'bg-stone-200'}
     ${({ inPast }) => inPast ? 'stripes' : ''}
 `;
 

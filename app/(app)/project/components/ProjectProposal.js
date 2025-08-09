@@ -62,7 +62,7 @@ export default function ProjectProposal() {
                         onBlur={(e) => projectActions.updateProject({ name: e.target.value })}
                         placeholder={`הפרויקט המגניב של ${user.firstName || ''}`}
                         dir="rtl"
-                        className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="border border-stone-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                 </div>
 
@@ -78,7 +78,7 @@ export default function ProjectProposal() {
                         ))}
                     </div>
                 </div>
-                <div className="text-gray-500 text-sm mt-4 text-center">
+                <div className="text-stone-500 text-sm mt-4 text-center">
                     {filledThreeQuestions ?
                         'מעולה! עכשיו מחכים לשיבוץ המנחה שלך כדי להמשיך לפרויקט' :
                         'יש להשלים לפחות שלוש שאלות כדי להמשיך לפרויקט'

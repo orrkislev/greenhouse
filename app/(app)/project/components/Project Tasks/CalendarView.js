@@ -1,19 +1,19 @@
 import { tw } from "@/utils/tw";
 import { ganttActions, useGantt } from "@/utils/store/useGantt";
 import { useTime } from "@/utils/store/useTime";
-import { endOfWeek, format, startOfWeek, add } from "date-fns";
-import { Trash, Grip } from "lucide-react";
+import { endOfWeek, format, startOfWeek, add, subWeeks } from "date-fns";
+import { Trash, Grip, ArrowDownToLine } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { projectTasksActions, useProjectTasks } from "@/utils/store/useProjectTasks";
 
-const CalendarHeader = tw`flex items-center justify-between p-4 bg-gray-100`;
-const CalendarCell = tw`p-2 flex flex-col gap-1 transition-all duration-200 border border-gray-200 relative
+const CalendarHeader = tw`flex items-center justify-between p-4 bg-stone-100`;
+const CalendarCell = tw`p-2 flex flex-col gap-1 transition-all duration-200 border border-stone-200 relative
     ${props => props.$over ? 'border-l-4 border-l-blue-400 bg-blue-50 shadow-md ring-2 ring-blue-200' : ''}
-    ${props => props.$isWeekend ? 'text-gray-500' : 'text-gray-700'}
-    ${props => props.$inTerm ? 'text-gray-500' : 'text-gray-700'}
+    ${props => props.$isWeekend ? 'text-stone-500' : 'text-stone-700'}
+    ${props => props.$inTerm ? 'text-stone-500' : 'text-stone-700'}
     ${props => props.$isPast ? 'stripes' : ''}`;
 
 
@@ -21,6 +21,7 @@ export default function CalendarView() {
     const tasks = useProjectTasks((state) => state.tasks);
     const currTerm = useTime((state) => state.currTerm);
     const gantt = useGantt((state) => state.gantt);
+    const [fullView, setFullView] = useState(false);
 
     useEffect(() => {
         ganttActions.fetchGanttEvents(currTerm.start, currTerm.end);
@@ -52,9 +53,16 @@ export default function CalendarView() {
         currentDay.setDate(currentDay.getDate() + 1);
     }
 
+    let displayCells = cellsData;
+    if (!fullView) {
+        const startOfLastWeek = format(subWeeks(startOfWeek(new Date(), { weekStartsOn: 0 }), 1), "yyyy-MM-dd");
+        const indexOfLastWeek = cellsData.findIndex(cell => cell.dateFormatted === startOfLastWeek);
+        displayCells = cellsData.slice(indexOfLastWeek, indexOfLastWeek + 18);
+    }
+
 
     return (
-        <div className='grid grid-cols-6 divide-x divide-y divide-black border border-black'>
+        <div className='grid grid-cols-6 relative'>
             <CalendarHeader>א</CalendarHeader>
             <CalendarHeader>ב</CalendarHeader>
             <CalendarHeader>ג</CalendarHeader>
@@ -62,9 +70,16 @@ export default function CalendarView() {
             <CalendarHeader>ה</CalendarHeader>
             <CalendarHeader>סופש</CalendarHeader>
 
-            {cellsData.map((cellData, index) => (
+            {displayCells.map((cellData, index) => (
                 <CalendarCellComponent key={index} cellData={cellData} />
             ))}
+            {!fullView && (
+                <>
+                    <div className="absolute top-0 left-0 right-0 h-32 bg-linear-to-t from-transparent to-white" />
+                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-b from-transparent to-white" />
+                    <ArrowDownToLine className="w-8 h-8 border border-stone-200 absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 text-stone-400 bg-white p-1 rounded-full hover:bg-stone-100  hover:scale-110 cursor-pointer transition-all" onClick={() => setFullView(true)} />
+                </>
+            )}
         </div>
     );
 }
@@ -111,11 +126,11 @@ function CalendarCellComponent({ cellData }) {
             $isWeekend={cellData.isWeekend}
             $inTerm={cellData.inTerm}
             $isPast={cellData.isPast}>
-            <div className="text-sm text-gray-500 mb-2">
+            <div className="text-sm text-stone-500 mb-2">
                 {cellData.date.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' })}
 
                 {cellData.gantt.map(ganttEvent => (
-                    <div key={ganttEvent} className="text-xs text-gray-400">
+                    <div key={ganttEvent} className="text-xs text-stone-400">
                         {ganttEvent}
                     </div>
                 ))}
@@ -178,10 +193,10 @@ function TaskItem({ task }) {
 
     return (
         <TaskItemDiv ref={elementRef} $dragging={dragState === 'dragging'} $over={dragState === 'over'} $active={!task.completed}>
-            <div ref={gripRef} className="flex items-center gap-2 text-gray-400 cursor-move hover:text-gray-600 transition-colors p-1 rounded mr-2" >
+            <div ref={gripRef} className="flex items-center gap-2 text-stone-400 cursor-move hover:text-stone-600 transition-colors p-1 rounded mr-2" >
                 {!task.completed && <Grip className="w-3 h-3" />}
             </div>
-            <div className="text-sm text-gray-700 flex-1">{task.title}</div>
+            <div className="text-sm text-stone-700 flex-1">{task.title}</div>
             <button className="text-red-500 hover:text-red-700 ml-2" onClick={() => onDelete(task.id)}>
                 <Trash className="w-4 h-4" />
             </button>
@@ -190,8 +205,8 @@ function TaskItem({ task }) {
 }
 
 const TaskItemDiv = tw`
-    relative flex items-center justify-between p-2 bg-white border-b border-gray-200 transition-all duration-200
-    ${props => props.$dragging ? 'opacity-50 transform rotate-2 shadow-lg scale-105' : 'hover:bg-gray-50'}
+    relative flex items-center justify-between p-2 bg-white border-b border-stone-200 transition-all duration-200
+    ${props => props.$dragging ? 'opacity-50 transform rotate-2 shadow-lg scale-105' : 'hover:bg-stone-50'}
     ${props => props.$over ? 'border-l-4 border-l-blue-400 bg-blue-50' : ''}
     ${props => props.$active ? '' : 'opacity-50 line-through bg-emerald-100 hover:bg-emerald-100'}
 `;

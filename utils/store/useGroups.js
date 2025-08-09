@@ -6,15 +6,10 @@ import { useTime } from "@/utils/store/useTime";
 
 export const useGroups = create((set, get) => ({
     groups: [],
-    clear: () => {
-        set({ groups: [] })
-    },
 
     // ----------- Group Loading -----------
     // -------------------------------------
     loadGroups: async () => {
-        if (get().groups.length > 0) return;
-        
         const user = useUser.getState().user;
         if (!user || !user.id) return;
 
@@ -25,7 +20,7 @@ export const useGroups = create((set, get) => ({
 
         const currGroups = get().groups;
         const groupsToLoad = userGroups.filter(group => !currGroups.find(g => g.id === group.id));
-        
+
         const newGroups = [];
         for (const group of groupsToLoad) {
             const groupDocRef = doc(db, "groups", group.id);
@@ -35,7 +30,8 @@ export const useGroups = create((set, get) => ({
             }
         }
         newGroups.forEach(group => {
-            group.isMentor = group.mentors && group.mentors.includes(user.id);
+            group.isMentor = (group.mentors && group.mentors.includes(user.id)) ||
+                (group.type === 'major' && user.roles.includes('staff'));
         })
         const oldGroups = currGroups.filter(g => !newGroups.find(g2 => g2.id === g.id));
         set({ groups: [...oldGroups, ...newGroups] });
@@ -97,6 +93,40 @@ export const useGroups = create((set, get) => ({
         const students = members.filter(m => m.roles.includes('student'));
         const mentors = members.filter(m => m.roles.includes('staff'));
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, students, mentors } : g) }));
+    },
+
+    // ----------- Group Tasks Management -----------
+    // ----------------------------------------------
+    loadGroupTasks: async (group) => {
+        const user = useUser.getState().user;
+        if (!user || !user.id) return;
+
+        const tasksRef = collection(db, 'groups', group.id, 'tasks');
+        const tasksQuery = query(tasksRef, where('active', '==', true));
+        const tasksSnapshot = await getDocs(tasksQuery);
+        const tasks = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks } : g) }));
+    },
+    createGroupTask: async (group, task) => {
+        const tasksRef = collection(db, 'groups', group.id, 'tasks');
+        const newDoc = await addDoc(tasksRef, task);
+        set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: [...g.tasks, { ...task, id: newDoc.id }] } : g) }));
+    },
+    updateGroupTask: async (group, task, updates) => {
+        const taskDocRef = doc(db, 'groups', group.id, 'tasks', task.id);
+        await updateDoc(taskDocRef, updates);
+        set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: g.tasks.map(t => t.id === task.id ? { ...t, ...updates } : t) } : g) }));
+    },
+    deleteGroupTask: async (group, task) => {
+        const taskDocRef = doc(db, 'groups', group.id, 'tasks', task.id);
+        await deleteDoc(taskDocRef);
+        set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: g.tasks.filter(t => t.id !== task.id) } : g) }));
+    },
+    completeTask: async (group, task, userId) => {
+        const taskDocRef = doc(db, 'groups', group.id, 'tasks', task.id);
+        await updateDoc(taskDocRef, { completedBy: arrayUnion(userId) });
+        task.completedBy = [...(task.completedBy || []), userId];
+        set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: g.tasks.map(t => t.id === task.id ? task : t) } : g) }));
     }
 })
 );
@@ -140,7 +170,3 @@ groupsActions.getUserGroupEventsForWeek = async (groupId, userId, week) => {
     const events = eventsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     return events;
 }
-
-
-
-useUser.subscribe(state => state.user?.id, groupsActions.clear)

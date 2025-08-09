@@ -1,3 +1,4 @@
+import Box2 from "@/components/Box2";
 import { adminActions, useAdmin } from "@/utils/store/useAdmin";
 import { Puzzle } from "lucide-react";
 import { useEffect } from "react";
@@ -22,15 +23,10 @@ export default function Staff_Admin() {
                 </div>
             </div>
             <div className="flex gap-4 ">
-                <div className='flex-1 flex gap-4 p-4 border border-gray-200'>
-                    <div className=''>הודעה</div>
+                <Box2 label="הודעה בית ספרית" className="flex-1">
                     <textarea defaultValue={message} onBlur={(e) => adminActions.updateMessage(e.target.value)} className="w-full h-full" />
-                </div>
-                <div className='flex-1 flex gap-4 p-4 border border-gray-200'>
-                    <div className=''>משימות</div>
-                    {/* TODO */}
-                    <div>אפשר לקבוע משימות לכל התלמידים </div>
-                    <div>אפשר לעקוב אחר משימות מסויימות</div>
+                </Box2>
+                <div className='flex-1'>
                 </div>
             </div>
         </div>

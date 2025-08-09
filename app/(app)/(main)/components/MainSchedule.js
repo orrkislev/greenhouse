@@ -42,30 +42,30 @@ export default function MainSchedule() {
         <Box2 label="מה יש לי היום">
 
             {todayNote && (
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-stone-500">
                     הערות שלי: <span className="text-black">{todayNote}</span>
                 </div>
             )}
 
             <div>
-                <div className="text-sm text-gray-500">הלוז שלי</div>
+                <div className="text-sm text-stone-500">הלוז שלי</div>
                 {todayEvents.length > 0 ? todayEvents.map(event => (
-                    <div key={event.id} className="flex gap-1 items-center">
+                    <div key={event.id} className="flex gap-3 items-center">
                         <div className="text-xs">ב{event.start}</div>
                         <div className="text-sm font-bold">{event.title}</div>
                     </div>
-                )) : <div className="text-xs text-gray-500">אין אירועים היום</div>}
+                )) : <div className="text-xs text-stone-500">אין אירועים היום</div>}
             </div>
 
 
             {todayGroupEvents.length > 0 && (
-                <div className="flex flex-col gap-2">
-                    <div className="text-sm text-gray-500">הקבוצות שלי</div>
+                <div className="flex flex-col gap-3">
+                    <div className="text-sm text-stone-500">הקבוצות שלי</div>
                     {todayGroupEvents.map(group => (
-                        <div key={group.group} className="flex flex-col gap-1">
+                        <div key={group.group} className="flex flex-col gap-3">
                             <div className="text-sm font-bold">{group.group}</div>
                             {group.events.map(event => (
-                                <div key={event.id} className="flex gap-1 items-center">
+                                <div key={event.id} className="flex gap-3 items-center">
                                     <div className="text-xs">ב{event.start}</div>
                                     <div className="text-sm font-bold">{event.title}</div>
                                 </div>

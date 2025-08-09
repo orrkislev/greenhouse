@@ -4,7 +4,7 @@ import { Edit2, Meh, Plus, Trash, UserRoundX, XIcon } from "lucide-react";
 import { tw } from "@/utils/tw";
 import { Cell, Edittable, TableHeader } from "./Common";
 
-const SpecialButton = tw`p-4 border border-gray-200 rounded-md flex items-center gap-2 text-xs hover:bg-gray-100 cursor-pointer`;
+const SpecialButton = tw`p-4 border border-stone-200 rounded-md flex items-center gap-2 text-xs hover:bg-stone-100 cursor-pointer`;
 
 export default function AdminGroups() {
     const groups = useAdmin(state => state.groups);
@@ -20,14 +20,14 @@ export default function AdminGroups() {
     return (
         <div className="flex flex-col gap-4">
             {groups.map(group => (
-                <div key={group.id} className="p-4 border border-gray-200 flex gap-4">
+                <div key={group.id} className="p-4 border border-stone-200 flex gap-4">
                     <div>
                         <GroupHeader group={group} />
                         <GroupStudents group={group} />
                     </div>
                     <GroupMentors group={group} />
                     {group.students && group.students.length == 0 && (
-                        <div className="text-sm text-gray-500 flex items-center gap-2 cursor-pointer" onClick={() => adminActions.deleteGroup(group.id)}>
+                        <div className="text-sm text-stone-500 flex items-center gap-2 cursor-pointer" onClick={() => adminActions.deleteGroup(group.id)}>
                             <Trash className="w-4 h-4" />
                             מחק קבוצה
                         </div>
@@ -78,7 +78,7 @@ function GroupHeader({ group }) {
         return (
             <div className="flex items-center mb-2 group gap-2">
                 <h2 className="text-lg font-semibold">{group.name}</h2>
-                <span className="text-sm text-gray-500">שנה {group.year}</span>
+                <span className="text-sm text-stone-500">שנה {group.year}</span>
                 <Edit2 className="w-4 h-4 opacity-0 group-hover:opacity-100 cursor-pointer"
                     onClick={() => setIsEditing(true)} />
             </div>
@@ -101,7 +101,7 @@ function GroupMentors({ group }) {
     };
 
     return (
-        <div className="flex flex-col gap-2 border border-gray-200 p-4">
+        <div className="flex flex-col gap-2 border border-stone-200 p-4">
             <h3 className="text-sm">מנטורים</h3>
             {groupMentors.map(mentor => (
                 <div key={mentor.id} className="flex justify-between gap-2 items-center text-sm text-blue-800 px-2 rounded-full group relative border border-blue-400">
@@ -183,16 +183,16 @@ function GroupStudents({ group }) {
     return (
         <div>
             <h3 className="text-sm">תלמידים</h3>
-            <table className="text-left text-xs border-collapse border-gray-200 border">
+            <table className="text-left text-xs border-collapse border-stone-200 border">
                 <TableHeader headers={headers} />
                 <tbody>
                     {studentsData.map((student, index) => (
-                        <tr key={index} className="border-b border-gray-200">
+                        <tr key={index} className="border-b border-stone-200">
                             <Cell >{index + 1}</Cell>
                             {student.isNew ? (
                                 <Cell><Edittable value={student.username} onChange={(value) => updateStudentData(student.id, 'username', value)} /></Cell>
                             ) : (
-                                <Cell className="text-gray-500">{student.username}</Cell>
+                                <Cell className="text-stone-500">{student.username}</Cell>
                             )}
                             <Cell><Edittable value={student.firstName} onChange={(value) => updateStudentData(student.id, 'firstName', value)} /></Cell>
                             <Cell><Edittable value={student.lastName} onChange={(value) => updateStudentData(student.id, 'lastName', value)} /></Cell>
@@ -234,24 +234,16 @@ function GroupStudents({ group }) {
 function AdminMajors() {
     const majors = useAdmin(state => state.majors);
 
-    const handleRemoveMajor = (majorId) => {
-        adminActions.updateMajors(majors.filter(major => major.id !== majorId));
-    };
-
-    const editMajor = (majorId, value) => {
-        adminActions.updateMajors(majors.map(major => major.id === majorId ? { ...major, name: value } : major));
-    };
-
-    const addMajor = () => {
-        adminActions.updateMajors([...majors, { id: new Date().getTime(), name: 'מגמה חדשה' }]);
-    };
+    const handleRemoveMajor = (majorId) => adminActions.deleteMajor(majorId);
+    const editMajor = (majorId, value) => adminActions.updateMajor(majorId, { name: value });
+    const addMajor = () => adminActions.createMajor({ name: 'מגמה חדשה' });
 
     return (
-        <div className="flex flex-col gap-4 border border-gray-200 p-4">
+        <div className="flex flex-col gap-4 border border-stone-200 p-4">
             <h3 className="text-sm">מגמות</h3>
             <div className="flex gap-2">
                 {majors.map(major => (
-                    <div key={major.id} className="flex flex-col p-4 gap-2 group relative border border-gray-200">
+                    <div key={major.id} className="flex flex-col p-4 gap-2 group relative border border-stone-200">
                         <div>מגמת</div>
                         <Edittable value={major.name} onFinish={(value) => editMajor(major.id, value)} />
                         <XIcon className="absolute top-1 left-1 w-4 h-4 opacity-0 group-hover:opacity-100 cursor-pointer"
