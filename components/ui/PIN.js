@@ -1,12 +1,13 @@
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "./input-otp";
 
-export default function PINInput({ onChange }) {
+export default function PINInput({ onChange, value }) {
 
     return (
         <div>
             <label className="block text-sm font-medium mb-1">סיסמא</label>
             <InputOTP
                 maxLength={4}
+                value={value}
                 onChange={v => onChange({target: { value: v }})}
             >
                 <InputOTPGroup className="ltr">

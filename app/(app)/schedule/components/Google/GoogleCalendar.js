@@ -23,7 +23,7 @@ export default function GoogleCalendar() {
     }, [user.googleRefreshToken, week]);
 
     if (!user) return null;
-    if (!user.googleRefreshToken) return <AuthGoogleCalendar />
+    if (!user.googleRefreshToken) return null
 
     const weeksEvents = week.map(day => {
         return {

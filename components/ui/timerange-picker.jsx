@@ -83,7 +83,7 @@ export default function TimeRangePicker({ value, onChange }) {
           inputMode="numeric"
           pattern="\d*"
           maxLength={2}
-          className="w-12 text-center"
+          className="text-center"
           value={startHour}
           onChange={handleInput(setStartHour, isValidHour)}
           onBlur={validateAndNotify}
@@ -97,7 +97,7 @@ export default function TimeRangePicker({ value, onChange }) {
           inputMode="numeric"
           pattern="\d*"
           maxLength={2}
-          className="w-12 text-center"
+          className="text-center"
           value={startMinute}
           onChange={handleInput(setStartMinute, isValidMinute)}
           onBlur={validateAndNotify}
@@ -111,7 +111,7 @@ export default function TimeRangePicker({ value, onChange }) {
           inputMode="numeric"
           pattern="\d*"
           maxLength={2}
-          className="w-12 text-center"
+          className="text-center"
           value={endHour}
           onChange={handleInput(setEndHour, isValidHour)}
           onBlur={validateAndNotify}
@@ -125,7 +125,7 @@ export default function TimeRangePicker({ value, onChange }) {
           inputMode="numeric"
           pattern="\d*"
           maxLength={2}
-          className="w-12 text-center"
+          className="text-center"
           value={endMinute}
           onChange={handleInput(setEndMinute, isValidMinute)}
           onBlur={validateAndNotify}

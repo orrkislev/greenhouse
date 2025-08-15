@@ -7,6 +7,7 @@ import StudyMain from "./components/StudyMain"
 import StudyPath, { newSubjectData } from "./components/StudyPath"
 import { tw } from "@/utils/tw"
 import { PageMain } from "@/components/ContextBar"
+import { examplePaths } from "./components/example study paths"
 
 const PathButtonSpan = tw.span`
     ${({ $active }) => $active ? '' : 'line-through'}
@@ -27,12 +28,8 @@ export default function LearnPage() {
     const selectedPath = paths.find(path => path.id === view)
 
     const newPath = () => {
-        studyActions.addPath({
-            name: "תחום חדש",
-            description: "מה המטרה שלך בתחום הזה?",
-            subjects: [newSubjectData()],
-            active: true,
-        })
+        const selectedPath = examplePaths[Math.floor(Math.random() * examplePaths.length)]
+        studyActions.addPath(selectedPath)
     }
 
     return (

@@ -7,25 +7,28 @@ import MainProject from "./components/MainProject"
 import MainSchedule from "./components/MainSchedule"
 import MainGroups from "./components/MainGroups"
 import MainLearn from "./components/MainLearn"
+import ContextBar, { PageMain } from "@/components/ContextBar"
+import MainContext from "./components/MainContext"
 
 export default function MainPage() {
     return (
-        <div className="p-4 flex flex-col gap-4">
-            <MainGreetings />
-            <div className="flex gap-3">
-                <div className="flex flex-col gap-3">
+        <>
+            <PageMain>
+
+                <div className="p-4 flex flex-col gap-3">
+                    <MainGreetings />
                     <MainMessages />
                     <MainGroups />
                     <div className="flex gap-3">
                         <MainProject />
                         <MainSchedule />
                     </div>
-                </div>
-                <div className="flex flex-col gap-3">
-                    <MainNews />
                     <MainLearn />
                 </div>
-            </div>
-        </div>
+            </PageMain>
+            <ContextBar name="">
+                <MainContext />
+            </ContextBar>
+        </>
     )
 }

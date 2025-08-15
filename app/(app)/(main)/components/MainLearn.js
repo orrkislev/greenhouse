@@ -11,18 +11,20 @@ export default function MainLearn() {
 
     return (
         <Box2 label="למידה">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-8">
                 {paths.map((path) => (
                     <div key={path.id}>
                         <h1>{path.name}</h1>
-                        {path.subjects.map((subject) => (
-                            <div key={subject.id} className="mr-2">
-                                <div className="text-sm flex gap-1">
-                                    <div className='flex-1'>{subject.name}{' - '}</div>
-                                    <div className='flex-3'>{subject.steps.find(step => !step.finished) ? subject.steps.find(step => !step.finished).text : ''}</div>
+                        <div className="flex flex-col gap-4">
+                            {path.subjects.map((subject) => (
+                                <div key={subject.id} className="mr-2">
+                                    <div className="text-sm flex flex-col gap-1">
+                                        <div className='flex-1 text-stone-400 text-xs'>{subject.name}</div>
+                                        <div className='flex-3 text-stone-800 text-sm pr-4'>{subject.steps.find(step => !step.finished) ? subject.steps.find(step => !step.finished).source : ''}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 ))}
             </div>

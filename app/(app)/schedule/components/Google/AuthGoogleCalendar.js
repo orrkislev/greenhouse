@@ -31,18 +31,14 @@ export default function AuthGoogleCalendar() {
 
 
     return (
-        <ScheduleSection name="גוגל" edittable={false} withLabel={true}>
-            <div />
-            <div />
-            <div className='col-span-2'>
-                {!code ? (
-                    <div className="bg-[#4285F4] hover:bg-[#357ae8] cursor-pointer text-center text-white transition-colors" onClick={clickAuth}>Authorize Google Calendar</div>
-                ) : (
-                    <div>Processing...</div>
-                )}
-            </div>
-            <div />
-            <div />
-        </ScheduleSection>
+        <div className='col-span-2'>
+            {!code ? (
+                <div className="bg-[#4285F4] hover:bg-[#357ae8] cursor-pointer text-center text-white transition-colors" onClick={clickAuth}>
+                    חיבור גוגל קלנדר
+                </div>
+            ) : (
+                <div>Processing...</div>
+            )}
+        </div>
     );
 }

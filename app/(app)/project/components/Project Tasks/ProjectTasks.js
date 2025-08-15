@@ -1,14 +1,14 @@
 import { tw } from "@/utils/tw";
 import { useEffect, useState } from "react"
 import ListView from "./ListView";
-import { List, CalendarDays, Route, BetweenHorizonalEnd, TableOfContents } from "lucide-react";
+import { List, CalendarDays, Route, BetweenHorizonalEnd, TableOfContents, ListPlus, Plus } from "lucide-react";
 import WeeklyView from "./WeeklyView";
 import CalendarView from "./CalendarView";
 import { format } from "date-fns";
 import { projectTasksActions, useProjectTasks } from "@/utils/store/useProjectTasks";
 import Box2 from "@/components/Box2";
 
-const NewTaskButton = tw`px-4 py-1 bg-blue-500 text-white hover:bg-blue-600 transition-colors`;
+const NewTaskButton = tw`px-4 py-1 bg-primary text-white hover:bg-primary/80 transition-colors flex gap-1 transition-all duration-300 rounded-lg`;
 
 const ViewButton = tw`px-3 py-1 flex items-center gap-1 transition-colors
     hover:bg-stone-100 cursor-pointer ${props => props.$active ? 'bg-stone-200' : ''}`;
@@ -36,8 +36,9 @@ export default function ProjectTasks() {
     return (
         <Box2 label="תכנית עבודה" className="bg-white pb-6">
             <div className="flex gap-4 mb-4 justify-between">
-                <NewTaskButton onClick={createNewTask}>
-                    הוספת משימה חדשה
+                <NewTaskButton onClick={createNewTask} className="group/newTask">
+                    <Plus className="w-6 h-6" />
+                    <div className="">משימה חדשה</div>
                 </NewTaskButton>
                 <ViewSelector />
             </div>

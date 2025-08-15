@@ -1,6 +1,6 @@
 import { tw } from "@/utils/tw"
 
-export const DashboardLayout = tw`flex flex-col`;
+export const DashboardLayout = tw`flex flex-col w-full`;
 export const DashboardPanel = tw`flex pr-4 pt-4 z-2 gap-4`;
 export const DashboardPanelButton = tw`text-xs text-stone-500 hover:bg-stone-600 rounded-full
     px-4 py-2 cursor-pointer transition-colors duration-200

@@ -1,15 +1,18 @@
 'use client'
 
 import StaffGroup_Students from "./StaffGroup_Students";
-// import StaffGroup_Meetings from "./StaffGroup_Meetings";
 import StaffGroup_Header from "./StaffGroup_Header";
 import { useEffect, useState } from "react";
 import { groupsActions } from "@/utils/store/useGroups";
 import StaffGroup_Meetings from "./StaffGroup_Meetings";
 import Box2 from "@/components/Box2";
 import { useUser } from "@/utils/store/useUser";
-import { Archive, BookmarkX, Check, Trash, X } from "lucide-react";
+import { Archive, Check, Plus, Trash } from "lucide-react";
 import { AvatarGroup } from "@/components/Avatar";
+import 'react-quill-new/dist/quill.snow.css';
+import MessageEditor from "./MessageEditor";
+
+
 
 
 export default function StaffGroup({ group }) {
@@ -17,19 +20,11 @@ export default function StaffGroup({ group }) {
         groupsActions.loadClassStudents(group);
     }, [group])
 
-    const updateMessage = (message) => {
-        groupsActions.updateGroup(group, { message });
-    }
-
     return (
         <div className="flex flex-col gap-4">
             <StaffGroup_Header group={group} />
             <div className="flex gap-4 ">
-                <Box2 label="הודעה" className="flex-1">
-                    <div className=''>
-                        <textarea defaultValue={group.message} onBlur={(e) => updateMessage(e.target.value)} className="w-full h-full" />
-                    </div>
-                </Box2>
+                <MessageEditor onSave={(value) => groupsActions.updateGroup(group, { message: value })} initialValue={group.message} />
                 <GroupTasks group={group} />
             </div>
             <StaffGroup_Students group={group} />
@@ -37,6 +32,9 @@ export default function StaffGroup({ group }) {
         </div>
     );
 }
+
+
+
 
 function GroupTasks({ group }) {
 
@@ -87,7 +85,9 @@ function NewTask({ group }) {
     if (!isEditing) {
         return (
             <div>
-                <button onClick={() => setIsEditing(true)}>+</button>
+                <button onClick={() => setIsEditing(true)} className="p-1 rounded-full bg-primary text-white hover:bg-primary/80 cursor-pointer">
+                    <Plus className="w-4 h-4" />
+                </button>
             </div>
         )
     }

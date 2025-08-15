@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { TaskPill } from "./MainProject";
 import { useUser } from "@/utils/store/useUser";
 import { Check } from "lucide-react";
+import 'react-quill-new/dist/quill.snow.css';
 
 export default function MainGroups() {
     const groups = useGroups((state) => state.groups);
@@ -30,9 +31,7 @@ function MainGroup({ group }) {
 
     return (
         <Box2 label={group.label} className="flex-1">
-            <div className="text-sm text-stone-500 w-full">
-                {group.message || 'אין הודעה'}
-            </div>
+            <div className="text-sm text-stone-500 w-full" dangerouslySetInnerHTML={{ __html: group.message }} />
             <div>
                 {group.tasks && group.tasks.map((task) => (
                     <MainGroupTask key={task.id} group={group} task={task} />

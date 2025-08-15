@@ -1,29 +1,20 @@
 import SmartText, { AutoSizeTextarea } from "@/components/SmartText"
 import { studyActions } from "@/utils/store/useStudy"
-import { Check, Plus, Trash2 } from "lucide-react"
+import { Check, Loader2, Plus, Trash2 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { tw } from "@/utils/tw"
+import { getNewStep, getNewSubject } from "./example study paths"
 
 const SpecialButton = tw`p-4 border border-stone-200 rounded-md flex items-center gap-2 text-xs hover:bg-stone-100 cursor-pointer`;
 
-const newStepData = () => ({
-    id: new Date().getTime(),
-    source: "איך אני לומד את זה",
-    text: "מה למדתי מזה",
-    finished: false,
-})
-export const newSubjectData = () => ({
-    id: new Date().getTime(),
-    name: "שם הנושא החדש",
-    description: "תיאור הנושא החדש",
-    steps: [newStepData()],
-})
-
-
 export default function StudyPath({ path }) {
+    const [loading, setLoading] = useState(false)
 
-    const newSubject = () => {
-        studyActions.addSubject(path.id, newSubjectData())
+    const newSubject = async () => {
+        setLoading(true)
+        const newSubject = await getNewSubject(path)
+        studyActions.addSubject(path.id, newSubject)
+        setLoading(false)
     }
 
     return (
@@ -33,9 +24,9 @@ export default function StudyPath({ path }) {
                     <Trash2 className="w-4 h-4" />
                     מחק תחום
                 </SpecialButton>
-                <SpecialButton onClick={newSubject}>
-                    <Plus className="w-4 h-4" />
-                    הוסף נושא
+                <SpecialButton onClick={newSubject} disabled={loading}>
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                    {loading ? "רגע..." : "הוסף נושא"}
                 </SpecialButton>
             </div>
 
@@ -52,13 +43,17 @@ export default function StudyPath({ path }) {
 }
 
 function Subject({ path, subject }) {
+    const [loading, setLoading] = useState(false)
 
-    const newStep = () => {
-        studyActions.addStep(path.id, subject.id, newStepData())
+    const newStep = async () => {
+        setLoading(true)
+        const newStep = await getNewStep(path, subject)
+        studyActions.addStep(path.id, subject.id, newStep)
+        setLoading(false)
     }
     return (
         <div key={subject.id} className="flex">
-            <div className="z-2">
+            <div className="z-2 w-64">
                 <div className="bg-white flex flex-col gap-4 p-4 border border-stone-300 justify-between group/subject">
                     <div className="flex flex-col gap-1">
                         <SmartText className="text-lg" text={subject.name} onEdit={(name) => studyActions.updateSubject(path.id, subject.id, { ...subject, name })} />
@@ -69,9 +64,9 @@ function Subject({ path, subject }) {
                             <Trash2 className="w-4 h-4" />
                             מחק נושא
                         </SpecialButton>
-                        <SpecialButton onClick={newStep}>
-                            <Plus className="w-4 h-4" />
-                            הוסף שלב
+                        <SpecialButton onClick={newStep} disabled={loading}>
+                            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                            {loading ? "רגע..." : "הוסף שלב"}
                         </SpecialButton>
                     </div>
                 </div>
@@ -144,7 +139,7 @@ const StepPill = tw`step flex border border-stone-500 bg-white rounded-full bord
 
 function Step({ path, subject, step, index }) {
     return (
-        <div style={{ marginRight: index % 2 == 0 ? (index == 0 ? "10%" : "20%") : "35%" }} className="flex">
+        <div style={{ marginRight: index % 2 == 0 ? (index == 0 ? "10%" : "20%") : "35%" }} className="flex max-w-128">
             <div className="relative flex">
                 {index == 0 && <div className="absolute top-[50%] right-0 w-64 translate-x-[100%] h-px border-b border-dashed border-stone-500" />}
                 <StepPill $finished={step.finished}>

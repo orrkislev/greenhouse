@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { userActions, useUser } from "@/utils/store/useUser";
 import { addDoc, arrayUnion, collection, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
-import { db } from "@/utils//firebase/firebase";
+import { db, storage } from "@/utils//firebase/firebase";
 import { useTime } from "@/utils/store/useTime";
 import { logsActions, useLogs } from "@/utils/store/useLogs";
 import { LOG_RECORDS, LOG_TYPES } from "@/utils/constants/constants";
@@ -9,6 +9,7 @@ import { subscribeWithSelector } from "zustand/middleware";
 import { debounce } from "lodash";
 import { projectTasksActions } from "@/utils/store/useProjectTasks";
 import { format } from "date-fns";
+import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 
 export const useProject = create(subscribeWithSelector((set, get) => {
@@ -188,9 +189,25 @@ export const useProject = create(subscribeWithSelector((set, get) => {
             if (!user.id || !project) return
             const projectLibraryRef = doc(db, 'users', user.id, 'projects', project.id, 'documents', 'library');
             const newItems = get().library;
+
+            const item = newItems[itemIndex];
+            if (item.url) {
+                const storageRef = ref(storage, item.path);
+                await deleteObject(storageRef);
+            }
+
             newItems.splice(itemIndex, 1);
             await setDoc(projectLibraryRef, { items: newItems }, { merge: true });
             set({ library: [...newItems] });
+        },
+        uploadLibraryItem: async (file) => {
+            const user = useUser.getState().user;
+            const project = get().project;
+            if (!user.id || !project) return
+            const storageRef = ref(storage, `projects/${user.id}/${project.id}/${Date.now()}_${file.name}`);
+            await uploadBytes(storageRef, file);
+            const url = await getDownloadURL(storageRef);
+            await get().addLibraryItem({ url, name: file.name, path: storageRef.fullPath });
         }
     }
 }));

@@ -19,7 +19,7 @@ export default function MainNews() {
     if (!embedUrl) return null;
 
     return (
-        <Box2 label="חדשות החממה" className="min-w-[40vw]">
+        <Box2 label="חדשות החממה" className="w-full">
             <div className="w-full h-0 pb-[56.25%] relative ">
                 <iframe
                     src={embedUrl}

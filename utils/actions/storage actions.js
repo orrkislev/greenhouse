@@ -8,8 +8,10 @@ export function resizeImageTo128(imageFile) {
                 canvas.width = 128;
                 canvas.height = 128;
                 const ctx = canvas.getContext("2d");
-                // Draw the image scaled to 128x128
-                ctx.drawImage(img, 0, 0, 128, 128);
+                const scale = Math.max(128 / img.width, 128 / img.height);
+                const newWidth = img.width * scale;
+                const newHeight = img.height * scale;
+                ctx.drawImage(img, (128 - newWidth) / 2, (128 - newHeight) / 2, newWidth, newHeight);
                 canvas.toBlob(
                     (blob) => {
                         if (blob) resolve(blob);

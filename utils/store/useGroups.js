@@ -101,6 +101,8 @@ export const useGroups = create((set, get) => ({
         const user = useUser.getState().user;
         if (!user || !user.id) return;
 
+        if (group.tasks) return;
+
         const tasksRef = collection(db, 'groups', group.id, 'tasks');
         const tasksQuery = query(tasksRef, where('active', '==', true));
         const tasksSnapshot = await getDocs(tasksQuery);

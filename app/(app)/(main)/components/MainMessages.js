@@ -1,7 +1,8 @@
 import { ganttActions, useGantt } from "@/utils/store/useGantt"
-import { useGroups } from "@/utils/store/useGroups";
 import { useEffect } from "react";
 import Box2 from "@/components/Box2";
+import 'react-quill-new/dist/quill.snow.css';
+
 
 export default function MainMessages() {
     const message = useGantt((state) => state.message);
@@ -11,10 +12,6 @@ export default function MainMessages() {
     }, []);
 
     return (
-        <Box2>
-            <div className="text-sm text-stone-500 w-full">
-                {message || 'אין הודעה'}
-            </div>
-        </Box2>
+        <div className="text-sm text-stone-700 w-full p-4" dangerouslySetInnerHTML={{ __html: message }} />
     )
 }

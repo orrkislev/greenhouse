@@ -1,21 +1,29 @@
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth } from './firebase';
 
+export const prepareEmail = (username) => {
+  return username.split('@')[0] + '@chamama.org'
+}
+export const getUsernameFromEmail = (email) => {
+  return email.split('@')[0]
+}
+export const preparePassword = (pinPass) => {
+  return pinPass.toString().padStart(6, '0')
+}
 
-export const prepareEmailPassword = (username, pinPass) => {
-  const email = username.split('@')[0] + '@chamama.org'
-  const password = pinPass.toString().padStart(6, '0')
-  return [email, password]
+export const onGotUser = (callback) => {
+  onAuthStateChanged(auth, callback);
 }
 
 export class AuthService {
   static async signIn(username, pinPass) {
-    const [email, password] = prepareEmailPassword(username, pinPass);
+    const email = prepareEmail(username);
+    const password = preparePassword(pinPass);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      return userCredential.user;
+      return {user:userCredential.user};
     } catch (error) {
-      throw new Error(this.getErrorMessage(error));
+      return {error: this.getErrorMessage(error)};
     }
   }
 
@@ -27,25 +35,29 @@ export class AuthService {
     }
   }
 
+
+
   static getErrorMessage(error) {
     if (error.code) {
       switch (error.code) {
+        case 'auth/invalid-credential':
+          return 'שם משתמש או סיסמא שגויים';
         case 'auth/user-not-found':
-          return 'No user found with this email address.';
+          return 'שם משתמש או סיסמא שגויים';
         case 'auth/wrong-password':
-          return 'Incorrect password.';
+          return 'שם משתמש או סיסמא שגויים';
         case 'auth/email-already-in-use':
-          return 'An account with this email already exists.';
+          return 'משתמש זה כבר קיים';
         case 'auth/weak-password':
-          return 'Password should be at least 6 characters.';
+          return 'סיסמא חלשה';
         case 'auth/invalid-email':
-          return 'Invalid email address.';
+          return 'שם משתמש לא תקין';
         case 'auth/too-many-requests':
-          return 'Too many failed attempts. Please try again later.';
+          return 'יותר מדי ניסיונות. נסו שוב מאוחר יותר';
         default:
-          return error.message || 'An error occurred during authentication.';
+          return error.message || 'שגיאה בהתחברות';
       }
     }
-    return error.message || 'An unexpected error occurred.';
+    return error.message || 'שגיאה בהתחברות';
   }
 }

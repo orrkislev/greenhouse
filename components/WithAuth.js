@@ -5,6 +5,7 @@ import { UserCircle2 } from 'lucide-react';
 import { useUser } from '@/utils/store/useUser';
 import PINInput from './ui/PIN';
 import { redirect } from 'next/navigation';
+import Image from 'next/image';
 
 export default function WithAuth({ children, role }) {
     const [username, setUsername] = useState('');
@@ -39,11 +40,11 @@ export default function WithAuth({ children, role }) {
             <div className="flex-1 bg-white flex items-center justify-center p-8">
                 <div className="w-full max-w-md">
                     {/* Logo/Icon Section */}
-                    <div className="text-center mb-8">
-                        <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <div className="flex flex-col items-center justify-center">
+                        <Image src="/logo.png" alt="logo" width={300} height={300} />
+                        {/* <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full mx-auto mb-4 flex items-center justify-center">
                             <UserCircle2 className="h-8 w-8 text-white" />
-                        </div>
-                        <h1 className="text-2xl font-bold text-stone-800 mb-2">הי!</h1>
+                        </div> */}
                         <p className="text-sm text-stone-600">
                             היכנסו עם שם המשתמש והסיסמא שלהם
                             אם אתם לא זוכרים, פנו למנטורים

@@ -19,7 +19,6 @@ export default function StaffPage() {
 
     useEffect(() => {
         groupsActions.loadGroups();
-        staffActions.getMentoringStudents();
     }, []);
 
     useEffect(() => {
@@ -38,9 +37,7 @@ export default function StaffPage() {
                         {group.name}
                     </DashboardPanelButton>
                 ))}
-                {students.length > 0 && (
-                    <DashboardPanelButton onClick={() => setActiveTab('students')} $active={activeTab === 'students'}>ליווי</DashboardPanelButton>
-                )}
+                <DashboardPanelButton onClick={() => setActiveTab('students')} $active={activeTab === 'students'}>ליווי</DashboardPanelButton>
                 {user.roles.includes('admin') && (
                     <DashboardPanelButton onClick={() => setActiveTab('admin')} $active={activeTab === 'admin'}>תיכון החממה</DashboardPanelButton>
                 )}

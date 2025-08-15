@@ -10,33 +10,26 @@ import Meetings from "./components/meetings/Meetings";
 import GoogleCalendar from "./components/Google/GoogleCalendar";
 import Notes from "./components/notes/Notes";
 import Term from "./components/term/Term";
-import { PageMain } from "@/components/ContextBar";
+import ContextBar, { PageMain } from "@/components/ContextBar";
+import { DashboardLayout, DashboardPanel, DashboardPanelButton, DashboardTitle } from "@/components/DashboardLayout";
+import ScheduleContext from "./components/ScheduleContext";
 
-const ScheduleOuter = tw`w-full h-full px-16 pt-8`;
+const ScheduleOuter = tw`w-full h-full pr-16 pt-8`;
 
 export default function SchedulePage() {
     const [view, setView] = useState('week');
 
     return (
+        <>
         <PageMain>
+            <DashboardLayout>
+            <DashboardTitle>לוח זמנים</DashboardTitle>
+            <DashboardPanel>
+                <DashboardPanelButton onClick={() => setView('week')} $active={view === 'week'}>שבוע</DashboardPanelButton>
+                <DashboardPanelButton onClick={() => setView('semester')} $active={view === 'semester'}>תקופה</DashboardPanelButton>
+            </DashboardPanel>
             <ScheduleOuter>
-                <div className="flex items-center justify-between mb-4">
-                    <h1 className="text-2xl">לוח זמנים</h1>
-                    <div className="flex space-x-4">
-                        <button
-                            className={`px-4 py-2 rounded ${view === 'week' ? 'bg-blue-500 text-white' : 'bg-stone-200 text-stone-800'}`}
-                            onClick={() => setView('week')}
-                        >
-                            שבוע
-                        </button>
-                        <button
-                            className={`px-4 py-2 rounded ${view === 'semester' ? 'bg-blue-500 text-white' : 'bg-stone-200 text-stone-800'}`}
-                            onClick={() => setView('semester')}
-                        >
-                            תקופה
-                        </button>
-                    </div>
-                </div>
+
                 <ScheduleTop view={view} />
 
                 {view === 'week' && (
@@ -53,9 +46,13 @@ export default function SchedulePage() {
                     <>
                         <Term />
                     </>
-                )}
-            </ScheduleOuter>
+                    )}
+                </ScheduleOuter>
+            </DashboardLayout>
         </PageMain>
-
+        <ContextBar>
+            <ScheduleContext />
+        </ContextBar>
+        </>
     )
 }

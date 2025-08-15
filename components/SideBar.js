@@ -7,7 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { AvatarEdit }    from "./Avatar";
+import Avatar from "./Avatar";
 
 const SideBarDiv = tw`flex flex-col border-l border-stone-400 bg-stone-200 -my-6`
 const SideBarHeader = tw`aspect-square flex items-center justify-center p-2 relative`
@@ -31,15 +31,17 @@ export default function SideBar() {
     return (
         <SideBarDiv>
             <SideBarHeader>
-                <Image src="/logo.png" alt="logo" fill={true} style={{ objectFit: 'contain' }} priority={true}
-                    sizes="(max-width: 768px) 20vw, (max-width: 1200px) 20vw, 20vw" />
+                <Link href="/">
+                    <Image src="/logo.png" alt="logo" fill={true} style={{ objectFit: 'contain' }} priority={true}
+                        sizes="(max-width: 768px) 20vw, (max-width: 1200px) 20vw, 20vw" />
+                </Link>
             </SideBarHeader>
-            <Separator className='w-full'/>
+            <Separator className='w-full' />
             <div className="flex gap-2 items-center p-2 justify-center text-sm">
-                <AvatarEdit />
+                <Avatar user={user}/>
                 <div>{user.firstName}</div>
             </div>
-            <Separator className='w-full'/>
+            <Separator className='w-full' />
             <SideBarContent>
                 {/* Home */}
                 <SideBarItem href="/" icon={<TreePalm className="w-4 h-4" />} label="בית" active={pathname === '/'} />
@@ -56,7 +58,7 @@ export default function SideBar() {
                 <SideBarItem href="/project" icon={<Snail className="w-4 h-4" />} label="הפרויקט" active={pathname === '/project'} />
 
                 {/* Research */}
-                <SideBarItem href="/research" icon={<Brain className="w-4 h-4" />} label="חקר" active={pathname === '/research'} />
+                <SideBarItem href="/research" icon={<Brain className="w-4 h-4" />} label="חקר" active={pathname === '/research'} disabled={true} />
 
                 {/* Vocation */}
                 <SideBarItem href="/vocation" icon={<Briefcase className="w-4 h-4" />} label="תעסוקה" active={pathname === '/vocation'} disabled={true} />

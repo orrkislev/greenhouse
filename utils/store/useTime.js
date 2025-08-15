@@ -40,22 +40,32 @@ export const useTime = create(subscribeWithSelector((set, get) => {
         // ------ Terms ------
         terms: [],
         currTerm: null,
+        addTerm: async (term) => {
+            const termRef = doc(db, 'school', 'terms');
+            const newTerms = [...get().terms, term];
+            await updateDoc(termRef, { terms: newTerms });
+            set({ terms: newTerms });
+        },
+        removeTerm: async (termId) => {
+            const termRef = doc(db, 'school', 'terms');
+            const newTerms = get().terms.filter(term => term.id !== termId);
+            await updateDoc(termRef, { terms: newTerms });
+            set({ terms: newTerms });
+        },
         updateTerm: async (termId, updates) => {
-            const termRef = doc(db, 'school', 'gantt');
+            const termRef = doc(db, 'school', 'terms');
             const newTerms = get().terms.map(term => term.id === termId ? { ...term, ...updates } : term);
-            await updateDoc(termRef, {
-                terms: newTerms
-            });
+            await updateDoc(termRef, { terms: newTerms });
             set({ terms: newTerms });
         },
     };
 }));
 
 (async () => {
-    const ganttInfo = doc(db, 'school', 'terms');
-    const ganttSnapshot = await getDoc(ganttInfo);
-    const ganttData = ganttSnapshot.data();
-    const terms = ganttData?.terms || [];
+    const termsInfo = doc(db, 'school', 'terms');
+    const termsSnapshot = await getDoc(termsInfo);
+    const termsData = termsSnapshot.data();
+    const terms = termsData?.terms || [];
     const currDate = format(new Date(), 'yyyy-MM-dd');
     const currTerm = terms.find(term => term.start <= currDate && term.end >= currDate) || null;
     useTime.setState({ currTerm, terms });

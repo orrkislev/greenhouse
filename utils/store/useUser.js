@@ -1,13 +1,14 @@
 import { create } from 'zustand';
-import { persist, subscribeWithSelector } from 'zustand/middleware';
-import { AuthService } from '@/utils/firebase/auth';
+import { subscribeWithSelector } from 'zustand/middleware';
+import { AuthService, onGotUser } from '@/utils/firebase/auth';
 import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from '@/utils/firebase/firebase';
 import { resizeImageTo128 } from '@/utils/actions/storage actions';
+import { resetPin } from '../actions/admin actions';
 
 
-export const useUser = create(subscribeWithSelector(persist((set, get) => {
+export const useUser = create(subscribeWithSelector((set, get) => {
 	let unsubscribeUserDoc = null;
 	const unsubscribe = () => {
 		if (unsubscribeUserDoc) {
@@ -19,8 +20,9 @@ export const useUser = create(subscribeWithSelector(persist((set, get) => {
 
 	return {
 		user: null,
-		loading: true,
+		loading: false,
 		originalUser: null,
+		error: null,
 
 		logout: () => {
 			unsubscribe();
@@ -29,21 +31,22 @@ export const useUser = create(subscribeWithSelector(persist((set, get) => {
 		},
 
 		signIn: async (username, pinPass) => {
-			set({ loading: true });
-			try {
-				const userCredential = await AuthService.signIn(username, pinPass);
-				unsubscribe();
-				if (userCredential) {
-					const userRef = doc(db, 'users', username);
-					unsubscribeUserDoc = onSnapshot(userRef, (docSnap) => {
-						if (docSnap.exists()) set({ user: { ...docSnap.data(), id: username } });
-					});
-				}
-			} catch (error) {
-				throw error;
-			} finally {
-				set({ loading: false });
+			const { user, error } = await AuthService.signIn(username, pinPass);
+			if (user) {
+				await get().subscribeToUser(user.email.split('@')[0]);
+			} else {
+				set({ error });
 			}
+		},
+
+		subscribeToUser: async (userId) => {
+			set({ loading: true });
+			unsubscribe();
+			const userRef = doc(db, 'users', userId);
+			unsubscribeUserDoc = onSnapshot(userRef, (docSnap) => {
+				const data = docSnap.data();
+				if (docSnap.exists()) set({ user: { ...data, id: userId }, loading: false });
+			});
 		},
 
 		updateUserDoc: async (updates) => {
@@ -91,11 +94,9 @@ export const useUser = create(subscribeWithSelector(persist((set, get) => {
 			if (!user) return;
 			const storageRef = ref(storage, `profilePictures/${user.id}`);
 			const resizedBlob = await resizeImageTo128(image);
-			const uploadTask = uploadBytesResumable(storageRef, resizedBlob);
-			uploadTask.on('success', async () => {
-				const url = await getDownloadURL(uploadTask.snapshot.ref);
-				get().updateUserDoc({ profilePicture: url });
-			});
+			await uploadBytes(storageRef, resizedBlob);
+			const url = await getDownloadURL(storageRef);
+			await get().updateUserDoc({ profilePicture: url });
 		},
 
 		getUserData: async (userId) => {
@@ -103,15 +104,20 @@ export const useUser = create(subscribeWithSelector(persist((set, get) => {
 			const userDoc = await getDoc(userRef);
 			return userDoc.data();
 		},
+
+		changePin: async (newPin) => {
+			const user = get().user;
+			await resetPin(user.uid, newPin);
+		},
 	};
-},
-	{
-		name: 'auth-storage',
-		partialize: (state) => ({ user: state.user, originalUser: state.originalUser }),
-		merge: (persistedState, currentState) => ({ ...currentState, ...persistedState, loading: false }),
-	}
-)));
+}));
 
 export const userActions = Object.fromEntries(
 	Object.entries(useUser.getState()).filter(([key, value]) => typeof value === 'function')
 );
+
+onGotUser((user) => {
+	if (user && !useUser.getState().user) {
+		useUser.getState().subscribeToUser(user.email.split('@')[0]);
+	}
+});

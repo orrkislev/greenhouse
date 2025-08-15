@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getAI, getGenerativeModel, GoogleAIBackend } from "firebase/ai";
 
 const firebaseConfig = {
   // Replace with your Firebase configuration
@@ -18,4 +19,23 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+const ai = getAI(app, { backend: new GoogleAIBackend() });
+const model = getGenerativeModel(ai, { model: "gemini-2.5-flash" });
+
 export default app;
+
+export const generateText = async (prompt) => {
+  const result = await model.generateContent(prompt);
+  return result.response.text();
+}
+export const generateTextWithSchema = async (prompt, schema) => {
+  const model = getGenerativeModel(ai, {
+    model: "gemini-2.5-flash",
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: schema,
+    },
+  });
+  const result = await model.generateContent(prompt);
+  return result.response.text();
+}

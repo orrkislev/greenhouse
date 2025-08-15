@@ -3,11 +3,11 @@ import { ScheduleSection } from "../Layout";
 import { addDays, addWeeks, differenceInWeeks, endOfWeek, isSameDay, isToday, startOfWeek, subDays } from "date-fns";
 import { tw } from "@/utils/tw";
 
-const TermCell = tw`w-full h-full border border-stone-300 p-2 text-stone-500
-    ${({ isWeekend }) => isWeekend ? 'bg-blue-200/50' : ''}
-    ${({ isToday }) => isToday ? 'bg-green-200/50' : ''}
-    ${({ inTerm }) => inTerm ? '' : 'bg-stone-200'}
-    ${({ inPast }) => inPast ? 'stripes' : ''}
+const TermCell = tw.div`w-full h-full border border-stone-300 p-2 text-stone-500 min-h-16
+    ${({ $isWeekend }) => $isWeekend ? 'bg-blue-200/50' : ''}
+    ${({ $isToday }) => $isToday ? 'bg-green-200/50' : ''}
+    ${({ $inTerm }) => $inTerm ? '' : 'bg-stone-200'}
+    ${({ $inPast }) => $inPast ? 'stripes' : ''}
 `;
 
 export default function Term() {
@@ -41,7 +41,7 @@ export default function Term() {
     return (
         <ScheduleSection>
             {weeks.map((week, i) => week.map((day, j) => (
-                <TermCell key={j} inTerm={day.inTerm} isWeekend={day.isWeekend} isToday={day.isToday} inPast={day.inPast}>
+                <TermCell key={j} $inTerm={day.inTerm} $isWeekend={day.isWeekend} $isToday={day.isToday} $inPast={day.inPast}>
                     <div className="text-xs">{day.date.toLocaleDateString('he-IL', { month: 'long', day: 'numeric' })}</div>
                     {day.isFirstDayOfTerm && <div className="text-xs">היום הראשון של התקופה</div>}
                     {day.isLastDayOfTerm && <div className="text-xs">היום האחרון של התקופה</div>}
