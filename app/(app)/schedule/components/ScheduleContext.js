@@ -10,7 +10,7 @@ export default function ScheduleContext() {
 
     return (
         <div className="flex flex-col gap-4">
-            {user.googleRefreshToken && <AuthGoogleCalendar />}
+            {!user.googleRefreshToken && <AuthGoogleCalendar />}
             <StudyGroupsMessage />
         </div>
     )
