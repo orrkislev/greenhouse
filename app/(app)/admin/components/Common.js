@@ -11,17 +11,19 @@ export const Cell = ({ children, className = '' }) => (
 )
 
 export function Edittable({ value, onChange = () => { }, onFinish = () => { } }) {
-    const [editing, setEditing] = useState(false);
+    const [editing, setEditing] = useState(true);
     const onUpdate = (e) => {
         onChange(e.target.value);
     }
     const onBlur = (e) => {
-        setEditing(false);
+        // setEditing(false);
         onFinish(e.target.value);
     }
     if (editing) {
         return (
-            <input type="text" defaultValue={value} onChange={onUpdate} onBlur={onBlur} autoFocus />
+            <input type="text" defaultValue={value} onChange={onUpdate} onBlur={onBlur} autoFocus 
+                className="border-none outline-none p-0 m-0"
+            />
         );
     } else {
         return <div className="cursor-pointer" onClick={() => setEditing(true)}>{value ? value : '-'}</div>;

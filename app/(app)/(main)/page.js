@@ -22,8 +22,8 @@ export default function MainPage() {
                     <div className="flex gap-3">
                         <MainProject />
                         <MainSchedule />
+                        <MainLearn />
                     </div>
-                    <MainLearn />
                 </div>
             </PageMain>
             <ContextBar name="">

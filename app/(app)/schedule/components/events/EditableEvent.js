@@ -10,8 +10,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useState } from "react";
 import TimeRangePicker from "@/components/ui/timerange-picker";
 import { eventsActions } from "@/utils/store/useEvents";
+import WithLabel from "@/components/WithLabel";
+import Button from "@/components/Button";
+import { CalendarCheck, Trash2 } from "lucide-react";
 
-export function EditableEvent({ event, onStartDrag, onEndDrag, onStartResize, onEndResize, onSelect }) {
+export function EditableEvent({ event, onStartDrag, onEndDrag, onStartResize, onEndResize }) {
     const { isDragging, isResizing, isHovered,
         handleMouseDown, handleResizeDown, handleMouseEnter, handleMouseLeave,
     } = useDragAndResize({ onStartDrag, onEndDrag, onStartResize, onEndResize });
@@ -68,7 +71,7 @@ export function EditableEvent({ event, onStartDrag, onEndDrag, onStartResize, on
 }
 
 
-function EditEvent({event, onClose}) {
+function EditEvent({ event, onClose }) {
     const [startTime, setStartTime] = useState(event.start);
     const [endTime, setEndTime] = useState(event.end);
 
@@ -87,28 +90,26 @@ function EditEvent({event, onClose}) {
     };
 
     return (
-        <div>
-            <EventTitleEditor event={event} />
-            <TimeRangePicker
-                value={{ start: startTime, end: endTime }}
-                onChange={({ start, end }) => {
-                    setStartTime(start);
-                    setEndTime(end);
-                }}
-            />
-            <div className="flex justify-end">
-                <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors mr-2"
-                    onClick={handleSave}
-                >
-                    Save
-                </button>
-                <button
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
-                    onClick={handleDelete}
-                >
-                    Delete Event
-                </button>
+        <div className="flex flex-col gap-2">
+            <WithLabel label="כותרת">
+                <EventTitleEditor event={event} />
+            </WithLabel>
+            <WithLabel label="זמן">
+                <TimeRangePicker
+                    value={{ start: startTime, end: endTime }}
+                    onChange={({ start, end }) => {
+                        setStartTime(start);
+                        setEndTime(end);
+                    }}
+                />
+            </WithLabel>
+            <div className="flex justify-between mt-4">
+                <Button data-role="save" onClick={handleSave} >
+                    שמירה <CalendarCheck className="w-4 h-4" />
+                </Button>
+                <Button data-role="delete" onClick={handleDelete} >
+                    <Trash2 className="w-4 h-4" />
+                </Button>
             </div>
         </div>
     );

@@ -20,9 +20,9 @@ export default function AdminStaff() {
     const addStaff = () => {
         setStaffData([...staffData, {
             id: new Date().getTime(),
-            username: 'user',
-            firstName: 'שם פרטי',
-            lastName: 'שם משפחה',
+            username: '',
+            firstName: '',
+            lastName: '',
             admin: false,
             major: '',
             isNew: true,
@@ -36,22 +36,23 @@ export default function AdminStaff() {
         setMadeChanges(true);
     }
 
-    const saveChanges = () => {
+    const saveChanges = async () => {
         const updates = staffData.filter(staff => staff.dirty && !staff.isNew);
         const newStaff = staffData.filter(staff => staff.isNew);
-        updates.forEach(staff => {
+        for (const staff of updates) {
             delete staff.dirty;
             const id = staff.id;
             delete staff.id;
-            adminActions.updateMember(id, staff);
-        });
-        newStaff.forEach(staff => {
-            delete staff.isNew;
+            await adminActions.updateMember(id, staff);
+        }
+        for (const staff of newStaff) {
+            delete staff.isNew; 
             delete staff.dirty;
             delete staff.id;
             if (staff.admin) staff.roles.push('admin');
-            adminActions.createMember(staff);
-        });
+            if (staff.major == '') delete staff.major;
+            await adminActions.createMember(staff);
+        }
         setMadeChanges(false);
     }
 
@@ -81,12 +82,24 @@ export default function AdminStaff() {
                         <tr key={index}>
                             <Cell>{index + 1}</Cell>
                             {staff.isNew ? (
-                                <Cell><Edittable value={staff.username} onChange={(value) => updateStaffData(staff.id, 'username', value)} /></Cell>
+                                <Cell>
+                                    <input type="text" defaultValue={staff.username} placeholder="שם משתמש" className="border-none outline-none p-0 m-0"
+                                        onChange={(e) => updateStaffData(staff.id, 'username', e.target.value)}
+                                    />
+                                </Cell>
                             ) : (
-                                <Cell className='text-stone-500'>{staff.username}</Cell>
+                                <Cell className='text-stone-500'>{staff.id}</Cell>
                             )}
-                            <Cell><Edittable value={staff.firstName} onChange={(value) => updateStaffData(staff.id, 'firstName', value)} /></Cell>
-                            <Cell><Edittable value={staff.lastName} onChange={(value) => updateStaffData(staff.id, 'lastName', value)} /></Cell>
+                            <Cell>
+                                <input type="text" defaultValue={staff.firstName} placeholder="שם פרטי" className="border-none outline-none p-0 m-0"
+                                    onChange={(e) => updateStaffData(staff.id, 'firstName', e.target.value)}
+                                />
+                            </Cell>
+                            <Cell>
+                                <input type="text" defaultValue={staff.lastName} placeholder="שם משפחה" className="border-none outline-none p-0 m-0"
+                                    onChange={(e) => updateStaffData(staff.id, 'lastName', e.target.value)}
+                                />
+                            </Cell>
                             <Cell><Checkbox value={staff.admin || staff.roles.includes('admin')} onChange={(value) => updateStaffData(staff.id, 'admin', value)} /></Cell>
                             <Cell>
                                 <select value={staff.major} onChange={(e) => updateStaffData(staff.id, 'major', e.target.value)}>

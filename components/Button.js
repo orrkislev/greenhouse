@@ -1,0 +1,23 @@
+import { tw } from "@/utils/tw"
+
+const ButtonDiv = tw`
+    inline-flex items-center justify-between gap-2 p-2 rounded-sm
+    whitespace-nowrap text-xs font-medium 
+    border border-stone-300 text-stone-700
+    hover:bg-stone-200 hover:border-stone-400 hover:text-stone-800
+    transition-all duration-200 group/button cursor-pointer
+    disabled:pointer-events-none disabled:opacity-50 
+    [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 
+    outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 
+    dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:border-input dark:hover:bg-input/50
+    data-[role=edit]:text-indigo-800 data-[role=edit]:border-indigo-300 data-[role=edit]:hover:bg-indigo-100 data-[role=edit]:hover:border-indigo-400
+    data-[role=delete]:text-rose-800 data-[role=delete]:border-rose-300 data-[role=delete]:hover:bg-rose-100 data-[role=delete]:hover:border-rose-400
+    data-[role=save]:text-emerald-800 data-[role=save]:border-emerald-300 data-[role=save]:hover:bg-emerald-100 data-[role=save]:hover:border-emerald-400
+    data-[role=cancel]:text-stone-800 data-[role=cancel]:border-stone-300 data-[role=cancel]:hover:bg-stone-100 data-[role=cancel]:hover:border-stone-400
+    data-[role=close]:text-stone-800 data-[role=close]:border-stone-300 data-[role=close]:hover:bg-stone-100 data-[role=close]:hover:border-stone-400
+    data-[role=new]:text-green-800 data-[role=new]:border-green-300 data-[role=new]:hover:bg-green-100 data-[role=new]:hover:border-green-400
+    `
+
+export default function Button({ children, ...props }) {
+    return <ButtonDiv {...props}>{children}</ButtonDiv>
+}

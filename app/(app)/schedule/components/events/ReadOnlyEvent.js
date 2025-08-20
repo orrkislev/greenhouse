@@ -13,7 +13,17 @@ const EventDiv = tw`
     z-5 hover:bg-[#E77885] stripes outline-2 outline-white
 `;
 
-export function ReadOnlyEvent({ event, onSelect }) {
+export function ReadOnlyEvent({ event }) {
+
+    return (
+        <EventDiv style={event.gridStyle}>
+            <div className="font-medium truncate">{event.title}</div>
+        </EventDiv>
+    );
+}
+
+
+function ReadOnlyEventWithContext({ event, onSelect }) {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     return (

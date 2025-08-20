@@ -137,7 +137,7 @@ function FocusedGoal({ index }) {
                         }}
                     >
                         {goal.leadingQuestions.map((question, index) => (
-                            <div key={question} className="px-4 py-1 bg-white border border-stone-300 flex gap-2 group w-full text-xs">
+                            <div key={question + index} className="px-4 py-1 bg-white border border-stone-300 flex gap-2 group w-full text-xs">
                                 <AutoSizeTextarea
                                     value={question}
                                     onFinish={value => updateQuestion(index, value)}

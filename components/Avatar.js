@@ -10,6 +10,7 @@ export default function Avatar({ user, userId, className, ...props }) {
         if (!user && userId) {
             userActions.getUserData(userId).then(setUserData);
         }
+        if (user) setUserData(user);
     }, [user, userId])
 
     let avatarContent = null;

@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { UserCircle2 } from 'lucide-react';
-import { useUser } from '@/utils/store/useUser';
+import { userActions, useUser } from '@/utils/store/useUser';
 import PINInput from './ui/PIN';
 import { redirect } from 'next/navigation';
 import Image from 'next/image';
@@ -10,7 +9,7 @@ import Image from 'next/image';
 export default function WithAuth({ children, role }) {
     const [username, setUsername] = useState('');
     const [pin, setPin] = useState(['', '', '', '']);
-    const { user, signIn, loading, error } = useUser();
+    const { user, loading, error } = useUser();
 
     if (loading) {
         return (
@@ -31,7 +30,7 @@ export default function WithAuth({ children, role }) {
 
     const onSubmit = (e) => {
         e.preventDefault();
-        signIn(username, pin);
+        userActions.signIn(username, pin);
     };
 
     return (

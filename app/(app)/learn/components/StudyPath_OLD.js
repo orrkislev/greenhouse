@@ -1,6 +1,6 @@
 import SmartText, { AutoSizeTextarea } from "@/components/SmartText"
 import { studyActions } from "@/utils/store/useStudy"
-import { Check, Ellipsis, Hamburger, Loader2, Menu, Pencil, Plus, Sparkle, Trash2, X } from "lucide-react"
+import { Check, Loader2, Pencil, Plus, Trash2 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { tw } from "@/utils/tw"
 import { getNewStep, getNewSubject } from "./example study paths"
@@ -20,23 +20,22 @@ export default function StudyPath({ path }) {
 
     return (
         <div className="flex flex-col gap-4">
-            <PathBG key={path.id} path={path} />
-            <div className="">
-                <div className="inline-block -mt-4">
-                    <SmartText className="text-6xl font-bold" text={path.name} onEdit={(name) => {
-                        studyActions.updatePath(path.id, { ...path, name })
-                        studyActions.createImage(path, name)
-                    }} />
-                    <SmartText className="text-xl text-stone-500" text={path.description} onEdit={(description) => studyActions.updatePath(path.id, { ...path, description })} />
-                </div>
-                <PathOptions path={path} />
-            </div>
-
-            <div className="flex gap-4 ">
+            <div className="flex gap-4">
+                <SpecialButton onClick={() => studyActions.deletePath(path.id)}>
+                    <Trash2 className="w-4 h-4" />
+                    מחק תחום
+                </SpecialButton>
                 <SpecialButton onClick={newSubject} disabled={loading}>
                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                     {loading ? "רגע..." : "הוסף נושא"}
                 </SpecialButton>
+            </div>
+
+
+            <div className="flex flex-col gap-1 py-8 px-4 relative">
+                <SmartText className="text-xl z-10" text={path.name} onEdit={(name) => studyActions.updatePath(path.id, { ...path, name })} />
+                <SmartText className="text-sm text-stone-500 z-10" text={path.description} onEdit={(description) => studyActions.updatePath(path.id, { ...path, description })} />
+                <SubjectBg subject={path} />
             </div>
 
             {path.subjects.map((subject) => (
@@ -46,41 +45,14 @@ export default function StudyPath({ path }) {
     )
 }
 
-function PathOptions({ path }) {
-    const [isOpen, setIsOpen] = useState(false)
-
-    const onDelete = () => {
-        studyActions.deletePath(path.id)
-        setIsOpen(false)
-    }
-
-    return (
-        <div className={`border border-stone-200 bg-white float-left mt-2 max-w-8 transition-all duration-300 overflow-hidden ${isOpen ? 'max-w-40' : ''}`}>
-            {!isOpen ? (
-                <Ellipsis className="w-6 h-6 cursor-pointer p-1 hover:bg-stone-200 rounded-full" onClick={() => setIsOpen(true)} />
-            ) : (
-                <div className="p-2 rounded-md flex flex-col gap-2">
-                    <div className="flex justify-end">
-                        <X className="w-6 h-6 cursor-pointer p-1 hover:bg-stone-200 rounded-full" onClick={() => setIsOpen(false)} />
-                    </div>
-                    <div className="flex gap-2 items-center text-stone-500 cursor-pointer hover:text-stone-500 hover:bg-stone-200 rounded-md p-1 transition-all truncate" onClick={onDelete}>
-                        <Trash2 className="w-4 h-4" />
-                        מחק תחום
-                    </div>
-                </div>
-            )}
-        </div>
-    )
-}
-
-function PathBG({ path }) {
-    return (
-        <div className="border border-stone-200 w-full h-64 bg-contain bg-center flex items-center justify-center" style={{ backgroundImage: path.image ? `url(${path.image})` : 'none' }} >
-            {!path.image && (
-                <Sparkle className="w-16 h-16 animate-pulse" />
-            )}
-        </div>
-    )
+function SubjectBg({ subject }) {
+    // const [image, setImage] = useState(null)
+    // useEffect(() => {
+        // generateImage(subject.name).then(setImage)
+    // }, [subject])
+    // if (!image) return null
+    // const imageUrl = `data:image/png;base64,${image}`;
+    // return <div className="absolute inset-0 bg-red-500 bg-cover bg-center z-1" style={{ backgroundImage: `url(${imageUrl})` }} />
 }
 
 function Subject({ path, subject }) {

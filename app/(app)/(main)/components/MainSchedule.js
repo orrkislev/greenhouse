@@ -1,6 +1,6 @@
 import { eventsActions, useEvents } from "@/utils/store/useEvents";
 import { googleCalendarActions, useGoogleCalendar } from "@/utils/store/useGoogleCalendar";
-import { groupsActions, useGroups } from "@/utils/store/useGroups";
+import { groupsActions, useInvolvedGroups } from "@/utils/store/useGroups";
 import { notesActions, useNotes } from "@/utils/store/useNotes"
 import { useTime } from "@/utils/store/useTime";
 import { useEffect } from "react";
@@ -11,12 +11,8 @@ export default function MainSchedule() {
     const week = useTime(state => state.week);
     const notes = useNotes(state => state.userNotes);
     const events = useEvents(state => state.events);
-    const groups = useGroups(state => state.groups);
+    const groups = useInvolvedGroups();
     const googleCalendarEvents = useGoogleCalendar(state => state.events);
-
-    useEffect(() => {
-        groupsActions.loadGroups();
-    }, [])
 
     const groupIds = groups.map(g => g.id).join(',');
 
@@ -34,12 +30,12 @@ export default function MainSchedule() {
     const todayGroupEvents = groups.map(group => (
         {
             group: group.name,
-            events: group.events ? group.events.filter(event => event.date === today) : []
+            events: group.events ? group.events[today] : []
         }))
         .filter(group => group.events.length > 0)
 
     return (
-        <Box2 label="מה יש לי היום">
+        <Box2 label="מה יש לי היום" className="flex-1">
 
             {todayNote && (
                 <div className="text-sm text-stone-500">

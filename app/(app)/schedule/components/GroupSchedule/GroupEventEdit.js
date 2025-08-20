@@ -1,8 +1,11 @@
 import { FormInput, useForm } from "@/components/ui/form/FormInput";
-import { Button } from "@/components/ui/button";
 import TimeRangePicker from "@/components/ui/timerange-picker";
 import { format } from "date-fns";
 import { groupsActions } from "@/utils/store/useGroups";
+import WithLabel from "@/components/WithLabel";
+import Button from "@/components/Button";
+import { CalendarCheck, X } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 export function GroupEventEdit({ onClose, groupId, date, event }) {
     const form = useForm({
@@ -32,26 +35,26 @@ export function GroupEventEdit({ onClose, groupId, date, event }) {
 
     return (
         <form {...form.formProps} className="flex flex-col gap-1">
-            <div className="flex flex-col gap-2">
+            <WithLabel label="כותרת">
                 <FormInput {...form.props.title} />
-            </div>
-            <TimeRangePicker
-                value={form.values.timeRange}
-                onChange={(value) => form.setValue('timeRange', value)}
-            />
-            <div className="flex w-full gap-2">
-                <Button type="submit" className="mt-2 flex-1">
-                    שמירה
+            </WithLabel>
+            <WithLabel label="זמן">
+                <TimeRangePicker
+                    value={form.values.timeRange}
+                    onChange={(value) => form.setValue('timeRange', value)}
+                />
+            </WithLabel>
+            <div className="flex justify-between mt-4">
+                <Button data-role="save">
+                    שמירה <CalendarCheck
+                        className="w-4 h-4" />
                 </Button>
                 {event && (
-                    <Button type="button" variant="destructive" className="mt-2 flex-1" onClick={clickDelete}>
-                        מחיקה
+                    <Button data-role="delete" onClick={clickDelete}>
+                        <Trash2 className="w-4 h-4" />
                     </Button>
                 )}
             </div>
-            <Button type="button" variant="secondary" className="mt-2" onClick={onClose}>
-                ביטול
-            </Button>
         </form>
     );
 }

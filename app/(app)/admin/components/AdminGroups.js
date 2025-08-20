@@ -101,7 +101,7 @@ function GroupMentors({ group }) {
     };
 
     return (
-        <div className="flex flex-col gap-2 border border-stone-200 p-4">
+        <div className="flex flex-col gap-2 border border-stone-200 p-4 sticky top-0">
             <h3 className="text-sm">מנטורים</h3>
             {groupMentors.map(mentor => (
                 <div key={mentor.id} className="flex justify-between gap-2 items-center text-sm text-blue-800 px-2 rounded-full group relative border border-blue-400">
@@ -112,7 +112,7 @@ function GroupMentors({ group }) {
             ))}
             <select className="ml-2 p-1 border rounded text-sm" onChange={(e) => addMentorToGroup(e.target.value)} defaultValue="">
                 <option value="" disabled>הוסף מנטור</option>
-                {staff.filter(mentor => !group.mentors.some(m => m.id === mentor.id)).map(mentor => (
+                {staff.filter(mentor => !group.mentors.some(m => m.id === mentor.id)).sort((a, b) => a.firstName.localeCompare(b.firstName)).map(mentor => (
                     <option key={mentor.id} value={mentor.id}>{mentor.firstName} {mentor.lastName}</option>
                 ))}
             </select>
@@ -122,20 +122,20 @@ function GroupMentors({ group }) {
 
 function GroupStudents({ group }) {
     const majors = useAdmin(state => state.majors);
-    const [studentsData, setStudentsData] = useState(group.students);
+    const [studentsData, setStudentsData] = useState(group.students || []);
     const [madeChanges, setMadeChanges] = useState(false);
 
     useEffect(() => {
-        setStudentsData(group.students);
+        if (group && group.students) setStudentsData(group.students);
     }, [group])
 
     const addStudent = () => {
         const newStudent = {
             id: new Date().getTime(),
-            username: 'user.na',
-            firstName: 'שם פרטי',
-            lastName: 'שם משפחה',
-            major: 'מגמה',
+            username: '',
+            firstName: '',
+            lastName: '',
+            major: '',
             isNew: true,
             roles: ['student'],
             class: group.id,
@@ -149,19 +149,20 @@ function GroupStudents({ group }) {
         setMadeChanges(true);
     };
 
-    const saveChanges = () => {
+    const saveChanges = async () => {
         const dirtyStudents = studentsData.filter(student => student.dirty && !student.isNew);
         const newStudents = studentsData.filter(student => student.isNew);
-        dirtyStudents.forEach(student => {
+        for (const student of dirtyStudents) {
             delete student.dirty;
-            adminActions.updateMember(student.id, student);
-        });
-        newStudents.forEach(student => {
+            await adminActions.updateMember(student.id, student);
+        }
+        for (const student of newStudents) {
             delete student.isNew;
             delete student.dirty;
             delete student.id;
-            adminActions.createMember(student);
-        });
+            if (student.major == '') delete student.major;
+            await adminActions.createMember(student);
+        }
         setMadeChanges(false);
     }
 
@@ -186,16 +187,28 @@ function GroupStudents({ group }) {
             <table className="text-left text-xs border-collapse border-stone-200 border">
                 <TableHeader headers={headers} />
                 <tbody>
-                    {studentsData.map((student, index) => (
-                        <tr key={index} className="border-b border-stone-200">
+                    {studentsData.sort((a, b) => a.firstName.localeCompare(b.firstName)).map((student, index) => (
+                        <tr key={student.id + index} className="border-b border-stone-200">
                             <Cell >{index + 1}</Cell>
                             {student.isNew ? (
-                                <Cell><Edittable value={student.username} onChange={(value) => updateStudentData(student.id, 'username', value)} /></Cell>
+                                <Cell>
+                                    <input type="text" defaultValue={student.username} placeholder="שם משתמש" className="border-none outline-none p-0 m-0"
+                                        onChange={(e) => updateStudentData(student.id, 'username', e.target.value)}
+                                    />
+                                </Cell>
                             ) : (
-                                <Cell className="text-stone-500">{student.username}</Cell>
+                                <Cell className="text-stone-500">{student.id}</Cell>
                             )}
-                            <Cell><Edittable value={student.firstName} onChange={(value) => updateStudentData(student.id, 'firstName', value)} /></Cell>
-                            <Cell><Edittable value={student.lastName} onChange={(value) => updateStudentData(student.id, 'lastName', value)} /></Cell>
+                            <Cell>
+                                <input type="text" defaultValue={student.firstName} placeholder="שם פרטי" className="border-none outline-none p-0 m-0"
+                                    onChange={(e) => updateStudentData(student.id, 'firstName', e.target.value)}
+                                />
+                            </Cell>
+                            <Cell>
+                                <input type="text" defaultValue={student.lastName} placeholder="שם משפחה" className="border-none outline-none p-0 m-0"
+                                    onChange={(e) => updateStudentData(student.id, 'lastName', e.target.value)}
+                                />
+                            </Cell>
                             <Cell>
                                 <select value={student.major} onChange={(e) => updateStudentData(student.id, 'major', e.target.value)}>
                                     <option value="">-</option>

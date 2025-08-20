@@ -9,6 +9,7 @@ export const useAdmin = create((set, get) => ({
     staff: [],
     groups: [],
     majors: [],
+    allMembers: [],
 
     loadData: async () => {
         if (get().groups.length > 0) return;
@@ -29,6 +30,7 @@ export const useAdmin = create((set, get) => ({
         set({
             staff: staffList,
             groups: groups,
+            allMembers: allMembers,
         });
 
         get().loadMajors();
@@ -45,7 +47,8 @@ export const useAdmin = create((set, get) => ({
             groups: state.groups.map(group => ({
                 ...group,
                 students: group.students.map(student => student.id === memberId ? { ...student, ...updates } : student)
-            }))
+            })),
+            allMembers: state.allMembers.map(member => member.id === memberId ? { ...member, ...updates } : member)
         }));
     },
     createMember: async (memberData) => {
@@ -53,25 +56,30 @@ export const useAdmin = create((set, get) => ({
         const memberRef = doc(db, "users", memberData.username);
         delete memberData.username;
         await updateDoc(memberRef, memberData);
+        const newUserData = { id: memberData.username, ...memberData };
         if (memberData.roles.includes('student')) {
             set(state => ({
                 groups: state.groups.map(group => ({
                     ...group,
-                    students: group.students.concat({ id: memberData.username, ...memberData })
+                    students: group.students ? group.students.concat(newUserData) : [newUserData]
                 }))
             }));
         } else if (memberData.roles.includes('staff')) {
             set(state => ({
-                staff: state.staff.concat({ id: memberData.username, ...memberData })
+                staff: state.staff.concat(newUserData)
             }));
         }
+        set(state => ({
+            allMembers: state.allMembers.concat(newUserData)
+        }));
     },
     deleteMember: async (member) => {
         await deleteUser(member.uid);
         await deleteDoc(doc(db, "users", member.id));
         set(state => ({
             staff: state.staff.filter(m => m.id !== member.id),
-            groups: state.groups.map(group => ({ ...group, students: group.students.filter(student => student.id !== member.id) }))
+            groups: state.groups.map(group => ({ ...group, students: group.students.filter(student => student.id !== member.id) })),
+            allMembers: state.allMembers.filter(m => m.id !== member.id)
         }));
     },
 

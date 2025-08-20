@@ -1,8 +1,9 @@
-import { format, startOfWeek } from "date-fns";
+import { addDays, format, isBefore, startOfWeek } from "date-fns";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { create } from "zustand";
 import { db } from "@/utils//firebase/firebase";
 import { subscribeWithSelector } from "zustand/middleware";
+import { isEqual } from "lodash";
 
 export const HOURS = ['9:30', '10:30', '11:30', '12:30', 'ערב'];
 
@@ -107,3 +108,18 @@ export function getTermWeeks(term) {
     }
     return termWeeks;
 }
+
+
+export function dateRange(start, end) {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const dates = [];
+    let current = startDate;
+  
+    while (isBefore(current, endDate) || isEqual(current, endDate)) {
+      dates.push(new Date(current)); // clone so it's not mutated later
+      current = addDays(current, 1);
+    }
+  
+    return dates.map(date => format(date, 'yyyy-MM-dd'));
+  }

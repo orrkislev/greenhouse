@@ -18,7 +18,7 @@ export default function MainProject() {
     if (project && !project.master) state = 'proposal'
 
     return (
-        <Box2 label="הפרויקט שלי" className="group/project pb-8">
+        <Box2 label="הפרויקט שלי" className="flex-1group/project pb-8">
             <div className='flex flex-col gap-3'>
                 <div className='font-semibold'>
                     {state === 'no project' ? 'אין פרויקט פעיל' : project.name || 'פרויקט חדש'}

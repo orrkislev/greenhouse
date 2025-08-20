@@ -5,36 +5,44 @@ import { Pencil } from "lucide-react";
 
 export default function SmartText({ text, className, onEdit }) {
     const [isEditing, setIsEditing] = useState(false);
+    const [lastValue, setLastValue] = useState(text);
 
     if (!onEdit) return <SmartLabel text={text} className={className} />
 
+    const startEditing = (e) => {
+        e.stopPropagation();
+        setIsEditing(true);
+        setLastValue(text);
+    }
+
+    const onFinish = (value) => {
+        if (value !== lastValue) {
+            onEdit(value);
+            setLastValue(value)
+        }
+        setIsEditing(false);
+    }
+
+    if (isEditing) {
+        return <AutoSizeTextarea value={text} onFinish={onFinish} autoFocus={true} className={className} />
+    }
+
     return (
-        <div className="flex gap-4 group">
-            {isEditing
-                // ? <input type="text" defaultValue={text} autoFocus onBlur={(e) => { onEdit(e.target.value); setIsEditing(false) }} />
-                ? <AutoSizeTextarea value={text} onFinish={(value) => { onEdit(value); setIsEditing(false) }} autoFocus={true} className={className} />
-                : (
-                    <>
-                        <SmartLabel text={text} className={className} />
-                        <Pencil className="w-4 h-4 cursor-pointer opacity-0 group-hover:opacity-50 hover:opacity-100 transition-all"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setIsEditing(true);
-                            }}
-                        />
-                    </>
-                )
-            }
+        <div className="flex gap-4 group items-center">
+            <SmartLabel text={text} className={className} onClick={startEditing} />
+            <Pencil className="w-4 h-4 cursor-pointer opacity-0 group-hover:opacity-50 hover:opacity-100 transition-all"
+                onClick={startEditing}
+            />
         </div>
     )
 }
 
 
-function SmartLabel({ text, className }) {
-    className += ' cursor-default'
+function SmartLabel({ text, className, onClick }) {
+    className += ' cursor-text'
     const isLink = text.includes("http") || text.includes("www.");
     if (isLink) return <LinkText text={text} className={className} />
-    return <span className={className}>{text}</span>
+    return <span className={className} onClick={onClick}>{text}</span>
 }
 
 

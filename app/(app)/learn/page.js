@@ -4,28 +4,28 @@ import { useEffect, useState } from "react"
 import { DashboardLayout, DashboardPanel, DashboardPanelButton, DashboardMain, DashboardTitle } from "@/components/DashboardLayout"
 import { studyActions, useStudy } from "@/utils/store/useStudy"
 import StudyMain from "./components/StudyMain"
-import StudyPath, { newSubjectData } from "./components/StudyPath"
+import StudyPath from "./components/StudyPath"
 import { tw } from "@/utils/tw"
-import { PageMain } from "@/components/ContextBar"
+import ContextBar, { PageMain } from "@/components/ContextBar"
 import { examplePaths } from "./components/example study paths"
+import { useSearchParams } from "next/navigation"
+import Link from "next/link"
+import StudyContext from "./components/StudyContext"
 
 const PathButtonSpan = tw.span`
     ${({ $active }) => $active ? '' : 'line-through'}
 `
 
 export default function LearnPage() {
+    const searchParams = useSearchParams()
     const paths = useStudy(state => state.paths)
-    const [view, setView] = useState('dashboard');
 
     useEffect(() => {
         studyActions.loadPaths()
     }, [])
 
-    useEffect(() => {
-        if (paths.length > 0) setView(paths[paths.length - 1].id)
-    }, [paths.length])
-
-    const selectedPath = paths.find(path => path.id === view)
+    const id = searchParams.get('id')
+    const selectedPath = paths.find(path => path.id === id)
 
     const newPath = () => {
         const selectedPath = examplePaths[Math.floor(Math.random() * examplePaths.length)]
@@ -33,25 +33,35 @@ export default function LearnPage() {
     }
 
     return (
+        <>
         <PageMain>
             <DashboardLayout>
                 <DashboardTitle>מסלולי למידה שלי</DashboardTitle>
-                <DashboardPanel>
-                    <DashboardPanelButton onClick={() => setView('dashboard')} $active={view === 'dashboard'}>ראשי</DashboardPanelButton>
+                {selectedPath && (
+                    <DashboardPanel>
+                    <Link href='/learn'>
+                        <DashboardPanelButton $active={!id}>ראשי</DashboardPanelButton>
+                    </Link>
                     {paths.map(path => (
-                        <DashboardPanelButton key={path.id} onClick={() => setView(path.id)} $active={view === path.id}>
-                            <PathButtonSpan $active={path.active}>{path.name}</PathButtonSpan>
-                        </DashboardPanelButton>
+                        <Link href={`/learn?id=${path.id}`} key={path.id}>
+                            <DashboardPanelButton $active={id === path.id}>
+                                <PathButtonSpan $active={path.active}>{path.name}</PathButtonSpan>
+                            </DashboardPanelButton>
+                        </Link>
                     ))}
                     <DashboardPanelButton onClick={newPath} className="bg-emerald-500 text-white">
                         +
-                    </DashboardPanelButton>
-                </DashboardPanel>
+                        </DashboardPanelButton>
+                    </DashboardPanel>
+                )}
                 <DashboardMain>
-                    {view === 'dashboard' && <StudyMain />}
-                    {selectedPath && <StudyPath path={selectedPath} />}
+                    {selectedPath ? <StudyPath path={selectedPath} /> : <StudyMain />}
                 </DashboardMain>
             </DashboardLayout>
         </PageMain>
+        <ContextBar>
+            <StudyContext />
+        </ContextBar>
+        </>
     )
 }

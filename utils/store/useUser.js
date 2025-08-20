@@ -24,12 +24,14 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 		originalUser: null,
 		error: null,
 
+		// ---------------------------------------------------------------
+		// ------------ Log in and out, subscribe to user ----------------
+		// ---------------------------------------------------------------
 		logout: () => {
 			unsubscribe();
 			set({ user: null });
 			AuthService.signOut();
 		},
-
 		signIn: async (username, pinPass) => {
 			const { user, error } = await AuthService.signIn(username, pinPass);
 			if (user) {
@@ -38,7 +40,6 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 				set({ error });
 			}
 		},
-
 		subscribeToUser: async (userId) => {
 			set({ loading: true });
 			unsubscribe();
@@ -60,6 +61,9 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 			}));
 		},
 
+		// ----------------------------------------------------
+		// ------------ Staff Switching User ------------------
+		// ----------------------------------------------------
 		switchToStudent: async (studentId, currUrl) => {
 			const user = get().user;
 			if (!user || !user.roles || !user.roles.includes('staff')) {
@@ -87,24 +91,35 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 				if (docSnap.exists()) set({ user: { ...docSnap.data(), id: originalUser.user.id } });
 			});
 			set({ user: originalUser, originalUser: null });
-			if (lastPage) setTimeout(() => window.location.href = lastPage, 100);
+			return lastPage;
 		},
+
+		// ----------------------------------------------------
+		// ------------ Profile Picture ------------------
+		// ----------------------------------------------------
 		updateProfilePicture: async (image) => {
 			const user = get().user;
 			if (!user) return;
 			const storageRef = ref(storage, `profilePictures/${user.id}`);
-			const resizedBlob = await resizeImageTo128(image);
+			const resizedBlob = await resizeImage(image, 128);
 			await uploadBytes(storageRef, resizedBlob);
 			const url = await getDownloadURL(storageRef);
 			await get().updateUserDoc({ profilePicture: url });
 		},
 
+
+		// ----------------------------------------------------
+		// ------------ Get User Data ------------------
+		// ----------------------------------------------------
 		getUserData: async (userId) => {
 			const userRef = doc(db, 'users', userId);
 			const userDoc = await getDoc(userRef);
 			return userDoc.data();
 		},
 
+		// ----------------------------------------------------
+		// ------------ Change Pin ------------------
+		// ----------------------------------------------------
 		changePin: async (newPin) => {
 			const user = get().user;
 			await resetPin(user.uid, newPin);

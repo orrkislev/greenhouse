@@ -1,3 +1,4 @@
+import WithLabel from "@/components/WithLabel";
 import { projectActions, useProject } from "@/utils/store/useProject";
 import { useTime } from "@/utils/store/useTime";
 import { tw } from "@/utils/tw";
@@ -12,19 +13,12 @@ export default function ProjectContext() {
         <div className="flex flex-col gap-4">
             {project && !project.isOld && project.master && (
                 <div className="flex-1 flex gap-3 flex-col">
-                    <div className="p-4 h-64 flex items-center justify-center border border-stone-300">
-                        <div className="text-center text-stone-600">
-                            <p className="text-sm leading-relaxed">
-                                {project.questions.map((question, index) => (
-                                    <span key={index} className="block mb-2">
-                                        <strong>{question.title}</strong> - {question.value}
-                                    </span>
-                                ))}
-                            </p>
-                            <div className="mt-8 text-lg font-medium">
-                                עריכה
-                            </div>
-                        </div>
+                    <div className="p-4 flex flex-col gap-4 border border-stone-300 text-sm text-stone-600">
+                        {project.questions.map((question, index) => (
+                            <WithLabel key={index} label={question.title}>
+                                <div className="text-sm text-stone-500">{question.value}</div>
+                            </WithLabel>
+                        ))}
                     </div>
 
                     {/* Research topics */}

@@ -10,7 +10,7 @@ export default function MainLearn() {
     }, [])
 
     return (
-        <Box2 label="למידה">
+        <Box2 label="למידה" className="flex-1">
             <div className="flex flex-col gap-8">
                 {paths.map((path) => (
                     <div key={path.id}>

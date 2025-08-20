@@ -35,7 +35,7 @@ export const createUser = async (username, firstName, lastName) => {
         throw new Error('Failed to create user');
     }
 
-    userDoc.set({
+    await userDoc.set({
         uid: userRecord.uid,
         firstName,
         lastName,

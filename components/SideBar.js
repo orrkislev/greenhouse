@@ -9,7 +9,7 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import Avatar from "./Avatar";
 
-const SideBarDiv = tw`flex flex-col border-l border-stone-400 bg-stone-200 -my-6`
+const SideBarDiv = tw`flex flex-col border-l border-stone-400 bg-stone-200 -my-6 py-4`
 const SideBarHeader = tw`aspect-square flex items-center justify-center p-2 relative`
 const SideBarContent = tw`h-full flex flex-col gap-1 pt-8 flex-1`
 const SideBarFooter = tw`flex flex-col gap-1 pb-4`
@@ -58,7 +58,7 @@ export default function SideBar() {
                 <SideBarItem href="/project" icon={<Snail className="w-4 h-4" />} label="הפרויקט" active={pathname === '/project'} />
 
                 {/* Research */}
-                <SideBarItem href="/research" icon={<Brain className="w-4 h-4" />} label="חקר" active={pathname === '/research'} disabled={true} />
+                <SideBarItem href="/research" icon={<Brain className="w-4 h-4" />} label="חקר" active={pathname === '/research'} />
 
                 {/* Vocation */}
                 <SideBarItem href="/vocation" icon={<Briefcase className="w-4 h-4" />} label="תעסוקה" active={pathname === '/vocation'} disabled={true} />

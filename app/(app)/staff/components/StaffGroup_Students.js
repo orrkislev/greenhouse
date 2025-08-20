@@ -1,88 +1,118 @@
-import Events from "@/app/(app)/schedule/components/events/Events";
 import { StudentCard } from "./StudentCard";
 import { useEffect, useState } from "react";
-import { useTime } from "@/utils/store/useTime";
-import { groupsActions } from "@/utils/store/useGroups";
-import { eventsActions } from "@/utils/store/useEvents";
 import { userActions } from "@/utils/store/useUser";
 import Avatar from "@/components/Avatar";
+import { eventsActions } from "@/utils/store/useEvents";
+import { groupsActions, groupUtils, useGroups } from "@/utils/store/useGroups";
+import { useTime } from "@/utils/store/useTime";
+import Button from "@/components/Button";
+import { UserRoundX, VenetianMask } from "lucide-react";
+import { staffActions } from "@/utils/store/useStaff";
+import WithLabel from "@/components/WithLabel";
 
 export default function StaffGroup_Students({ group }) {
-    const [selectedStudent, setSelectedStudent] = useState(null)
-
     if (!group.students) return null;
-
-    const onSelect = (student) => {
-        setSelectedStudent(prev => prev && prev.id === student.id ? null : student);
-    }
-
-    const goToStudent = async (student) => {
-        await userActions.switchToStudent(student.id, 'staff');
-        window.location.href = '/';
-    }
 
     let displayStudents = group.students;
     if (group.type === 'class' || group.type === 'major') displayStudents = displayStudents.filter(student => student.roles.includes('student'));
 
+    return <Staff_Students_List students={displayStudents} context={group.type} />
+}
+
+
+export function Staff_Students_List({ students, context }) {
+
+    const [selectedStudent, setSelectedStudent] = useState(students[0])
+
+
 
     return (
-        <div className="flex gap-4">
-            {selectedStudent && (
-                <div className="p-4 border border-stone-200 flex flex-col gap-2 cursor-pointer hover:bg-stone-100" onClick={() => goToStudent(selectedStudent)}>
-                    <div className="flex items-center gap-2">
-                        <Avatar user={selectedStudent} />
-                        <div className="font-bold">{selectedStudent.firstName} {selectedStudent.lastName}</div>
-                    </div>
-                    <div>מה יש לו היום</div>
-                    <div>מה הפרויקט שלו והמשימות</div>
-                    <div>איזה דברים הוא לומד</div>
-                    <div className="text-xl">אפשר ללחוץ כאן</div>
-                </div>
-            )}
+        <div className="">
+            <div className="float-right ml-4">
+                <SelectedStudentCard student={selectedStudent} context={context} />
+            </div>
+
             <div className="flex flex-wrap gap-2">
-                {displayStudents
+                {students
                     .sort((a, b) => a.firstName.localeCompare(b.firstName, 'he'))
                     .map((student) => (
                         <StudentCard key={student.id}
                             student={student}
-                            onSelect={() => onSelect(student)}
+                            onSelect={() => setSelectedStudent(student)}
                             selected={selectedStudent && selectedStudent.id === student.id}
                         />
                     ))
                 }
             </div>
         </div>
-    );
+    )
 }
 
+function SelectedStudentCard({ student, context }) {
+    const [data, setData] = useState(null)
+    const groups = useGroups(state => state.groups);
+    const today = useTime(state => state.today);
 
-
-function StudentSchedule({ student }) {
-    const week = useTime(state => state.week);
-    const [events, setEvents] = useState([]);
     useEffect(() => {
-        if (!student || !week) return;
+        setData({ ...student });
         (async () => {
-            const studentEvents = await eventsActions.getUserEventsForWeek(student.id, week);
-            for (const group of student.groups || []) {
-                const studentGroupEvents = await groupsActions.getUserGroupEventsForWeek(group, student.id, week);
+            const events = await eventsActions.getTodaysEventsForUser(student.id);
+            groupUtils.getUserGroupIds(student).forEach(groupId => groupsActions.loadGroupEvents(groupId, today, today));
+            setData({ ...student, events });
+        })()
+    }, [student, today])
 
-                studentEvents.push(...studentGroupEvents.map(event => ({
-                    ...event,
-                    group: group,
-                })));
-            }
-            setEvents(studentEvents)
-        })();
-    }, [student, week]);
+    const goToStudent = async (student) => {
+        await userActions.switchToStudent(student.id, 'staff');
+    }
+
+    if (!data) return null;
+
 
     return (
-        <Events
-            events={events}
-            edittable={false}
-            week={week}
-            withLabel={false}
-        />
-    )
+        <div className="p-6 border border-stone-200 flex flex-col gap-6 justify-between">
+            <div className="flex items-center gap-2">
+                <Avatar user={data} className="w-16 h-16" />
+                <div>
+                    <div className="font-bold">{data.firstName} {data.lastName}</div>
+                    <div className="text-xs text-stone-500">
+                        {context === 'class' ? groups.find(g => g.id === data.major)?.name : groups.find(g => g.id === data.class)?.name}
+                    </div>
+                </div>
+            </div>
+            <WithLabel label="לוז היום">
+                {data.events && data.events.length > 0 ? data.events.map(event => (
+                    <div key={event.id} className="flex gap-3 items-center">
+                        <div className="text-xs">ב{event.start}</div>
+                        <div className="text-sm font-bold">{event.title}</div>
+                    </div>
+                )) : <div className="text-xs text-stone-500">אין אירועים היום</div>}
+                {groups.filter(g => groupUtils.isMember(g, data)).map(group => (
+                    <div key={group.id} className="flex gap-3 items-center">
+                        <div className="text-sm font-semibold">ב{group.name}</div>
+                        {group.events && group.events[today] && group.events[today].length > 0 ? group.events[today].map(event => (
+                            <div key={event.id} className="flex gap-3 items-center">
+                                <div className="text-xs">ב{event.start}</div>
+                                <div className="text-sm">{event.title}</div>
+                            </div>
+                        )) : <div className="text-xs text-stone-500">אין אירועים היום</div>}
+                    </div>
+                ))}
+            </WithLabel>
 
+            <div className="flex gap-2">
+                <Button data-role="edit" onClick={() => goToStudent(data)}>
+                    להיות {data.firstName}
+                    <VenetianMask className="w-4 h-4" />
+                </Button>
+
+                {context === 'master' && (
+                    <Button data-role="delete" onClick={() => staffActions.removeStudentFromMentoring(data)}>
+                        הסר
+                        <UserRoundX className="w-4 h-4" />
+                    </Button>
+                )}
+            </div>
+        </div>
+    )
 }

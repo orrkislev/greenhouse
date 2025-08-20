@@ -1,13 +1,9 @@
 import { useEffect } from "react";
 import GroupSchedule from "./GroupSchedule";
-import { groupsActions, useGroups } from "@/utils/store/useGroups";
+import { groupsActions, useInvolvedGroups } from "@/utils/store/useGroups";
 
 export default function GroupSchedules() {
-    const groups = useGroups(state => state.groups);
-
-    useEffect(()=>{
-        groupsActions.loadGroups();
-    },[])
+    const groups = useInvolvedGroups();
 
     const groupIds = groups.map(g => g.id).join(',');
 

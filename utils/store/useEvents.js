@@ -27,11 +27,7 @@ export const useEvents = create((set, get) => {
 
         loadTodayEvents: async () => {
             if (!userId()) return;
-            const today = format(new Date(), "yyyy-MM-dd");
-            const eventsRef = getRef("events");
-            const eventsQuery = query(eventsRef, where("date", "==", today));
-            const eventsSnap = await getDocs(eventsQuery);
-            const events = eventsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const events = await get().getTodaysEventsForUser(userId());
             set({ events });
         },
         loadWeekEvents: async (week) => {
@@ -81,6 +77,14 @@ export const useEvents = create((set, get) => {
                 events: state.events.filter(event => event.id !== eventId)
             }));
         },
+
+        getTodaysEventsForUser: async (userId) => {
+            const eventsRef = collection(db, `users/${userId}/events`);
+            const eventsQuery = query(eventsRef, where("date", "==", format(new Date(), "yyyy-MM-dd")));
+            const eventsSnap = await getDocs(eventsQuery);
+            const events = eventsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            return events;
+        }
     }
 });
 

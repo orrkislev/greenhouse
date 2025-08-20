@@ -2,7 +2,7 @@ import { useTime } from "@/utils/store/useTime";
 import { create } from "zustand";
 import { fetchEventsFromGoogleCalendar } from "@/utils/actions/google actions";
 import { useUser } from "@/utils/store/useUser";
-import { addDays, format, getDay } from "date-fns";
+import { addDays, format } from "date-fns";
 
 export const useGoogleCalendar = create((set, get) => ({
     events: [],

@@ -1,36 +1,30 @@
 'use client'
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import StaffGroup from "./components/StaffGroup";
 import StaffStudents from "./components/StaffStudents";
-import { staffActions, useStaff } from "@/utils/store/useStaff";
-import { groupsActions, useGroups } from "@/utils/store/useGroups";
+import { useStaff } from "@/utils/store/useStaff";
+import { groupsActions, useMentorGroups } from "@/utils/store/useGroups";
 import { DashboardLayout, DashboardPanel, DashboardPanelButton, DashboardMain } from "@/components/DashboardLayout"
 import { useUser } from "@/utils/store/useUser";
 import Staff_Admin from "./components/Staff_Admin";
 
 export default function StaffPage() {
     const user = useUser(state => state.user);
-    const groups = useGroups(state => state.groups);
+    const groups = useMentorGroups();
     const students = useStaff(state => state.students);
     const [activeTab, setActiveTab] = useState("students");
 
-    const staffGroups = useMemo(() => groups.filter(g => g.isMentor), [groups]);
-
     useEffect(() => {
-        groupsActions.loadGroups();
-    }, []);
+        setActiveTab(groups.length > 0 ? groups[0].id : "students");
+    }, [groups.length]);
 
-    useEffect(() => {
-        setActiveTab(staffGroups.length > 0 ? staffGroups[0].id : "students");
-    }, [staffGroups.length]);
-
-    const selectedGroup = staffGroups.find(g => g.id === activeTab) || groups.find(g => g.id === activeTab);
+    const selectedGroup = groups.find(g => g.id === activeTab);
 
     return (
         <DashboardLayout>
             <DashboardPanel>
-                {staffGroups.map(group => (
+                {groups.map(group => (
                     <DashboardPanelButton key={group.id} onClick={() => setActiveTab(group.id)} $active={activeTab === group.id}>
                         {group.type == 'major' && 'מגמת '}
                         {group.type == 'class' && 'קבוצת '}

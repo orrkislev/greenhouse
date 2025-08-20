@@ -1,17 +1,21 @@
 import { create } from "zustand";
 import { userActions, useUser } from "./useUser";
-import { collection, updateDoc, deleteDoc, addDoc, getDocs, doc, getDoc } from "firebase/firestore";
-import { db } from '@/utils/firebase/firebase'
+import { collection, updateDoc, deleteDoc, addDoc, getDoc, doc } from "firebase/firestore";
+import { db, generateImage, storage } from '@/utils/firebase/firebase'
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { examplePaths } from "@/app/(app)/learn/components/example study paths";
+import { useEffect } from "react";
 
 export const useStudy = create((set, get) => ({
     paths: [],
+    sideContext: [],
 
     loadPaths: async () => {
         if (get().paths.length > 0) return;
         const user = useUser.getState().user;
         if (!user) return;
         if (!user.study) return;
-        const paths = []    
+        const paths = []
         for (const studyId of user.study) {
             const studyDoc = await getDoc(doc(db, 'users', user.id, 'study', studyId))
             if (studyDoc.exists()) {
@@ -19,6 +23,11 @@ export const useStudy = create((set, get) => ({
             }
         }
         set({ paths })
+    },
+
+    addNewPath: () => {
+        const selectedPath = examplePaths[Math.floor(Math.random() * examplePaths.length)]
+        get().addPath(selectedPath)
     },
 
     addPath: async (path) => {
@@ -32,6 +41,8 @@ export const useStudy = create((set, get) => ({
     },
     deletePath: async (pathId) => {
         const user = useUser.getState().user;
+        const pathRef = doc(db, 'users', user.id, 'study', pathId)
+        await deleteDoc(pathRef)
         userActions.updateUserDoc({ study: user.study ? user.study.filter(id => id !== pathId) : [] })
         set(state => ({ paths: state.paths.filter(path => path.id !== pathId) }))
     },
@@ -77,9 +88,57 @@ export const useStudy = create((set, get) => ({
         subject.steps = subject.steps.filter(step => step.id !== stepId)
         get().updatePath(pathId, path)
     },
+
+
+    // ------------------------------
+    createImage: async (path, name) => {
+        const user = useUser.getState().user;
+        if (!user) return;
+
+        await get().updatePath(path.id, { image: null })
+
+        const imageData = await generateImage(name);
+        if (!imageData) return;
+
+        const byteCharacters = atob(imageData);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/png' });
+
+        const storageRef = ref(storage, `studyPaths/${user.id}/${path.id}`);
+        await uploadBytes(storageRef, blob, { contentType: 'image/png' })
+        const url = await getDownloadURL(storageRef);
+        await get().updatePath(path.id, { image: url });
+    },
+
+
+    // ------------------------------
+    loadSideContext: async () => {
+        const docRef = doc(db, 'school', 'study')
+        const docSnap = await getDoc(docRef)
+        if (!docSnap.exists()) return;
+        set({ sideContext: docSnap.data().sideContext });
+    },
+    saveSideContext: async (sideContext) => {
+        const docRef = doc(db, 'school', 'study')
+        await updateDoc(docRef, { sideContext });
+        set({ sideContext });
+    }
 }));
 
 
 export const studyActions = Object.fromEntries(
     Object.entries(useStudy.getState()).filter(([key, value]) => typeof value === 'function')
 );
+
+
+export function useStudySideContext() {
+    const sideContext = useStudy(state => state.sideContext);
+    useEffect(() => {
+        studyActions.loadSideContext();
+    }, []);
+    return sideContext
+}

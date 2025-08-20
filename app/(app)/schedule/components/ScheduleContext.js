@@ -2,8 +2,7 @@ import { useUser } from "@/utils/store/useUser"
 import AuthGoogleCalendar from "./Google/AuthGoogleCalendar";
 import { ganttActions, useGantt } from "@/utils/store/useGantt";
 import { useEffect, useState } from "react";
-import { Check, Pencil, Plus, Save, Trash2 } from "lucide-react";
-import TimeRangePicker from "@/components/ui/timerange-picker";
+import { Pencil, Plus, Save, Trash2 } from "lucide-react";
 
 export default function ScheduleContext() {
     const user = useUser(state => state.user);
@@ -34,7 +33,6 @@ function StudyGroupsMessage() {
 
     const canEdit = user.roles.includes('admin');
 
-    console.log({ data, studyGroups });
     const days = Object.fromEntries([[0, []], [1, []], [2, []], [3, []], [4, []]]);
     data.forEach((group, index) => {
         days[group.day].push({ group, index });

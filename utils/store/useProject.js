@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { userActions, useUser } from "@/utils/store/useUser";
 import { addDoc, arrayUnion, collection, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
-import { db, storage } from "@/utils//firebase/firebase";
+import { db, folkArtStyle, generateImage, storage } from "@/utils//firebase/firebase";
 import { useTime } from "@/utils/store/useTime";
 import { logsActions, useLogs } from "@/utils/store/useLogs";
 import { LOG_RECORDS, LOG_TYPES } from "@/utils/constants/constants";
@@ -208,7 +208,33 @@ export const useProject = create(subscribeWithSelector((set, get) => {
             await uploadBytes(storageRef, file);
             const url = await getDownloadURL(storageRef);
             await get().addLibraryItem({ url, name: file.name, path: storageRef.fullPath });
-        }
+        },
+
+        // ------ Project Images ------
+        createImage: async (name) => {
+            const user = useUser.getState().user;
+            if (!user) return;
+            const project = get().project;
+            if (!project) return;
+
+            await get().updateProject({ image: null })
+
+            const imageData = await generateImage(name, folkArtStyle);
+            if (!imageData) return;
+    
+            const byteCharacters = atob(imageData);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'image/png' });
+    
+            const storageRef = ref(storage, `projects/${user.id}/${project.id}/image`);
+            await uploadBytes(storageRef, blob, { contentType: 'image/png' })
+            const url = await getDownloadURL(storageRef);
+            await get().updateProject({ image: url });
+        },
     }
 }));
 

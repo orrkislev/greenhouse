@@ -8,7 +8,6 @@ export const useStaff = create((set, get) => ({
     allStudents: [],
 
     getMentoringStudents: async () => {
-        console.log('getMentoringStudents');
         const user = useUser.getState().user;
         if (!user.id || !user.roles.includes('staff')) return;
         const projectsQuery = query(
@@ -21,8 +20,6 @@ export const useStaff = create((set, get) => ({
         const projects = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const studentsIDs = querySnapshot.docs.map(doc => doc.ref.parent.parent.id);
         if (user.students) studentsIDs.push(...user.students);
-        console.log('user', user);
-        console.log('studentsIDs', studentsIDs);
 
         let allStudents = []
         while (studentsIDs.length > 0) {
@@ -57,6 +54,14 @@ export const useStaff = create((set, get) => ({
         if (!user.id || !user.roles.includes('staff')) return;
         await updateDoc(doc(db, "users", user.id), { students: arrayRemove(student.id) });
         set({ students: get().students.filter(s => s.id !== student.id) });
+    },
+
+    getStudentData: async (student) => {
+        if (student.projectId) {
+            const project = await getDoc(doc(db, "projects", student.projectId));
+            student.project = project.data();
+        }
+        return student;
     }
 }));
 

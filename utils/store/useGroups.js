@@ -1,40 +1,46 @@
-import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { create } from "zustand"
 import { db } from "@/utils//firebase/firebase";
 import { useUser } from "@/utils/store/useUser";
-import { useTime } from "@/utils/store/useTime";
+import { dateRange, useTime } from "@/utils/store/useTime";
+import { useEffect } from "react";
 
 export const useGroups = create((set, get) => ({
     groups: [],
+    loading: false,
 
     // ----------- Group Loading -----------
     // -------------------------------------
     loadGroups: async () => {
-        const user = useUser.getState().user;
-        if (!user || !user.id) return;
+        if (get().loading) return;
+        set({ loading: true });
+        const groupIds = groupUtils.getUserGroupIds();
+        await Promise.all(groupIds.map(groupId => get().loadGroup(groupId)));
+        set({ loading: false });
+    },
+    loadAllGroups: async () => {
+        if (get().loading) return;
+        set({ loading: true });
+        const groupsRef = collection(db, "groups");
+        const snapshot = await getDocs(groupsRef);
+        const groups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const currentGroups = get().groups;
+        const onlyNewGroups = groups.filter(g => !currentGroups.find(g2 => g2.id === g.id));
+        set({ groups: [...currentGroups, ...onlyNewGroups] });
+        set({ loading: false });
+    },
+    loadGroup: async (groupId) => {
+        const stateGroup = get().groups.find(g => g.id === groupId);
+        if (stateGroup) return stateGroup;
 
-        const userGroups = [];
-        if (user.roles.includes('staff')) userGroups.push({ id: 'צוות', type: 'staff' });
-        if (user.class) userGroups.push({ id: user.class, type: 'class' });
-        if (user.major) userGroups.push({ id: user.major, type: 'major' });
-
-        const currGroups = get().groups;
-        const groupsToLoad = userGroups.filter(group => !currGroups.find(g => g.id === group.id));
-
-        const newGroups = [];
-        for (const group of groupsToLoad) {
-            const groupDocRef = doc(db, "groups", group.id);
-            const groupDoc = await getDoc(groupDocRef);
-            if (groupDoc.exists()) {
-                newGroups.push({ ...groupDoc.data(), id: groupDoc.id, type: group.type });
-            }
+        const groupDoc = await getDoc(doc(db, "groups", groupId));
+        if (groupDoc.exists()) {
+            const group = { ...groupDoc.data(), id: groupDoc.id };
+            set((state) => ({ groups: [...state.groups, group] }));
+            return group;
         }
-        newGroups.forEach(group => {
-            group.isMentor = (group.mentors && group.mentors.includes(user.id)) ||
-                (group.type === 'major' && user.roles.includes('staff'));
-        })
-        const oldGroups = currGroups.filter(g => !newGroups.find(g2 => g2.id === g.id));
-        set({ groups: [...oldGroups, ...newGroups] });
+
+        return null;
     },
     updateGroup: async (group, updates) => {
         const groupDocRef = doc(db, "groups", group.id);
@@ -48,33 +54,31 @@ export const useGroups = create((set, get) => ({
         const week = useTime.getState().week;
         if (!week || week.length === 0) return;
         for (const group of get().groups) {
-            get().loadGroupEvents(group, week[0], week[week.length - 1]);
+            await get().loadGroupEvents(group.id, week[0], week[week.length - 1]);
         }
     },
     loadTodayEvents: async () => {
         const today = useTime.getState().today;
         const groups = get().groups;
         for (const group of groups) {
-            get().loadGroupEvents(group, today, today);
+            await get().loadGroupEvents(group.id, today, today);
         }
     },
-    loadGroupEvents: async (group, start, end) => {
-        if (!group || !group.id) return;
-        const userId = useUser.getState().user?.id;
-        if (group.unsubscribe) group.unsubscribe();
-        const eventsRef = collection(db, 'groups', group.id, 'events');
-        const eventsQuery = query(eventsRef,
-            where('date', '>=', start),
-            where('date', '<=', end)
-        );
-        group.unsubscribe = onSnapshot(eventsQuery, snapshot => {
-            const events = snapshot.docs.map(doc => ({ id: doc.id, group: group.id, ...doc.data() }));
-            events.forEach(event => { event.isMember = event.members && event.members.includes(userId); });
-            set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, events } : g) }));
-        });
-        set((state) => ({
-            groups: state.groups.map(g => g.id === group.id ? group : g)
+    loadGroupEvents: async (groupId, start, end) => {
+        if (!groupId) return;
+
+        let stateGroup = get().groups.find(g => g.id === groupId);
+        if (!stateGroup) stateGroup = await get().loadGroup(groupId);
+
+        const eventsRef = collection(db, 'groups', groupId, 'events');
+        const newEvents = stateGroup.events ? { ...stateGroup.events } : {};
+        await Promise.all(dateRange(start, end).map(async date => {
+            if (newEvents[date]) return;
+            const snapshot = await getDocs(query(eventsRef, where('date', '==', date)));
+            const events = snapshot.docs.map(doc => ({ id: doc.id, group: groupId, ...doc.data() }));
+            newEvents[date] = events;
         }));
+        set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: newEvents } : g) }));
     },
 
     // ----------- Group Students Management -----------
@@ -171,4 +175,55 @@ groupsActions.getUserGroupEventsForWeek = async (groupId, userId, week) => {
     const eventsSnap = await getDocs(eventsQuery);
     const events = eventsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     return events;
+}
+
+
+export const groupUtils = {
+    isMentor: (group, user) => {
+        if (!user) user = useUser.getState().user;
+        return (group.mentors && group.mentors.includes(user.id)) ||
+            (group.type === 'major' && user.roles.includes('staff') && user.major === group.id);
+    },
+    isMember: (group, user) => {
+        if (!user) user = useUser.getState().user;
+        return (group.type === 'class' && user.class === group.id) ||
+            (group.type === 'major' && user.major === group.id) ||
+            (group.type === 'staff' && user.roles.includes('staff'));
+    },
+    isGroupEventMember: (event, user) => {
+        if (!user) user = useUser.getState().user;
+        return event.members && event.members.includes(user.id);
+    },
+
+    getUserGroupIds: (user) => {
+        if (!user) user = useUser.getState().user;
+        if (!user.id) return [];
+        const groups = []
+        if (user.roles.includes('staff')) groups.push('צוות');
+        if (user.class) groups.push(user.class);
+        if (user.major) groups.push(user.major);
+        return groups;
+    }
+}
+
+export const useMemberGroups = () => {
+    const groups = useGroups(state => state.groups);
+    useEffect(() => {
+        groupsActions.loadGroups()
+    }, [])
+    return groups.filter(g => groupUtils.isMember(g, useUser.getState().user));
+}
+export const useMentorGroups = () => {
+    const groups = useGroups(state => state.groups);
+    useEffect(() => {
+        groupsActions.loadGroups()
+    }, [])
+    return groups.filter(g => groupUtils.isMentor(g, useUser.getState().user));
+}
+export const useInvolvedGroups = () => {
+    const groups = useGroups(state => state.groups);
+    useEffect(() => {
+        groupsActions.loadGroups()
+    }, [])
+    return groups.filter(g => groupUtils.isMember(g, useUser.getState().user) || groupUtils.isMentor(g, useUser.getState().user));
 }
