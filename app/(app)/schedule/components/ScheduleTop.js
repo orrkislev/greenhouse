@@ -22,15 +22,8 @@ export default function ScheduleTop({ view }) {
         <ScheduleSection className='border-t'>
                 {labels.map((label, dayIndex) => (
                     <DayColumn key={dayIndex} className={`col-${dayIndex + 1} ${dayIndex === 5 ? 'bg-[#E4D4C7]' : ''}`}>
-                        {view === 'week' && (
-                            <>
-                                <div className='text-lg font-semibold'>{label.dayOfTheWeek}</div>
-                                <div className="text-xs">{label.weekday}</div>
-                            </>
-                        )}
-                        {view === 'semester' && (
-                            <div className='text-lg font-semibold'>{label.semester}</div>
-                        )}
+                        <div className='text-lg font-semibold'>{label.dayOfTheWeek}</div>
+                        {view === 'week' && <div className="text-xs">{label.weekday}</div>}
                     </DayColumn>
                 ))}
         </ScheduleSection>

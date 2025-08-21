@@ -1,5 +1,8 @@
+import Button from "@/components/Button";
 import { projectActions } from "@/utils/store/useProject";
 import { useTime } from "@/utils/store/useTime";
+import { Plus } from "lucide-react";
+import Image from "next/image";
 
 export default function NewProjectDialog(){
     const term = useTime(state => state.currTerm);
@@ -10,12 +13,13 @@ export default function NewProjectDialog(){
 
     return (
         <div className='flex flex-col items-center justify-center h-screen'>
-            <h1 className='text-2xl font-bold mb-4'>הגיע הזמן להתחיל פרויקט חדש לתקופת {term?.name || ''}</h1>
+            <h1 className='text-2xl font-bold'>הגיע הזמן להתחיל פרויקט חדש לתקופת {term?.name || ''}</h1>
             <p className='text-stone-600 mb-8'>איזה כיף יהיה להתחיל פרויקט חדש!</p>
-            <button className='px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600'
-                onClick={onSubmit}>
-                צור פרויקט חדש
-            </button>
+            <Button data-role="edit" onClick={onSubmit} className="text-lg">
+                פרויקט חדש
+                <Plus className="w-4 h-4" />
+            </Button>
+            <Image src="/no_project.png" alt="Project" width={600} height={600} className="mt-4" />
         </div>
     )
 }

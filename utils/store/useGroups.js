@@ -181,8 +181,10 @@ groupsActions.getUserGroupEventsForWeek = async (groupId, userId, week) => {
 export const groupUtils = {
     isMentor: (group, user) => {
         if (!user) user = useUser.getState().user;
-        return (group.mentors && group.mentors.includes(user.id)) ||
-            (group.type === 'major' && user.roles.includes('staff') && user.major === group.id);
+        if (!user.roles.includes('staff')) return false;
+        if (group.type === 'class') return user.class === group.id;
+        if (group.type === 'major') return user.major === group.id;
+        return false;
     },
     isMember: (group, user) => {
         if (!user) user = useUser.getState().user;
@@ -218,7 +220,8 @@ export const useMentorGroups = () => {
     useEffect(() => {
         groupsActions.loadGroups()
     }, [])
-    return groups.filter(g => groupUtils.isMentor(g, useUser.getState().user));
+    const mentoring = groups.filter(g => groupUtils.isMentor(g, useUser.getState().user));
+    return mentoring;
 }
 export const useInvolvedGroups = () => {
     const groups = useGroups(state => state.groups);

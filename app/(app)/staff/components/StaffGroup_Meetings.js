@@ -28,7 +28,7 @@ export default function StaffGroup_Meetings({ group }) {
 
             <ScheduleSection withLabel={false}>
                 <div className="bg-stone-100 px-2 py-1 text-sm">
-                    חניכים
+                    חניכים ללא שיחה מתוכננת
                 </div>
                 {daysOfWeek.map((day, index) => (
                     <div key={day} className="bg-stone-100 text-sm flex items-center justify-center">
@@ -67,7 +67,7 @@ function StudentNoMeetingSlot({ student }) {
                     onClick={() => setIsOpen(true)}
                 >
                     <span className="">{student.firstName} {student.lastName}</span>
-                    <span className="text-stone-600">אין שיחה מתוכננת</span>
+                    <span className="text-stone-600"></span>
                 </div>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-4">

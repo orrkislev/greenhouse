@@ -94,10 +94,12 @@ function GroupMentors({ group }) {
     const groupMentors = staff.filter(staff => group.mentors.includes(staff.id));
 
     const handleRemoveMentor = (mentorId) => {
-        adminActions.updateGroup(group.id, { mentors: group.mentors.filter(mentor => mentor !== mentorId) });
+        // adminActions.updateGroup(group.id, { mentors: group.mentors.filter(mentor => mentor !== mentorId) });
+        adminActions.removeMentorFromClass(group.id, mentorId);
     };
     const addMentorToGroup = (mentorId) => {
-        adminActions.updateGroup(group.id, { mentors: [...group.mentors, mentorId] });
+        // adminActions.updateGroup(group.id, { mentors: [...group.mentors, mentorId] });
+        adminActions.assignMentorToClass(group.id, mentorId);
     };
 
     return (
@@ -112,7 +114,7 @@ function GroupMentors({ group }) {
             ))}
             <select className="ml-2 p-1 border rounded text-sm" onChange={(e) => addMentorToGroup(e.target.value)} defaultValue="">
                 <option value="" disabled>הוסף מנטור</option>
-                {staff.filter(mentor => !group.mentors.some(m => m.id === mentor.id)).sort((a, b) => a.firstName.localeCompare(b.firstName)).map(mentor => (
+                {staff.filter(mentor => !mentor.class).sort((a, b) => a.firstName.localeCompare(b.firstName)).map(mentor => (
                     <option key={mentor.id} value={mentor.id}>{mentor.firstName} {mentor.lastName}</option>
                 ))}
             </select>
