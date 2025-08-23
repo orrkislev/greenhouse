@@ -1,11 +1,11 @@
-import { projectActions, useProject } from "@/utils/store/useProject";
-import ProjectTasks from "./Project Tasks/ProjectTasks";
+import { projectActions, useProjectData } from "@/utils/store/useProject";
 import ProjectGoals from "./ProjectGoals";
-import Box2 from "@/components/Box2";
 import ProjectLibrary from "./ProjectLibrary";
 import ProjectInfo from "./ProjectInfo";
 import SmartText from "@/components/SmartText";
-import { Sparkle } from "lucide-react";
+import { DotSquare, Sparkle } from "lucide-react";
+import ProjectTasks from "./Project Tasks/ProjectTasks";
+import { useEffect } from "react";
 
 
 export default function ProjectDashboard() {
@@ -23,33 +23,32 @@ export default function ProjectDashboard() {
 
 
 function ProjectName() {
-    const project = useProject((state) => state.project);
+    const project = useProjectData(state => state.project);
+
+    useEffect(() => {
+        if (project && !project.image) {
+            projectActions.createImage(project.name)
+        }
+    }, [project])
 
     const onEdit = (name) => {
         projectActions.updateProject({ ...project, name })
-        projectActions.createImage(name)
+        setTimeout(() => { projectActions.createImage(name) }, 500)
     }
+
+    const img = !project.image || project.image === 'generating' ? null : project.image;
 
     return (
         <>
-            <div className="w-full h-32 bg-stone-300 bg-cover bg-center bg-no-repeat border-b border-stone-200" style={{ backgroundImage: `url(${project.image})` }}>
-                {!project.image && (
-                    <div className="w-full h-full flex items-center justify-center">
-                        <Sparkle className="w-10 h-10 animate-pulse text-stone-500" />
-                    </div>
-                )}
+            <div className="w-full h-32 bg-stone-300 bg-cover bg-center bg-no-repeat border-b border-stone-200" style={{ backgroundImage: `url(${img})` }}>
+                <div className="w-full h-full flex items-center justify-center">
+                    {project.image === 'generating' && <Sparkle className="w-10 h-10 animate-pulse text-stone-500" />}
+                    {!project.image && <DotSquare className="w-10 h-10 animate-pulse text-stone-500" />}
+                </div>
             </div>
             <SmartText text={project.name} onEdit={onEdit}
                 className="w-full h-full border-none text-center text-2xl font-semibold"
             />
-            {/* <input type="text"
-                defaultValue={project.name}
-                className="w-full h-full border-none text-center text-2xl font-semibold"
-                onBlur={(e) => {
-                    if (e.target.value !== project.name) {
-                        projectActions.updateProject({ ...project, name: e.target.value });
-                    }
-                }} /> */}
         </>
     );
 }

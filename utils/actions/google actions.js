@@ -12,7 +12,11 @@ export async function getAuthUrl(redirect_url) {
 
     const url = oauth2Client.generateAuthUrl({
         access_type: 'offline',
-        scope: ['https://www.googleapis.com/auth/calendar.readonly'],
+        scope: [
+            'https://www.googleapis.com/auth/calendar.readonly',
+            'https://www.googleapis.com/auth/documents',
+            'https://www.googleapis.com/auth/drive.file',
+        ],
         prompt: 'consent',
     });
 
@@ -34,7 +38,6 @@ export async function getRefreshToken(redirect_url, code) {
 }
 
 export async function fetchEventsFromGoogleCalendar(refreshToken, start, end) {
-    console.log('fetchEventsFromGoogleCalendar', start, end)
     const oauth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET
@@ -90,3 +93,64 @@ export async function getLatestVideoFromPlaylist(playlistId) {
     const latestVideo = lastItems[lastItems.length - 1];
     return latestVideo.snippet.resourceId.videoId;
 }
+
+
+
+
+
+
+export async function createGoogleDoc({ refreshToken, name, title, subtitle }) {
+  console.log('createGoogleDoc');
+    const oauth2Client = new google.auth.OAuth2(
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_SECRET
+    );
+    oauth2Client.setCredentials({refresh_token: refreshToken,});
+
+    // 3. Create Google Doc
+    const docs = google.docs({ version: 'v1', auth: oauth2Client });
+    const createRes = await docs.documents.create({ requestBody: { title: name } });
+    const docId = createRes.data.documentId;
+    
+    // 4. Add subtitle
+    await docs.documents.batchUpdate({
+      documentId: docId,
+      requestBody: {
+        requests: [
+          {
+            insertText: {
+              location: { index: 1 }, // Start after the initial empty paragraph
+              text: title + '\n' + subtitle + '\n'
+            }
+          },
+          {
+            updateTextStyle: {
+              range: { startIndex: 1, endIndex: 1 + title.length },
+              textStyle: {
+                fontSize: { magnitude: 24, unit: 'PT' },
+                bold: true
+              },
+              fields: 'fontSize,bold'
+            }
+          },
+          {
+            updateTextStyle: {
+              range: { 
+                startIndex: 1 + title.length + 1, // +1 for the newline
+                endIndex: 1 + title.length + 1 + subtitle.length
+              },
+              textStyle: {
+                fontSize: { magnitude: 16, unit: 'PT' },
+                bold: false
+              },
+              fields: 'fontSize,bold'
+            }
+          }
+        ]
+      }
+    });
+
+    console.log('docId',docId);
+  
+    return `https://docs.google.com/document/d/${docId}/edit`;
+  }

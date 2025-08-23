@@ -6,6 +6,9 @@ import { projectActions, useProject } from "@/utils/store/useProject";
 import { useUser } from "@/utils/store/useUser";
 import { adminActions } from "@/utils/store/useAdmin";
 import { projectTasksActions } from "@/utils/store/useProjectTasks";
+import Box2 from "@/components/Box2";
+import Button from "@/components/Button";
+import { Cat } from "lucide-react";
 
 const QUESTIONS = [
     {
@@ -25,7 +28,7 @@ const QUESTIONS = [
 
 export default function ProjectProposal() {
     const user = useUser(state => state.user)
-    const project = useProject((state) => state.project);
+    const project = useProject();
     const [questions, setQuestions] = useState(QUESTIONS);
 
     useEffect(() => {
@@ -39,7 +42,6 @@ export default function ProjectProposal() {
     useEffect(()=>{
         if (filledThreeQuestions) {
             projectTasksActions.completeTaskByLabel('הצהרת כוונות');
-            window.location.reload()
         }
     },[filledThreeQuestions])
     
@@ -50,11 +52,10 @@ export default function ProjectProposal() {
         projectActions.updateProject({ questions: newQuestions });
     };
 
-
     return (
         <div className='rtl'>
             <div className="max-w-6xl mx-auto space-y-6">
-                <div className="bg-white rounded-lg shadow p-6 flex flex-col min-w-[260px] w-full">
+                <Box2>
                     <div className="font-semibold text-lg mb-2">שם הפרויקט</div>
                     <input
                         type="text"
@@ -64,7 +65,7 @@ export default function ProjectProposal() {
                         dir="rtl"
                         className="border border-stone-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
-                </div>
+                </Box2>
 
                 <div className="flex gap-6 w-full">
                     <div className="flex flex-1 gap-6">
@@ -84,13 +85,21 @@ export default function ProjectProposal() {
                         'יש להשלים לפחות שלוש שאלות כדי להמשיך לפרויקט'
                     }
                 </div>
-                {filledThreeQuestions && user.roles.includes('staff') && (
+                {filledThreeQuestions && user.roles && user.roles.includes('staff') && (
                     <div className="flex justify-center mt-4">
-                        <button className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                            onClick={() => adminActions.assignMasterToProject(user.id, project.id, user)}
+                        <Button data-role="edit"
+                            onClick={() => {
+                                adminActions.assignMasterToProject(user.id, project.id, user)
+                                const masterData = {
+                                    id: user.id,
+                                    firstName: user.firstName,
+                                    lastName: user.lastName,
+                                }
+                                projectActions.updateProject({ master: masterData })
+                            }}
                         >
-                            I AM MY OWN MASTER
-                        </button>
+                            I AM MY OWN MASTER <Cat className="w-4 h-4" />
+                        </Button>
                     </div>
                 )}
             </div>

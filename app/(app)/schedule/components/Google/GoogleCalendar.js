@@ -1,7 +1,5 @@
 import { useUser } from "@/utils/store/useUser";
-import AuthGoogleCalendar from "./AuthGoogleCalendar";
-import { googleCalendarActions, useGoogleCalendar } from "@/utils/store/useGoogleCalendar";
-import { useEffect } from "react";
+import { useGoogleCalendarEventsWeek } from "@/utils/store/useGoogleCalendar";
 import { ScheduleSection } from "../Layout";
 import { tw } from "@/utils/tw";
 import { useTime } from "@/utils/store/useTime";
@@ -15,12 +13,7 @@ const GanttDay = tw`flex flex-col items-center justify-center text-stone-800 tex
 export default function GoogleCalendar() {
     const user = useUser(state => state.user);
     const week = useTime(state => state.week);
-    const googleEvents = useGoogleCalendar(state => state.events);
-
-    useEffect(() => {
-        if (!user || !user.googleRefreshToken || !week || week.length === 0) return;
-        googleCalendarActions.getWeeksEvents();
-    }, [user.googleRefreshToken, week]);
+    const googleEvents = useGoogleCalendarEventsWeek();
 
     if (!user) return null;
     if (!user.googleRefreshToken) return null

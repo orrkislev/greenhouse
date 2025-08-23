@@ -1,6 +1,6 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Masonry, usePositioner } from "masonic";
-import { projectActions, useProject } from "@/utils/store/useProject";
+import { useEffect, useRef, useState } from "react";
+import { Masonry } from "masonic";
+import { projectActions,useProjectData } from "@/utils/store/useProject";
 import { Plus, Shapes, Trash } from "lucide-react";
 import Microlink from '@microlink/react'
 import { AutoSizeTextarea } from "@/components/SmartText";
@@ -8,7 +8,7 @@ import Image from "next/image";
 
 
 export default function ProjectLibrary() {
-    const library = useProject((state) => state.library);
+    const library = useProjectData((state) => state.library);
 
     useEffect(() => {
         projectActions.loadProjectLibrary();

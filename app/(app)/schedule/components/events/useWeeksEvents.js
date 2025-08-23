@@ -1,22 +1,18 @@
 import { useInvolvedGroups } from "@/utils/store/useGroups";
-import { eventsActions, useEvents } from "@/utils/store/useEvents";
-import { useEffect } from "react";
+import { useWeekEvents } from "@/utils/store/useEvents";
 import { HOURS } from "@/utils/store/useTime";
 
 export default function useWeeksEvents(week) {
-    const events = useEvents(state => state.events);
-    const groups = useInvolvedGroups();
-
-    useEffect(() => {
-        if (week && week.length > 0) eventsActions.loadWeekEvents(week);
-    }, [week]);
+    const events = useWeekEvents();
+    // const groups = useInvolvedGroups();
 
     if (!week || week.length === 0) return [];
 
     const userEvents = events.filter(event => event.date >= week[0] && event.date <= week[week.length - 1]);
 
-    const groupEvents = groups.flatMap(group => group.events ? week.flatMap(date => group.events[date] || []) : [])
-    return [...userEvents, ...groupEvents]
+    // const groupEvents = groups.flatMap(group => group.events ? week.flatMap(date => group.events[date] || []) : [])
+    // return [...userEvents, ...groupEvents]
+    return userEvents;
 }
 
 export function prepareEventsForSchedule(events, week, edittable = false) {

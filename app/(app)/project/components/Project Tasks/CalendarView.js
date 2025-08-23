@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
-import { projectTasksActions, useProjectTasks } from "@/utils/store/useProjectTasks";
+import { projectTasksActions, useProjectTasksData } from "@/utils/store/useProjectTasks";
 
 const CalendarHeader = tw`flex items-center justify-between p-4 bg-stone-100`;
 const CalendarCell = tw`p-2 flex flex-col gap-1 transition-all duration-200 border border-stone-200 relative
@@ -18,7 +18,7 @@ const CalendarCell = tw`p-2 flex flex-col gap-1 transition-all duration-200 bord
 
 
 export default function CalendarView() {
-    const tasks = useProjectTasks((state) => state.tasks);
+    const tasks = useProjectTasksData((state) => state.tasks);
     const currTerm = useTime((state) => state.currTerm);
     const gantt = useGantt((state) => state.gantt);
     const [fullView, setFullView] = useState(false);

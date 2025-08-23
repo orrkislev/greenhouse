@@ -1,20 +1,18 @@
-import { create } from "zustand";
-import { userActions, useUser } from "./useUser";
+import { userActions } from "./useUser";
 import { collection, updateDoc, deleteDoc, addDoc, getDoc, doc } from "firebase/firestore";
 import { db, generateImage, storage } from '@/utils/firebase/firebase'
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { examplePaths } from "@/app/(app)/learn/components/example study paths";
 import { useEffect } from "react";
+import { createDataLoadingHook, createStore } from "./utils/createStore";
 
-export const useStudy = create((set, get) => ({
+export const [useStudy, studyActions] = createStore((set, get, withUser, withLoadingCheck) => ({
     paths: [],
     sideContext: [],
 
-    loadPaths: async () => {
-        if (get().paths.length > 0) return;
-        const user = useUser.getState().user;
-        if (!user) return;
+    loadPaths: withLoadingCheck(async (user) => {
         if (!user.study) return;
+
         const paths = []
         for (const studyId of user.study) {
             const studyDoc = await getDoc(doc(db, 'users', user.id, 'study', studyId))
@@ -23,35 +21,30 @@ export const useStudy = create((set, get) => ({
             }
         }
         set({ paths })
-    },
+    }),
 
     addNewPath: () => {
         const selectedPath = examplePaths[Math.floor(Math.random() * examplePaths.length)]
         get().addPath(selectedPath)
     },
 
-    addPath: async (path) => {
-        const user = useUser.getState().user;
-        if (!user.id) return;
+    addPath: withUser(async (user, path) => {
         const study = collection(db, 'users', user.id, 'study')
         const docRef = await addDoc(study, path)
         path.id = docRef.id
         userActions.updateUserDoc({ study: user.study ? [...user.study, path.id] : [path.id] })
         set(state => ({ paths: [...state.paths, path] }))
-    },
-    deletePath: async (pathId) => {
-        const user = useUser.getState().user;
+    }),
+    deletePath: withUser(async (user, pathId) => {
         const pathRef = doc(db, 'users', user.id, 'study', pathId)
         await deleteDoc(pathRef)
         userActions.updateUserDoc({ study: user.study ? user.study.filter(id => id !== pathId) : [] })
         set(state => ({ paths: state.paths.filter(path => path.id !== pathId) }))
-    },
-    updatePath: async (pathId, pathData) => {
-        const user = useUser.getState().user;
-        if (!user.id) return;
+    }),
+    updatePath: withUser(async (user, pathId, pathData) => {
         await updateDoc(doc(db, 'users', user.id, 'study', pathId), pathData)
         set(state => ({ paths: state.paths.map(path => path.id === pathId ? { ...path, ...pathData } : path) }))
-    },
+    }),
 
     addSubject: async (pathId, subject) => {
         const path = get().paths.find(path => path.id === pathId)
@@ -91,9 +84,7 @@ export const useStudy = create((set, get) => ({
 
 
     // ------------------------------
-    createImage: async (path, name) => {
-        const user = useUser.getState().user;
-        if (!user) return;
+    createImage: withUser(async (user, path, name) => {
 
         await get().updatePath(path.id, { image: null })
 
@@ -112,7 +103,7 @@ export const useStudy = create((set, get) => ({
         await uploadBytes(storageRef, blob, { contentType: 'image/png' })
         const url = await getDownloadURL(storageRef);
         await get().updatePath(path.id, { image: url });
-    },
+    }),
 
 
     // ------------------------------
@@ -128,11 +119,7 @@ export const useStudy = create((set, get) => ({
         set({ sideContext });
     }
 }));
-
-
-export const studyActions = Object.fromEntries(
-    Object.entries(useStudy.getState()).filter(([key, value]) => typeof value === 'function')
-);
+export const useStudyPaths = createDataLoadingHook(useStudy, 'paths', 'loadPaths');
 
 
 export function useStudySideContext() {

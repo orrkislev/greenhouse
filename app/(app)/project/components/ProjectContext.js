@@ -1,5 +1,5 @@
 import WithLabel from "@/components/WithLabel";
-import { projectActions, useProject } from "@/utils/store/useProject";
+import { projectActions, useProject, useProjectData } from "@/utils/store/useProject";
 import { useTime } from "@/utils/store/useTime";
 import { tw } from "@/utils/tw";
 import { ChevronLeft } from "lucide-react";
@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 
 export default function ProjectContext() {
-    const project = useProject((state) => state.project);
+    const project = useProject();
 
     return (
         <div className="flex flex-col gap-4">
@@ -51,8 +51,8 @@ const ProjectDiv = tw.div`
 `
 
 function OtherProjects() {
-    const currProject = useProject((state) => state.project);
-    const otherProjects = useProject((state) => state.otherProjects);
+    const currProject = useProjectData((state) => state.project);
+    const otherProjects = useProjectData((state) => state.otherProjects);
     const terms = useTime((state) => state.terms);
 
     useEffect(() => {

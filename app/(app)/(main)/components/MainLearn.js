@@ -1,13 +1,8 @@
 import Box2 from "@/components/Box2";
-import { studyActions, useStudy } from "@/utils/store/useStudy";
-import { useEffect } from "react";
+import { useStudyPaths } from "@/utils/store/useStudy";
 
 export default function MainLearn() {
-    const paths = useStudy((state) => state.paths);
-
-    useEffect(() => {
-        studyActions.loadPaths();
-    }, [])
+    const paths = useStudyPaths();
 
     return (
         <Box2 label="למידה" className="flex-1">

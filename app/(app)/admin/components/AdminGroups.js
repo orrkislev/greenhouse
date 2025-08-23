@@ -189,7 +189,10 @@ function GroupStudents({ group }) {
             <table className="text-left text-xs border-collapse border-stone-200 border">
                 <TableHeader headers={headers} />
                 <tbody>
-                    {studentsData.sort((a, b) => a.firstName.localeCompare(b.firstName)).map((student, index) => (
+                    {studentsData
+                        .sort((a, b) => a.firstName.localeCompare(b.firstName))
+                        .sort((a, b) => a.isNew ? 1 : b.isNew ? -1 : 0)
+                        .map((student, index) => (
                         <tr key={student.id + index} className="border-b border-stone-200">
                             <Cell >{index + 1}</Cell>
                             {student.isNew ? (

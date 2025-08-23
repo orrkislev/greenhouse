@@ -1,108 +1,43 @@
 import { db } from "@/utils/firebase/firebase";
-import { useUser } from "@/utils/store/useUser";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where } from "firebase/firestore";
-import { create } from "zustand";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, or, query, updateDoc, where } from "firebase/firestore";
+import { createDataLoadingHook, createStore } from "./utils/createStore";
 
-export const useMeetings = create((set, get) => {
-    const userId = () => useUser.getState().user.id;
-
+export const [useMeetingsData, meetingsActions] = createStore((set, get, withUser, withLoadingCheck) => {
     return {
         meetings: [],
-        loaded: false,
 
-        addMeetings: (meetingsData) => {
-            const user = useUser.getState().user;
-            if (!user) return;
-            const newMeetings = meetingsData.map(meetingData => {
-                const otherIndex = meetingData.participants.findIndex(p => p !== user.id);
-                return {
-                    ...meetingData,
-                    other: {
-                        id: meetingData.participants[otherIndex],
-                        name: meetingData.names[otherIndex],
-                    },
-                    isCreator: meetingData.created === user.id,
-                }
-            })
-            set(state => ({
-                meetings: [...state.meetings, ...newMeetings],
-            }));
-        },
-
-        loadTodayMeetings: async () => {
-            const uid = userId();
-            if (!uid) return;
-            const dayOfTheWeek = new Date().getDay();
+        loadMeetings: withLoadingCheck(async (user) => {
             const meetingsRef = collection(db, `meetings`);
-            const meetingsQuery = query(meetingsRef, where("day", "==", dayOfTheWeek), where("participants", "array-contains", uid));
+            const meetingsQuery = query(meetingsRef, or(where("staff", "==", user.id), where("student", "==", user.id)));
             const meetingsSnap = await getDocs(meetingsQuery);
             const meetings = meetingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            get().addMeetings(meetings);
-        },
-        loadMeetings: async () => {
-            if (get().loaded) return;
-            const uid = userId();
-            if (!uid) return;
-            const meetingsRef = collection(db, `meetings`);
-            const meetingsQuery = query(meetingsRef, where("participants", "array-contains", uid));
-            onSnapshot(meetingsQuery, snapshot => {
-                const meetings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                get().addMeetings(meetings);
-                set({ loaded: true });
-            });
-        },
+            set({ meetings });
+        }),
 
-        createMeeting: async (otherUser, day, start, end) => {
-            const user = useUser.getState().user;
-            if (!user) return;
-
+        createMeeting: withUser(async (user, otherUser, day, start, end) => {
             const meeting = {
-                participants: [otherUser.id, user.id],
-                names: [otherUser.firstName + " " + otherUser.lastName, user.firstName + " " + user.lastName],
-                day, start, end, created: user.id,
+                staff: user.id,
+                staffName: user.firstName + " " + user.lastName,
+                student: otherUser.id,
+                studentName: otherUser.firstName + " " + otherUser.lastName,
+                day, start, end,
             };
             const newMeetingDoc = await addDoc(collection(db, `meetings`), meeting);
-            set(state => ({
-                meetings: [...state.meetings, { id: newMeetingDoc.id, ...meeting }],
-            }));
-        },
+            set({ meetings: [...get().meetings, { id: newMeetingDoc.id, ...meeting }] });
+        }),
 
-        findMeetingById: (meetingId) => {
-            const meeting = get().meetings.find(meeting => meeting.id === meetingId);
-            if (meeting) return meeting;
+        updateMeeting: async (meetingId, updates) => {
             const meetingRef = doc(db, `meetings`, meetingId);
-            const meetingSnap = getDoc(meetingRef);
-            if (meetingSnap.exists()) {
-                const meetingData = meetingSnap.data();
-                return { id: meetingId, ...meetingData };
-            }
-            return null;
+            await updateDoc(meetingRef, updates);
+            set({ meetings: get().meetings.map(meeting => meeting.id === meetingId ? { ...meeting, ...updates } : meeting) });
         },
-
-        findMeetingByParticipants: (p1, p2) => {
-            const meeting = get().meetings.find(meeting => {
-                return meeting.participants.includes(p1) && meeting.participants.includes(p2);
-            });
-            if (meeting) return meeting;
-            const meetingsRef = collection(db, `meetings`);
-            const meetingsQuery = query(meetingsRef, where("participants", "array-contains", p1), where("participants", "array-contains", p2));
-            const meetingsSnap = getDocs(meetingsQuery);
-            if (meetingsSnap.empty) return null;
-            const meetingData = meetingsSnap.docs[0].data();
-            return { id: meetingsSnap.docs[0].id, ...meetingData };
+        deleteMeeting: async (meetingId) => {
+            const meetingRef = doc(db, `meetings`, meetingId);
+            await deleteDoc(meetingRef);
+            set({ meetings: get().meetings.filter(meeting => meeting.id !== meetingId) });
         }
     }
 });
 
-
-export const meetingsActions = Object.fromEntries(
-    Object.entries(useMeetings.getState()).filter(([key, value]) => typeof value === 'function')
-);
-meetingsActions.updateMeeting = async (meetingId, updates) => {
-    const meetingRef = doc(db, `meetings`, meetingId);
-    await updateDoc(meetingRef, updates);
-};
-meetingsActions.deleteMeeting = async (meetingId) => {
-    const meetingRef = doc(db, `meetings`, meetingId);
-    await deleteDoc(meetingRef);
-};
+export const useMeetingsToday = createDataLoadingHook(useMeetingsData, 'meetings', 'loadTodayMeetings');
+export const useMeetings = createDataLoadingHook(useMeetingsData, 'meetings', 'loadMeetings');

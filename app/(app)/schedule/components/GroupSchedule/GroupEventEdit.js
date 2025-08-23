@@ -29,7 +29,7 @@ export function GroupEventEdit({ onClose, groupId, date, event }) {
     });
 
     const clickDelete = async () => {
-        await groupsActions.removeGroupEvent(groupId, event.id);
+        await groupsActions.removeGroupEvent(groupId, date, event.id);
         onClose();
     };
 
@@ -45,7 +45,7 @@ export function GroupEventEdit({ onClose, groupId, date, event }) {
                 />
             </WithLabel>
             <div className="flex justify-between mt-4">
-                <Button data-role="save">
+                <Button type="submit" data-role="save" >
                     שמירה <CalendarCheck
                         className="w-4 h-4" />
                 </Button>

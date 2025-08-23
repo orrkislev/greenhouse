@@ -1,20 +1,22 @@
 
 import { ScheduleSection } from "@/app/(app)/schedule/components/Layout";
+import Button, { IconButton } from "@/components/Button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import TimeRangePicker from "@/components/ui/timerange-picker";
 import { meetingsActions, useMeetings } from "@/utils/store/useMeetings";
+import { X } from "lucide-react";
 import { useState } from "react";
 
 const daysOfWeek = ['א', 'ב', 'ג', 'ד', 'ה'];
 
 export default function StaffGroup_Meetings({ group }) {
-    const meetings = useMeetings(state => state.meetings);
-    
+    const meetings = useMeetings();
+
     const studentsWithMeetings = []
     const studentsWithoutMeetings = []
     if (!group.students) return null;
     group.students.map(student => {
-        const meeting = meetings.find(m => m.participants.includes(student.id));
+        const meeting = meetings.find(m => m.student === student.id);
         if (meeting) studentsWithMeetings.push({ ...student, meeting: meeting });
         else studentsWithoutMeetings.push(student);
     });
@@ -160,4 +162,53 @@ function StudentMeetingSlot({ student, meeting }) {
             </PopoverContent>
         </Popover>
     );
+}
+
+export function EditMeeting({ student, meeting, onClose }) {
+    const [time, setTime] = useState({ start: meeting ? meeting.start : '09:30', end: meeting ? meeting.end : '10:00' });
+    const [day, setDay] = useState(meeting ? meeting.day : 1);
+
+    const onTimeChange = (newTime) => {
+        setTime(newTime);
+    }
+
+    const onDelete = () => {
+        meetingsActions.deleteMeeting(meeting.id);
+        onClose();
+    }
+
+    const onSave = () => {
+        if (meeting) {
+            meetingsActions.updateMeeting(meeting.id, { start: time.start, end: time.end, day: day });
+        } else {
+            meetingsActions.createMeeting(student, day, time.start, time.end);
+        }
+        onClose();
+    }
+
+    return (
+        <div className="flex flex-col gap-2 relative pt-8 p-2 border border-stone-300 rounded">
+            <h4 className="font-bold">שיחה עם {student.firstName}</h4>
+            <TimeRangePicker
+                value={time}
+                onChange={onTimeChange}
+            />
+            <select value={day} onChange={(e) => setDay(Number(e.target.value))} className="border border-stone-300 rounded px-2 py-1 w-full">
+                {daysOfWeek.map((day, index) => (
+                    <option key={day} value={index + 1}>{day}</option>
+                ))}
+            </select>
+            <div className="flex justify-end">
+                <Button onClick={onSave}>
+                    שמירה
+                </Button>
+                {meeting && (
+                    <Button onClick={onDelete}>
+                        מחיקת שיחה
+                    </Button>
+                )}
+            </div>
+            <IconButton icon={X} onClick={onClose} className="absolute top-2 right-2" />
+        </div>
+    )
 }

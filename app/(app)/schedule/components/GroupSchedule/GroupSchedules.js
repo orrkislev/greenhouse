@@ -8,7 +8,7 @@ export default function GroupSchedules() {
     const groupIds = groups.map(g => g.id).join(',');
 
     useEffect(()=>{
-        groupsActions.updateWeek();
+        groupsActions.loadWeekEvents();
     }, [groupIds]);
 
     return groups.map(group => <GroupSchedule key={group.id} group={group} />)

@@ -10,11 +10,10 @@ import { AnimatePresence, motion } from "motion/react";
 import Avatar from "./Avatar";
 
 const SideBarDiv = tw`flex flex-col border-l border-stone-400 bg-stone-200 -my-6 py-4`
-const SideBarHeader = tw`aspect-square flex items-center justify-center p-2 relative`
-const SideBarContent = tw`h-full flex flex-col gap-1 pt-8 flex-1`
+const SideBarContent = tw`h-full flex flex-col gap-1 pt-8 flex-1 z-0`
 const SideBarFooter = tw`flex flex-col gap-1 pb-4`
 
-const NavigationMenuItem = tw`flex gap-2 rtl items-center p-2 text-stone-500 hover:text-stone-700 mr-4 z-2 relative overflow-hidden -ml-px
+const NavigationMenuItem = tw`flex gap-2 rtl items-center p-2 text-stone-500 hover:text-stone-700 mr-4 relative overflow-hidden -ml-px
 ${props => props.$disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
 `
 const LinkClasses = `flex justify-center gap-1 text-sm rounded-lg p-2 z-2 items-center`
@@ -30,15 +29,13 @@ export default function SideBar() {
 
     return (
         <SideBarDiv>
-            <SideBarHeader>
-                <Link href="/">
-                    <Image src="/logo.png" alt="logo" fill={true} style={{ objectFit: 'contain' }} priority={true}
-                        sizes="(max-width: 768px) 20vw, (max-width: 1200px) 20vw, 20vw" />
-                </Link>
-            </SideBarHeader>
+            <Link href="/" className="aspect-square flex items-center justify-center p-2 relative">
+                <Image src="/logo.png" alt="logo" fill={true} style={{ objectFit: 'contain' }} priority={true}
+                    sizes="(max-width: 768px) 20vw, (max-width: 1200px) 20vw, 20vw" />
+            </Link>
             <Separator className='w-full' />
             <div className="flex gap-2 items-center p-2 justify-center text-sm">
-                <Avatar user={user}/>
+                <Avatar user={user} />
                 <div>{user.firstName}</div>
             </div>
             <Separator className='w-full' />

@@ -39,7 +39,7 @@ export default function SmartText({ text, className, onEdit }) {
 
 
 function SmartLabel({ text, className, onClick }) {
-    className += ' cursor-text'
+    className += ' cursor-text hover:underline'
     const isLink = text.includes("http") || text.includes("www.");
     if (isLink) return <LinkText text={text} className={className} />
     return <span className={className} onClick={onClick}>{text}</span>

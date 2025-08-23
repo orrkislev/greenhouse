@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Blend, BookOpen, Pencil, Telescope, X } from "lucide-react";
-import { projectActions, useProject } from "@/utils/store/useProject";
+import { projectActions, useProject, useProjectData } from "@/utils/store/useProject";
 
 
 const goalIcons = [
@@ -55,7 +55,7 @@ export default function ProjectGoals() {
 
 
 function FocusedGoal({ index }) {
-    const goals = useProject(state => state.goals);
+    const goals = useProjectData(state => state.goals);
     const [goal, setGoal] = useState(goals["goal" + index] || InitialGoals[index]);
     const [isFocused, setIsFocused] = useState(false);
     const ref = useRef(null);
@@ -76,7 +76,6 @@ function FocusedGoal({ index }) {
         setGoal(prev => ({ ...prev, leadingQuestions: prev.leadingQuestions.map((question, i) => i === index ? value : question) }));
     }
     const newQuestion = () => {
-        console.log("newQuestion");
         setGoal(prev => ({ ...prev, leadingQuestions: [...prev.leadingQuestions, ""] }));
     }
     const removeQuestion = (index) => {

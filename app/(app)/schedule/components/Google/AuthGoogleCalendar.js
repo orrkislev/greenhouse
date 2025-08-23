@@ -1,9 +1,32 @@
+import Button from "@/components/Button";
 import { getAuthUrl, getRefreshToken } from "@/utils/actions/google actions";
-import { userActions } from "@/utils/store/useUser";
+import { userActions, useUser } from "@/utils/store/useUser";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ScheduleSection } from "../Layout";
 
 export default function AuthGoogleCalendar() {
+    const user = useUser(state => state.user);
+    const router = useRouter();
+
+    if (user.googleRefreshToken) return null;
+
+    const clickAuth = async () => {
+        localStorage.setItem('redirectUrl', window.location.pathname);
+        const origin = window.location.origin;
+        const url = await getAuthUrl(origin);
+        router.push(url);
+    }
+
+
+    return (
+        <Button onClick={clickAuth}>
+            חיבור חשבון גוגל
+        </Button>
+    );
+}
+
+
+
+export function AuthGoogleListener() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const code = searchParams.get('code');
@@ -18,27 +41,12 @@ export default function AuthGoogleCalendar() {
                 userActions.updateUserDoc({
                     googleRefreshToken: token
                 })
-                router.push('/');
+                const redirectUrl = localStorage.getItem('redirectUrl') || '/';
+                localStorage.removeItem('redirectUrl');
+                router.push(redirectUrl);
             }
         })();
     }
 
-    const clickAuth = async () => {
-        const origin = window.location.origin;
-        const url = await getAuthUrl(origin);
-        router.push(url);
-    }
-
-
-    return (
-        <div className='col-span-2'>
-            {!code ? (
-                <div className="bg-[#4285F4] hover:bg-[#357ae8] cursor-pointer text-center text-white transition-colors" onClick={clickAuth}>
-                    חיבור גוגל קלנדר
-                </div>
-            ) : (
-                <div>Processing...</div>
-            )}
-        </div>
-    );
+    return null;
 }

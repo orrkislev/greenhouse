@@ -1,7 +1,7 @@
-import { eventsActions, useEvents } from "@/utils/store/useEvents";
-import { googleCalendarActions, useGoogleCalendar } from "@/utils/store/useGoogleCalendar";
+import { useTodayEvents } from "@/utils/store/useEvents";
+import { useGoogleCalendarEventsToday } from "@/utils/store/useGoogleCalendar";
 import { groupsActions, useInvolvedGroups } from "@/utils/store/useGroups";
-import { notesActions, useNotes } from "@/utils/store/useNotes"
+import { useNotes } from "@/utils/store/useNotes"
 import { useTime } from "@/utils/store/useTime";
 import { useEffect } from "react";
 import Box2 from "@/components/Box2";
@@ -9,18 +9,15 @@ import Box2 from "@/components/Box2";
 export default function MainSchedule() {
     const today = useTime(state => state.today);
     const week = useTime(state => state.week);
-    const notes = useNotes(state => state.userNotes);
-    const events = useEvents(state => state.events);
+    const notes = useNotes();
+    const events = useTodayEvents();
     const groups = useInvolvedGroups();
-    const googleCalendarEvents = useGoogleCalendar(state => state.events);
+    const googleCalendarEvents = useGoogleCalendarEventsToday();
 
     const groupIds = groups.map(g => g.id).join(',');
 
     useEffect(() => {
-        notesActions.loadUserNotesForWeek();
-        eventsActions.loadWeekEvents(week);
-        groupsActions.updateWeek();
-        googleCalendarActions.getTodayEvents();
+        groupsActions.loadWeekEvents();
     }, [week, groupIds])
 
     if (!today) return null;
@@ -30,7 +27,7 @@ export default function MainSchedule() {
     const todayGroupEvents = groups.map(group => (
         {
             group: group.name,
-            events: group.events ? group.events[today] : []
+            events: group.events?.[today] ?? []
         }))
         .filter(group => group.events.length > 0)
 

@@ -27,7 +27,7 @@ export default function Notes() {
 }
 
 function DayNote({ day }) {
-    const notes = useNotes(state => state.userNotes);
+    const notes = useNotes();
     const text = notes?.[day] || '';
 
     const [editing, setEditing] = useState(false);

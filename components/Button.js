@@ -1,6 +1,6 @@
 import { tw } from "@/utils/tw"
 
-const ButtonDiv = tw`
+const ButtonDiv = tw.button`
     inline-flex items-center justify-between gap-2 p-2 rounded-sm
     whitespace-nowrap text-xs font-medium 
     border border-stone-300 text-stone-700
@@ -20,4 +20,10 @@ const ButtonDiv = tw`
 
 export default function Button({ children, ...props }) {
     return <ButtonDiv {...props}>{children}</ButtonDiv>
+}
+
+export function IconButton(props) {
+    return <div className="p-2 hover:bg-stone-100 rounded-full cursor-pointer transition-colors" {...props}>
+        <props.icon className="w-4 h-4" />
+    </div>
 }

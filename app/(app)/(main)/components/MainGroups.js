@@ -1,5 +1,5 @@
 import Box2 from "@/components/Box2";
-import { groupsActions, useGroups } from "@/utils/store/useGroups";
+import { groupsActions, useInvolvedGroups } from "@/utils/store/useGroups";
 import { useEffect } from "react";
 import { TaskPill } from "./MainProject";
 import { useUser } from "@/utils/store/useUser";
@@ -7,7 +7,7 @@ import { Check } from "lucide-react";
 import 'react-quill-new/dist/quill.snow.css';
 
 export default function MainGroups() {
-    const groups = useGroups((state) => state.groups);
+    const groups = useInvolvedGroups();
 
     groups.forEach(group => {
         group.label = group.name;

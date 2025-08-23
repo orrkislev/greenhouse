@@ -1,58 +1,43 @@
 import { useTime } from "@/utils/store/useTime";
-import { create } from "zustand";
 import { fetchEventsFromGoogleCalendar } from "@/utils/actions/google actions";
-import { useUser } from "@/utils/store/useUser";
 import { addDays, format } from "date-fns";
+import { createDataLoadingHook, createStore } from "./utils/createStore";
 
-export const useGoogleCalendar = create((set, get) => ({
+export const [useGoogleCalendar, googleCalendarActions] = createStore((set, get, withUser, withLoadingCheck) => ({
     events: [],
-    isLoading: false,
     loadedRanges: [],
 
-    getTodayEvents: async () => {
-        const userRefreshToken = useUser.getState().user.googleRefreshToken;
-        if (!userRefreshToken) return;
+    getTodayEvents: withLoadingCheck(async (user) => {
+        if (!user.googleRefreshToken) return;
         const day = format(new Date(), 'yyyy-MM-dd');
         const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
 
-        if (get().isLoading) return;
         if (get().loadedRanges.some(range => range.start === day && range.end === tomorrow)) {
             return;
         }
-        set(state => ({ loadedRanges: [...state.loadedRanges, { start: day, end: tomorrow }], isLoading: true }));
-        try {
-            const events = await fetchEventsFromGoogleCalendar(userRefreshToken, day, tomorrow);
-            set({ events: events.map(formatEvent), isLoading: false });
-        } catch (error) {
-            set({ isLoading: false });
-        }
-    },
-    getWeeksEvents: async () => {
+        set(state => ({ loadedRanges: [...state.loadedRanges, { start: day, end: tomorrow }] }));
+        const events = await fetchEventsFromGoogleCalendar(user.googleRefreshToken, day, tomorrow);
+        set({ events: events.map(formatEvent) })
+    }),
+    getWeeksEvents: withLoadingCheck(async (user) => {
         const week = useTime.getState().week;
         if (!week || week.length === 0) return
-        const userRefreshToken = useUser.getState().user.googleRefreshToken;
-        if (!userRefreshToken) return
+        if (!user.googleRefreshToken) return
 
         const start = week[0];
         const end = week[week.length - 1];
 
-        if (get().isLoading) return;
         if (get().loadedRanges.some(range => range.start === start && range.end === end)) {
             return;
         }
-        set(state => ({ loadedRanges: [...state.loadedRanges, { start, end }], isLoading: true }));
-        try {
-            const events = await fetchEventsFromGoogleCalendar(userRefreshToken, start, end);
-            set({ events: events.map(formatEvent), isLoading: false });
-        } catch (error) {
-            set({ isLoading: false });
-        }
-    }
+        set(state => ({ loadedRanges: [...state.loadedRanges, { start, end }] }));
+        const events = await fetchEventsFromGoogleCalendar(user.googleRefreshToken, start, end);
+        set({ events: events.map(formatEvent) });
+    }),
 }));
 
-export const googleCalendarActions = Object.fromEntries(
-    Object.entries(useGoogleCalendar.getState()).filter(([key, value]) => typeof value === 'function')
-);
+export const useGoogleCalendarEventsToday = createDataLoadingHook(useGoogleCalendar, 'events', 'getTodayEvents');
+export const useGoogleCalendarEventsWeek = createDataLoadingHook(useGoogleCalendar, 'events', 'getWeeksEvents');
 
 const formatEvent = (event) => {
     return {

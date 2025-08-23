@@ -9,6 +9,7 @@ import MainGroups from "./components/MainGroups"
 import MainLearn from "./components/MainLearn"
 import ContextBar, { PageMain } from "@/components/ContextBar"
 import MainContext from "./components/MainContext"
+import { AuthGoogleListener } from "../schedule/components/Google/AuthGoogleCalendar"
 
 export default function MainPage() {
     return (
@@ -29,6 +30,8 @@ export default function MainPage() {
             <ContextBar name="">
                 <MainContext />
             </ContextBar>
+
+            <AuthGoogleListener />
         </>
     )
 }

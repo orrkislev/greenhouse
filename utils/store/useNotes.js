@@ -1,15 +1,12 @@
-import { create } from "zustand";
-import { useUser } from "@/utils/store/useUser";
+
 import { useTime } from "@/utils/store/useTime";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/utils//firebase/firebase";
+import { createDataLoadingHook, createStore } from "./utils/createStore";
 
-export const useNotes = create((set, get) => ({
+export const [useNotesData, notesActions] = createStore((set, get, withUser, withLoadingCheck) => ({
     userNotes: {},
-    loadUserNotesForWeek: async () => {
-        const user = useUser.getState().user;
-        if (!user) return
-
+    loadUserNotesForWeek: withLoadingCheck(async (user) => {
         const week = useTime.getState().week;
         if (!week || week.length === 0) return
 
@@ -18,20 +15,14 @@ export const useNotes = create((set, get) => ({
         if (notesDoc.exists()) {
             set({ userNotes: notesDoc.data() })
         }
-    },
-    saveUserNote: async (note, date) => {
-        const user = useUser.getState().user;
-        if (!user) return
-
+    }),
+    saveUserNote: withUser(async (user, note, date) => {
         const week = useTime.getState().week;
         if (!week || week.length === 0) return
 
         const notesCollection = doc(db, 'users', user.id, 'notes', week[0])
         await setDoc(notesCollection, { [date]: note }, { merge: true })
         set((state) => ({ userNotes: { ...state.userNotes, [date]: note } }))
-    },
+    }),
 }));
-
-export const notesActions = Object.fromEntries(
-    Object.entries(useNotes.getState()).filter(([key, value]) => typeof value === 'function')
-)
+export const useNotes = createDataLoadingHook(useNotesData, 'userNotes', 'loadUserNotesForWeek');

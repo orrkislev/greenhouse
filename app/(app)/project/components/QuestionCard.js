@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { tw } from "@/utils/tw";
 import { Pencil } from "lucide-react";
+import Box2 from "@/components/Box2";
 
 const Card = tw.div`
     flex-1 bg-white rounded-2xl shadow-sm p-4 flex flex-col space-y-2 transition-all duration-200
@@ -54,8 +55,8 @@ export default function QuestionCard({ question, value, onSave }) {
     };
 
     return (
-        <Card
-            className={editing ? '' : 'opacity-80 hover:opacity-100'}
+        <Box2
+            className={editing ? 'flex-1' : 'flex-1 opacity-80 hover:opacity-100'}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
         >
@@ -85,6 +86,6 @@ export default function QuestionCard({ question, value, onSave }) {
             ) : (
                 <CollapsedAnswer>{value || <Placeholder>לא מולא</Placeholder>}</CollapsedAnswer>
             )}
-        </Card>
+        </Box2>
     );
 }

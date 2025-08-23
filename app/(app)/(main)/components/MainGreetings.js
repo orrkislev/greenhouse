@@ -19,8 +19,8 @@ export default function MainGreetings() {
         const delta = new Date(currTerm.start) - new Date();
         const days = Math.floor(delta / (1000 * 60 * 60 * 24));
         const deltaToEnd = new Date(currTerm.end) - new Date();
-        const daysToEnd = Math.floor(deltaToEnd / (1000 * 60 * 60 * 24));
-        return `היום ה${days} בתקופת ${currTerm.name} (${daysToEnd} יום נותרו)`
+        const daysToEnd = Math.floor(deltaToEnd / (1000 * 60 * 60 * 24)) + 1;
+        return `היום ה${days} בתקופת ${currTerm.name} (${daysToEnd} ימים נותרו)`
     }
 
     const weekInYear = () => {

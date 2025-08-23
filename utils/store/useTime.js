@@ -6,6 +6,8 @@ import { subscribeWithSelector } from "zustand/middleware";
 import { isEqual } from "lodash";
 
 export const HOURS = ['9:30', '10:30', '11:30', '12:30', 'ערב'];
+export const daysOfWeek = ['א', 'ב', 'ג', 'ד', 'ה'];
+
 
 export const useTime = create(subscribeWithSelector((set, get) => {
     const getWeekDates = (date) => {

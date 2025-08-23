@@ -2,6 +2,7 @@ import { adminActions, useAdmin } from "@/utils/store/useAdmin";
 import { useTime } from "@/utils/store/useTime";
 import { userActions } from "@/utils/store/useUser";
 import { useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 
 
 
@@ -10,6 +11,7 @@ export default function AdminProjects() {
     const staff = useAdmin(state => state.staff);
     const groups = useAdmin(state => state.groups);
     const currTerm = useTime(state => state.currTerm);
+    const router = useRouter();
 
     useEffect(() => {
         adminActions.loadProjects();
@@ -18,13 +20,14 @@ export default function AdminProjects() {
     const displayData = useMemo(() => {
         return groups.map(group => {
             return group.students.map(student => {
-                let project = null, requested = '', master = '', major = null;
+                let project = null, requested = '', master = '', major = null, projectId = null;
 
                 if (student.major) major = student.major.name;
                 if (student.project && student.project.terms.includes(currTerm.id)) {
                     requested = student.project.questions[2].value;
                     master = student.project.master ? student.project.master : null;
                     project = student.project.name;
+                    projectId = student.project.id;
                     if (student.project.terms.length > 1)
                         project += ' (המשך)';
                 }
@@ -32,7 +35,7 @@ export default function AdminProjects() {
                     id: student.id,
                     name: student.firstName + ' ' + student.lastName,
                     group: group.name,
-                    major, project, requested, master,
+                    major, project, requested, master, projectId,
                 }
             });
         }).flat();
@@ -54,8 +57,8 @@ export default function AdminProjects() {
 
 
     const clickOnProject = async (studentId) => {
-        await userActions.switchToStudent(studentId, 'admin');
-        window.location.href = '/project';
+        await userActions.switchToStudent(studentId, window.location.pathname);
+        setTimeout(() => { router.push('/project'); }, 200);
     }
 
     const selectMaster = async (studentId, projectId, masterId) => {
@@ -100,18 +103,20 @@ export default function AdminProjects() {
                             </Cell>
                             <Cell>{student.requested}</Cell>
                             <Cell>
-                                <select
-                                    value={student.master?.id || ''}
-                                    onChange={e => selectMaster(student.id, student.projectId, e.target.value)}
-                                    className="bg-white border border-stone-300 rounded-md p-1"
-                                >
-                                    <option value="">בחר מנחה</option>
-                                    {staff.map(mentor => (
-                                        <option key={mentor.id} value={mentor.id}>
-                                            {mentor.firstName} {mentor.lastName}
-                                        </option>
-                                    ))}
-                                </select>
+                                {student.projectId && (
+                                    <select
+                                        value={student.master?.id || ''}
+                                        onChange={e => selectMaster(student.id, student.projectId, e.target.value)}
+                                        className="bg-white border border-stone-300 rounded-md p-1"
+                                    >
+                                        <option value="">בחר מנחה</option>
+                                        {staff.map(mentor => (
+                                            <option key={mentor.id} value={mentor.id}>
+                                                {mentor.firstName} {mentor.lastName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                )}
                             </Cell>
                         </tr>
                     ))}

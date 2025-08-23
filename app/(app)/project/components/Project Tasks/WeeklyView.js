@@ -5,12 +5,12 @@ import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { ArrowDownToLine, Grip } from "lucide-react";
-import { projectTasksActions, useProjectTasks } from "@/utils/store/useProjectTasks";
+import { projectTasksActions, useProjectTasksData } from "@/utils/store/useProjectTasks";
 import { tw } from "@/utils/tw";
 
 export default function WeeklyView() {
     const [fullView, setFullView] = useState(false);
-    const tasks = useProjectTasks((state) => state.tasks);
+    const tasks = useProjectTasksData((state) => state.tasks);
     const currTerm = useTime((state) => state.currTerm);
     const [isDragging, setIsDragging] = useState(false);
 

@@ -1,145 +1,186 @@
-"use client"
+import Box2 from "@/components/Box2";
+import WithLabel from "@/components/WithLabel";
+import { researchActions, useResearchData } from "@/utils/store/useResearch";
+import { useUser } from "@/utils/store/useUser";
+import AuthGoogleCalendar from "../../schedule/components/Google/AuthGoogleCalendar";
+import Button, { IconButton } from "@/components/Button";
+import { Plus, BadgeHelp, BookOpen, Quote, FileText, Brain, Clock, Type, Eye, ImageIcon, Trash2, MoreVertical } from "lucide-react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { CheckCircle2, Circle, Search, PenTool, FileText, ShieldQuestion } from "lucide-react"
-import FoundationStage from "./foundation-stage"
-import CollectionStage from "./collection-stage"
-import SynthesisStage from "./synthesis-stage"
-import CompletionStage from "./completion-stage"
+import { tw } from "@/utils/tw";
+import Section_21 from "./sections/Section_21";
+import Section_sources from "./sections/Section_sources";
+import Section_quotes from "./sections/Section_Quotes";
+import Section_summary from "./sections/Section_summary";
+import Section_mindmap from "./sections/Section_mindmap";
+import Section_gallery from "./sections/Section_gallery";
+import Section_timeline from "./sections/Section_timeline";
+import Section_vocabulary from "./sections/Section_vocabulary";
+import Section_perspectives from "./sections/Section_perspectives";
+import usePopper from "@/components/Popper";
 
-import { create } from "zustand";
-export const useResearch = create((set, get) => ({
-    research: {
-        foundation: { field: "", topic: "", question: "" },
-        sources: [],
-        completion: { summary: "", googleDocUrl: "" },
+export default function Research() {
+    const user = useUser(state => state.user)
+    const research = useResearchData(state => state.research)
+
+    const clickCreateDoc = async () => {
+        researchActions.createGoogleDoc();
+    }
+
+
+    return (
+        <div className="flex-1 flex flex-col gap-3">
+            <div className="flex justify-between gap-4">
+                <WithLabel label="על מה החקר שלי" className="flex-1">
+                    <input type="text" placeholder="על מה החקר שלי" key={research.id}
+                        defaultValue={research.title} onBlur={(e) => researchActions.updateResearch({ title: e.target.value })}
+                        className="w-full text-xl" />
+                </WithLabel>
+                <div className="flex gap-2">
+                    <Box2>
+                        {!user.googleRefreshToken && <AuthGoogleCalendar />}
+                        {user.googleRefreshToken && !research.docUrl && <Button onClick={clickCreateDoc}>ליצור מסמך חקר</Button>}
+                        {research && research.docUrl && <a href={research.docUrl} target="_blank"><Button className='text-xl'>מסמך החקר שלי</Button></a>}
+                    </Box2>
+                    <ResearchOptions research={research} />
+                </div>
+            </div>
+            {research.sections && research.sections.map(section => {
+                const SectionComponent = sectionsTypes[section.type].component;
+                return (
+                    <WithLabel key={section.id} label={sectionsTypes[section.type].title} Icon={sectionsTypes[section.type].icon} onClose={() => researchActions.removeSection(section.id)}>
+                        <SectionComponent section={section} />
+                    </WithLabel>
+                )
+            })}
+            <div className="flex justify-center">
+                <NewSection />
+            </div>
+        </div>
+    )
+}
+
+const SectionCard = tw.div`flex-1 border border-stone-200 p-4 flex flex-col group/section-card cursor-pointer hover:bg-stone-200 transition-colors
+    ${({ $disabled }) => $disabled && 'opacity-50 pointer-events-none'}
+`
+const SectionIconContainer = tw.div`aspect-square flex items-center justify-center`
+const SectionIcon = tw.div`inset-0 rounded-full bg-stone-400 flex items-center justify-center p-2 text-white group-hover/section-card:bg-white group-hover/section-card:text-stone-400 transition-colors`
+
+
+function NewSection() {
+    const { open, close, Popper, baseRef } = usePopper()
+
+    const clickSection = (name) => {
+        close()
+        researchActions.addSection(name)
+    }
+
+    return (
+        <>
+            <Button data-role="new" onClick={open}>
+                <Plus className="w-4 h-4" />
+                חדש
+            </Button>
+            <Popper className="bg-black/50">
+                <div className="grid grid-cols-5 gap-2 p-4 bg-white w-4xl">
+                    {Object.entries(sectionsTypes).map(([key, section]) => (
+                        <SectionCard key={key} onClick={() => clickSection(key)} $disabled={section.disabled}>
+                            <SectionIconContainer>
+                                <SectionIcon>
+                                    <section.icon className="w-16 h-16" />
+                                </SectionIcon>
+                            </SectionIconContainer>
+                            <div className="font-semibold">{section.title}</div>
+                            <div className="text-xs text-stone-500">{section.description}</div>
+                        </SectionCard>
+                    ))}
+                </div>
+            </Popper>
+        </>
+    )
+}
+
+
+const sectionsTypes = {
+    '21-questions': {
+        icon: BadgeHelp,
+        title: "21 שאלות",
+        description: "כתבי 21 שאלות שונות על הנושא שלך",
+        component: Section_21
     },
-    setResearch: (research) => set({ research }),
-    updateResearch: (research) => set({ research: [...get().research, research] }),
-}));
+    'sources': {
+        icon: BookOpen,
+        title: "מקורות",
+        description: "אספי קישורים, סרטונים, מאמרים או ספרים שקשורים לנושא",
+        component: Section_sources
+    },
+    'quotes': {
+        icon: Quote,
+        title: "ציטוטים",
+        description: "רשמי משפטים או רעיונות שמצאת במקורותייך",
+        component: Section_quotes
+    },
+    'summary': {
+        icon: FileText,
+        title: "תקציר קצר",
+        description: "נסי לסכם את מה שלמדת בפסקה אחת בלבד",
+        component: Section_summary
+    },
+    'mindmap': {
+        icon: Brain,
+        title: "מפת מושגים",
+        description: "שרטטי חיבורים בין רעיונות, נושאים ומושגים שקשורים למחקר שלך",
+        component: Section_mindmap,
+        disabled: true
+    },
+    'gallery': {
+        icon: ImageIcon,
+        title: "גלריה",
+        description: "הוסיפי תמונות, איורים או ויז'ואלים שמעוררים השראה לנושא",
+        component: Section_gallery,
+        disabled: true
+    },
+    'timeline': {
+        icon: Clock,
+        title: "ציר זמן",
+        description: "צייני אירועים חשובים בהיסטוריה או בהתפתחות של הנושא",
+        component: Section_timeline,
+        disabled: true
+    },
+    'vocabulary': {
+        icon: Type,
+        title: "אוצר מילים",
+        description: "כתבי מילים ומושגים חדשים שפגשת במחקר שלך והסבירי אותם",
+        component: Section_vocabulary,
+        disabled: true
+    },
+    'perspectives': {
+        icon: Eye,
+        title: "שלוש נקודות מבט",
+        description: "הסתכלי על הנושא משלוש נקודות מבט שונות (מדעית, אישית, היסטורית וכו׳)",
+        component: Section_perspectives,
+        disabled: true
+    },
+}
 
-const stages = [
-  { id: "foundation", name: "הגדרה", icon: ShieldQuestion, description: "הגדר את בסיס החקר שלך" },
-  { id: "collection", name: "איסוף", icon: Search, description: "איסוף מקורות וחומרים" },
-  { id: "synthesis", name: "סינתזה", icon: PenTool, description: "סכם את החקר שלך" },
-  { id: "completion", name: "סיום", icon: FileText, description: "כתוב מסקנות וממצאים" },
-]
 
-export default function ResearchManagement() {
-  const [currentStage, setCurrentStage] = useState("foundation")
-  const research = useResearch(state => state.research);
-  const updateResearchData = useResearch(state => state.updateResearch);
+function ResearchOptions({ research }) {
+    const { open, close, Popper, baseRef } = usePopper()
 
-  const isStageComplete = (stageId) => {
-    switch (stageId) {
-      case "foundation":
-        return research.foundation.field && research.foundation.topic && research.foundation.question
-      case "collection":
-        return research.sources.length > 0 && research.sources.some((s) => s.materials.length > 0)
-      case "synthesis":
-        return research.sources.some((s) => s.materials.some((m) => m.notes.length > 0))
-      case "completion":
-        return research.completion.summary && research.completion.googleDocUrl
-      default:
-        return false
+    const clickDelete = () => {
+        researchActions.deleteResearch(research.id)
+        close()
     }
-  }
 
-  const renderStageContent = () => {
-    switch (currentStage) {
-      case "foundation":
-        return <FoundationStage data={research.foundation} onUpdate={(data) => updateResearchData("foundation", data)} />
-      case "collection":
-        return <CollectionStage data={research.sources} onUpdate={(data) => updateResearchData("sources", data)} />
-      case "synthesis":
-        return <SynthesisStage data={research.sources} onUpdate={(data) => updateResearchData("sources", data)} />
-      case "completion":
-        return <CompletionStage researchData={research} onUpdate={(data) => updateResearchData("completion", data)} />
-      default:
-        return null
-    }
-  }
+    return (
+        <>
+            <IconButton icon={MoreVertical} onClick={open} ref={baseRef} />
+            <Popper>
+                <Button onClick={clickDelete}>
+                    <Trash2 className="w-4 h-4" />
+                    מחק
+                </Button>
+            </Popper>
+        </>
 
-  return (
-    <div>
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-stone-900 mb-2">החקר שלך</h1>
-          <p className="text-stone-600">ארגן את תהליך החקר שלך מההתחלה ועד לסיום</p>
-        </div>
-
-        {/* Stage Navigation */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          {stages.map(stage => {
-            const Icon = stage.icon
-            const isComplete = isStageComplete(stage.id)
-            const isCurrent = currentStage === stage.id
-
-            return (
-              <Card
-                key={stage.id}
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  isCurrent ? "ring-2 ring-blue-500 bg-blue-50" : ""
-                }`}
-                onClick={() => setCurrentStage(stage.id)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-full ${isCurrent ? "bg-blue-500 text-white" : "bg-stone-100"}`}>
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-sm">{stage.name}</h3>
-                        {isComplete ? (
-                          <CheckCircle2 className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <Circle className="h-4 w-4 text-stone-300" />
-                        )}
-                      </div>
-                      <p className="text-xs text-stone-500">{stage.description}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
-
-        {/* Stage Content */}
-        <div className="mb-8">{renderStageContent()}</div>
-
-        {/* Navigation Buttons */}
-        <div className="flex justify-between">
-          <Button
-            variant="outline"
-            onClick={() => {
-              const currentIndex = stages.findIndex((s) => s.id === currentStage)
-              if (currentIndex > 0) {
-                setCurrentStage(stages[currentIndex - 1].id)
-              }
-            }}
-            disabled={stages.findIndex((s) => s.id === currentStage) === 0}
-          >
-            הקודם
-          </Button>
-
-          <Button
-            onClick={() => {
-              const currentIndex = stages.findIndex((s) => s.id === currentStage)
-              if (currentIndex < stages.length - 1) {
-                setCurrentStage(stages[currentIndex + 1].id)
-              }
-            }}
-            disabled={stages.findIndex((s) => s.id === currentStage) === stages.length - 1}
-          >
-            הבא
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
+    )
 }

@@ -18,12 +18,14 @@ export const useStaff = create((set, get) => ({
         const querySnapshot = await getDocs(projectsQuery);
 
         const projects = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const studentsIDs = querySnapshot.docs.map(doc => doc.ref.parent.parent.id);
-        if (user.students) studentsIDs.push(...user.students);
+        const projectStudentsIDs = querySnapshot.docs.map(doc => doc.ref.parent.parent.id);
+
+        const allStudentIds = [...projectStudentsIDs];
+        if (user.students) allStudentIds.push(...user.students);
 
         let allStudents = []
-        while (studentsIDs.length > 0) {
-            const first30 = studentsIDs.splice(0, 30);
+        while (allStudentIds.length > 0) {
+            const first30 = allStudentIds.splice(0, 30);
             const students = await getDocs(query(collection(db, "users"), where("__name__", "in", first30)));
             allStudents.push(...students.docs.map(doc => ({
                 id: doc.id,

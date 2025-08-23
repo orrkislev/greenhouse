@@ -1,5 +1,4 @@
-import { create } from "zustand";
-import { projectActions, useProject } from "@/utils/store/useProject";
+import { projectActions, useProjectData } from "@/utils/store/useProject";
 import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, limit, query, updateDoc, where, arrayUnion, getDoc } from "firebase/firestore";
 import { format } from "date-fns";
 import { useTime } from "@/utils/store/useTime";
@@ -7,11 +6,12 @@ import { logsActions } from "@/utils/store/useLogs";
 import { LOG_TYPES } from "@/utils/constants/constants";
 import { useUser } from "@/utils/store/useUser";
 import { db } from "@/utils//firebase/firebase";
+import { createDataLoadingHook, createStore } from "./utils/createStore";
 
-export const useProjectTasks = create((set, get) => {
+export const [useProjectTasksData, projectTasksActions] = createStore((set, get, withUser, withLoadingCheck) => {
     const getCollectionRef = () => {
         const userId = useUser.getState().user?.id;
-        const projectId = useProject.getState().project?.id;
+        const projectId = useProjectData.getState().project?.id;
         if (!userId || !projectId) return null
         return collection(db, 'users', userId, 'projects', projectId, 'tasks')
     }
@@ -21,23 +21,23 @@ export const useProjectTasks = create((set, get) => {
         view: 'list',
         loaded: false,
 
-        loadAllTasks: async () => {
+        loadAllTasks: withLoadingCheck(async (user) => {
             if (get().loaded === 'all') return;
             const collectionRef = getCollectionRef();
             if (!collectionRef) return
             const querySnapshot = await getDocs(collectionRef);
             const tasksDocs = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-            const tasks = useProject.getState().project?.tasks?.map(taskId => tasksDocs.find(task => task.id === taskId)).filter(e => e) || [];
+            const tasks = useProjectData.getState().project?.tasks?.map(taskId => tasksDocs.find(task => task.id === taskId)).filter(e => e) || [];
             tasks.push(...tasksDocs.filter(task => !tasks.find(t => t.id === task.id)));
-            set({ tasks, view: useProject.getState().project?.taskStyle || 'list', loaded: 'all' });
-        },
-        loadNextTasks: async () => {
+            set({ tasks, view: useProjectData.getState().project?.taskStyle || 'list', loaded: 'all' });
+        }),
+        loadNextTasks: withLoadingCheck(async (user) => {
             if (get().loaded === 'next') return;
 
             const collectionRef = getCollectionRef();
             if (!collectionRef) return
 
-            const view = useProject.getState().project?.taskStyle || 'list';
+            const view = useProjectData.getState().project?.taskStyle || 'list';
             let docs
             if (view === 'list') {
                 const snapshot = await getDocs(query(collectionRef, where('completed', '==', false)));
@@ -77,31 +77,31 @@ export const useProjectTasks = create((set, get) => {
                 const nextDocs = nextSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id, mark: 'next' }));
                 docs = [...overDueDocs, ...todayDocs, ...nextDocs];
             }
-            const tasks = useProject.getState().project?.tasks?.map(taskId => docs.find(task => task.id === taskId)).filter(e => e) || [];
+            const tasks = useProjectData.getState().project?.tasks?.map(taskId => docs.find(task => task.id === taskId)).filter(e => e) || [];
             tasks.push(...docs.filter(task => !tasks.find(t => t.id === task.id)));
             set({ tasks, view, loaded: 'next' });
-        },
+        }),
 
 
 
 
-        setTasks: async (tasks) => {
+        setTasks: withUser(async (user, tasks) => {
             projectActions.updateProject({ tasks: tasks.map(task => task.id) });
             set({ tasks });
-        },
+        }),
         setView: (view) => {
             projectActions.updateProject({ taskStyle: view });
             if (view === 'list')
                 set({ tasks: get().tasks.sort((a, b) => a.startDate.localeCompare(b.startDate)) });
             set({ view });
         },
-        addTask: async (task) => {
+        addTask: withUser(async (user, task) => {
             const collectionRef = getCollectionRef();
             if (!collectionRef) return;
             const newDoc = await addDoc(collectionRef, { ...task, completed: false });
             get().setTasks([...get().tasks, { ...task, id: newDoc.id }]);
-        },
-        updateTask: async (taskId, updatedFields) => {
+        }),
+        updateTask: withUser(async (user, taskId, updatedFields) => {
             const collectionRef = getCollectionRef();
             if (!collectionRef) return;
             const taskRef = doc(collectionRef, taskId);
@@ -109,14 +109,14 @@ export const useProjectTasks = create((set, get) => {
             get().setTasks(get().tasks.map(task =>
                 task.id === taskId ? { ...task, ...updatedFields } : task
             ));
-        },
-        deleteTask: async (taskId) => {
+        }),
+        deleteTask: withUser(async (user, taskId) => {
             const collectionRef = getCollectionRef();
             if (!collectionRef) return;
             const taskRef = doc(collectionRef, taskId);
             await deleteDoc(taskRef);
             get().setTasks(get().tasks.filter(task => task.id !== taskId));
-        },
+        }),
         changeOrder: (taskId, newSpot) => {
             const task = get().tasks.find(t => t.id === taskId);
             const newTasks = get().tasks.filter(t => t.id !== taskId);
@@ -126,11 +126,11 @@ export const useProjectTasks = create((set, get) => {
 
 
 
-        completeTaskByLabel: (label) => {
+        completeTaskByLabel: withUser(async (user, label) => {
             const task = get().tasks.find(t => t.label === label);
             if (!task || task.completed) return;
             get().completeTask(task.id);
-        },
+        }),
         completeTask: (taskId) => {
             const task = get().tasks.find(t => t.id === taskId);
             if (!task) return;
@@ -139,7 +139,7 @@ export const useProjectTasks = create((set, get) => {
                 type: LOG_TYPES.COMPLETE_TASK,
                 text: `השלמתי את המשימה ${task.title} בפרויקט`,
                 taskId: task.id,
-                projectId: useProject.getState().project.id,
+                projectId: useProjectData.getState().project.id,
             });
         },
         cancelTask: (taskId) => {
@@ -150,12 +150,12 @@ export const useProjectTasks = create((set, get) => {
                 type: LOG_TYPES.CANCEL_TASK,
                 text: `ביטלתי את המשימה ${task.title} בפרויקט`,
                 taskId: task.id,
-                projectId: useProject.getState().project.id,
+                projectId: useProjectData.getState().project.id,
             });
         },
 
 
-        addTaskToStudentProject: async (task, studentId) => {
+        addTaskToStudentProject: withUser(async (user, task, studentId) => {
             const userDoc = await getDoc(doc(db, 'users', studentId));
             if (!userDoc.exists()) return;
             const userData = userDoc.data();
@@ -166,10 +166,9 @@ export const useProjectTasks = create((set, get) => {
             await updateDoc(projectRef, {
                 tasks: arrayUnion(newDoc.id)
             });
-        }
+        }),
     }
 });
 
-export const projectTasksActions = Object.fromEntries(
-    Object.entries(useProjectTasks.getState()).filter(([key, value]) => typeof value === 'function')
-);
+export const useProjectTasks = createDataLoadingHook(useProjectTasksData, 'tasks', 'loadAllTasks');
+export const useProjectNextTasks = createDataLoadingHook(useProjectTasksData, 'tasks', 'loadNextTasks');

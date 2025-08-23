@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect, useState } from "react"
 import { DashboardLayout, DashboardPanel, DashboardPanelButton, DashboardMain, DashboardTitle } from "@/components/DashboardLayout"
-import { studyActions, useStudy } from "@/utils/store/useStudy"
+import { studyActions, useStudy, useStudyPaths } from "@/utils/store/useStudy"
 import StudyMain from "./components/StudyMain"
 import StudyPath from "./components/StudyPath"
 import { tw } from "@/utils/tw"
@@ -18,11 +17,7 @@ const PathButtonSpan = tw.span`
 
 export default function LearnPage() {
     const searchParams = useSearchParams()
-    const paths = useStudy(state => state.paths)
-
-    useEffect(() => {
-        studyActions.loadPaths()
-    }, [])
+    const paths = useStudyPaths()
 
     const id = searchParams.get('id')
     const selectedPath = paths.find(path => path.id === id)

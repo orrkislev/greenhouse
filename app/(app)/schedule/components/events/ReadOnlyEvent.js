@@ -4,7 +4,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/utils/store/useUser";
 import { groupsActions, useGroups } from "@/utils/store/useGroups"
-import { eventsActions } from "@/utils/store/useEvents";
 
 const EventDiv = tw`
     bg-[#EF98A1] py-2 px-4 text-stone-800
@@ -46,7 +45,6 @@ function ReadOnlyEventContext({ event, onClose }) {
 
     const handleRemove = () => {
         groupsActions.leaveGroupEvent(event.group, event.id, useUser.getState().user.id)
-        eventsActions.removeGroupEvent(event.id);
         onClose();
     };
 

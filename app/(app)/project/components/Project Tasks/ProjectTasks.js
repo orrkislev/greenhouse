@@ -1,11 +1,11 @@
 import { tw } from "@/utils/tw";
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import ListView from "./ListView";
-import { List, CalendarDays, Route, BetweenHorizonalEnd, TableOfContents, ListPlus, Plus } from "lucide-react";
+import { CalendarDays, BetweenHorizonalEnd, TableOfContents, Plus } from "lucide-react";
 import WeeklyView from "./WeeklyView";
 import CalendarView from "./CalendarView";
 import { format } from "date-fns";
-import { projectTasksActions, useProjectTasks } from "@/utils/store/useProjectTasks";
+import { projectTasksActions, useProjectTasks, useProjectTasksData } from "@/utils/store/useProjectTasks";
 import Box2 from "@/components/Box2";
 
 const NewTaskButton = tw`px-4 py-1 bg-primary text-white hover:bg-primary/80 transition-colors flex gap-1 transition-all duration-300 rounded-lg`;
@@ -14,16 +14,12 @@ const ViewButton = tw`px-3 py-1 flex items-center gap-1 transition-colors
     hover:bg-stone-100 cursor-pointer ${props => props.$active ? 'bg-stone-200' : ''}`;
 
 export default function ProjectTasks() {
-    const view = useProjectTasks((state) => state.view);
-    const tasks = useProjectTasks((state) => state.tasks);
-
-    useEffect(() => {
-        projectTasksActions.loadAllTasks();
-    }, [])
+    const projectTasks = useProjectTasks()
+    const view = useProjectTasksData((state) => state.view);
 
     const createNewTask = () => {
         const newTask = {
-            title: "משימה " + (tasks.length + 1),
+            title: "משימה נחמדה",
             description: "Task description",
             startDate: format(new Date(), 'yyyy-MM-dd'),
             endDate: format(new Date(), 'yyyy-MM-dd')
@@ -31,7 +27,7 @@ export default function ProjectTasks() {
         projectTasksActions.addTask(newTask);
     }
 
-    const ViewComponent = views[view].component;
+    const ViewComponent = views[view]?.component
 
     return (
         <Box2 label="תכנית עבודה" className="bg-white pb-6">
@@ -64,17 +60,11 @@ const views = {
         icon: CalendarDays,
         component: CalendarView,
     },
-    // timeline: {
-    //     label: 'ציר זמן',
-    //     icon: Route,
-    //     component: () => <div>Timeline View (not implemented)</div>,
-    //     // Placeholder for future implementation
-    // }
 }
 
 function ViewSelector() {
-    const view = useProjectTasks((state) => state.view);
-    const setView = useProjectTasks((state) => state.setView);
+    const view = useProjectTasksData((state) => state.view);
+    const setView = useProjectTasksData((state) => state.setView);
 
     const [isOpen, setIsOpen] = useState(false);
     const selectView = (newView) => {

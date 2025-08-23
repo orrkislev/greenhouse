@@ -61,7 +61,7 @@ export function AvatarEdit() {
 
     return (
         <div className="p-8 pb-2">
-            <div className="flex flex-col gap-2 items-center relative aspect-square border border-stone-500 rounded-full bg-stone-200"
+            <div className="flex flex-col gap-2 items-center justify-center relative aspect-square border border-stone-500 rounded-full bg-stone-200"
                 onDrop={e => {
                     e.preventDefault();
                     onFile(e.dataTransfer.files[0]);

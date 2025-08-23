@@ -1,20 +1,15 @@
 'use client'
 
-import { projectActions, useProject } from "@/utils/store/useProject";
+import { useProject } from "@/utils/store/useProject";
 import NewProjectDialog from "./components/NewProjectDialog";
 import NewTermDialog from "./components/NewTermDialog";
 import ProjectProposal from "./components/ProjectProposal";
 import ProjectDashboard from "./components/ProjectDashboard";
-import { useEffect } from "react";
 import ContextBar, { PageMain } from "@/components/ContextBar";
 import ProjectContext from "./components/ProjectContext";
 
 export default function ProjectPage() {
-    const project = useProject((state) => state.project);
-
-    useEffect(() => {
-        projectActions.loadProject();
-    }, []);
+    const project = useProject();
 
     let mainContent = null;
     if (!project) mainContent = <NewProjectDialog />;

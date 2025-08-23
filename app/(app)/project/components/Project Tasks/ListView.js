@@ -1,10 +1,10 @@
 import { Check, GripVertical, Trash, X } from "lucide-react";
 import { Reorder, useDragControls } from "framer-motion";
 import { useState } from "react";
-import { projectTasksActions, useProjectTasks } from "@/utils/store/useProjectTasks";
+import { projectTasksActions, useProjectTasksData } from "@/utils/store/useProjectTasks";
 
 export default function ListView() {
-    const tasks = useProjectTasks((state) => state.tasks);
+    const tasks = useProjectTasksData((state) => state.tasks);
 
     // Separate completed and non-completed tasks
     const activeTasks = tasks.filter(task => !task.completed);

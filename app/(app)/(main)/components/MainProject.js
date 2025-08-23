@@ -1,17 +1,12 @@
 import { tw } from "@/utils/tw";
-import { projectActions, useProject } from "@/utils/store/useProject";
-import { projectTasksActions, useProjectTasks } from "@/utils/store/useProjectTasks";
-import { Check, ChevronLeft, Trash, X } from "lucide-react";
+import { useProject } from "@/utils/store/useProject";
+import { projectTasksActions, useProjectNextTasks, useProjectTasksData } from "@/utils/store/useProjectTasks";
+import { Check, ChevronLeft, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
 import Box2 from "@/components/Box2";
 
 export default function MainProject() {
-    const project = useProject((state) => state.project);
-
-    useEffect(() => {
-        projectActions.loadProject();
-    }, []);
+    const project = useProject();
 
     let state = 'no project'
     if (project && project.master) state = 'tasks'
@@ -45,12 +40,8 @@ export default function MainProject() {
 
 
 function Tasks() {
-    const tasks = useProjectTasks((state) => state.tasks);
-    const view = useProjectTasks((state) => state.view);
-
-    useEffect(() => {
-        projectTasksActions.loadNextTasks();
-    }, []);
+    const tasks = useProjectNextTasks()
+    const view = useProjectTasksData((state) => state.view);
 
     if (tasks.length === 0) {
         return <div className='text-stone-500 text-center p-4'>אין משימות</div>;

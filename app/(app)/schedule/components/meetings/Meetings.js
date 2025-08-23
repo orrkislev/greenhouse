@@ -1,9 +1,7 @@
 import { tw } from "@/utils/tw";
 import { useTime } from "@/utils/store/useTime";
-import { meetingsActions, useMeetings } from "@/utils/store/useMeetings";
+import { useMeetings } from "@/utils/store/useMeetings";
 import { ScheduleSection } from "../Layout";
-import { useUser } from "@/utils/store/useUser";
-import { useEffect } from "react";
 
 const MeetingContainer = tw`flex flex-col items-center justify-center text-stone-800 text-xs p-2
     gap-2 divide-y divide-black/10 z-[10]
@@ -12,12 +10,7 @@ const MeetingContainer = tw`flex flex-col items-center justify-center text-stone
 
 export default function Meetings() {
     const week = useTime((state) => state.week);
-    const meetings = useMeetings(state => state.meetings);
-    const user = useUser(state => state.user);
-
-    useEffect(()=>{
-        if (week && week.length > 0) meetingsActions.loadMeetings();
-    },[week]);
+    const meetings = useMeetings();
 
     return (
         <ScheduleSection name="פגישות" edittable={false}>
@@ -26,7 +19,7 @@ export default function Meetings() {
                     {meetings.filter(meeting => meeting.day === index + 1).map((meeting, i) => (
                         <div key={i} className="text-xs text-stone-700 text-center flex gap-2">
                             <div>{meeting.start} - {meeting.end}</div>
-                            {meeting.other.name}
+                            {meeting.studentName}
                         </div>
                     ))}
                 </MeetingContainer>

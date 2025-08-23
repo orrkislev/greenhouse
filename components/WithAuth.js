@@ -40,7 +40,7 @@ export default function WithAuth({ children, role }) {
                 <div className="w-full max-w-md">
                     {/* Logo/Icon Section */}
                     <div className="flex flex-col items-center justify-center">
-                        <Image src="/logo.png" alt="logo" width={300} height={300} />
+                        <Image src="/logo.png" alt="logo" width={300} height={300} priority={true} style={{width:'auto', height:'auto'}}/>
                         {/* <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full mx-auto mb-4 flex items-center justify-center">
                             <UserCircle2 className="h-8 w-8 text-white" />
                         </div> */}

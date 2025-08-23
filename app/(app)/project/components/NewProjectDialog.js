@@ -19,7 +19,7 @@ export default function NewProjectDialog(){
                 פרויקט חדש
                 <Plus className="w-4 h-4" />
             </Button>
-            <Image src="/no_project.png" alt="Project" width={600} height={600} className="mt-4" />
+            <Image src="/no_project.png" alt="Project" width={600} height={600} className="mt-4" priority={true}/>
         </div>
     )
 }
