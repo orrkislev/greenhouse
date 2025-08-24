@@ -33,7 +33,7 @@ export default function Research() {
                 <WithLabel label="על מה החקר שלי" className="flex-1">
                     <input type="text" placeholder="על מה החקר שלי" key={research.id}
                         defaultValue={research.title} onBlur={(e) => researchActions.updateResearch({ title: e.target.value })}
-                        className="w-full text-xl" />
+                        className="w-full text-xl outline outline-transparent hover:outline hover:outline-stone-300 focus:outline-stone-300 rounded-sm transition-all duration-200" />
                 </WithLabel>
                 <div className="flex gap-2">
                     <Box2>

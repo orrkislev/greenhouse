@@ -4,24 +4,38 @@ import { projectTasksActions, useProjectNextTasks, useProjectTasksData } from "@
 import { Check, ChevronLeft, X } from "lucide-react";
 import Link from "next/link";
 import Box2 from "@/components/Box2";
+import Image from "next/image";
+import Button from "@/components/Button";
 
 export default function MainProject() {
     const project = useProject();
 
-    let state = 'no project'
-    if (project && project.master) state = 'tasks'
-    if (project && !project.master) state = 'proposal'
-
     return (
-        <Box2 label="הפרויקט שלי" className="flex-1group/project pb-8">
+        <Box2 label="הפרויקט שלי" className="flex-1 group/project pb-8">
             <div className='flex flex-col gap-3'>
-                <div className='font-semibold'>
-                    {state === 'no project' ? 'אין פרויקט פעיל' : project.name || 'פרויקט חדש'}
+                {project && <div className='w-full aspect-[7/3] relative group/image'>
+                    <Image src={project.image} alt={project.name} fill className="object-cover" />
+                    <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-transparent group-hover/image:bg-stone-900/30 transition-all duration-200">
+                        <h1 className="font-bold p-2 bg-white group-hover/image:text-stone-900 group-hover/image:scale-105 transition-all duration-200">{project.name}</h1>
+                    </div>
                 </div>
+                }
 
-                {state !== 'no project' && <Tasks />}
+                {project && <Tasks />}
+
+                {!project && <div className='font-semibold'>
+                    אין פרויקט פעיל
+                </div>}
+
             </div>
 
+            <Link href="/project">
+                <Button className="absolute bottom-2 left-2">
+                    לדף הפרויקט
+                    <ChevronLeft className='inline w-4 h-4 text-stone-500' />
+                </Button>
+            </Link>
+{/* 
             <Link href="/project">
                 <div className='absolute bottom-2 left-2 flex items-center gap-3 px-2 py-1 border border-stone-300 rounded-full hover:bg-stone-100 transition-all group-hover/project:opacity-100 opacity-0'>
                     <div className='text-xs'>
@@ -29,7 +43,7 @@ export default function MainProject() {
                     </div>
                     <ChevronLeft className='inline w-4 h-4 text-stone-500' />
                 </div>
-            </Link>
+            </Link> */}
         </Box2>
     );
 }

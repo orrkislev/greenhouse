@@ -16,7 +16,7 @@ export default function MainNews() {
         });
     }, []);
 
-    if (!embedUrl) return null;
+    if (!embedUrl) return <div></div>;
 
     return (
         <Box2 label="חדשות החממה" className="w-full">

@@ -5,6 +5,8 @@ import { staffActions, useStaff } from "@/utils/store/useStaff";
 import { Plus } from "lucide-react";
 import { useEffect } from "react";
 import { Staff_Students_List } from "./StaffGroup_Students";
+import Button from "@/components/Button";
+import WithLabel from "@/components/WithLabel";
 
 export default function StaffStudents() {
     const students = useStaff(state => state.students);
@@ -35,27 +37,23 @@ export default function StaffStudents() {
 
             <div className="text-stone-500">
                 {allStudents.length == 0 ? (
-                    <button className="px-4 py-2 border border-stone-300 text-stone-500 hover:bg-stone-100 hover:text-stone-700 transition-colors flex items-center gap-2"
-                        onClick={loadAllStudents}>
+                    <Button onClick={loadAllStudents}>
                         <Plus className="w-4 h-4" /> חניכים נוספים
-                    </button>
+                    </Button>
                 ) : (
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex gap-4 flex-wrap">
                         {groups.filter(g => g.type === 'class').map(group => {
                             const studentsInGroup = availableStudents.filter(student => student.class === group.id);
                             if (studentsInGroup.length > 0) return (
-                                <div key={group.id}>
-                                    {group.name}
+                                <WithLabel key={group.id} label={group.name}>
                                     <div className="flex gap-2 flex-wrap">
                                         {studentsInGroup.sort((a, b) => a.firstName.localeCompare(b.firstName)).map(student => (
-                                            <div key={student.id} className="flex items-center justify-between border border-stone-300 p-2 cursor-pointer hover:bg-stone-200 transition-colors"
-                                                onClick={() => staffActions.addStudentToMentoring(student)}
-                                            >
+                                            <Button key={student.id} data-role="save" onClick={() => staffActions.addStudentToMentoring(student)} >
                                                 {student.firstName} {student.lastName}
-                                            </div>
+                                            </Button>
                                         ))}
                                     </div>
-                                </div>
+                                </WithLabel>
                             )
                         })}
                     </div>

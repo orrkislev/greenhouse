@@ -31,7 +31,7 @@ export default function ResearchPage() {
         <ResearchList />
         <div className="flex justify-center items-center mt-8">
           <Button data-role="new" onClick={researchActions.newResearch}>
-            מחקר חדש
+            חקר חדש
             <Plus className="w-4 h-4 ml-2" />
           </Button>
         </div>

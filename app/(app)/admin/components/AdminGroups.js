@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { adminActions, useAdmin } from "@/utils/store/useAdmin";
-import { Edit2, Meh, Plus, Trash, UserRoundX, XIcon } from "lucide-react";
+import { Edit2, Meh, Plus, Trash, UserRoundX, Users2, XIcon } from "lucide-react";
 import { tw } from "@/utils/tw";
 import { Cell, Edittable, TableHeader } from "./Common";
 
@@ -251,6 +251,7 @@ function GroupStudents({ group }) {
 
 function AdminMajors() {
     const majors = useAdmin(state => state.majors);
+    const groups = useAdmin(state => state.groups);
 
     const handleRemoveMajor = (majorId) => adminActions.deleteMajor(majorId);
     const editMajor = (majorId, value) => adminActions.updateMajor(majorId, { name: value });
@@ -261,9 +262,15 @@ function AdminMajors() {
             <h3 className="text-sm">מגמות</h3>
             <div className="flex gap-2">
                 {majors.map(major => (
-                    <div key={major.id} className="flex flex-col p-4 gap-2 group relative border border-stone-200">
+                    <div key={major.id} className="flex flex-col p-4 group relative border border-stone-200">
                         <div>מגמת</div>
                         <Edittable value={major.name} onFinish={(value) => editMajor(major.id, value)} />
+                        <div className="flex items-center gap-2 pr-4 text-stone-400 mt-2" >
+                            <Users2 className="w-4 h-4" />
+                            <span className="text-xs text-stone-500">
+                                {groups.reduce((acc, group) => acc + group.students.filter(student => student.major == major.id).length, 0)}
+                            </span>
+                        </div>
                         <XIcon className="absolute top-1 left-1 w-4 h-4 opacity-0 group-hover:opacity-100 cursor-pointer"
                             onClick={() => handleRemoveMajor(major.id)} />
                     </div>
