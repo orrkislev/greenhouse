@@ -2,7 +2,7 @@ import { userActions } from "./useUser";
 import { collection, updateDoc, deleteDoc, addDoc, getDoc, doc } from "firebase/firestore";
 import { db, generateImage, storage } from '@/utils/firebase/firebase'
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { examplePaths } from "@/app/(app)/learn/components/example study paths";
+import { examplePaths, newPathData } from "@/app/(app)/learn/components/example study paths";
 import { useEffect } from "react";
 import { createDataLoadingHook, createStore } from "./utils/createStore";
 
@@ -24,8 +24,8 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
     }),
 
     addNewPath: () => {
-        const selectedPath = examplePaths[Math.floor(Math.random() * examplePaths.length)]
-        get().addPath(selectedPath)
+        // const selectedPath = examplePaths[Math.floor(Math.random() * examplePaths.length)]
+        get().addPath(newPathData())
     },
 
     addPath: withUser(async (user, path) => {
@@ -79,6 +79,27 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
         const path = get().paths.find(path => path.id === pathId)
         const subject = path.subjects.find(subject => subject.id === subjectId)
         subject.steps = subject.steps.filter(step => step.id !== stepId)
+        get().updatePath(pathId, path)
+    },
+
+    // ------------------------------
+    addSource: async (pathId, source) => {
+        const path = get().paths.find(path => path.id === pathId)
+        if (!path.sources) path.sources = []
+        path.sources.push({ text: source, id: crypto.randomUUID() })
+        get().updatePath(pathId, path)
+    },
+    updateSource: async (pathId, sourceId, sourceData) => {
+        const path = get().paths.find(path => path.id === pathId)
+        const source = path.sources.find(source => source.id === sourceId)
+        if (!source) return;
+        Object.assign(source, sourceData)
+        get().updatePath(pathId, path)
+    },
+    deleteSource: async (pathId, sourceId) => {
+        const path = get().paths.find(path => path.id === pathId)
+        if (!path.sources) return;
+        path.sources = path.sources.filter(source => source.id !== sourceId)
         get().updatePath(pathId, path)
     },
 

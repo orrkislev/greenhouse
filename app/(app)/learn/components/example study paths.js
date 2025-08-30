@@ -1,6 +1,29 @@
 import { generateTextWithSchema } from "@/utils/firebase/firebase"
 import { Schema } from "firebase/ai"
 
+
+export const newPathData = () => ({
+    name: "תחום הלמידה שלי",
+    description: "למה אני לומד את זה?",
+    subjects: [
+        {
+            id: crypto.randomUUID(),
+            name: "מה בעצם אני אלמד",
+            description: "הסבר קצר על הנושא",
+            steps: [
+                {
+                    id: crypto.randomUUID(),
+                    source: "מה הדבר הראשון שאלמד בנושא הזה",
+                    text: "איך בדיוק אני אלמד את זה",
+                    finished: false,
+                    test: "איך אדע שהצלחתי?",
+                },
+            ],
+        },
+    ],
+    active: true,
+})
+
 export const examplePaths = [
     {
         name: "ארכיטקטורת עננים אישיים",

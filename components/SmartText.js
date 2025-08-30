@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Pencil } from "lucide-react";
 
 
-export default function SmartText({ text, className, onEdit }) {
+export default function SmartText({ text, className, onEdit, withIcon = true }) {
     const [isEditing, setIsEditing] = useState(false);
     const [lastValue, setLastValue] = useState(text);
 
@@ -29,10 +29,10 @@ export default function SmartText({ text, className, onEdit }) {
 
     return (
         <div className="flex gap-4 group items-center">
-            <SmartLabel text={text} className={className} onClick={startEditing} />
-            <Pencil className="w-4 h-4 cursor-pointer opacity-0 group-hover:opacity-50 hover:opacity-100 transition-all"
+            <SmartLabel text={text || ''} className={className} onClick={startEditing} />
+            {withIcon && <Pencil className="w-4 h-4 cursor-pointer opacity-0 group-hover:opacity-50 hover:opacity-100 transition-all"
                 onClick={startEditing}
-            />
+            />}
         </div>
     )
 }
@@ -48,7 +48,7 @@ function SmartLabel({ text, className, onClick }) {
 
 function LinkText({ text, className }) {
     const words = text.split(" ");
-    return <div className={`flex gap-1 ${className}`}>
+    return <div className={`flex gap-1 ${className} flex-wrap whitespace-pre-wrap`}>
         {words.map((word, index) => <LinkWords key={index} word={word} className={className} />)}
     </div>
 }

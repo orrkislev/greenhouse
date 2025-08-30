@@ -6,7 +6,7 @@ import StudyMain from "./components/StudyMain"
 import StudyPath from "./components/StudyPath"
 import { tw } from "@/utils/tw"
 import ContextBar, { PageMain } from "@/components/ContextBar"
-import { examplePaths } from "./components/example study paths"
+import { examplePaths, newPathData } from "./components/example study paths"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import StudyContext from "./components/StudyContext"
@@ -23,8 +23,8 @@ export default function LearnPage() {
     const selectedPath = paths.find(path => path.id === id)
 
     const newPath = () => {
-        const selectedPath = examplePaths[Math.floor(Math.random() * examplePaths.length)]
-        studyActions.addPath(selectedPath)
+        // const selectedPath = examplePaths[Math.floor(Math.random() * examplePaths.length)]
+        studyActions.addPath(newPathData())
     }
 
     return (
