@@ -33,6 +33,7 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 			AuthService.signOut();
 		},
 		signIn: async (username, pinPass) => {
+			set({ error: null });
 			const { user, error } = await AuthService.signIn(username, pinPass);
 			if (user) {
 				await get().subscribeToUser(user.email.split('@')[0]);

@@ -43,14 +43,17 @@ export default function AdminStaff() {
             delete staff.dirty;
             const id = staff.id;
             delete staff.id;
+            if (staff.admin) staff.roles.push('admin');
+            delete staff.admin;
             await adminActions.updateMember(id, staff);
         }
         for (const staff of newStaff) {
             delete staff.isNew; 
             delete staff.dirty;
             delete staff.id;
-            if (staff.admin) staff.roles.push('admin');
             if (staff.major == '') delete staff.major;
+            if (staff.admin) staff.roles.push('admin');
+            delete staff.admin;
             await adminActions.createMember(staff);
         }
         setMadeChanges(false);

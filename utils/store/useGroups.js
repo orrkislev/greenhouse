@@ -115,8 +115,10 @@ export const [useGroups, groupsActions] = createStore((set, get) => ({
 
         const snapshot = await getDocs(query(collection(db, "users"), queryFilter));
         const members = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        const students = members.filter(m => m.roles.includes('student'));
+        let students = members.filter(m => m.roles.includes('student'));
         const mentors = members.filter(m => m.roles.includes('staff'));
+        if (group.type === 'staff') students = members.filter(m => m.roles.includes('staff'));
+
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, students, mentors } : g) }));
     },
 
@@ -180,6 +182,7 @@ export const groupUtils = {
     isMentor: (group, user) => {
         if (!user) user = useUser.getState().user;
         if (!user.roles || !user.roles.includes('staff')) return false;
+        if (group.type === 'staff') return user.class === group.id;
         if (group.type === 'class') return user.class === group.id;
         if (group.type === 'major') return user.major === group.id;
         return false;
@@ -200,8 +203,8 @@ export const groupUtils = {
         if (!user.id) return [];
         const groups = []
         if (user.roles && user.roles.includes('staff')) groups.push('צוות');
-        if (user.class) groups.push(user.class);
-        if (user.major) groups.push(user.major);
+        if (user.class && !groups.includes(user.class)) groups.push(user.class);
+        if (user.major && !groups.includes(user.major)) groups.push(user.major);
         return groups;
     }
 }

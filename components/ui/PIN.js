@@ -1,6 +1,6 @@
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "./input-otp";
 
-export default function PINInput({ onChange, value }) {
+export default function PINInput({ onChange, value, hideInput=false }) {
 
     return (
         <div>
@@ -9,6 +9,7 @@ export default function PINInput({ onChange, value }) {
                 maxLength={4}
                 value={value}
                 onChange={v => onChange({target: { value: v }})}
+                hideInput={hideInput}
             >
                 <InputOTPGroup className="ltr">
                     <InputOTPSlot index={0} className="bg-white" />

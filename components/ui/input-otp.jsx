@@ -9,11 +9,13 @@ import { cn } from "@/lib/utils"
 function InputOTP({
   className,
   containerClassName,
+  hideInput,
   ...props
 }) {
   return (
     (<OTPInput
       data-slot="input-otp"
+      data-hide-input={hideInput}
       containerClassName={cn("flex items-center gap-2 has-disabled:opacity-50", containerClassName)}
       className={cn("disabled:cursor-not-allowed", className)}
       {...props} />)
@@ -39,6 +41,10 @@ function InputOTPSlot({
 }) {
   const inputOTPContext = React.useContext(OTPInputContext)
   const { char, hasFakeCaret, isActive } = inputOTPContext?.slots[index] ?? {}
+  
+  // Check if the parent InputOTP has hideInput enabled
+  const hideInput = React.useContext(OTPInputContext)?.hideInput || 
+    document.querySelector('[data-slot="input-otp"]')?.getAttribute('data-hide-input') === 'true'
 
   return (
     (<div
@@ -49,7 +55,7 @@ function InputOTPSlot({
         className
       )}
       {...props}>
-      {char}
+      {hideInput && char ? '*' : char}
       {hasFakeCaret && (
         <div
           className="pointer-events-none absolute inset-0 flex items-center justify-center">
