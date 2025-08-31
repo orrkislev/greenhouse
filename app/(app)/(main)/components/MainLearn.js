@@ -9,7 +9,7 @@ export default function MainLearn() {
         <Box2 label="למידה" className="flex-1">
             <div className="flex flex-col gap-2">
                 {paths.map((path) => (
-                    <Link href={`/learn/${path.id}`} key={path.id}>
+                    <Link href={`/learn/?id=${path.id}`} key={path.id}>
                         <div className="group/path cursor-pointer">
                             <div className="w-full aspect-[7/3] relative">
                                 <Image src={path.image} alt={path.name} fill className="object-cover" />

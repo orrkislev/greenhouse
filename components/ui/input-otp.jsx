@@ -6,19 +6,23 @@ import { MinusIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+// Create a context to pass hideInput prop to slots
+const HideInputContext = React.createContext(false)
+
 function InputOTP({
   className,
   containerClassName,
-  hideInput,
+  hideInput = false,
   ...props
 }) {
   return (
-    (<OTPInput
-      data-slot="input-otp"
-      data-hide-input={hideInput}
-      containerClassName={cn("flex items-center gap-2 has-disabled:opacity-50", containerClassName)}
-      className={cn("disabled:cursor-not-allowed", className)}
-      {...props} />)
+    <HideInputContext.Provider value={hideInput}>
+      <OTPInput
+        data-slot="input-otp"
+        containerClassName={cn("flex items-center gap-2 has-disabled:opacity-50", containerClassName)}
+        className={cn("disabled:cursor-not-allowed", className)}
+        {...props} />
+    </HideInputContext.Provider>
   );
 }
 
@@ -42,9 +46,8 @@ function InputOTPSlot({
   const inputOTPContext = React.useContext(OTPInputContext)
   const { char, hasFakeCaret, isActive } = inputOTPContext?.slots[index] ?? {}
   
-  // Check if the parent InputOTP has hideInput enabled
-  const hideInput = React.useContext(OTPInputContext)?.hideInput || 
-    document.querySelector('[data-slot="input-otp"]')?.getAttribute('data-hide-input') === 'true'
+  // Get hideInput from our custom context
+  const hideInput = React.useContext(HideInputContext)
 
   return (
     (<div
