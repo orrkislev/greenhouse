@@ -30,7 +30,7 @@ function MainGroup({ group }) {
     }, [group])
 
     return (
-        <Box2 label={group.label} className="flex-1">
+        <Box2 label={group.label} description={group.description} className="flex-1">
             <div className="text-sm text-stone-500 w-full" dangerouslySetInnerHTML={{ __html: group.message }} />
             <div>
                 {group.tasks && group.tasks.map((task) => (
