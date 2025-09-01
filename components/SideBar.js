@@ -13,7 +13,7 @@ const SideBarDiv = tw`flex flex-col border-l border-stone-400 bg-stone-200 -my-6
 const SideBarContent = tw`h-full flex flex-col gap-1 pt-8 flex-1 z-0`
 const SideBarFooter = tw`flex flex-col gap-1 pb-4`
 
-const NavigationMenuItem = tw`flex gap-2 rtl items-center p-2 text-stone-500 hover:text-stone-700 mr-4 relative overflow-hidden -ml-px
+const NavigationMenuItem = tw`flex gap-2 rtl items-center p-1 pl-2 text-stone-500 hover:text-stone-700 mr-4 relative overflow-hidden -ml-px
 ${props => props.$disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
 `
 const LinkClasses = `flex justify-center gap-1 text-sm rounded-lg p-2 z-2 items-center`
@@ -102,7 +102,7 @@ function SideBarItem({ href, icon, label, active, disabled }) {
             </AnimatePresence>
             <Link href={href} className={LinkClasses + ' ' + (active ? 'text-black' : 'hover:bg-white')} >
                 {icon}
-                <div>{label}</div>
+                <div className="text-sm">{label}</div>
             </Link>
         </NavigationMenuItem>
     )
