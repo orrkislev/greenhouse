@@ -56,9 +56,10 @@ export default function CalendarView() {
     let displayCells = cellsData;
     if (!fullView) {
         const startOfLastWeek = format(subWeeks(startOfWeek(new Date(), { weekStartsOn: 0 }), 1), "yyyy-MM-dd");
-        const indexOfLastWeek = cellsData.findIndex(cell => cell.dateFormatted === startOfLastWeek);
+        const indexOfLastWeek = Math.max(cellsData.findIndex(cell => cell.dateFormatted === startOfLastWeek), 0)
         displayCells = cellsData.slice(indexOfLastWeek, indexOfLastWeek + 18);
     }
+
 
 
     return (

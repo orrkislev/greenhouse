@@ -2,7 +2,7 @@ import { userActions } from "./useUser";
 import { collection, updateDoc, deleteDoc, addDoc, getDoc, doc } from "firebase/firestore";
 import { db, generateImage, storage } from '@/utils/firebase/firebase'
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { examplePaths, newPathData } from "@/app/(app)/learn/components/example study paths";
+import { newPathData } from "@/app/(app)/learn/components/example study paths";
 import { useEffect } from "react";
 import { createDataLoadingHook, createStore } from "./utils/createStore";
 
@@ -11,7 +11,12 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
     sideContext: [],
 
     loadPaths: withLoadingCheck(async (user) => {
-        if (!user.study) return;
+        if (!user.study) {
+            set({ paths: [] })
+            return;
+        }
+
+        if (get().paths.length > 0) return;
 
         const paths = []
         for (const studyId of user.study) {
@@ -24,7 +29,6 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
     }),
 
     addNewPath: () => {
-        // const selectedPath = examplePaths[Math.floor(Math.random() * examplePaths.length)]
         get().addPath(newPathData())
     },
 

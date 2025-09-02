@@ -54,7 +54,7 @@ export default function WeeklyView() {
 
     let displayWeeks = termWeeks;
     if (!fullView) {
-        const currentIndex = termWeeks.findIndex(week => week.isCurrent);
+        const currentIndex = termWeeks.findIndex(week => week.isCurrent) || 1;
         displayWeeks = termWeeks.slice(currentIndex - 1, currentIndex + 2);
     }
 
