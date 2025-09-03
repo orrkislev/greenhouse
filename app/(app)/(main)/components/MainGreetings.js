@@ -27,7 +27,7 @@ export default function MainGreetings() {
         const year = (new Date()).getMonth() < 6 ? new Date().getFullYear() - 1 : new Date().getFullYear();
         const yearStart = startOfWeek(new Date(year, 8, 1), { weekStartsOn: 0 });
         const currWeekStart = startOfWeek(new Date(), { weekStartsOn: 0 });
-        const delta = differenceInWeeks(currWeekStart, yearStart);
+        const delta = differenceInWeeks(currWeekStart, yearStart) + 1;
         return delta;
     }
 

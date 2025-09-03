@@ -1,4 +1,4 @@
-import { GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signOut } from 'firebase/auth';
+import { EmailAuthProvider, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from './firebase';
 
 export const prepareEmail = (username) => {
@@ -39,7 +39,6 @@ export class AuthService {
     try {
       const googleProvider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, googleProvider);
-      console.log(userCredential.user);
       return { user: userCredential.user };
     } catch (error) {
       return { error: this.getErrorMessage(error) };

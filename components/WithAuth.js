@@ -85,11 +85,11 @@ export default function WithAuth({ children, role }) {
                             {loading ? 'ממתין...' : 'התחבר'}
                         </button>
 
-                        <div className='flex items-center justify-center'>
+                        {/* <div className='flex items-center justify-center'>
                             <Icon icon="devicon:google" className="w-12 h-12 p-2 grayscale-20 hover:grayscale-0 hover:saturate-300 hover:bg-stone-100 rounded-full cursor-pointer transition-all duration-200"
                                 onClick={() => userActions.signInWithGoogle()}
                             />
-                        </div>
+                        </div> */}
                     </form>
 
                 </div>
