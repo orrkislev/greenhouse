@@ -11,7 +11,7 @@ export default function MainProject() {
     const project = useProject();
 
     return (
-        <Box2 label="הפרויקט שלי" className="flex-1 group/project pb-8">
+        <Box2 label="הפרויקט שלי" className="flex-1 group/project pb-8 relative">
             <div className='flex flex-col gap-3'>
                 {project && <div className='w-full aspect-[7/3] relative group/image'>
                     <Image src={project.image} alt={project.name} fill className="object-cover" />
@@ -35,15 +35,6 @@ export default function MainProject() {
                     <ChevronLeft className='inline w-4 h-4 text-stone-500' />
                 </Button>
             </Link>
-{/* 
-            <Link href="/project">
-                <div className='absolute bottom-2 left-2 flex items-center gap-3 px-2 py-1 border border-stone-300 rounded-full hover:bg-stone-100 transition-all group-hover/project:opacity-100 opacity-0'>
-                    <div className='text-xs'>
-                        לדף הפרויקט
-                    </div>
-                    <ChevronLeft className='inline w-4 h-4 text-stone-500' />
-                </div>
-            </Link> */}
         </Box2>
     );
 }

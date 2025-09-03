@@ -205,6 +205,29 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             await get().addLibraryItem({ url, name: file.name, path: storageRef.fullPath });
         }),
 
+
+        // -------------------------------------
+        // ------ Project Library TLDraw -------
+        // -------------------------------------
+        tldraw:null,
+        loadTldraw: withUser(async (user) => {
+            const project = get().project;
+            if (!project) return;
+            const projectLibraryRef = doc(db, 'users', user.id, 'projects', project.id, 'documents', 'tldraw');
+            const projectLibrarySnapshot = await getDoc(projectLibraryRef);
+            if (projectLibrarySnapshot.exists()) {
+                const data = projectLibrarySnapshot.data();
+                set({ tldraw: data || null });
+            }
+        }),
+        saveTldraw: withUser(async (user, tldraw) => {
+            const project = get().project;
+            if (!project) return;
+            const projectLibraryRef = doc(db, 'users', user.id, 'projects', project.id, 'documents', 'tldraw');
+            await setDoc(projectLibraryRef, tldraw);
+            set({ tldraw });
+        }),
+
         // ------------------------------
         // ------ Project Image -------
         // ------------------------------

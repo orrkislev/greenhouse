@@ -1,4 +1,4 @@
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from './firebase';
 
 export const prepareEmail = (username) => {
@@ -21,9 +21,9 @@ export class AuthService {
     const password = preparePassword(pinPass);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      return {user:userCredential.user};
+      return { user: userCredential.user };
     } catch (error) {
-      return {error: this.getErrorMessage(error)};
+      return { error: this.getErrorMessage(error) };
     }
   }
 
@@ -35,7 +35,16 @@ export class AuthService {
     }
   }
 
-
+  static async signInWithGoogle() {
+    try {
+      const googleProvider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, googleProvider);
+      console.log(userCredential.user);
+      return { user: userCredential.user };
+    } catch (error) {
+      return { error: this.getErrorMessage(error) };
+    }
+  }
 
   static getErrorMessage(error) {
     if (error.code) {

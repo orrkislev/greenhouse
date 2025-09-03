@@ -5,6 +5,8 @@ import { userActions, useUser } from '@/utils/store/useUser';
 import PINInput from './ui/PIN';
 import { redirect } from 'next/navigation';
 import Image from 'next/image';
+import WithLabel from './WithLabel';
+import { Icon } from "@iconify/react";
 
 export default function WithAuth({ children, role }) {
     const [username, setUsername] = useState('');
@@ -36,16 +38,16 @@ export default function WithAuth({ children, role }) {
     return (
         <div className="min-h-screen flex">
             {/* Left Side - Sign In Form */}
-            <div className="flex-1 bg-white flex items-center justify-center p-8">
-                <div className="w-full max-w-md">
+            <div className="flex-1 bg-white flex items-center justify-center">
+                <div className="w-full max-w-md -mt-8">
                     {/* Logo/Icon Section */}
-                    <div className="flex flex-col items-center justify-center">
-                        <Image src="/logo.png" alt="logo" width={300} height={300} priority={true} style={{width:'auto', height:'auto'}}/>
+                    <div className="flex flex-col items-center justify-center mb-4">
+                        <Image src="/logo.png" alt="logo" width={300} height={300} priority={true} style={{ width: 'auto', height: 'auto' }} />
                         {/* <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full mx-auto mb-4 flex items-center justify-center">
                             <UserCircle2 className="h-8 w-8 text-white" />
                         </div> */}
-                        <p className="text-sm text-stone-600">
-                            היכנסו עם שם המשתמש והסיסמא שלהם
+                        <p className="text-sm text-stone-600 text-center">
+                            היכנסו עם שם המשתמש והסיסמא שלכם <br />
                             אם אתם לא זוכרים, פנו למנטורים
                         </p>
                     </div>
@@ -57,10 +59,7 @@ export default function WithAuth({ children, role }) {
                             </div>
                         )}
 
-                        <div className="space-y-2">
-                            <label htmlFor="username-sidebar" className="text-sm font-medium text-stone-700">
-                                שם משתמש
-                            </label>
+                        <WithLabel label="שם משתמש">
                             <input
                                 id="username-sidebar"
                                 type="text"
@@ -70,16 +69,13 @@ export default function WithAuth({ children, role }) {
                                 onChange={e => setUsername(e.target.value)}
                                 autoComplete="username"
                             />
-                        </div>
+                        </WithLabel>
 
-                        <div className="space-y-2">
-                            <label htmlFor="password-sidebar" className="text-sm font-medium text-stone-700">
-                                סיסמא (4 ספרות)
-                            </label>
-                            <div className="flex gap-2 justify-center">
+                        <WithLabel label="סיסמא (4 ספרות)">
+                            <div className="flex justify-center">
                                 <PINInput onChange={e => setPin(e.target.value)} hideInput={true} />
                             </div>
-                        </div>
+                        </WithLabel>
 
                         <button
                             type="submit"
@@ -88,8 +84,14 @@ export default function WithAuth({ children, role }) {
                         >
                             {loading ? 'ממתין...' : 'התחבר'}
                         </button>
+
+                        <div className='flex items-center justify-center'>
+                            <Icon icon="devicon:google" className="w-12 h-12 p-2 grayscale-20 hover:grayscale-0 hover:saturate-300 hover:bg-stone-100 rounded-full cursor-pointer transition-all duration-200"
+                                onClick={() => userActions.signInWithGoogle()}
+                            />
+                        </div>
                     </form>
-                    
+
                 </div>
             </div>
 

@@ -41,6 +41,16 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 				set({ error });
 			}
 		},
+		signInWithGoogle: async () => {
+			set({ error: null });
+			const { user, error } = await AuthService.signInWithGoogle();
+			console.log(user, error);
+			if (user) {
+				await get().subscribeToUser(user.email.split('@')[0]);
+			} else {
+				set({ error });
+			}
+		},
 		subscribeToUser: async (userId) => {
 			set({ loading: true });
 			unsubscribe();

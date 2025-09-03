@@ -171,4 +171,4 @@ export const [useProjectTasksData, projectTasksActions] = createStore((set, get,
 });
 
 export const useProjectTasks = createDataLoadingHook(useProjectTasksData, 'tasks', 'loadAllTasks');
-export const useProjectNextTasks = createDataLoadingHook(useProjectTasksData, 'tasks', 'loadNextTasks');
+export const useProjectNextTasks = createDataLoadingHook(useProjectTasksData, 'tasks', 'loadAllTasks');
