@@ -24,6 +24,7 @@ export default function MainSchedule() {
     const todayNote = notes[today];
     const todayEvents = events.filter(event => event.date === today).sort((a, b) => a.start.localeCompare(b.start));
     todayEvents.push(...googleCalendarEvents.filter(event => event.date === today));
+
     const todayGroupEvents = groups.map(group => (
         {
             group: group.name,

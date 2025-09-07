@@ -8,6 +8,8 @@ export const [useGoogleCalendar, googleCalendarActions] = createStore((set, get,
     loadedRanges: [],
 
     getTodayEvents: withLoadingCheck(async (user) => {
+        set({ events: [], loadedRanges: [] });
+        
         if (!user.googleRefreshToken) return;
         const day = format(new Date(), 'yyyy-MM-dd');
         const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');

@@ -30,10 +30,13 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
         events: [],
 
         loadTodayEvents: withLoadingCheck(async (user) => {
-            const events = await get().getTodaysEventsForUser(user.id);
-            set({ events });
+            console.log('loadTodayEvents', user.id);
+            set({ events: [] });
+            // const events = await get().getTodaysEventsForUser(user.id);
+            // set({ events });
         }), 
         loadWeekEvents: withLoadingCheck(async (user, week) => {
+            set({ events: [] });
             if (!week) week = useTime.getState().week;
             if (!week || week.length === 0) return;
 
