@@ -1,9 +1,9 @@
 import Image from "next/image";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 
 
-export default function SmartText({ text, className, onEdit, withIcon = true }) {
+export default function SmartText({ text, className, onEdit, withIcon = true, onRemove }) {
     const [isEditing, setIsEditing] = useState(false);
     const [lastValue, setLastValue] = useState(text);
 
@@ -32,6 +32,9 @@ export default function SmartText({ text, className, onEdit, withIcon = true }) 
             <SmartLabel text={text || ''} className={className} onClick={startEditing} />
             {withIcon && <Pencil className="w-4 h-4 cursor-pointer opacity-0 group-hover:opacity-50 hover:opacity-100 transition-all"
                 onClick={startEditing}
+            />}
+            {onRemove && <Trash2 className="w-4 h-4 cursor-pointer opacity-0 group-hover:opacity-50 hover:opacity-100 transition-all"
+                onClick={onRemove}
             />}
         </div>
     )

@@ -24,7 +24,7 @@ export default function Button({ children, ...props }) {
 }
 
 export function IconButton(props) {
-    return <div className="p-2 hover:bg-stone-100 rounded-full cursor-pointer transition-colors" {...props}>
+    return <div {...props} className={`p-2 hover:bg-stone-100 rounded-full cursor-pointer transition-colors ${props.className}`}>
         <props.icon className="w-4 h-4" />
     </div>
 }

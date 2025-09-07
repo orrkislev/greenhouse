@@ -41,13 +41,13 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
     }),
     deletePath: withUser(async (user, pathId) => {
         const pathRef = doc(db, 'users', user.id, 'study', pathId)
-        await deleteDoc(pathRef)
         userActions.updateUserDoc({ study: user.study ? user.study.filter(id => id !== pathId) : [] })
         set(state => ({ paths: state.paths.filter(path => path.id !== pathId) }))
+        await deleteDoc(pathRef)
     }),
     updatePath: withUser(async (user, pathId, pathData) => {
-        await updateDoc(doc(db, 'users', user.id, 'study', pathId), pathData)
         set(state => ({ paths: state.paths.map(path => path.id === pathId ? { ...path, ...pathData } : path) }))
+        await updateDoc(doc(db, 'users', user.id, 'study', pathId), pathData)
     }),
 
     addSubject: async (pathId, subject) => {
@@ -83,6 +83,33 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
         const path = get().paths.find(path => path.id === pathId)
         const subject = path.subjects.find(subject => subject.id === subjectId)
         subject.steps = subject.steps.filter(step => step.id !== stepId)
+        get().updatePath(pathId, path)
+    },
+
+    addStepContent: async (pathId, subjectId, stepId, content) => {
+        content.id = crypto.randomUUID()
+        const path = get().paths.find(path => path.id === pathId)
+        const subject = path.subjects.find(subject => subject.id === subjectId)
+        const step = subject.steps.find(step => step.id === stepId)
+        if (!step.content) step.content = []
+        step.content.push(content)
+        get().updatePath(pathId, path)
+    },
+    updateStepContent: async (pathId, subjectId, stepId, contentId, contentData) => {
+        const path = get().paths.find(path => path.id === pathId)
+        const subject = path.subjects.find(subject => subject.id === subjectId)
+        const step = subject.steps.find(step => step.id === stepId)
+        if (!step.content) step.content = []
+        const content = step.content.find(content => content.id === contentId)
+        Object.assign(content, contentData)
+        get().updatePath(pathId, path)
+    },
+    deleteStepContent: async (pathId, subjectId, stepId, contentId) => {
+        const path = get().paths.find(path => path.id === pathId)
+        const subject = path.subjects.find(subject => subject.id === subjectId)
+        const step = subject.steps.find(step => step.id === stepId)
+        if (!step.content) step.content = []
+        step.content = step.content.filter(content => content.id !== contentId)
         get().updatePath(pathId, path)
     },
 

@@ -1,13 +1,15 @@
 import SmartText, { AutoSizeTextarea } from "@/components/SmartText"
 import { studyActions } from "@/utils/store/useStudy"
-import { Check, Ellipsis, Hamburger, Loader2, Menu, Pencil, Plus, Sparkle, Trash2, X } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { BookOpen, Check, Ellipsis, EllipsisVertical, HandMetal, Pencil, Plus, Quote, Sparkle, Target, Trash2, X } from "lucide-react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { tw } from "@/utils/tw"
 import { getNewStep, getNewSubject } from "./example study paths"
 import { generateImage } from "@/utils/firebase/firebase"
 import WithLabel from "@/components/WithLabel"
 import StudyPath_Sources from "./StudyPath_Sources"
-import { IconButton } from "@/components/Button"
+import Button, { IconButton } from "@/components/Button"
+import Menu, { MenuList, MenuItem, MenuSeparator } from "@/components/Menu"
+import { motion } from "motion/react"
 
 const SpecialButton = tw`p-4 border border-stone-200 rounded-md flex items-center gap-2 text-xs hover:bg-stone-100 cursor-pointer`;
 
@@ -39,25 +41,24 @@ export default function StudyPath({ path }) {
 
 
             <WithLabel label="מה אני לומד.ת">
-                <div className="flex flex-col gap-4">
-                    <div className="flex">
+                {/* <div className="flex flex-col gap-4"> */}
+                {/* <div className="flex">
                         <SpecialButton onClick={newSubject} disabled={loading}>
                             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                             {loading ? "רגע..." : "הוסף נושא"}
                         </SpecialButton>
-                    </div>
+                    </div> */}
 
-                    {path.subjects.map((subject) => (
-                        <Subject key={subject.id} path={path} subject={subject} />
-                    ))}
-                </div>
+                {path.subjects.map((subject) => (
+                    <Subject key={subject.id} path={path} subject={subject} />
+                ))}
+                {/* </div> */}
             </WithLabel>
         </div>
     )
 }
 
 function PathOptions({ path }) {
-    const [isOpen, setIsOpen] = useState(false)
 
     const onDelete = () => {
         studyActions.deletePath(path.id)
@@ -65,21 +66,11 @@ function PathOptions({ path }) {
     }
 
     return (
-        <div className={`border border-stone-200 bg-white float-left mt-2 max-w-8 transition-all duration-300 overflow-hidden ${isOpen ? 'max-w-40' : ''}`}>
-            {!isOpen ? (
-                <Ellipsis className="w-6 h-6 cursor-pointer p-1 hover:bg-stone-200 rounded-full" onClick={() => setIsOpen(true)} />
-            ) : (
-                <div className="p-2 rounded-md flex flex-col gap-2">
-                    <div className="flex justify-end">
-                        <X className="w-6 h-6 cursor-pointer p-1 hover:bg-stone-200 rounded-full" onClick={() => setIsOpen(false)} />
-                    </div>
-                    <div className="flex gap-2 items-center text-stone-500 cursor-pointer hover:text-stone-500 hover:bg-stone-200 rounded-md p-1 transition-all truncate" onClick={onDelete}>
-                        <Trash2 className="w-4 h-4" />
-                        מחק תחום
-                    </div>
-                </div>
-            )}
-        </div>
+        <Menu className='float-left mt-2'>
+            <MenuList>
+                <MenuItem title="מחק תחום" icon={Trash2} onClick={onDelete} />
+            </MenuList>
+        </Menu>
     )
 }
 
@@ -94,34 +85,9 @@ function PathBG({ path }) {
 }
 
 function Subject({ path, subject }) {
-    const [loading, setLoading] = useState(false)
 
-    const newStep = async () => {
-        setLoading(true)
-        const newStep = await getNewStep(path, subject)
-        studyActions.addStep(path.id, subject.id, newStep)
-        setLoading(false)
-    }
     return (
         <div key={subject.id} className="flex gap-4">
-            <div className="z-2 w-64">
-                <div className="bg-white flex flex-col gap-4 p-4 border border-stone-300 justify-between group/subject">
-                    <div className="flex flex-col gap-1">
-                        <SmartText className="text-lg" text={subject.name} onEdit={(name) => studyActions.updateSubject(path.id, subject.id, { ...subject, name })} />
-                        <SmartText className="text-sm text-stone-500" text={subject.description} onEdit={(description) => studyActions.updateSubject(path.id, subject.id, { ...subject, description })} />
-                    </div>
-                    <div className="flex gap-1 opacity-0 group-hover/subject:opacity-100 transition-all">
-                        <SpecialButton onClick={() => studyActions.deleteSubject(path.id, subject.id)}>
-                            <Trash2 className="w-4 h-4" />
-                            מחק נושא
-                        </SpecialButton>
-                        <SpecialButton onClick={newStep} disabled={loading}>
-                            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                            {loading ? "רגע..." : "הוסף שלב"}
-                        </SpecialButton>
-                    </div>
-                </div>
-            </div>
             <div className="relative flex-1">
                 <Steps path={path} subject={subject} />
             </div>
@@ -130,111 +96,129 @@ function Subject({ path, subject }) {
 }
 
 function Steps({ path, subject }) {
+    const NewStepButton = (
+        <div className="bg-green-100 rounded-2xl p-4 shadow flex items-center justify-center">
+            <Button data-role="new" onClick={async () => {
+                const newStep = await getNewStep(path, subject)
+                studyActions.addStep(path.id, subject.id, newStep)
+            }}>
+                שלב נוסף
+                <Plus className="w-4 h-4 ml-2" />
+            </Button>
+        </div>
+    )
+
+
     return (
-        <div className="flex flex-col gap-3">
-            {subject.steps.map((step) => (
-                <Step key={step.id} path={path} subject={subject} step={step} />
-            ))}
+        <div className="flex">
+            <div className="flex-1 flex flex-col gap-8 pb-32">
+                {subject.steps.filter((_, index) => index % 2 == 0).map((step) => (
+                    <Step key={step.id} path={path} subject={subject} step={step} side="right" />
+                ))}
+                {subject.steps.length % 2 == 1 && NewStepButton}
+            </div>
+            <StepsMiddleLine path={path} subject={subject} />
+            <div className="flex-1 flex flex-col gap-8 pt-8 pb-32">
+                {subject.steps.filter((_, index) => index % 2 == 1).map((step) => (
+                    <Step key={step.id} path={path} subject={subject} step={step} side="left" />
+                ))}
+                {subject.steps.length % 2 == 0 && NewStepButton}
+            </div>
         </div>
     )
 }
 
-function Step({ path, subject, step }) {
+
+function StepsMiddleLine() {
     return (
-        <div className="flex justify-between border border-stone-300 group/step w-full">
-            <div className="flex-[3] flex flex-col gap-1 p-2">
-                <SmartText text={step.source} className="text-sm font-semibold text-stone-500" onEdit={(source) => studyActions.updateStep(path.id, subject.id, step.id, { ...step, source })} />
-                <SmartText text={step.text} className="text-sm text-stone-500" onEdit={(text) => studyActions.updateStep(path.id, subject.id, step.id, { ...step, text })} />
-            </div>
-            <div className="flex-[1] border-r border-stone-300 border-dashed pr-2 flex justify-between">
-                <SmartText text={step.test || "איך אדע שהצלחתי"} className="text-xs text-stone-500" onEdit={(test) => studyActions.updateStep(path.id, subject.id, step.id, { ...step, test })} />
-                <div className="flex flex-col gap-2 opacity-0 group-hover/step:opacity-100 transition-all">
-                    <IconButton icon={Check} onClick={() => studyActions.updateStep(path.id, subject.id, step.id, { ...step, finished: !step.finished })} />
-                    <IconButton icon={Trash2} onClick={() => studyActions.deleteStep(path.id, subject.id, step.id)} />
+        <div className="w-16 flex justify-center relative">
+            <div className="w-px h-full border-dashed border-r border-sky-600" />
+            <div className="absolute left-1/2 -translate-x-1/2 w-px h-32 bg-linear-to-b from-stone-100 to-transparent" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-px h-32 bg-linear-to-t from-stone-100 to-transparent" />
+        </div>
+    )
+}
+
+
+const contentIcons = {
+    source: { icon: Plus, className: 'underline' },
+    quote: { icon: Quote, className: 'italic' },
+    exercise: { icon: HandMetal },
+    goal: { icon: Target, className: 'font-semibold' },
+}
+
+function Step({ path, subject, step, side }) {
+    return (
+        <div className="group/step w-full relative">
+            <div className="rounded-2xl shadow bg-white overflow-hidden relative">
+                <motion.div
+                    initial={{
+                        scale: 0,
+                        opacity: 1,
+                    }}
+                    animate={{
+                        scale: step.finished ? 8 : 0,
+                        opacity: 1,
+                    }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                    className="absolute left-0 bottom-0 bg-sky-100 rounded-full"
+                    style={{
+                        width: "128px",
+                        height: "128px",
+                        zIndex: 0,
+                    }}
+                />
+
+                <div className="relative z-10 p-4 pb-8">
+
+                    <Menu className='absolute top-2 left-2 scale-80' icon={EllipsisVertical}>
+                        <MenuList>
+                            <MenuItem title="מקור מידע" icon={contentIcons.source.icon} onClick={() => studyActions.addStepContent(path.id, subject.id, step.id, { type: 'source', text: '' })} />
+                            <MenuItem title="ציטוט" icon={contentIcons.quote.icon} onClick={() => studyActions.addStepContent(path.id, subject.id, step.id, { type: 'quote', text: '' })} />
+                            <MenuItem title="תרגול" icon={contentIcons.exercise.icon} onClick={() => studyActions.addStepContent(path.id, subject.id, step.id, { type: 'exercise', text: '' })} />
+                            <MenuItem title="מטרה" icon={contentIcons.goal.icon} onClick={() => studyActions.addStepContent(path.id, subject.id, step.id, { type: 'goal', text: '' })} />
+                            <MenuSeparator />
+                            <MenuItem title="מחק" icon={Trash2} onClick={() => studyActions.deleteStep(path.id, subject.id, step.id)} />
+                        </MenuList>
+                    </Menu>
+
+                    <div className="flex flex-col gap-1 p-2">
+                        <SmartText text={step.source} className="text-xl font-semibold text-stone-500" onEdit={(source) => studyActions.updateStep(path.id, subject.id, step.id, { ...step, source })} />
+                        <SmartText text={step.text} className="text-sm text-stone-500" onEdit={(text) => studyActions.updateStep(path.id, subject.id, step.id, { ...step, text })} />
+                        {step.content && step.content.map((content) => {
+                            const Content = contentIcons[content.type]
+                            const className = `text-sm text-stone-500 ${Content.className || ''}`
+                            return (
+                                <div key={content.id} className="flex gap-2 items-center text-sm text-stone-500 p-1">
+                                    <Content.icon className="w-4 h-4" />
+                                    <SmartText text={content.text} className={className}
+                                        onEdit={(text) => studyActions.updateStepContent(path.id, subject.id, step.id, content.id, { text })}
+                                        onRemove={() => studyActions.deleteStepContent(path.id, subject.id, step.id, content.id)}
+                                    />
+                                </div>
+                            )
+                        })}
+                    </div>
+
+                    <div className="absolute bottom-2 left-2">
+                        <IconButton
+                            icon={Check}
+                            className={`w-8 h-8 border rounded-full transition-colors ${step.finished ? 'bg-sky-200 border-sky-300 text-sky-600' : 'border-stone-300'}`}
+                            onClick={() => studyActions.updateStep(path.id, subject.id, step.id, { ...step, finished: !step.finished })} />
+                    </div>
                 </div>
             </div>
+
+            <div className={`absolute top-1/2 w-8 -translate-y-1/2 h-8 
+                ${side == 'right' ? 'left-0 -translate-x-1/1 border-l rounded-bl-xl -ml-[0.5px]' : 'right-0 border-r translate-x-1/1 rounded-br-xl -mr-[0.5px]'}
+                border-b border-sky-600 border-dashed
+                `} />
+
+            <div className={`absolute top-1/2 translate-y-3
+                ${side == 'right' ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2'}
+                h-2 w-2 rounded-full bg-sky-600
+                `} />
+
         </div>
     )
 }
-
-// function Steps({ path, subject }) {
-//     const [counter, setCounter] = useState(0)
-//     const [svg, setSvg] = useState(null)
-//     const stepsRef = useRef(null)
-
-//     useEffect(() => {
-//         const timer = setInterval(() => {
-//             calcSVG()
-//         }, 100)
-//         return () => clearInterval(timer)
-//     }, [])
-
-//     const calcSVG = () => {
-//         if (!stepsRef.current) return
-//         const container = stepsRef.current.getBoundingClientRect()
-//         const steps = stepsRef.current.querySelectorAll(".step")
-//         let newSVg = []
-//         for (let i = 0; i < steps.length - 1; i++) {
-//             const s1 = steps[i]
-//             const s2 = steps[i + 1]
-//             const s1Rect = s1.getBoundingClientRect()
-//             const s2Rect = s2.getBoundingClientRect()
-//             const startY = s1Rect.top - container.top + s1Rect.height / 2
-//             const startX = i % 2 == 0 ? s1Rect.left - container.left : s1Rect.left - container.left + s1Rect.width
-//             const endy = s2Rect.top - container.top + s2Rect.height / 2
-//             const endx = i % 2 == 0 ? s2Rect.left - container.left : s2Rect.left - container.left + s2Rect.width
-//             const dx = i % 2 == 0 ? Math.min(startX, endx) - 30 : Math.max(startX, endx) + 30
-//             const radius = (startY - endy) / 2
-//             newSVg.push(<path key={i + '1'} d={`M${startX}, ${startY} L ${dx}, ${startY}`} />)
-//             newSVg.push(<path key={i + '2'} d={`M${dx}, ${startY} A ${radius} ${radius} 0 0 ${i % 2 == 0 ? 0 : 1} ${dx}, ${endy}`} />)
-//             newSVg.push(<path key={i + '3'} d={`M${dx}, ${endy} L ${endx}, ${endy}`} />)
-//         }
-//         setSvg(newSVg)
-//     }
-
-
-
-//     return (
-//         <>
-//             {stepsRef.current && svg && (
-//                 <div className="absolute inset-0">
-//                     <svg viewBox={`0 0 ${stepsRef.current.clientWidth} ${stepsRef.current.clientHeight}`} preserveAspectRatio="none" stroke="#777" strokeWidth="1" strokeDasharray="3" fill="none">
-//                         {svg}
-//                     </svg>
-//                 </div>
-//             )}
-//             <div className="flex flex-col gap-3 z-1 w-full" ref={stepsRef} key={`${path.id}-${subject.id}-${counter}`}>
-//                 {subject.steps.map((step, index) => (
-//                     <Step key={step.id} path={path} subject={subject} step={step} index={index} />
-//                 ))}
-//             </div>
-//         </>
-//     )
-// }
-
-// const StepPill = tw`step flex border border-stone-500 bg-white rounded-full border-dashed p-2 px-6 relative z-2 group/step
-//     ${({ $finished }) => $finished ? 'bg-green-50 border-solid border-stone-300 text-stone-500' : ''}
-// `
-
-// function Step({ path, subject, step, index }) {
-//     return (
-//         <div style={{ marginRight: index % 2 == 0 ? (index == 0 ? "10%" : "20%") : "35%" }} className="flex max-w-128">
-//             <div className="relative flex">
-//                 {index == 0 && <div className="absolute top-[50%] right-0 w-64 translate-x-[100%] h-px border-b border-dashed border-stone-500" />}
-//                 <StepPill $finished={step.finished}>
-//                     <div className="flex-1 flex gap-4 justify-between items-center">
-//                         <div className="flex-1 flex flex-col">
-//                             <SmartText text={step.source} className="text-sm font-semibold text-stone-500" onEdit={(source) => studyActions.updateStep(path.id, subject.id, step.id, { ...step, source })} />
-//                             <SmartText text={step.text} className="text-sm text-stone-500" onEdit={(text) => studyActions.updateStep(path.id, subject.id, step.id, { ...step, text })} />
-//                         </div>
-//                         <div className="flex opacity-0 group-hover/step:opacity-100 transition-all">
-//                             <Trash2 className="p-1 w-6 h-6 cursor-pointer hover:bg-stone-300/50 transition-colors rounded-full" onClick={() => studyActions.deleteStep(path.id, subject.id, step.id)} />
-//                             <Check className={`p-1 w-6 h-6 cursor-pointer ${step.finished ? "text-green-500" : "text-stone-500"} hover:bg-stone-300/50 transition-colors rounded-full`} onClick={() => studyActions.updateStep(path.id, subject.id, step.id, { ...step, finished: !step.finished })} />
-//                         </div>
-//                     </div>
-//                 </StepPill>
-//             </div>
-//         </div>
-//     )
-// }
-
