@@ -34,7 +34,7 @@ export default function MainGreetings() {
     return (
         <div className="flex justify-between">
             <div>
-                <div className="text-2xl font-bold ">{timeGreetings()}, {user.firstName} {user.id} </div>
+                <div className="text-2xl font-bold ">{timeGreetings()}, {user.firstName}</div>
                 <div className="font-light text-sm -mt-1"> היום {new Date().toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' })} </div>
             </div>
             <div className="text-sm text-stone-500 font-light flex flex-col items-end">
