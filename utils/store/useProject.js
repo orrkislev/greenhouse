@@ -238,7 +238,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
 
             const imageData = await generateImage(name, folkArtStyle);
             if (!imageData) {
-                await get().updateProject({ image: null })
+                await get().updateProject({ image: 'no image' })
                 return;
             }
 

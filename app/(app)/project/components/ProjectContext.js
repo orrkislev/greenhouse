@@ -26,16 +26,6 @@ export default function ProjectContext() {
                         <span className="text-sm text-stone-700">החקר שלי</span>
                         <ChevronLeft className="w-4 h-4 text-stone-400 cursor-pointer" />
                     </Link>
-
-                    {/* Close project button */}
-                    {project.status === "active" && (
-                        <button className="px-4 py-2 border border-red-800 text-red-600 hover:bg-red-800 hover:text-white transition-colors"
-                            onClick={() => {
-                                projectActions.closeProject();
-                            }}>
-                            סגירת הפרויקט
-                        </button>
-                    )}
                 </div>
             )}
 

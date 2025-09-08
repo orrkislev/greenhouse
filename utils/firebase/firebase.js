@@ -41,6 +41,7 @@ export const generateTextWithSchema = async (prompt, schema) => {
 }
 
 export const generateImage = async (prompt, style = vectorStyle) => {
+  console.log('generateImage', prompt);
   prompt = `1 - translate the following subject to english: ${prompt}
   2 - create a list of elements that represent the subject
   3 - generate an image of these elements, using the following style: ${JSON.stringify(style)}
@@ -52,12 +53,8 @@ export const generateImage = async (prompt, style = vectorStyle) => {
     },
   });
   const result = await model.generateContent(prompt);
-  const inlineDataParts = result.response.inlineDataParts();
-  if (inlineDataParts?.[0]) {
-    const image = inlineDataParts[0].inlineData.data;
-    return image;
-  }
-  return null;
+  const data = result?.response?.candidates?.[0]?.content?.parts?.find?.(part => part?.inlineData)?.inlineData?.data ?? null;
+  return data;
 }
 
 

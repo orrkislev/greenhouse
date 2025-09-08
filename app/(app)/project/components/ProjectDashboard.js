@@ -3,14 +3,22 @@ import ProjectGoals from "./ProjectGoals";
 import ProjectLibrary from "./ProjectLibrary";
 import ProjectInfo from "./ProjectInfo";
 import SmartText from "@/components/SmartText";
-import { DotSquare, Sparkle } from "lucide-react";
+import { DotSquare, Sparkle, Trash2 } from "lucide-react";
 import ProjectTasks from "./Project Tasks/ProjectTasks";
 import { useEffect } from "react";
+import Menu, { MenuList, MenuItem } from "@/components/Menu";
 
 
 export default function ProjectDashboard() {
     return (
         <div className="gap-3 flex flex-col">
+            <div className="flex justify-end">
+                <Menu>
+                    <MenuList>
+                        <MenuItem title="סגירת הפרויקט" icon={Trash2} onClick={() => projectActions.closeProject()} />
+                    </MenuList>
+                </Menu>
+            </div>
             <ProjectName />
             <ProjectInfo />
 

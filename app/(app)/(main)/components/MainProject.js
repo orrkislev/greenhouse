@@ -10,11 +10,13 @@ import Button from "@/components/Button";
 export default function MainProject() {
     const project = useProject();
 
+    const imgUrl = (project?.image === 'generating' || !project?.image) ? null : project?.image;
+
     return (
         <Box2 label="הפרויקט שלי" className="flex-1 group/project pb-8 relative">
             <div className='flex flex-col gap-3'>
                 {project && <div className='w-full aspect-[7/3] relative group/image'>
-                    <Image src={project.image} alt={project.name} fill className="object-cover" />
+                    {imgUrl && <Image src={imgUrl} alt={project.name} fill className="object-cover" />}
                     <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-transparent group-hover/image:bg-stone-900/30 transition-all duration-200">
                         <h1 className="font-bold p-2 bg-white group-hover/image:text-stone-900 group-hover/image:scale-105 transition-all duration-200">{project.name}</h1>
                     </div>
