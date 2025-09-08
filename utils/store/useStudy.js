@@ -11,10 +11,8 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
     sideContext: [],
 
     loadPaths: withLoadingCheck(async (user) => {
-        if (!user.study) {
-            set({ paths: [] })
-            return;
-        }
+        set({ paths: [] });
+        if (!user.study) return;
 
         if (get().paths.length > 0) return;
 

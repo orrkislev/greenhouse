@@ -25,10 +25,8 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
 
         setProject: (project) => set({ project }),
         loadProject: withLoadingCheck(async (user) => {
-            if (!user.projectId) {
-                set({ project: null });
-                return;
-            }
+            set({ project: null });
+            if (!user.projectId) return;
 
             const projectRef = doc(db, 'users', user.id, 'projects', user.projectId);
             const projectSnapshot = await getDoc(projectRef);
@@ -209,7 +207,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
         // -------------------------------------
         // ------ Project Library TLDraw -------
         // -------------------------------------
-        tldraw:null,
+        tldraw: null,
         loadTldraw: withUser(async (user) => {
             const project = get().project;
             if (!project) return;

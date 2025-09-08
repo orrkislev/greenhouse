@@ -24,7 +24,7 @@ export default function AdminProjects() {
 
                 if (student.major) major = student.major.name;
                 if (student.project && student.project.terms.includes(currTerm.id)) {
-                    requested = student.project.questions[2].value;
+                    requested = student.project?.questions?.length > 2 ? student.project?.questions[2]?.value : '';
                     master = student.project.master ? student.project.master : null;
                     project = student.project.name;
                     projectId = student.project.id;

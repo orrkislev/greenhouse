@@ -7,6 +7,7 @@ export const [useMeetingsData, meetingsActions] = createStore((set, get, withUse
         meetings: [],
 
         loadMeetings: withLoadingCheck(async (user) => {
+            set({ meetings: [] });
             const meetingsRef = collection(db, `meetings`);
             const meetingsQuery = query(meetingsRef, or(where("staff", "==", user.id), where("student", "==", user.id)));
             const meetingsSnap = await getDocs(meetingsQuery);

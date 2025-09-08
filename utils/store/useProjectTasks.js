@@ -22,6 +22,7 @@ export const [useProjectTasksData, projectTasksActions] = createStore((set, get,
         loaded: false,
 
         loadAllTasks: withLoadingCheck(async (user) => {
+            set({tasks: []})
             if (get().loaded === 'all') return;
             const collectionRef = getCollectionRef();
             if (!collectionRef) return
@@ -32,6 +33,7 @@ export const [useProjectTasksData, projectTasksActions] = createStore((set, get,
             set({ tasks, view: useProjectData.getState().project?.taskStyle || 'list', loaded: 'all' });
         }),
         loadNextTasks: withLoadingCheck(async (user) => {
+            set({tasks: []})
             if (get().loaded === 'next') return;
 
             const collectionRef = getCollectionRef();

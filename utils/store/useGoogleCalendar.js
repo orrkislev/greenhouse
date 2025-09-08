@@ -22,6 +22,7 @@ export const [useGoogleCalendar, googleCalendarActions] = createStore((set, get,
         set({ events: events.map(formatEvent) })
     }),
     getWeeksEvents: withLoadingCheck(async (user) => {
+        set({ events: [], loadedRanges: [] });
         const week = useTime.getState().week;
         if (!week || week.length === 0) return
         if (!user.googleRefreshToken) return

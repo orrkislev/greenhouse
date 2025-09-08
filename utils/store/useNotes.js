@@ -7,6 +7,7 @@ import { createDataLoadingHook, createStore } from "./utils/createStore";
 export const [useNotesData, notesActions] = createStore((set, get, withUser, withLoadingCheck) => ({
     userNotes: {},
     loadUserNotesForWeek: withLoadingCheck(async (user) => {
+        set({ userNotes: {} });
         const week = useTime.getState().week;
         if (!week || week.length === 0) return
 

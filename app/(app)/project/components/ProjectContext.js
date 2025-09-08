@@ -14,7 +14,7 @@ export default function ProjectContext() {
             {project && !project.isOld && project.master && (
                 <div className="flex-1 flex gap-3 flex-col">
                     <div className="p-4 flex flex-col gap-4 border border-stone-300 text-sm text-stone-600">
-                        {project.questions.map((question, index) => (
+                        {project.questions && project.questions.map((question, index) => (
                             <WithLabel key={index} label={question.title}>
                                 <div className="text-sm text-stone-500">{question.value}</div>
                             </WithLabel>

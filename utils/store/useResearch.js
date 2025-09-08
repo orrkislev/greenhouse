@@ -12,6 +12,7 @@ export const [useResearchData, researchActions] = createStore((set, get, withUse
     setResearch: (research) => set({ research }),
 
     loadResearch: withLoadingCheck(async (user) => {
+        set({ research: null, allResearch: [] });
         const currentResearchId = user.researchId;
         if (!currentResearchId) return;
         get().loadResearchById(currentResearchId)
