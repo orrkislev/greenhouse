@@ -18,6 +18,7 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
         const ref = getRef();
         for (const event of events) {
             if (event._dirty && event.id) {
+                console.log('saving event to firestore', event);
                 const { id, _dirty, ...data } = event;
                 await updateDoc(doc(ref, id), data);
                 event._dirty = false;
@@ -63,6 +64,7 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
             }));
         },
         updateEvent: (eventId, updatedEvent) => {
+            console.log('updating event', eventId, updatedEvent);
             updatedEvent._dirty = true;
             set((state) => {
                 const updatedEvents = state.events.map(event =>

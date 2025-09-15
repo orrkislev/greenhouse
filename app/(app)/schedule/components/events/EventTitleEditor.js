@@ -29,12 +29,17 @@ export function SmartTextArea(props) {
 export function EventTitleEditor({ event }) {
     const [editTitle, setEditTitle] = useState(event.title);
 
+    useEffect(() => {
+        setEditTitle(event.title);
+    }, [event.title]);
+
     const handleTitleChange = (e) => {
         setEditTitle(e.target.value);
     };
 
     const handleTitleBlur = () => {
         if (editTitle !== event.title) {
+            console.log('saving title', editTitle);
             eventsActions.updateEvent(event.id, { title: editTitle });
         }
     };
