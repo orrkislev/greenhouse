@@ -1,3 +1,4 @@
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "./input-otp";
 
 export default function PINInput({ onChange, value, hideInput=false }) {
@@ -10,6 +11,7 @@ export default function PINInput({ onChange, value, hideInput=false }) {
                 value={value}
                 onChange={v => onChange({target: { value: v }})}
                 hideInput={hideInput}
+                pattern={REGEXP_ONLY_DIGITS}
             >
                 <InputOTPGroup className="ltr">
                     <InputOTPSlot index={0} className="bg-white" />
