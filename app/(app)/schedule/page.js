@@ -2,7 +2,7 @@
 
 import { tw } from "@/utils/tw";
 import Gantt from "./components/Gantt";
-import { ScheduleEvents } from "./components/events/Events";
+import Events from "./components/events/Events";
 import ScheduleTop from "./components/ScheduleTop";
 import { useState } from "react";
 import GroupSchedules from "./components/GroupSchedule/GroupSchedules";
@@ -36,7 +36,7 @@ export default function SchedulePage() {
                     <>
                         <Notes />
                         <Meetings />
-                        <ScheduleEvents />
+                        <Events />
                         <GoogleCalendar />
                         <GroupSchedules />
                         <Gantt />

@@ -4,6 +4,7 @@ import { EditableEvent } from "./EditableEvent";
 import { ReadOnlyEvent } from "./ReadOnlyEvent";
 
 export function Event({ event, onStartDrag, onEndDrag, onStartResize, onEndResize }) {
+
     if (event.edittable) {
         return (
             <EditableEvent

@@ -52,7 +52,7 @@ export default function usePopper(props = {}) {
                         transition={{ duration: 0.2, ease: 'easeInOut' }}
                     >
                         <div className="fixed top-0 left-0 w-full h-full" onClick={close} />
-                        <motion.div className="fixed bg-white"
+                        <motion.div className="fixed bg-white p-4 rounded-lg border border-stone-300 shadow-sm"
                             ref={popperRef}
                             initial={{ y: 20, opacity: 0, scale: 0.98 }}
                             animate={{ y: 0, opacity: 1, scale: 1 }}

@@ -1,22 +1,22 @@
-import { FormInput, useForm } from "@/components/ui/form/FormInput";
-import TimeRangePicker from "@/components/ui/timerange-picker";
 import { format } from "date-fns";
+import { useState } from "react";
 import { groupsActions } from "@/utils/store/useGroups";
 import WithLabel from "@/components/WithLabel";
 import Button from "@/components/Button";
-import { CalendarCheck, X } from "lucide-react";
-import { Trash2 } from "lucide-react";
+import { CalendarCheck, Trash2 } from "lucide-react";
+import TimeRange from "@/components/TimeRange";
+import SmartTextArea from "@/components/SmartTextArea";
 
 export function GroupEventEdit({ onClose, groupId, date, event }) {
-    const form = useForm({
-        title: event?.title || '',
-        timeRange: event?.timeRange || { start: '09:30', end: '11:00' }
-    }, async (values) => {
+    const [timeRange, setTimeRange] = useState(event?.timeRange || { start: '09:30', end: '11:00' });
+    const [title, setTitle] = useState(event?.title || '');
+
+    const clickSave = async () => {
         const newObj = {
-            title: values.title,
+            title: title,
             date: format(date, 'yyyy-MM-dd'),
-            start: values.timeRange.start,
-            end: values.timeRange.end,
+            start: timeRange.start,
+            end: timeRange.end,
         };
 
         if (event) {
@@ -24,9 +24,8 @@ export function GroupEventEdit({ onClose, groupId, date, event }) {
         } else {
             await groupsActions.createGroupEvent(groupId, newObj);
         }
-        form.clear();
         onClose()
-    });
+    };
 
     const clickDelete = async () => {
         await groupsActions.removeGroupEvent(groupId, date, event.id);
@@ -34,18 +33,18 @@ export function GroupEventEdit({ onClose, groupId, date, event }) {
     };
 
     return (
-        <form {...form.formProps} className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1">
             <WithLabel label="כותרת">
-                <FormInput {...form.props.title} />
+                <SmartTextArea value={title} onChange={(e) => setTitle(e.target.value)} />
             </WithLabel>
             <WithLabel label="זמן">
-                <TimeRangePicker
-                    value={form.values.timeRange}
-                    onChange={(value) => form.setValue('timeRange', value)}
+                <TimeRange
+                    defaultValue={timeRange}
+                    onUpdate={setTimeRange}
                 />
             </WithLabel>
             <div className="flex justify-between mt-4">
-                <Button type="submit" data-role="save" >
+                <Button type="submit" data-role="save" onClick={clickSave} >
                     שמירה <CalendarCheck
                         className="w-4 h-4" />
                 </Button>
@@ -55,6 +54,6 @@ export function GroupEventEdit({ onClose, groupId, date, event }) {
                     </Button>
                 )}
             </div>
-        </form>
+        </div>
     );
 }

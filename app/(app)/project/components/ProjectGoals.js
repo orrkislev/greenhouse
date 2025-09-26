@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Blend, BookOpen, Pencil, Telescope, X } from "lucide-react";
-import { projectActions, useProject, useProjectData } from "@/utils/store/useProject";
+import { projectActions, useProjectData } from "@/utils/store/useProject";
+import SmartTextArea from "@/components/SmartTextArea";
 
 
 const goalIcons = [
@@ -112,18 +113,11 @@ function FocusedGoal({ index }) {
                         <div className="p-1">{goalIcons[index]}</div>
                         <div className="flex-1 flex flex-col gap-2">
                             <div className="text-stone-700 text-sm">
-                                <AutoSizeTextarea type="text"
-                                    autoFocus={true}
-                                    value={goal.title}
-                                    onFinish={value => updateContent("title", value)}
-                                />
+                                <SmartTextArea value={goal.title} onChange={value => updateContent("title", value)} />
                             </div>
                             <div className="w-full h-px bg-stone-300" />
                             <div className="text-stone-500 text-sm">
-                                <AutoSizeTextarea
-                                    value={goal.description}
-                                    onFinish={value => updateContent("description", value)}
-                                />
+                                <SmartTextArea value={goal.description} onChange={value => updateContent("description", value)} />
                             </div>
                         </div>
                     </div>
@@ -137,10 +131,7 @@ function FocusedGoal({ index }) {
                     >
                         {goal.leadingQuestions.map((question, index) => (
                             <div key={question + index} className="px-4 py-1 bg-white border border-stone-300 flex gap-2 group w-full text-xs">
-                                <AutoSizeTextarea
-                                    value={question}
-                                    onFinish={value => updateQuestion(index, value)}
-                                />
+                                <SmartTextArea value={question} onChange={value => updateQuestion(index, value)} />
                                 <button onClick={() => removeQuestion(index)} className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer ">
                                     <X className="w-4 h-4 text-red-500" />
                                 </button>
@@ -155,33 +146,5 @@ function FocusedGoal({ index }) {
                 </div>
             )}
         </>
-    )
-}
-
-export function AutoSizeTextarea({ value, onFinish, autoFocus }) {
-    const ref = useRef(null);
-
-    useEffect(() => {
-        if (ref.current) {
-            ref.current.style.height = 'auto';
-            ref.current.style.height = ref.current.scrollHeight + 'px';
-        }
-    }, [value]);
-
-    const onChange = (e) => {
-        if (ref.current) {
-            ref.current.style.height = 'auto';
-            ref.current.style.height = ref.current.scrollHeight + 'px';
-        }
-    }
-
-    return (
-        <textarea ref={ref}
-            defaultValue={value}
-            autoFocus={autoFocus}
-            onBlur={(e) => onFinish(e.target.value)}
-            className="w-full h-auto resize-none whitespace-pre-wrap leading-loose"
-            onChange={onChange}
-        />
     )
 }

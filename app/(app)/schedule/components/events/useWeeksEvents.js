@@ -4,6 +4,7 @@ import { HOURS } from "@/utils/store/useTime";
 
 export default function useWeeksEvents(week) {
     const events = useWeekEvents();
+    
     // const groups = useInvolvedGroups();
 
     if (!week || week.length === 0) return [];

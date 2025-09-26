@@ -13,8 +13,8 @@ export const useLogs = create((set, get) => ({
         const newLog = { ...log, timestamp: new Date().toISOString() };
         const today = useTime.getState().today;
         const docRef = doc(db, 'users', userId, 'logs', today);
-        await setDoc(docRef, { logs: arrayUnion(newLog) }, { merge: true });
         set((state) => ({ logs: [...state.logs, newLog] }));
+        await setDoc(docRef, { logs: arrayUnion(newLog) }, { merge: true });
     },
 }));
 

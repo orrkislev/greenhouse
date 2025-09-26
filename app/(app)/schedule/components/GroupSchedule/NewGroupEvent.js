@@ -1,7 +1,6 @@
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { tw } from "@/utils/tw";
 import { GroupEventEdit } from "./GroupEventEdit";
-import { useState } from "react";
+import usePopper from "@/components/Popper";
 
 const AddObjectDiv = tw`flex items-center justify-center text-stone-800 text-sm
         pointer-events-auto cursor-pointer 
@@ -14,22 +13,14 @@ const AddObjectDiv = tw`flex items-center justify-center text-stone-800 text-sm
 
 
 export function NewGroupEvent({ groupId, date }) {
-    const [isOpen, setIsOpen] = useState(false);
+    const { open, close, Popper, baseRef } = usePopper();
 
     return (
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
-            <PopoverTrigger asChild>
-                <AddObjectDiv onClick={() => setIsOpen(true)} $active={isOpen}>
-                    +
-                </AddObjectDiv>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 bg-white p-4 border border-stone-300 z-[999]">
-                <GroupEventEdit
-                    onClose={() => setIsOpen(false)}
-                    groupId={groupId}
-                    date={date}
-                />
-            </PopoverContent>
-        </Popover>
+        <>
+            <AddObjectDiv ref={baseRef} onClick={open}>+</AddObjectDiv>
+            <Popper>
+                <GroupEventEdit onClose={close} groupId={groupId} date={date} />
+            </Popper>
+        </>
     );
 }

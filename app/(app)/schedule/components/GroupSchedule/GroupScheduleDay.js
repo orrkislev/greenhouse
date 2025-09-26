@@ -6,7 +6,7 @@ const GroupCellDiv = tw`bg-white flex flex-col h-full gap-[2px]
     ${props => !props.$edittable ? 'bg-[#C4BBB2]/60' : ''}
     `;
 
-export default function GroupCell({ date, groupId, edittable, events = [] }) {
+export default function GroupScheduleDay({ date, groupId, edittable, events = [] }) {
 
     if (events.length == 0 && !edittable) {
         return (

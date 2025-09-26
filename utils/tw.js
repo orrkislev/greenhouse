@@ -1,5 +1,11 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs) {
+  return twMerge(clsx(inputs));
+}
+
 
 // Utility function to filter out props that start with '$'
 export function filterProps(props) {

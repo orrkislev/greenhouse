@@ -6,19 +6,20 @@ import { useDragAndResize } from "./useDragAndResize";
 import { EventControls } from "./EventControls";
 import { ResizeHandle } from "./ResizeHandle";
 import { EventTitleEditor } from "./EventTitleEditor";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useState } from "react";
-import TimeRangePicker from "@/components/ui/timerange-picker";
 import { eventsActions } from "@/utils/store/useEvents";
 import WithLabel from "@/components/WithLabel";
 import Button from "@/components/Button";
 import { CalendarCheck, Trash2 } from "lucide-react";
+import TimeRange from "@/components/TimeRange";
+import usePopper from "@/components/Popper";
+import SmartTextArea from "@/components/SmartTextArea";
 
 export function EditableEvent({ event, onStartDrag, onEndDrag, onStartResize, onEndResize }) {
     const { isDragging, isResizing, isHovered,
         handleMouseDown, handleResizeDown, handleMouseEnter, handleMouseLeave,
     } = useDragAndResize({ onStartDrag, onEndDrag, onStartResize, onEndResize });
-    const [isOpen, setIsOpen] = useState(false);
+    const { isOpen, open, close, Popper, baseRef } = usePopper();
 
     const motionProps = {
         drag: true,
@@ -44,29 +45,27 @@ export function EditableEvent({ event, onStartDrag, onEndDrag, onStartResize, on
     `;
 
     return (
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
-            <PopoverTrigger asChild>
-                <div style={event.gridStyle} className="relative z-5">
-                    <motion.div className={eventClasses} {...motionProps}>
-                        <EventControls
-                            event={event}
-                            onSelect={() => setIsOpen(true)}
-                            visible={isHovered && !isDragging && !isResizing}
-                        />
+        <>
+            <div style={event.gridStyle} className="relative z-5" ref={baseRef}>
+                <motion.div className={eventClasses} {...motionProps}>
+                    <EventControls
+                        event={event}
+                        onSelect={() => open()}
+                        visible={isHovered && !isDragging && !isResizing}
+                    />
 
-                        <EventTitleEditor event={event} />
+                    <EventTitleEditor event={event} />
 
-                        <ResizeHandle
-                            visible={(isHovered && !isDragging) || isResizing}
-                            onMouseDown={handleResizeDown}
-                        />
-                    </motion.div>
-                </div>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-4" sideOffset={5}>
-                <EditEvent event={event} onClose={() => setIsOpen(false)} />
-            </PopoverContent>
-        </Popover>
+                    <ResizeHandle
+                        visible={(isHovered && !isDragging) || isResizing}
+                        onMouseDown={handleResizeDown}
+                    />
+                </motion.div>
+            </div>
+            <Popper>
+                <EditEvent event={event} onClose={close} />
+            </Popper>
+        </>
     );
 }
 
@@ -74,30 +73,32 @@ export function EditableEvent({ event, onStartDrag, onEndDrag, onStartResize, on
 function EditEvent({ event, onClose }) {
     const [startTime, setStartTime] = useState(event.start);
     const [endTime, setEndTime] = useState(event.end);
+    const [title, setTitle] = useState(event.title);
 
     const handleSave = (e) => {
         e.preventDefault();
+        onClose();
         eventsActions.updateEvent(event.id, {
+            title: title,
             start: startTime,
             end: endTime,
         });
-        onClose();
     };
 
     const handleDelete = () => {
-        eventsActions.deleteEvent(event.id);
         onClose();
+        eventsActions.deleteEvent(event.id);
     };
 
     return (
         <div className="flex flex-col gap-2">
             <WithLabel label="כותרת">
-                <EventTitleEditor event={event} />
+                <SmartTextArea value={title} onChange={(e) => setTitle(e.target.value)} />
             </WithLabel>
             <WithLabel label="זמן">
-                <TimeRangePicker
-                    value={{ start: startTime, end: endTime }}
-                    onChange={({ start, end }) => {
+                <TimeRange
+                    defaultValue={{ start: startTime, end: endTime }}
+                    onUpdate={({ start, end }) => {
                         setStartTime(start);
                         setEndTime(end);
                     }}

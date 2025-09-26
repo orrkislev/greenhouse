@@ -1,27 +1,14 @@
-import SmartText, { AutoSizeTextarea } from "@/components/SmartText"
+import SmartText from "@/components/SmartText"
 import { studyActions } from "@/utils/store/useStudy"
-import { BookOpen, Check, Ellipsis, EllipsisVertical, HandMetal, Pencil, Plus, Quote, Sparkle, Target, Trash2, X } from "lucide-react"
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
-import { tw } from "@/utils/tw"
-import { getNewStep, getNewSubject } from "./example study paths"
-import { generateImage } from "@/utils/firebase/firebase"
+import { Check, EllipsisVertical, HandMetal, Plus, Quote, Sparkle, Target, Trash2 } from "lucide-react"
+import { getNewStep } from "./example study paths"
 import WithLabel from "@/components/WithLabel"
 import StudyPath_Sources from "./StudyPath_Sources"
 import Button, { IconButton } from "@/components/Button"
 import Menu, { MenuList, MenuItem, MenuSeparator } from "@/components/Menu"
 import { motion } from "motion/react"
 
-const SpecialButton = tw`p-4 border border-stone-200 rounded-md flex items-center gap-2 text-xs hover:bg-stone-100 cursor-pointer`;
-
 export default function StudyPath({ path }) {
-    const [loading, setLoading] = useState(false)
-
-    const newSubject = async () => {
-        setLoading(true)
-        const newSubject = await getNewSubject(path)
-        studyActions.addSubject(path.id, newSubject)
-        setLoading(false)
-    }
 
     return (
         <div className="flex flex-col gap-4">
@@ -41,18 +28,9 @@ export default function StudyPath({ path }) {
 
 
             <WithLabel label="מה אני לומד.ת">
-                {/* <div className="flex flex-col gap-4"> */}
-                {/* <div className="flex">
-                        <SpecialButton onClick={newSubject} disabled={loading}>
-                            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                            {loading ? "רגע..." : "הוסף נושא"}
-                        </SpecialButton>
-                    </div> */}
-
                 {path.subjects.map((subject) => (
                     <Subject key={subject.id} path={path} subject={subject} />
                 ))}
-                {/* </div> */}
             </WithLabel>
         </div>
     )
@@ -62,7 +40,6 @@ function PathOptions({ path }) {
 
     const onDelete = () => {
         studyActions.deletePath(path.id)
-        setIsOpen(false)
     }
 
     return (
@@ -86,16 +63,6 @@ function PathBG({ path }) {
 
 function Subject({ path, subject }) {
 
-    return (
-        <div key={subject.id} className="flex gap-4">
-            <div className="relative flex-1">
-                <Steps path={path} subject={subject} />
-            </div>
-        </div>
-    )
-}
-
-function Steps({ path, subject }) {
     const NewStepButton = (
         <div className="bg-green-100 rounded-2xl p-4 shadow flex items-center justify-center">
             <Button data-role="new" onClick={async () => {
@@ -108,26 +75,28 @@ function Steps({ path, subject }) {
         </div>
     )
 
-
     return (
-        <div className="flex">
-            <div className="flex-1 flex flex-col gap-8 pb-32">
-                {subject.steps.filter((_, index) => index % 2 == 0).map((step) => (
-                    <Step key={step.id} path={path} subject={subject} step={step} side="right" />
-                ))}
-                {subject.steps.length % 2 == 1 && NewStepButton}
-            </div>
-            <StepsMiddleLine path={path} subject={subject} />
-            <div className="flex-1 flex flex-col gap-8 pt-8 pb-32">
-                {subject.steps.filter((_, index) => index % 2 == 1).map((step) => (
-                    <Step key={step.id} path={path} subject={subject} step={step} side="left" />
-                ))}
-                {subject.steps.length % 2 == 0 && NewStepButton}
+        <div key={subject.id} className="flex gap-4">
+            <div className="relative flex-1">
+                <div className="flex">
+                    <div className="flex-1 flex flex-col gap-8 pb-32">
+                        {subject.steps.filter((_, index) => index % 2 == 0).map((step) => (
+                            <Step key={step.id} path={path} subject={subject} step={step} side="right" />
+                        ))}
+                        {subject.steps.length % 2 == 1 && NewStepButton}
+                    </div>
+                    <StepsMiddleLine path={path} subject={subject} />
+                    <div className="flex-1 flex flex-col gap-8 pt-8 pb-32">
+                        {subject.steps.filter((_, index) => index % 2 == 1).map((step) => (
+                            <Step key={step.id} path={path} subject={subject} step={step} side="left" />
+                        ))}
+                        {subject.steps.length % 2 == 0 && NewStepButton}
+                    </div>
+                </div>
             </div>
         </div>
     )
 }
-
 
 function StepsMiddleLine() {
     return (

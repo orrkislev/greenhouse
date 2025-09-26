@@ -133,8 +133,8 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             const project = get().project;
             if (!project) return;
             const goalsRef = doc(db, 'users', user.id, 'projects', project.id, 'documents', 'goals');
-            await setDoc(goalsRef, { [goalName]: content }, { merge: true });
             set(state => ({ goals: { ...state.goals, [goalName]: content } }));
+            await setDoc(goalsRef, { [goalName]: content }, { merge: true });
         }),
 
         // ------------------------------
@@ -166,8 +166,8 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             const project = get().project;
             if (!project) return;
             const projectLibraryRef = doc(db, 'users', user.id, 'projects', project.id, 'documents', 'library');
-            await setDoc(projectLibraryRef, { items: arrayUnion(item) }, { merge: true });
             set(state => ({ library: [...state.library, item] }));
+            await setDoc(projectLibraryRef, { items: arrayUnion(item) }, { merge: true });
         }),
         updateLibraryItem: withUser(async (user, itemIndex, text) => {
             const project = get().project;
@@ -175,8 +175,8 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             const projectLibraryRef = doc(db, 'users', user.id, 'projects', project.id, 'documents', 'library');
             const newItems = get().library
             newItems[itemIndex] = text;
-            await setDoc(projectLibraryRef, { items: newItems }, { merge: true });
             set({ library: newItems });
+            await setDoc(projectLibraryRef, { items: newItems }, { merge: true });
         }),
         deleteLibraryItem: withUser(async (user, itemIndex) => {
             const project = get().project;
@@ -191,8 +191,8 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             }
 
             newItems.splice(itemIndex, 1);
-            await setDoc(projectLibraryRef, { items: newItems }, { merge: true });
             set({ library: [...newItems] });
+            await setDoc(projectLibraryRef, { items: newItems }, { merge: true });
         }),
         uploadLibraryItem: withUser(async (user, file) => {
             const project = get().project;
@@ -222,8 +222,8 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             const project = get().project;
             if (!project) return;
             const projectLibraryRef = doc(db, 'users', user.id, 'projects', project.id, 'documents', 'tldraw');
-            await setDoc(projectLibraryRef, tldraw);
             set({ tldraw });
+            await setDoc(projectLibraryRef, tldraw);
         }),
 
         // ------------------------------

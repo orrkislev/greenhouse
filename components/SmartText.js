@@ -1,11 +1,13 @@
 import Image from "next/image";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
+import SmartTextArea from "@/components/SmartTextArea";
 
 
 export default function SmartText({ text, className, onEdit, withIcon = true, onRemove }) {
     const [isEditing, setIsEditing] = useState(false);
     const [lastValue, setLastValue] = useState(text);
+    const [value, setValue] = useState(text);
 
     if (!onEdit) return <SmartLabel text={text} className={className} />
 
@@ -15,7 +17,7 @@ export default function SmartText({ text, className, onEdit, withIcon = true, on
         setLastValue(text);
     }
 
-    const onFinish = (value) => {
+    const onFinish = () => {
         if (value !== lastValue) {
             onEdit(value);
             setLastValue(value)
@@ -23,8 +25,12 @@ export default function SmartText({ text, className, onEdit, withIcon = true, on
         setIsEditing(false);
     }
 
+    const onChange = (e) => {
+        setValue(e.target.value);
+    }
+
     if (isEditing) {
-        return <AutoSizeTextarea value={text} onFinish={onFinish} autoFocus={true} className={className} />
+        return <SmartTextArea value={value} onChange={onChange} onBlur={onFinish} autoFocus={true} className={className} />
     }
 
     return (
@@ -159,40 +165,3 @@ const OEMBED_PROVIDERS = [
         extract: data => data.title
     }
 ];
-
-
-
-
-
-
-
-
-
-export function AutoSizeTextarea({ value, onFinish, autoFocus, className }) {
-    const ref = useRef(null);
-
-    useLayoutEffect(() => {
-        if (ref.current) {
-            ref.current.style.height = 'auto';
-            ref.current.style.height = ref.current.scrollHeight + 'px';
-        }
-    }, [value]);
-
-    const onChange = (e) => {
-        if (ref.current) {
-            ref.current.style.height = 'auto';
-            ref.current.style.height = ref.current.scrollHeight + 'px';
-        }
-    }
-
-    return (
-        <textarea ref={ref}
-            rows={1}
-            defaultValue={value}
-            autoFocus={autoFocus}
-            onBlur={(e) => onFinish(e.target.value)}
-            className={`resize-none whitespace-pre-wrap ${className} w-full`}
-            onChange={onChange}
-        />
-    )
-}

@@ -25,28 +25,22 @@ const newEventTitles = [
     "פגישה חשובה",
     "שיחה אישית",
 ];
-export function ScheduleEvents({ withLabel = true }) {
+export default function Events() {
     const week = useTime(state => state.week);
     const allEvents = useWeeksEvents(week, true);
-    if (!week || week.length === 0) return null;
 
-
-    return (
-        <Events events={allEvents} edittable={true} week={week} withLabel={withLabel} />
-    )
-}
-export default function Events({ events, edittable = false, week, withLabel = true }) {
     const [draggingId, setDraggingId] = useState(null);
     const [resizingId, setResizingId] = useState(null);
 
-    const displayEvents = prepareEventsForSchedule(events, week, edittable);
+    if (!week || week.length === 0) return null;
 
+    const displayEvents = prepareEventsForSchedule(allEvents, week, true);
     const positions = Array(6).fill(0).map((_, col) => Array(5).fill(0).map((_, row) => (
         { row: row + 1, col: col + 1 }))).flat();
 
     const onMove = pos => {
         if (draggingId === null) return;
-        const currEvent = events.find(e => e.id === draggingId);
+        const currEvent = allEvents.find(e => e.id === draggingId);
         const currDuration = getEventDuration(currEvent);
         eventsActions.updateEvent(draggingId, {
             date: week[pos.col - 1],
@@ -77,14 +71,11 @@ export default function Events({ events, edittable = false, week, withLabel = tr
     }
 
     return (
-        <ScheduleSection name="לוז" withLabel={withLabel}>
+        <ScheduleSection name="לוז" withLabel={true}>
             {positions.map((pos, index) => {
-                if (edittable)
-                    return <EmptySlot key={index} className={`col-${pos.col} row-${pos.row}`}
-                        onClick={() => handleNewEvent(pos)}
-                    >+</EmptySlot>
-                else
-                    return <Empty key={index} className={`col-${pos.col} row-${pos.row}`} />
+                return <EmptySlot key={index} className={`col-${pos.col} row-${pos.row}`}
+                    onClick={() => handleNewEvent(pos)}
+                >+</EmptySlot>
             })}
 
             {positions.map((pos, index) => (
@@ -95,7 +86,7 @@ export default function Events({ events, edittable = false, week, withLabel = tr
 
 
 
-            {edittable && draggingId !== null &&
+            {draggingId !== null &&
                 positions.map((pos, index) => (
                     <Droppable key={index} row={pos.row} col={pos.col}
                         onPlace={() => onMove(pos)}
@@ -103,7 +94,7 @@ export default function Events({ events, edittable = false, week, withLabel = tr
                 ))
             }
 
-            {edittable && resizingId !== null && (() => {
+            {resizingId !== null && (() => {
                 const event = displayEvents.find(e => e.id === resizingId);
                 if (!event) return null;
                 const eventCol = week.findIndex(date => date === event.date) + 1;

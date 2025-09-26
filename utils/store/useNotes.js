@@ -22,8 +22,8 @@ export const [useNotesData, notesActions] = createStore((set, get, withUser, wit
         if (!week || week.length === 0) return
 
         const notesCollection = doc(db, 'users', user.id, 'notes', week[0])
-        await setDoc(notesCollection, { [date]: note }, { merge: true })
         set((state) => ({ userNotes: { ...state.userNotes, [date]: note } }))
+        await setDoc(notesCollection, { [date]: note }, { merge: true })
     }),
 }));
 export const useNotes = createDataLoadingHook(useNotesData, 'userNotes', 'loadUserNotesForWeek');
