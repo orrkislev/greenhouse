@@ -36,7 +36,7 @@ export function EditableEvent({ event, onStartDrag, onEndDrag, onStartResize, on
     };
 
     const eventClasses = `
-        bg-[#EF98A1] py-2 pr-10 pl-2 text-stone-800
+        bg-[#EF98A1] p-2 pt-5 text-stone-800
         flex items-center justify-start text-sm
         pointer-events-auto transition-all cursor-grab
         z-5 relative
@@ -87,7 +87,7 @@ function EditEvent({ event, onClose }) {
 
     const handleDelete = () => {
         onClose();
-        eventsActions.deleteEvent(event.id);
+        eventsActions.deleteEvent(event);
     };
 
     return (

@@ -18,7 +18,7 @@ export default function MainProject() {
                 {project && <div className='w-full aspect-[7/3] relative group/image'>
                     {imgUrl && <Image src={imgUrl} alt={project.name} fill className="object-cover" />}
                     <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-transparent group-hover/image:bg-stone-900/30 transition-all duration-200">
-                        <h1 className="font-bold p-2 bg-white group-hover/image:text-stone-900 group-hover/image:scale-105 transition-all duration-200">{project.name}</h1>
+                        <h1 className="font-bold p-2 bg-white group-hover/image:text-stone-900 group-hover/image:scale-105 transition-all duration-200">{project.title}</h1>
                     </div>
                 </div>
                 }

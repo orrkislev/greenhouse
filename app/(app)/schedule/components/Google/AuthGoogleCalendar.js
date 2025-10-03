@@ -38,7 +38,7 @@ export function AuthGoogleListener() {
             const origin = window.location.origin;
             const token = await getRefreshToken(origin, code);
             if (token) {
-                userActions.updateUserDoc({
+                userActions.updateUserData({
                     googleRefreshToken: token
                 })
                 const redirectUrl = localStorage.getItem('redirectUrl') || '/';

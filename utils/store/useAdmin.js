@@ -1,84 +1,63 @@
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { create } from "zustand"
-import { db } from "@/utils/firebase/firebase";
 import { createUser, deleteUser } from "@/utils/actions/admin actions";
-import { projectTasksActions } from "@/utils/store/useProjectTasks";
-import { format } from "date-fns";
+import { supabase } from "../supabase/client";
+import { makeLink, prepareForGroupsTable, prepareForUsersTable } from "../supabase/utils";
 
 export const useAdmin = create((set, get) => ({
-    staff: [],
-    groups: [],
+    classes: [],
     majors: [],
     allMembers: [],
 
+    // --------------------------------------
+    // -------- Load initial Data -------------
+    // -------------------------------------
+
     loadData: async () => {
-        if (get().groups.length > 0) return;
-        
-        const groupsQuery = query(collection(db, "groups"), where("type", "==", 'class'));
-        const snapshot = await getDocs(groupsQuery);
-        const groups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (get().allMembers.length > 0) return;
 
-        const membersCollection = collection(db, "users");
-        let allMembers = await getDocs(membersCollection);
-        allMembers = allMembers.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const studentsList = allMembers.filter(member => !member.roles || member.roles.includes('student'));
-        const staffList = allMembers.filter(member => member.roles && member.roles.includes('staff'));
-        groups.forEach(group => {
-            group.students = studentsList.filter(student => student.class == group.id);
-        });
-
-        set({
-            staff: staffList,
-            groups: groups,
-            allMembers: allMembers,
-        });
-
-        get().loadMajors();
+        const { data: classes, error: allClassesError } = await supabase.from('groups').select('*').eq('type', 'class');
+        const { data: majors, error: allMajorsError } = await supabase.from('groups').select('*').eq('type', 'major');
+        let { data: allMembers, error: allMembersError } = await supabase
+            .from('users')
+            .select(`
+                id,
+                first_name,
+                last_name,
+                username,
+                role,
+                is_admin,
+                groups:users_groups!left (
+                    group_id
+                )
+            `);
+        allMembers.forEach(member => member.groups = member.groups.map(g => g.group_id));
+        set({ classes, majors, allMembers });
     },
 
     // ------------------------------
     // Users
     // ------------------------------
-    updateMember: async (memberId, updates) => {
-        const memberRef = doc(db, "users", memberId);
-        await updateDoc(memberRef, updates);
+    createMember: async (memberData) => {
+        const newID = await createUser(memberData.username, memberData.first_name, memberData.last_name);
+        if (!newID) return
+        await supabase.from('users').update(prepareForUsersTable(memberData)).eq('id', newID);
+        const newMemberData = { ...memberData, id: newID, groups: memberData.groups || [] };
         set(state => ({
-            staff: state.staff.map(member => member.id === memberId ? { ...member, ...updates } : member),
-            groups: state.groups.map(group => ({
-                ...group,
-                students: group.students.map(student => student.id === memberId ? { ...student, ...updates } : student)
-            })),
+            allMembers: state.allMembers.concat(newMemberData)
+        }));
+        return newID;
+    },
+    updateMember: async (memberId, updates) => {
+        const cleanedUpdates = prepareForUsersTable(updates);
+        await supabase.from('users').update(cleanedUpdates).eq('id', memberId);
+        set(state => ({
             allMembers: state.allMembers.map(member => member.id === memberId ? { ...member, ...updates } : member)
         }));
     },
-    createMember: async (memberData) => {
-        await createUser(memberData.username, memberData.firstName, memberData.lastName);
-        const memberRef = doc(db, "users", memberData.username);
-        delete memberData.username;
-        await updateDoc(memberRef, memberData);
-        const newUserData = { id: memberData.username, ...memberData };
-        if (memberData.roles.includes('student')) {
-            set(state => ({
-                groups: state.groups.map(group => ({
-                    ...group,
-                    students: group.students ? group.students.concat(newUserData) : [newUserData]
-                }))
-            }));
-        } else if (memberData.roles.includes('staff')) {
-            set(state => ({
-                staff: state.staff.concat(newUserData)
-            }));
-        }
-        set(state => ({
-            allMembers: state.allMembers.concat(newUserData)
-        }));
-    },
     deleteMember: async (member) => {
-        await deleteUser(member.uid);
-        await deleteDoc(doc(db, "users", member.id));
+        await deleteUser(member.id);
+        await supabase.from('users').delete().eq('id', member.id);
         set(state => ({
-            staff: state.staff.filter(m => m.id !== member.id),
-            groups: state.groups.map(group => ({ ...group, students: group.students.filter(student => student.id !== member.id) })),
             allMembers: state.allMembers.filter(m => m.id !== member.id)
         }));
     },
@@ -86,34 +65,37 @@ export const useAdmin = create((set, get) => ({
     // ------------------------------
     // Groups
     // ------------------------------
-    assignMentorToClass: async (classId, mentorId) => {
-        const group = get().groups.find(g => g.id === classId);
-        if (!group) return;
-        get().updateGroup(classId, { mentors: [...group.mentors, mentorId] });
-        get().updateMember(mentorId, { class: classId });
-    },
-    removeMentorFromClass: async (classId, mentorId) => {
-        const group = get().groups.find(g => g.id === classId);
-        if (!group) return;
-        get().updateGroup(classId, { mentors: group.mentors.filter(m => m !== mentorId) });
-        get().updateMember(mentorId, { class: null });
-    },
-    createGroup: async (name, type, data = {}) => {
-        const groupData = { name, type, open: false, mentors: [], ...data };
-        const newDoc = await addDoc(collection(db, "groups"), groupData);
-        groupData.id = newDoc.id;
-        set(state => ({ groups: [...state.groups, groupData] }));
-    },
-    updateGroup: async (groupId, updates) => {
-        const groupRef = doc(db, "groups", groupId);
-        await updateDoc(groupRef, updates);
+    addUserToGroup: async (groupId, userId) => {
+        await supabase.from('users_groups').insert({ user_id: userId, group_id: groupId });
         set(state => ({
-            groups: state.groups.map(group => group.id === groupId ? { ...group, ...updates } : group)
+            allMembers: state.allMembers.map(member => member.id === userId ? { ...member, groups: [...member.groups, groupId] } : member)
         }));
     },
+    removeUserFromGroup: async (groupId, userId) => {
+        await supabase.from('users_groups').delete().eq('user_id', userId).eq('group_id', groupId);
+        set(state => ({
+            allMembers: state.allMembers.map(member => member.id === userId ? { ...member, groups: member.groups.filter(g => g !== groupId) } : member)
+        }));
+    },
+    createGroup: async (name, type) => {
+        const groupData = { name, type };
+        const { data: newGroupData, error } = await supabase.from('groups').insert(prepareForGroupsTable(groupData)).select().single();
+        if (error) throw error;
+        if (type === 'class') set(state => ({ classes: [...state.classes, newGroupData] }));
+        if (type === 'major') set(state => ({ majors: [...state.majors, newGroupData] }));
+    },
+    updateGroup: async (groupId, updates) => {
+        const { data, error } = await supabase.from('groups').update(prepareForGroupsTable(updates)).eq('id', groupId).select();
+        if (error) throw error;
+        if (data.type === 'class') set(state => ({ classes: state.classes.map(group => group.id === groupId ? { ...group, ...updates } : group) }));
+        if (data.type === 'major') set(state => ({ majors: state.majors.map(major => major.id === groupId ? { ...major, ...updates } : major) }));
+    },
     deleteGroup: async (groupId) => {
-        await deleteDoc(doc(db, "groups", groupId));
-        set(state => ({ groups: state.groups.filter(group => group.id !== groupId) }));
+        const currentClass = get().classes.find(group => group.id === groupId);
+        const currentMajor = get().majors.find(major => major.id === groupId);
+        await supabase.from('groups').delete().eq('id', groupId);
+        if (currentClass) set(state => ({ classes: state.classes.filter(group => group.id !== groupId) }));
+        if (currentMajor) set(state => ({ majors: state.majors.filter(major => major.id !== groupId) }));
     },
 
 
@@ -121,80 +103,50 @@ export const useAdmin = create((set, get) => ({
     // Projects
     // ------------------------------
     loadProjects: async () => {
-        const groups = get().groups;
-        if (groups.flatMap(group => group.students).some(student => student.project)) return;
-        for (const group of groups) {
-            const studentsWithProjectIds = group.students.filter(student => student.projectId);
-            for (const student of studentsWithProjectIds) {
-                const projectRef = doc(db, "users", student.id, "projects", student.projectId);
-                const projectSnapshot = await getDoc(projectRef);
-                if (projectSnapshot.exists()) {
-                    const projectData = projectSnapshot.data();
+        const allMembers = get().allMembers;
+        if (allMembers.some(member => member.project)) return;
+        for (const member of allMembers) {
+            const { data, error } = await supabase.rpc('get_student_current_term_project', { p_student_id: member.id });
+            if (error) throw error;
+            if (data.length > 0) {
+                const { data: data2, error: error2 } = await supabase.rpc('get_linked_items', {
+                    p_table_name: 'projects',
+                    p_item_id: data[0].id,
+                    p_target_types: ['mentorships']
+                })
+                if (error2) throw error2;
+                if (data2) {
+                    data[0].masters = data2.mentorships.map(d => d.mentorId).map(id => allMembers.find(m => m.id === id));
                     set(state => ({
-                        groups: state.groups.map(g => {
-                            if (g.id === group.id) {
-                                g.students = g.students.map(s => s.id === student.id ? { ...s, project: projectData } : s);
-                            }
-                            return g;
-                        })
+                        allMembers: state.allMembers.map(member => member.id === member.id ? { ...member, project: data[0] } : member)
                     }));
                 }
             }
         }
     },
-    assignMasterToProject: async (studentId, projectId, master) => {
-        const studentRef = doc(db, "users", studentId, "projects", projectId);
-        const masterData = {
-            id: master.id,
-            firstName: master.firstName,
-            lastName: master.lastName,
-        }
-        await updateDoc(studentRef, { master: masterData });
-        set(state => ({
-            groups: state.groups.map(group => ({
-                ...group,
-                students: group.students.map(student => {
-                    if (student.id === studentId && student.projectId === projectId) {
-                        return { ...student, project: { ...student.project, master: masterData } };
-                    }
-                    return student;
-                })
-            }))
-        }));
-        projectTasksActions.addTaskToStudentProject({
-            title: 'לקבוע פגישה שבועית',
-            description: `לקבוע פגישה שבועית עם ${master.firstName} ${master.lastName}`,
-            startDate: format(new Date(), 'yyyy-MM-dd'),
-            endDate: format(new Date(), 'yyyy-MM-dd')
-        }, studentId);
-    },
+    assignMasterToProject: async (studentId, projectId, masterId) => {
+        const { data, error } = await supabase.from('mentorships')
+            .upsert({ mentor_id: masterId, student_id: studentId })
+            .select().single();
+        if (error) throw error;
+        const { error: error2 } = await makeLink('mentorships', data.id, 'projects', projectId);
+        if (error2) throw error2;
 
-    // ------------------------------
-    // Majors
-    // ------------------------------
-    loadMajors: async () => {
-        const majorsQuery = query(collection(db, 'groups'), where('type', '==', 'major'));
-        const snapshot = await getDocs(majorsQuery);
-        const majors = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        set({ majors });
-    },
-    createMajor: async (majorData) => {
-        const newDoc = await addDoc(collection(db, 'groups'), {
-            name: majorData.name,
-            type: 'major',
-            open: false,
-        });
-        majorData.id = newDoc.id;
-        set(state => ({ majors: [...state.majors, majorData] }));
-    },
-    updateMajor: async (majorId, updates) => {
-        const majorRef = doc(db, 'groups', majorId);
-        await updateDoc(majorRef, updates);
-        set(state => ({ majors: state.majors.map(major => major.id === majorId ? { ...major, ...updates } : major) }));
-    },
-    deleteMajor: async (majorId) => {
-        await deleteDoc(doc(db, 'groups', majorId));
-        set(state => ({ majors: state.majors.filter(major => major.id !== majorId) }));
+        if (get().allMembers.length > 0) {
+            set(state => ({
+                allMembers: state.allMembers.map(member => ({
+                    ...member,
+                    project: member.project?.id === projectId ? { ...member.project, master: master } : member.project
+                }))
+            }));
+        }
+
+        // TODO ADD TASK
+        // await projectTasksActions.addTaskToStudentProject({
+        //     title: 'לקבוע פגישה שבועית',
+        //     description: `לקבוע פגישה שבועית עם ${master.first_name} ${master.last_name}`,
+        //     due_date: format(new Date(), 'yyyy-MM-dd'),
+        // }, studentId);
     },
 
     // ------------------------------
@@ -202,12 +154,13 @@ export const useAdmin = create((set, get) => ({
     // ------------------------------
     message: '',
     loadMessage: async () => {
-        const message = await getDoc(doc(db,'school','messages'))
-        set({ message: message.data().text });
+        const {data, error} = await supabase.from('misc').select('data').eq('name', 'school_message').single();
+        if (error) throw error;
+        set({ message: data.data.text });
     },
     updateMessage: async (text) => {
-        await updateDoc(doc(db,'school','messages'), { text });
         set({ message: text });
+        await supabase.from('misc').update({ data: { text } }).eq('name', 'school_message');
     },
 }));
 

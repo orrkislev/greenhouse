@@ -1,6 +1,6 @@
 import WithLabel from "@/components/WithLabel";
 import { projectActions, useProject, useProjectData } from "@/utils/store/useProject";
-import { useTime } from "@/utils/store/useTime";
+import { timeActions, useTime } from "@/utils/store/useTime";
 import { tw } from "@/utils/tw";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
@@ -42,21 +42,11 @@ const ProjectDiv = tw.div`
 
 function OtherProjects() {
     const currProject = useProjectData((state) => state.project);
-    const otherProjects = useProjectData((state) => state.otherProjects);
-    const terms = useTime((state) => state.terms);
+    const allProjects = useProjectData((state) => state.allProjects);
 
     useEffect(() => {
-        projectActions.loadOtherProjects();
+        projectActions.loadAllProjects();
     }, [])
-
-    const termsWithProjects = terms.map(term => ({
-        ...term,
-        projects: otherProjects.filter(project => project.terms.includes(term.id))
-    })).filter(term => term.projects.length > 0).sort((a, b) => a.start - b.start);
-    termsWithProjects.push({
-        id: 'other', name: 'אחרים', start: '',
-        projects: otherProjects.filter(project => !termsWithProjects.find(term => term.projects.includes(project)))
-    });
 
     const clickOnProject = (project) => {
         if (project.id === currProject?.id) {
@@ -71,15 +61,10 @@ function OtherProjects() {
         <div>
             <div className='w-full h-px bg-stone-300 mb-2'></div>
             <div className="text-sm text-stone-700 mb-4">כל הפרויקטים שלי</div>
-            {termsWithProjects.map((term) => (
-                <div key={term.id} className="flex flex-col gap-2">
-                    <div className="text-xs text-stone-400">{term.start.split('-')[0]} - {term.name}</div>
-                    {term.projects.map(project => (
-                        <ProjectDiv key={project.id} onClick={() => clickOnProject(project)} $isActive={project.id === currProject?.id}>
-                            {project.name}
-                        </ProjectDiv>
-                    ))}
-                </div>
+            {allProjects.map(project => (
+                <ProjectDiv key={project.id} onClick={() => clickOnProject(project)} $isActive={project.id === currProject?.id}>
+                    {project.title}
+                </ProjectDiv>
             ))}
         </div>
     )

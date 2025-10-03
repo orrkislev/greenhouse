@@ -33,15 +33,17 @@ export default function ProjectDashboard() {
 function ProjectName() {
     const project = useProjectData(state => state.project);
 
-    useEffect(() => {
-        if (project && !project.image) {
-            projectActions.createImage(project.name)
-        }
-    }, [project])
+    // TODO ADD IMAGE CREATION
+    // useEffect(() => {
+    //     if (project && !project.image) {
+    //         projectActions.createImage(project.name)
+    //     }
+    // }, [project])
 
-    const onEdit = (name) => {
-        projectActions.updateProject({ ...project, name })
-        setTimeout(() => { projectActions.createImage(name) }, 500)
+    const onEdit = (title) => {
+        projectActions.updateProject({ ...project, title })
+        // TODO ADD IMAGE CREATION
+        // setTimeout(() => { projectActions.createImage(name) }, 500)
     }
 
     const img = !project.image || project.image === 'generating' ? null : project.image;
@@ -54,9 +56,7 @@ function ProjectName() {
                     {!project.image && <DotSquare className="w-10 h-10 animate-pulse text-stone-500" />}
                 </div>
             </div>
-            <SmartText text={project.name} onEdit={onEdit}
-                className="w-full h-full border-none text-center text-2xl font-semibold"
-            />
+            <SmartText text={project.name} onEdit={onEdit} className="w-full h-full border-none text-center text-2xl font-semibold" />
         </>
     );
 }

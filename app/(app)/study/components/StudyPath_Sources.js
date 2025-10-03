@@ -14,14 +14,14 @@ export default function StudyPath_Sources({ path }) {
                     className="text-sm text-stone-500 bg-green-100 border border-green-300 rounded-md p-2"
                     withIcon={false}
                 />
-                {path.sources && path.sources.map((source) => (
-                    <div key={source.id} className="flex gap-2 items-center bg-white border border-stone-300 rounded-md p-2 group/source">
-                        <SmartText text={source.text}
-                            onEdit={(text) => studyActions.updateSource(path.id, source.id, { text })}
+                {path.sources && path.sources.map((source,sourceIndex) => (
+                    <div key={sourceIndex} className="flex gap-2 items-center bg-white border border-stone-300 rounded-md p-2 group/source">
+                        <SmartText text={source}
+                            onEdit={(text) => studyActions.updateSource(path.id, sourceIndex, text)}
                             withIcon={false}
                             className="text-sm text-stone-500"
                         />
-                        <Trash2 className="w-4 h-4 cursor-pointer text-stone-500 opacity-0 group-hover/source:opacity-100 hover:bg-stone-300/50 transition-colors rounded-full" onClick={() => studyActions.deleteSource(path.id, source.id)} />
+                        <Trash2 className="w-4 h-4 cursor-pointer text-stone-500 opacity-0 group-hover/source:opacity-100 hover:bg-stone-300/50 transition-colors rounded-full" onClick={() => studyActions.deleteSource(path.id, sourceIndex)} />
                     </div>
                 ))}
             </div>

@@ -3,16 +3,15 @@
 import { useEffect, useState } from "react";
 import StaffGroup from "./components/StaffGroup";
 import StaffStudents from "./components/StaffStudents";
-import { useStaff } from "@/utils/store/useStaff";
-import { groupsActions, useMentorGroups } from "@/utils/store/useGroups";
+import { useMentorships } from "@/utils/store/useMentorships";
+import { useUserGroups } from "@/utils/store/useGroups";
 import { DashboardLayout, DashboardPanel, DashboardPanelButton, DashboardMain } from "@/components/DashboardLayout"
-import { useUser } from "@/utils/store/useUser";
 import Staff_Admin from "./components/Staff_Admin";
+import { isAdmin } from "@/utils/store/useUser";
 
 export default function StaffPage() {
-    const user = useUser(state => state.user);
-    const groups = useMentorGroups();
-    const students = useStaff(state => state.students);
+    const groups = useUserGroups();
+    const students = useMentorships(state => state.mentorships);
     const [activeTab, setActiveTab] = useState("students");
 
     useEffect(() => {
@@ -32,7 +31,7 @@ export default function StaffPage() {
                     </DashboardPanelButton>
                 ))}
                 <DashboardPanelButton onClick={() => setActiveTab('students')} $active={activeTab === 'students'}>ליווי</DashboardPanelButton>
-                {user.roles.includes('admin') && (
+                {isAdmin() && (
                     <DashboardPanelButton onClick={() => setActiveTab('admin')} $active={activeTab === 'admin'}>תיכון החממה</DashboardPanelButton>
                 )}
             </DashboardPanel>

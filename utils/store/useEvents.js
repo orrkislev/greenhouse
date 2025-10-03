@@ -1,94 +1,115 @@
-import { db } from "@/utils/firebase/firebase";
-import { useUser } from "@/utils/store/useUser";
-import { format } from "date-fns";
-import { addDoc, and, collection, deleteDoc, doc, getDocs, or, query, updateDoc, where } from "firebase/firestore";
+import { addDays, format } from "date-fns";
 import { debounce } from "lodash";
-import { createStore, createDataLoadingHook, withLoadingCheck } from "./utils/createStore";
+import { createStore, createDataLoadingHook } from "./utils/createStore";
 import { useTime } from "./useTime";
+import { prepareForEventsTable } from "../supabase/utils";
+import { supabase } from "../supabase/client";
 
 
 export const [useEventsData, eventsActions] = createStore((set, get, withUser, withLoadingCheck) => {
-    const getRef = () => {
-        const userId = useUser.getState().user.id;
-        return collection(db, `users/${userId}/events`);
-    }
-
     const debouncedUpdateEvents = debounce(async () => {
         const { events } = get();
-        const ref = getRef();
-        for (const event of events) {
-            if (event._dirty && event.id) {
-                const { id, _dirty, ...data } = event;
-                await updateDoc(doc(ref, id), data);
-                event._dirty = false;
+        const dates = Object.keys(events);
+        for (const date of dates) {
+            for (const event of events[date]) {
+                if (event._dirty && event.id) {
+                    const { id, _dirty, ...data } = event;
+                    const { error } = await supabase.from('events').update(prepareForEventsTable(data)).eq('id', id);
+                    event._dirty = false;
+                }
             }
         }
-        set({ events: [...events] });
+        set({ events: { ...events } });
     }, 1000);
 
     return {
-        events: [],
+        events: {},
 
         loadTodayEvents: withLoadingCheck(async (user) => {
-            set({ events: [] });
-            const events = await get().getTodaysEventsForUser(user.id);
-            set({ events });
-        }), 
+            await get().loadEvents(user, format(new Date(), 'yyyy-MM-dd'));
+        }),
         loadWeekEvents: withLoadingCheck(async (user, week) => {
-            set({ events: [] });
             if (!week) week = useTime.getState().week;
             if (!week || week.length === 0) return;
-
-            const eventsRef = collection(db,'users',user.id,'events')
-            const eventsQuery = query(eventsRef,
-                and(
-                    where("date", ">=", week[0]),
-                    where("date", "<=", week[week.length - 1])
-                )
-            );
-            const eventsSnap = await getDocs(eventsQuery);
-            const events = eventsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-            set({ events });
+            await get().loadEvents(user, week[0], week[week.length - 1]);
         }),
+
+        loadEvents: async (user, start, end) => {
+            if (!end) end = start;
+            let date = start
+            let shouldLoad = false;
+            while (date <= end) {
+                if (!get().events[date]) {
+                    shouldLoad = true;
+                    break;
+                }
+                date = addDays(date, 1);
+            }
+            if (!shouldLoad) return;
+
+            const { data, error } = await supabase.rpc('get_user_events', {
+                p_user_id: user.id,
+                p_start_date: start,
+                p_end_date: end
+            });
+            if (error) throw error;
+
+
+            const newEvents = { ...get().events };
+            date = new Date(start);
+            while (date <= new Date(end)) {
+                const dateStr = format(date, 'yyyy-MM-dd');
+                if (!newEvents[dateStr]) newEvents[dateStr] = [];
+                newEvents[dateStr].push(...data.filter(e => e.date === dateStr));
+                date = addDays(date, 1);
+            }
+            set({ events: newEvents });
+        },
 
         // ------------------------------
         // ---- CRUD Events -------------
         // ------------------------------
-        addEvent: async (event) => {
-            const newDoc = await addDoc(getRef(), event);
-            event.id = newDoc.id;
-            set((state) => ({
-                events: [...state.events, event]
-            }));
-        },
-        updateEvent: (eventId, updatedEvent) => {
-            updatedEvent._dirty = true;
-            set((state) => {
-                const updatedEvents = state.events.map(event =>
-                    event.id === eventId ? { ...event, ...updatedEvent } : event
-                );
-                return { events: updatedEvents };
-            });
+        addEvent: withUser(async (user, event) => {
+            event.created_by = user.id;
+            const { data, error } = await supabase.from('events').insert(prepareForEventsTable(event)).select().single();
+            if (error) throw error;
+            const newEvents = { ...get().events };
+            newEvents[event.date] = [...(newEvents[event.date] || []), data];
+            set({ events: newEvents });
+        }),
+        updateEvent: async (eventId, updates) => {
+            const event = Object.values(get().events).flat().find(event => event.id === eventId);
+            const newEvents = { ...get().events };
+            newEvents[event.date] = newEvents[event.date].filter(event => event.id !== eventId);
+            Object.assign(event, updates);
+            event._dirty = true;
+            newEvents[event.date] = [...newEvents[event.date], event];
+            set({ events: newEvents });
             debouncedUpdateEvents();
         },
-        deleteEvent: async (eventId) => {
-            const ref = getRef();
-            set((state) => ({
-                events: state.events.filter(event => event.id !== eventId)
-            }));
-            await deleteDoc(doc(ref, eventId));
+        deleteEvent: async (event) => {
+            const newEvents = { ...get().events };
+            newEvents[event.date] = newEvents[event.date].filter(event => event.id !== event.id);
+            set({ events: newEvents });
+            await supabase.from('events').delete().eq('id', event.id);
         },
 
         // -----------------------------------
         // ---- Other Users ( for staff ) ----
         // -----------------------------------
         getTodaysEventsForUser: async (userId) => {
-            const eventsRef = collection(db, `users/${userId}/events`);
-            const eventsQuery = query(eventsRef, where("date", "==", format(new Date(), "yyyy-MM-dd")));
-            const eventsSnap = await getDocs(eventsQuery);
-            const events = eventsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            return events;
+            const { data: scheduledEvents, error: scheduledEventsError } = await supabase.rpc('get_user_events', {
+                p_user_id: userId,
+                p_start_date: format(new Date(), 'yyyy-MM-dd'),
+                p_end_date: format(new Date(), 'yyyy-MM-dd')
+            })
+            if (scheduledEventsError) throw scheduledEventsError;
+            const { data: meetings, error: meetingsError } = await supabase.rpc('get_user_recurring_events', {
+                p_user_id: userId,
+                p_day_of_week: new Date().getDay() + 1
+            })
+            if (meetingsError) throw meetingsError;
+            return { scheduledEvents, meetings };
         }
     }
 });

@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { create } from "zustand";
 import { db } from "@/utils/firebase/firebase";
+import { supabase } from "../supabase/client";
 
 const toKey = (date) => {
     if (typeof date === "string") return date;
@@ -16,14 +17,18 @@ export const useGantt = create((set, get) => ({
 
     // ------------------------------
     loadSchoolMessage: async () => {
-        if (get().schoolMessage) return;
-        const message = await getDoc(doc(db, 'school', 'messages'));
-        const data = message.data();
-        set({ message: data.text, studyGroups: data.studyGroups || [] });
+        const {data, error} = await supabase.from('misc').select('data').eq('name', 'school_message').single();
+        if (error) throw error;
+        set({ schoolMessage: data.data.text });
     },
-    saveStudyGroups: async (studyGroups) => {
-        await updateDoc(doc(db, 'school', 'messages'), { studyGroups }, { merge: true });
-        set({ studyGroups });
+    loadStudyGroups: async () => {
+        const {data, error} = await supabase.from('misc').select('data').eq('name', 'study_groups').single();
+        if (error) throw error;
+        set({ studyGroups: data.data.study_groups || [] });
+    },
+    saveStudyGroups: async (study_groups) => {
+        await supabase.from('misc').update({ data: { study_groups } }).eq('name', 'study_groups');
+        set({ studyGroups: study_groups });
     },
 
 

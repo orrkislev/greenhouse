@@ -1,12 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { userActions, useUser } from '@/utils/store/useUser';
+import { isAdmin, isStaff, userActions, useUser } from '@/utils/store/useUser';
 import PINInput from './ui/PIN';
 import { redirect } from 'next/navigation';
 import Image from 'next/image';
 import WithLabel from './WithLabel';
-import { Icon } from "@iconify/react";
 
 export default function WithAuth({ children, role }) {
     const [username, setUsername] = useState('');
@@ -23,11 +22,10 @@ export default function WithAuth({ children, role }) {
 
 
     if (user && Object.keys(user).length > 0) {
-        if (!role || (role && user.roles && user.roles.includes(role))) {
-            return children;
-        } else {
-            redirect('/')
-        }
+        if (!role) return children;
+        else if (role == 'staff' && isStaff()) return children;
+        else if (role == 'admin' && isAdmin()) return children;
+        else redirect('/')
     }
 
     const onSubmit = (e) => {
@@ -55,7 +53,7 @@ export default function WithAuth({ children, role }) {
                     <form onSubmit={onSubmit} className="space-y-6">
                         {error && (
                             <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-                                {error}
+                                {error.message}
                             </div>
                         )}
 

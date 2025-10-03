@@ -21,6 +21,7 @@ export function EventTitleEditor({ event }) {
 
     return (
         <SmartTextArea
+            key={JSON.stringify(event.gridStyle)}
             value={editTitle}
             onMouseDown={e => e.stopPropagation()}
             onChange={handleTitleChange}

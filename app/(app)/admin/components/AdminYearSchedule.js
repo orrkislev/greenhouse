@@ -4,9 +4,14 @@ import { timeActions, useTime } from "@/utils/store/useTime";
 import { format } from "date-fns";
 import { Trash } from "lucide-react";
 import { Plus } from "lucide-react";
+import { useEffect } from "react";
 
 export default function AdminYearSchedule() {
     const terms = useTime(state => state.terms);
+
+    useEffect(() => {
+        timeActions.loadTerms();
+    }, []);
 
     const startYear = new Date().getMonth() < 7 ? new Date().getFullYear() - 1 : new Date().getFullYear();
     const academicYear = `${startYear}-${startYear + 1}`;
@@ -47,7 +52,6 @@ export default function AdminYearSchedule() {
                     name: 'תקופה חדשה',
                     start: format(new Date(), 'yyyy-MM-dd'),
                     end: format(new Date(), 'yyyy-MM-dd'),
-                    id: crypto.randomUUID()
                 })}>
                     <Plus className="w-4 h-4" />
                 </button>

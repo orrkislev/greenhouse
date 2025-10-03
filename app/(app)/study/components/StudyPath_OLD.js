@@ -25,7 +25,7 @@ export default function StudyPath({ path }) {
             <PathBG key={path.id} path={path} />
             <div className="">
                 <div className="inline-block -mt-4">
-                    <SmartText className="text-6xl font-bold" text={path.name} onEdit={(name) => {
+                    <SmartText className="text-6xl font-bold" text={path.title} onEdit={(name) => {
                         studyActions.updatePath(path.id, { ...path, name })
                         studyActions.createImage(path, name)
                     }} />

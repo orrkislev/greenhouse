@@ -1,24 +1,12 @@
 'use server';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { prepareEmail, preparePassword } from '@/utils/firebase/auth';
+import { getSupabaseAdminClient } from '../supabase/server';
 
-if (!getApps().length) {
-    initializeApp({
-        credential: cert({
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        }),
-    });
-}
+const supabase = getSupabaseAdminClient();
 
-export const createUser = async (username, firstName, lastName) => {
-    const db = getFirestore();
-    const userDoc = db.collection('users').doc(username);
-    const userSnapshot = await userDoc.get();
-    if (userSnapshot.exists) {
+export const createUser = async (username, first_name, last_name) => {
+    const userSnapshot = await supabase.from('users').select('*').eq('username', username).single();
+    if (userSnapshot.data) {
         throw new Error("Username already exists. Please choose a different username.");
     }
 
@@ -29,27 +17,33 @@ export const createUser = async (username, firstName, lastName) => {
 
     const email = prepareEmail(username);
     const password = preparePassword('0000');
-    const userRecord = await getAuth().createUser({ email, password, displayName: `${firstName} ${lastName}`, emailVerified: true, });
+    const { data: userRecord, error: userError } = await supabase.auth.admin.createUser({ email, password });
 
-    if (!userRecord) {
-        throw new Error('Failed to create user');
+    if (userError) {
+        throw new Error('Failed to create user: ' + userError.message);
     }
 
-    await userDoc.set({
-        uid: userRecord.uid,
-        firstName,
-        lastName,
-        roles: [],
+    const { data, error } = await supabase.from('users').insert({
+        id: userRecord.user.id,
+        first_name,
+        last_name,
+        username,
+        created_at: new Date(),
+        updated_at: new Date(),
     });
+    if (error) {
+        throw new Error('Failed to save user to database: ' + error.message);
+    }
+    return userRecord.user.id;
 }
 
 export const resetPin = async (userId, newPin = '0000') => {
     const password = preparePassword(newPin);
-    await getAuth().updateUser(userId, {
+    await supabase.auth.admin.updateUserById(userId, {
         password,
     });
 }
 
 export const deleteUser = async (userId) => {
-    await getAuth().deleteUser(userId);
+    await supabase.auth.admin.deleteUser(userId);
 }

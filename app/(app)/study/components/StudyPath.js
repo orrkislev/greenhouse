@@ -15,9 +15,9 @@ export default function StudyPath({ path }) {
             <PathBG key={path.id} path={path} />
             <div className="">
                 <div className="inline-block -mt-4">
-                    <SmartText className="text-6xl font-bold" text={path.name} onEdit={(name) => {
-                        studyActions.updatePath(path.id, { ...path, name })
-                        studyActions.createImage(path, name)
+                    <SmartText className="text-6xl font-bold" text={path.title} onEdit={(title) => {
+                        studyActions.updatePath(path.id, { ...path, title })
+                        studyActions.createImage(path, title)
                     }} />
                     <SmartText className="text-xl text-stone-500" text={path.description} onEdit={(description) => studyActions.updatePath(path.id, { ...path, description })} />
                 </div>
@@ -28,9 +28,7 @@ export default function StudyPath({ path }) {
 
 
             <WithLabel label="מה אני לומד.ת">
-                {path.subjects.map((subject) => (
-                    <Subject key={subject.id} path={path} subject={subject} />
-                ))}
+                <Steps key={path.id} path={path} />
             </WithLabel>
         </div>
     )
@@ -61,13 +59,13 @@ function PathBG({ path }) {
     )
 }
 
-function Subject({ path, subject }) {
+function Steps({ path }) {
 
     const NewStepButton = (
         <div className="bg-green-100 rounded-2xl p-4 shadow flex items-center justify-center">
             <Button data-role="new" onClick={async () => {
-                const newStep = await getNewStep(path, subject)
-                studyActions.addStep(path.id, subject.id, newStep)
+                const newStep = await getNewStep(path)
+                studyActions.addStep(path.id, newStep)
             }}>
                 שלב נוסף
                 <Plus className="w-4 h-4 ml-2" />
@@ -76,21 +74,21 @@ function Subject({ path, subject }) {
     )
 
     return (
-        <div key={subject.id} className="flex gap-4">
+        <div key={path.id} className="flex gap-4">
             <div className="relative flex-1">
                 <div className="flex">
                     <div className="flex-1 flex flex-col gap-8 pb-32">
-                        {subject.steps.filter((_, index) => index % 2 == 0).map((step) => (
-                            <Step key={step.id} path={path} subject={subject} step={step} side="right" />
+                        {path.steps.filter((_, index) => index % 2 == 0).map((step) => (
+                            <Step key={step.id} path={path} step={step} side="right" />
                         ))}
-                        {subject.steps.length % 2 == 1 && NewStepButton}
+                        {path.steps.length % 2 == 1 && NewStepButton}
                     </div>
-                    <StepsMiddleLine path={path} subject={subject} />
+                    <StepsMiddleLine path={path} />
                     <div className="flex-1 flex flex-col gap-8 pt-8 pb-32">
-                        {subject.steps.filter((_, index) => index % 2 == 1).map((step) => (
-                            <Step key={step.id} path={path} subject={subject} step={step} side="left" />
+                        {path.steps.filter((_, index) => index % 2 == 1).map((step) => (
+                            <Step key={step.id} path={path} step={step} side="left" />
                         ))}
-                        {subject.steps.length % 2 == 0 && NewStepButton}
+                        {path.steps.length % 2 == 0 && NewStepButton}
                     </div>
                 </div>
             </div>
@@ -116,7 +114,20 @@ const contentIcons = {
     goal: { icon: Target, className: 'font-semibold' },
 }
 
-function Step({ path, subject, step, side }) {
+function Step({ path, step, side }) {
+
+    const addContent = (type) => {
+        // TODO
+    }
+
+    const updateContent = (contentId, data) => {
+        // TODO
+    }
+
+    const removeContent = (contentId) => {
+        // TODO
+    }
+
     return (
         <div className="group/step w-full relative">
             <div className="rounded-2xl shadow bg-white overflow-hidden relative">
@@ -142,18 +153,18 @@ function Step({ path, subject, step, side }) {
 
                     <Menu className='absolute top-2 left-2 scale-80' icon={EllipsisVertical}>
                         <MenuList>
-                            <MenuItem title="מקור מידע" icon={contentIcons.source.icon} onClick={() => studyActions.addStepContent(path.id, subject.id, step.id, { type: 'source', text: '' })} />
-                            <MenuItem title="ציטוט" icon={contentIcons.quote.icon} onClick={() => studyActions.addStepContent(path.id, subject.id, step.id, { type: 'quote', text: '' })} />
-                            <MenuItem title="תרגול" icon={contentIcons.exercise.icon} onClick={() => studyActions.addStepContent(path.id, subject.id, step.id, { type: 'exercise', text: '' })} />
-                            <MenuItem title="מטרה" icon={contentIcons.goal.icon} onClick={() => studyActions.addStepContent(path.id, subject.id, step.id, { type: 'goal', text: '' })} />
+                            <MenuItem title="מקור מידע" icon={contentIcons.source.icon} onClick={() => addContent('source')} />
+                            <MenuItem title="ציטוט" icon={contentIcons.quote.icon} onClick={() => addContent('quote')} />
+                            <MenuItem title="תרגול" icon={contentIcons.exercise.icon} onClick={() => addContent('exercise')} />
+                            <MenuItem title="מטרה" icon={contentIcons.goal.icon} onClick={() => addContent('goal')} />
                             <MenuSeparator />
-                            <MenuItem title="מחק" icon={Trash2} onClick={() => studyActions.deleteStep(path.id, subject.id, step.id)} />
+                            <MenuItem title="מחק" icon={Trash2} onClick={() => studyActions.deleteStep(path.id, step.id)} />
                         </MenuList>
                     </Menu>
 
                     <div className="flex flex-col gap-1 p-2">
-                        <SmartText text={step.source} className="text-xl font-semibold text-stone-500" onEdit={(source) => studyActions.updateStep(path.id, subject.id, step.id, { ...step, source })} />
-                        <SmartText text={step.text} className="text-sm text-stone-500" onEdit={(text) => studyActions.updateStep(path.id, subject.id, step.id, { ...step, text })} />
+                        <SmartText text={step.title} className="text-xl font-semibold text-stone-500" onEdit={(title) => studyActions.updateStep(path.id, step.id, { ...step, title })} />
+                        <SmartText text={step.description} className="text-sm text-stone-500" onEdit={(description) => studyActions.updateStep(path.id, step.id, { ...step, description })} />
                         {step.content && step.content.map((content) => {
                             const Content = contentIcons[content.type]
                             const className = `text-sm text-stone-500 ${Content.className || ''}`
@@ -161,8 +172,8 @@ function Step({ path, subject, step, side }) {
                                 <div key={content.id} className="flex gap-2 items-center text-sm text-stone-500 p-1">
                                     <Content.icon className="w-4 h-4" />
                                     <SmartText text={content.text} className={className}
-                                        onEdit={(text) => studyActions.updateStepContent(path.id, subject.id, step.id, content.id, { text })}
-                                        onRemove={() => studyActions.deleteStepContent(path.id, subject.id, step.id, content.id)}
+                                        onEdit={(text) => updateContent(content.id, { text })}
+                                        onRemove={() => removeContent(content.id)}
                                     />
                                 </div>
                             )
@@ -172,8 +183,8 @@ function Step({ path, subject, step, side }) {
                     <div className="absolute bottom-2 left-2">
                         <IconButton
                             icon={Check}
-                            className={`w-8 h-8 border rounded-full transition-colors ${step.finished ? 'bg-sky-200 border-sky-300 text-sky-600' : 'border-stone-300'}`}
-                            onClick={() => studyActions.updateStep(path.id, subject.id, step.id, { ...step, finished: !step.finished })} />
+                            className={`w-8 h-8 border rounded-full transition-colors ${step.status == 'completed' ? 'bg-sky-200 border-sky-300 text-sky-600' : 'border-stone-300'}`}
+                            onClick={() => studyActions.updateStep(path.id, step.id, { ...step, status: step.status == 'todo' ? 'completed' : 'todo' })} />
                     </div>
                 </div>
             </div>

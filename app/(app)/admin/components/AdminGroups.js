@@ -7,15 +7,13 @@ import { Cell, Edittable, TableHeader } from "./Common";
 const SpecialButton = tw`p-4 border border-stone-200 rounded-md flex items-center gap-2 text-xs hover:bg-stone-100 cursor-pointer`;
 
 export default function AdminGroups() {
-    const groups = useAdmin(state => state.groups);
+    const groups = useAdmin(state => state.classes);
 
     useEffect(() => {
         adminActions.loadData();
     }, [])
 
-    const createGroup = () => {
-        adminActions.createGroup('קבוצה חדשה', 'class', { year: 1 });
-    }
+    const createGroup = () => adminActions.createGroup('קבוצה חדשה', 'class');
 
     return (
         <div className="flex flex-col gap-4">
@@ -50,22 +48,18 @@ export default function AdminGroups() {
 
 function GroupHeader({ group }) {
     const [isEditing, setIsEditing] = useState(false);
+
     if (isEditing) {
         const handleSubmit = (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
-            const updatedGroup = {
-                name: formData.get('name'),
-                year: parseInt(formData.get('year'), 10)
-            };
-            adminActions.updateGroup(group.id, updatedGroup);
+            adminActions.updateGroup(group.id, { name: formData.get('name') });
             setIsEditing(false);
         };
 
         return (
             <form className="flex items-center mb-2 group gap-2" onSubmit={handleSubmit}>
                 <input type="text" name="name" defaultValue={group.name} className="p-1 border rounded" />
-                <input type="number" name="year" defaultValue={group.year} className="p-1 border rounded" />
                 <button type="submit" className="px-4 py-1 bg-blue-500 text-white text-xs hover:bg-blue-600">
                     שמור
                 </button>
@@ -78,7 +72,6 @@ function GroupHeader({ group }) {
         return (
             <div className="flex items-center mb-2 group gap-2">
                 <h2 className="text-lg font-semibold">{group.name}</h2>
-                <span className="text-sm text-stone-500">שנה {group.year}</span>
                 <Edit2 className="w-4 h-4 opacity-0 group-hover:opacity-100 cursor-pointer"
                     onClick={() => setIsEditing(true)} />
             </div>
@@ -89,17 +82,15 @@ function GroupHeader({ group }) {
 
 
 function GroupMentors({ group }) {
-    const staff = useAdmin(state => state.staff);
-
-    const groupMentors = staff.filter(staff => group.mentors.includes(staff.id));
+    const allMembers = useAdmin(state => state.allMembers);
+    const staff = allMembers.filter(member => member.role === 'staff');
+    const groupMentors = allMembers.filter(member => member.role === 'staff' && member.groups?.includes(group.id));
 
     const handleRemoveMentor = (mentorId) => {
-        // adminActions.updateGroup(group.id, { mentors: group.mentors.filter(mentor => mentor !== mentorId) });
-        adminActions.removeMentorFromClass(group.id, mentorId);
+        adminActions.removeUserFromGroup(group.id, mentorId);
     };
     const addMentorToGroup = (mentorId) => {
-        // adminActions.updateGroup(group.id, { mentors: [...group.mentors, mentorId] });
-        adminActions.assignMentorToClass(group.id, mentorId);
+        adminActions.addUserToGroup(group.id, mentorId);
     };
 
     return (
@@ -107,15 +98,15 @@ function GroupMentors({ group }) {
             <h3 className="text-sm">מנטורים</h3>
             {groupMentors.map(mentor => (
                 <div key={mentor.id} className="flex justify-between gap-2 items-center text-sm text-blue-800 px-2 rounded-full group relative border border-blue-400">
-                    <span>{mentor.firstName} {mentor.lastName}</span>
+                    <span>{mentor.first_name} {mentor.last_name}</span>
                     <XIcon className="w-4 h-4 opacity-30 group-hover:opacity-100 cursor-pointer"
                         onClick={() => handleRemoveMentor(mentor.id)} />
                 </div>
             ))}
             <select className="ml-2 p-1 border rounded text-sm" onChange={(e) => addMentorToGroup(e.target.value)} defaultValue="">
                 <option value="" disabled>הוסף מנטור</option>
-                {staff.filter(mentor => !mentor.class).sort((a, b) => a.firstName.localeCompare(b.firstName)).map(mentor => (
-                    <option key={mentor.id} value={mentor.id}>{mentor.firstName} {mentor.lastName}</option>
+                {staff.filter(mentor => !mentor.class).sort((a, b) => a.first_name.localeCompare(b.first_name)).map(mentor => (
+                    <option key={mentor.id} value={mentor.id}>{mentor.first_name} {mentor.last_name}</option>
                 ))}
             </select>
         </div>
@@ -123,23 +114,24 @@ function GroupMentors({ group }) {
 }
 
 function GroupStudents({ group }) {
+    const allMembers = useAdmin(state => state.allMembers);
     const majors = useAdmin(state => state.majors);
-    const [studentsData, setStudentsData] = useState(group.students || []);
+    const [studentsData, setStudentsData] = useState([])
     const [madeChanges, setMadeChanges] = useState(false);
 
     useEffect(() => {
-        if (group && group.students) setStudentsData(group.students);
-    }, [group])
+        setStudentsData(allMembers.filter(member => member.role === 'student' && member.groups?.includes(group.id)));
+    }, [allMembers])
 
     const addStudent = () => {
         const newStudent = {
             id: new Date().getTime(),
             username: '',
-            firstName: '',
-            lastName: '',
+            first_name: '',
+            last_name: '',
             major: '',
             isNew: true,
-            roles: ['student'],
+            role: 'student',
             class: group.id,
         };
         setStudentsData([...studentsData, newStudent]);
@@ -157,20 +149,26 @@ function GroupStudents({ group }) {
         for (const student of dirtyStudents) {
             delete student.dirty;
             await adminActions.updateMember(student.id, student);
+            await adminActions.addUserToGroup(group.id, student.id);
+            if (student.major) await adminActions.addUserToGroup(student.major, student.id);
         }
         for (const student of newStudents) {
             delete student.isNew;
             delete student.dirty;
             delete student.id;
             if (student.major == '') delete student.major;
-            await adminActions.createMember(student);
+            const newID = await adminActions.createMember( student );
+            await adminActions.addUserToGroup(group.id, newID);
+            if (student.major) await adminActions.addUserToGroup(student.major, newID);
         }
         setMadeChanges(false);
     }
 
     const deleteStudent = (student) => {
         if (student.isNew) setStudentsData(studentsData.filter(s => s.id !== student.id));
-        else if (confirm(`בטוח? למחוק את ${student.firstName} ${student.lastName}?`)) {
+        else if (confirm(`בטוח? למחוק את ${student.first_name} ${student.last_name}?`)) {
+            adminActions.removeUserFromGroup(group.id, student.id);
+            if (student.major) adminActions.removeUserFromGroup(student.major, student.id);
             adminActions.deleteMember(student);
         }
     }
@@ -178,11 +176,12 @@ function GroupStudents({ group }) {
     const headers = [
         { key: 'id', label: '', sortable: false },
         { key: 'username', label: 'שם משתמש', sortable: false },
-        { key: 'firstName', label: 'שם פרטי', sortable: true },
-        { key: 'lastName', label: 'שם משפחה', sortable: true },
+        { key: 'first_name', label: 'שם פרטי', sortable: true },
+        { key: 'last_name', label: 'שם משפחה', sortable: true },
         { key: 'major', label: 'מגמה', sortable: true },
         { key: 'delete', label: '', sortable: false },
     ];
+
     return (
         <div>
             <h3 className="text-sm">תלמידים</h3>
@@ -190,41 +189,41 @@ function GroupStudents({ group }) {
                 <TableHeader headers={headers} />
                 <tbody>
                     {studentsData
-                        .sort((a, b) => a.firstName.localeCompare(b.firstName))
+                        .sort((a, b) => a.first_name.localeCompare(b.first_name))
                         .sort((a, b) => a.isNew ? 1 : b.isNew ? -1 : 0)
                         .map((student, index) => (
-                        <tr key={student.id + index} className="border-b border-stone-200">
-                            <Cell >{index + 1}</Cell>
-                            {student.isNew ? (
+                            <tr key={student.id + index} className="border-b border-stone-200">
+                                <Cell >{index + 1}</Cell>
+                                {student.isNew ? (
+                                    <Cell>
+                                        <input type="text" defaultValue={student.username} placeholder="שם משתמש" className="border-none outline-none p-0 m-0"
+                                            onChange={(e) => updateStudentData(student.id, 'username', e.target.value)}
+                                        />
+                                    </Cell>
+                                ) : (
+                                    <Cell className="text-stone-500">{student.username}</Cell>
+                                )}
                                 <Cell>
-                                    <input type="text" defaultValue={student.username} placeholder="שם משתמש" className="border-none outline-none p-0 m-0"
-                                        onChange={(e) => updateStudentData(student.id, 'username', e.target.value)}
+                                    <input type="text" defaultValue={student.first_name} placeholder="שם פרטי" className="border-none outline-none p-0 m-0"
+                                        onChange={(e) => updateStudentData(student.id, 'first_name', e.target.value)}
                                     />
                                 </Cell>
-                            ) : (
-                                <Cell className="text-stone-500">{student.id}</Cell>
-                            )}
-                            <Cell>
-                                <input type="text" defaultValue={student.firstName} placeholder="שם פרטי" className="border-none outline-none p-0 m-0"
-                                    onChange={(e) => updateStudentData(student.id, 'firstName', e.target.value)}
-                                />
-                            </Cell>
-                            <Cell>
-                                <input type="text" defaultValue={student.lastName} placeholder="שם משפחה" className="border-none outline-none p-0 m-0"
-                                    onChange={(e) => updateStudentData(student.id, 'lastName', e.target.value)}
-                                />
-                            </Cell>
-                            <Cell>
-                                <select value={student.major} onChange={(e) => updateStudentData(student.id, 'major', e.target.value)}>
-                                    <option value="">-</option>
-                                    {majors.map(major => (
-                                        <option key={major.id} value={major.id}>{major.name}</option>
-                                    ))}
-                                </select>
-                            </Cell>
-                            <Cell><button className="p-1 bg-red-500 my-1 rounded text-white text-xs hover:bg-red-600 flex items-center gap-2" onClick={() => deleteStudent(student)}><UserRoundX className="w-4 h-4" /></button></Cell>
-                        </tr>
-                    ))}
+                                <Cell>
+                                    <input type="text" defaultValue={student.last_name} placeholder="שם משפחה" className="border-none outline-none p-0 m-0"
+                                        onChange={(e) => updateStudentData(student.id, 'last_name', e.target.value)}
+                                    />
+                                </Cell>
+                                <Cell>
+                                    <select value={student.major || student.groups?.find(groupId => majors.find(major => major.id === groupId))} onChange={(e) => updateStudentData(student.id, 'major', e.target.value)}>
+                                        <option value="">-</option>
+                                        {majors.map(major => (
+                                            <option key={major.id} value={major.id}>{major.name}</option>
+                                        ))}
+                                    </select>
+                                </Cell>
+                                <Cell><button className="p-1 bg-red-500 my-1 rounded text-white text-xs hover:bg-red-600 flex items-center gap-2" onClick={() => deleteStudent(student)}><UserRoundX className="w-4 h-4" /></button></Cell>
+                            </tr>
+                        ))}
                     <tr>
                         <Cell>
                             <button className="px-4 py-1 bg-emerald-500 my-1 rounded text-white text-xs hover:bg-emerald-600 flex items-center gap-2" onClick={addStudent}>
@@ -250,12 +249,12 @@ function GroupStudents({ group }) {
 
 
 function AdminMajors() {
+    const allMembers = useAdmin(state => state.allMembers);
     const majors = useAdmin(state => state.majors);
-    const groups = useAdmin(state => state.groups);
 
-    const handleRemoveMajor = (majorId) => adminActions.deleteMajor(majorId);
-    const editMajor = (majorId, value) => adminActions.updateMajor(majorId, { name: value });
-    const addMajor = () => adminActions.createMajor({ name: 'מגמה חדשה' });
+    const handleRemoveMajor = (majorId) => adminActions.deleteGroup(majorId);
+    const editMajor = (majorId, value) => adminActions.updateGroup(majorId, { name: value });
+    const addMajor = () => adminActions.createGroup('מגמה חדשה', 'major');
 
     return (
         <div className="flex flex-col gap-4 border border-stone-200 p-4">
@@ -268,7 +267,7 @@ function AdminMajors() {
                         <div className="flex items-center gap-2 pr-4 text-stone-400 mt-2" >
                             <Users2 className="w-4 h-4" />
                             <span className="text-xs text-stone-500">
-                                {groups.reduce((acc, group) => acc + group.students.filter(student => student.major == major.id).length, 0)}
+                                {allMembers.filter(member => member.role === 'student' && member.groups?.includes(major.id)).length}
                             </span>
                         </div>
                         <XIcon className="absolute top-1 left-1 w-4 h-4 opacity-0 group-hover:opacity-100 cursor-pointer"

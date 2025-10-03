@@ -1,5 +1,5 @@
 import Box2 from "@/components/Box2";
-import { groupsActions, useInvolvedGroups } from "@/utils/store/useGroups";
+import { groupsActions, useUserGroups } from "@/utils/store/useGroups";
 import { useEffect } from "react";
 import { TaskPill } from "./MainProject";
 import { useUser } from "@/utils/store/useUser";
@@ -7,7 +7,7 @@ import { Check } from "lucide-react";
 import 'react-quill-new/dist/quill.snow.css';
 
 export default function MainGroups() {
-    const groups = useInvolvedGroups();
+    const groups = useUserGroups();
 
     groups.forEach(group => {
         group.label = group.name;
@@ -26,7 +26,8 @@ export default function MainGroups() {
 
 function MainGroup({ group }) {
     useEffect(() => {
-        groupsActions.loadGroupTasks(group);
+        groupsActions.loadGroupTasks(group.id);
+        groupsActions.loadWeekEvents(group.id);
     }, [group])
 
     return (
@@ -52,7 +53,7 @@ function MainGroupTask({ group, task }) {
     return (
         <div className="flex items-center gap-2 group/task">
             <TaskPill tag={completed ? 'completed' : 'next'}>
-                {task.text}
+                {task.title}
             </TaskPill>
             {!completed && (
                 <div className='flex gap-2 items-center group-hover/task:opacity-100 opacity-0 transition-opacity'>

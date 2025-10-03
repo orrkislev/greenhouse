@@ -1,32 +1,30 @@
 import { useEffect, useState } from "react";
 import { adminActions, useAdmin } from "@/utils/store/useAdmin";
 import { Plus, Save, UserRoundX } from "lucide-react";
-import { Cell, Edittable, Checkbox, TableHeader } from "./Common";
+import { Cell, Checkbox, TableHeader } from "./Common";
 
 export default function AdminStaff() {
-    const staff = useAdmin(state => state.staff);
-    const majors = useAdmin(state => state.majors);
-    const [staffData, setStaffData] = useState(staff);
+    const allMembers = useAdmin(state => state.allMembers);
     const [madeChanges, setMadeChanges] = useState(false);
+    const [staffData, setStaffData] = useState(allMembers.filter(member => member.role === 'staff' || member.role === 'admin'));
 
     useEffect(() => {
         adminActions.loadData();
     }, [])
 
     useEffect(() => {
-        setStaffData(staff);
-    }, [staff])
+        setStaffData(allMembers.filter(member => member.role === 'staff' || member.role === 'admin'));
+    }, [allMembers])
 
     const addStaff = () => {
         setStaffData([...staffData, {
             id: new Date().getTime(),
             username: '',
-            firstName: '',
-            lastName: '',
-            admin: false,
-            major: '',
+            first_name: '',
+            last_name: '',
             isNew: true,
-            roles: ['staff']
+            role: 'staff',
+            is_admin: false,
         }]);
         setMadeChanges(true);
     }
@@ -40,20 +38,10 @@ export default function AdminStaff() {
         const updates = staffData.filter(staff => staff.dirty && !staff.isNew);
         const newStaff = staffData.filter(staff => staff.isNew);
         for (const staff of updates) {
-            delete staff.dirty;
-            const id = staff.id;
-            delete staff.id;
-            if (staff.admin) staff.roles.push('admin');
-            delete staff.admin;
-            await adminActions.updateMember(id, staff);
+            await adminActions.updateMember(staff.id, staff);
         }
         for (const staff of newStaff) {
-            delete staff.isNew; 
-            delete staff.dirty;
             delete staff.id;
-            if (staff.major == '') delete staff.major;
-            if (staff.admin) staff.roles.push('admin');
-            delete staff.admin;
             await adminActions.createMember(staff);
         }
         setMadeChanges(false);
@@ -61,7 +49,7 @@ export default function AdminStaff() {
 
     const deleteStaff = async (staff) => {
         if (staff.isNew) setStaffData(staffData.filter(s => s.id !== staff.id));
-        else if (confirm(`בטוח? למחוק את ${staff.firstName} ${staff.lastName}?`)) {
+        else if (confirm(`בטוח? למחוק את ${staff.first_name} ${staff.last_name}?`)) {
             await adminActions.deleteMember(staff);
         }
     }
@@ -69,10 +57,9 @@ export default function AdminStaff() {
     const headers = [
         { key: 'id', label: '', sortable: false },
         { key: 'username', label: 'שם משתמש', sortable: false },
-        { key: 'firstName', label: 'שם פרטי', sortable: true },
-        { key: 'lastName', label: 'שם משפחה', sortable: true },
+        { key: 'first_name', label: 'שם פרטי', sortable: true },
+        { key: 'last_name', label: 'שם משפחה', sortable: true },
         { key: 'admin', label: 'ניהול', sortable: false },
-        { key: 'major', label: 'מגמה', sortable: true },
         { key: 'delete', label: '', sortable: false },
     ];
 
@@ -91,27 +78,19 @@ export default function AdminStaff() {
                                     />
                                 </Cell>
                             ) : (
-                                <Cell className='text-stone-500'>{staff.id}</Cell>
+                                <Cell className='text-stone-500'>{staff.username}</Cell>
                             )}
                             <Cell>
-                                <input type="text" defaultValue={staff.firstName} placeholder="שם פרטי" className="border-none outline-none p-0 m-0"
-                                    onChange={(e) => updateStaffData(staff.id, 'firstName', e.target.value)}
+                                <input type="text" defaultValue={staff.first_name} placeholder="שם פרטי" className="border-none outline-none p-0 m-0"
+                                    onChange={(e) => updateStaffData(staff.id, 'first_name', e.target.value)}
                                 />
                             </Cell>
                             <Cell>
-                                <input type="text" defaultValue={staff.lastName} placeholder="שם משפחה" className="border-none outline-none p-0 m-0"
-                                    onChange={(e) => updateStaffData(staff.id, 'lastName', e.target.value)}
+                                <input type="text" defaultValue={staff.last_name} placeholder="שם משפחה" className="border-none outline-none p-0 m-0"
+                                    onChange={(e) => updateStaffData(staff.id, 'last_name', e.target.value)}
                                 />
                             </Cell>
-                            <Cell><Checkbox value={staff.admin || staff.roles.includes('admin')} onChange={(value) => updateStaffData(staff.id, 'admin', value)} /></Cell>
-                            <Cell>
-                                <select value={staff.major} onChange={(e) => updateStaffData(staff.id, 'major', e.target.value)}>
-                                    <option value="">-</option>
-                                    {majors.map(major => (
-                                        <option key={major.id} value={major.id}>{major.name}</option>
-                                    ))}
-                                </select>
-                            </Cell>
+                            <Cell><Checkbox value={staff.is_admin} onChange={(value) => updateStaffData(staff.id, 'is_admin', value)} /></Cell>
                             <Cell><button className="p-1 bg-red-500 my-1 rounded text-white text-xs hover:bg-red-600 flex items-center gap-2" onClick={() => deleteStaff(staff)}><UserRoundX className="w-4 h-4" /></button></Cell>
                         </tr>
                     ))}

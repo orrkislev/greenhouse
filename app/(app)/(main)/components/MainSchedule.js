@@ -1,6 +1,6 @@
 import { useTodayEvents } from "@/utils/store/useEvents";
 import { useGoogleCalendarEventsToday } from "@/utils/store/useGoogleCalendar";
-import { groupsActions, useInvolvedGroups } from "@/utils/store/useGroups";
+import { groupsActions, useUserGroups } from "@/utils/store/useGroups";
 import { useNotes } from "@/utils/store/useNotes"
 import { useTime } from "@/utils/store/useTime";
 import { useEffect } from "react";
@@ -11,26 +11,24 @@ export default function MainSchedule() {
     const week = useTime(state => state.week);
     const notes = useNotes();
     const events = useTodayEvents();
-    const groups = useInvolvedGroups();
+    const groups = useUserGroups();
     const googleCalendarEvents = useGoogleCalendarEventsToday();
 
     const groupIds = groups.map(g => g.id).join(',');
-
     useEffect(() => {
-        groupsActions.loadWeekEvents();
+        groupsActions.loadTodayEvents();
     }, [week, groupIds])
 
     if (!today) return null;
+
     const todayNote = notes[today];
-    const todayEvents = events.filter(event => event.date === today).sort((a, b) => a.start.localeCompare(b.start));
+    const todayEvents = events[today] ?? [];
     todayEvents.push(...googleCalendarEvents.filter(event => event.date === today));
 
-    const todayGroupEvents = groups.map(group => (
-        {
-            group: group.name,
-            events: group.events?.[today] ?? []
-        }))
-        .filter(group => group.events.length > 0)
+    const todayGroupEvents = groups.map(group => ({
+        group: group.name,
+        events: group.events?.[today] ?? []
+    })).filter(group => group.events.length > 0)
 
     return (
         <Box2 label="מה יש לי היום" className="flex-1">

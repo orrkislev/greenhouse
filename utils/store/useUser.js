@@ -1,23 +1,14 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import { AuthService, onGotUser } from '@/utils/firebase/auth';
-import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { prepareEmail } from '@/utils/firebase/auth';
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { db, storage } from '@/utils/firebase/firebase';
-import { resizeImageTo128 } from '@/utils/actions/storage actions';
+import { storage } from '@/utils/firebase/firebase';
+import { resizeImage } from '@/utils/actions/storage actions';
 import { resetPin } from '../actions/admin actions';
+import { supabase } from '../supabase/client';
 
 
 export const useUser = create(subscribeWithSelector((set, get) => {
-	let unsubscribeUserDoc = null;
-	const unsubscribe = () => {
-		if (unsubscribeUserDoc) {
-			unsubscribeUserDoc();
-			unsubscribeUserDoc = null;
-		}
-	}
-
-
 	return {
 		user: null,
 		loading: false,
@@ -25,51 +16,28 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 		error: null,
 
 		// ---------------------------------------------------------------
-		// ------------ Log in and out, subscribe to user ----------------
+		// ------------ Log in and out, get user data ----------------
 		// ---------------------------------------------------------------
 		logout: () => {
-			unsubscribe();
 			set({ user: null });
-			AuthService.signOut();
+			supabase.auth.signOut();
 		},
 		signIn: async (username, pinPass) => {
 			set({ error: null });
-			const { user, error } = await AuthService.signIn(username, pinPass);
-			if (user) {
-				await get().subscribeToUser(user.email.split('@')[0]);
-			} else {
-				set({ error });
-			}
+			const email = prepareEmail(username);
+			const { data, error } = await supabase.auth.signInWithPassword({ email, password: pinPass });
+			if (error) set({ error });
+			if (data) await get().getUserData(data.user.id);
 		},
-		signInWithGoogle: async () => {
-			set({ error: null });
-			const { user, error } = await AuthService.signInWithGoogle();
-			console.log(user, error);
-			if (user) {
-				await get().subscribeToUser(user.email.split('@')[0]);
-			} else {
-				set({ error });
-			}
+		getUserData: async (userId) => {
+			const { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
+			if (error) set({ error });
+			else set({ user: data });
 		},
-		subscribeToUser: async (userId) => {
-			set({ loading: true });
-			unsubscribe();
-			const userRef = doc(db, 'users', userId);
-			unsubscribeUserDoc = onSnapshot(userRef, (docSnap) => {
-				const data = docSnap.data();
-				if (docSnap.exists()) set({ user: { ...data, id: userId }, loading: false });
-			});
-		},
-
-		updateUserDoc: async (updates) => {
-			const userDocRef = doc(db, 'users', get().user.id);
-			await updateDoc(userDocRef, updates);
-			set((state) => ({
-				user: {
-					...state.user,
-					...updates,
-				},
-			}));
+		updateUserData: async (updates) => {
+			const { error } = await supabase.from('users').update(updates).eq('id', get().user.id);
+			if (error) set({ error });
+			else set((state) => ({ user: { ...state.user, ...updates } }));
 		},
 
 		// ----------------------------------------------------
@@ -77,31 +45,26 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 		// ----------------------------------------------------
 		switchToStudent: async (studentId, currUrl) => {
 			const user = get().user;
-			if (!user || !user.roles || !user.roles.includes('staff')) {
+			if (!user || !isStaff()) {
 				throw new Error("User does not have permission to switch to student.");
 			}
 
 			set({ originalUser: { user, lastPage: currUrl }, user: null });
-			const studentRef = doc(db, 'users', studentId);
-			unsubscribe();
-			unsubscribeUserDoc = onSnapshot(studentRef, (docSnapshot) => {
-				if (docSnapshot.exists()) {
-					set({ user: { ...docSnapshot.data(), id: studentId } });
-				}
-			})
+
+			const { data, error } = await supabase.from('users').select('*').eq('id', studentId).single();
+			if (error) set({ error });
+			else set({ user: data });
 		},
-		switchBackToOriginal: () => {
+		switchBackToOriginal: async () => {
 			const originalUser = get().originalUser;
 			const lastPage = originalUser.lastPage;
 			if (!originalUser) {
 				throw new Error("No original user to switch back to.");
 			}
-			unsubscribe();
-			const userRef = doc(db, 'users', originalUser.user.id);
-			unsubscribeUserDoc = onSnapshot(userRef, (docSnap) => {
-				if (docSnap.exists()) set({ user: { ...docSnap.data(), id: originalUser.user.id } });
-			});
-			set({ user: originalUser, originalUser: null });
+			const { data, error } = await supabase.from('users').select('*').eq('id', originalUser.user.id).single();
+			if (error) set({ error });
+			else set({ user: data });
+
 			return lastPage;
 		},
 
@@ -115,17 +78,7 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 			const resizedBlob = await resizeImage(image, 128);
 			await uploadBytes(storageRef, resizedBlob);
 			const url = await getDownloadURL(storageRef);
-			await get().updateUserDoc({ profilePicture: url });
-		},
-
-
-		// ----------------------------------------------------
-		// ------------ Get User Data ------------------
-		// ----------------------------------------------------
-		getUserData: async (userId) => {
-			const userRef = doc(db, 'users', userId);
-			const userDoc = await getDoc(userRef);
-			return userDoc.data();
+			await get().updateUserData({ profilePicture: url });
 		},
 
 		// ----------------------------------------------------
@@ -133,17 +86,29 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 		// ----------------------------------------------------
 		changePin: async (newPin) => {
 			const user = get().user;
-			await resetPin(user.uid, newPin);
+			await resetPin(user.id, newPin);
 		},
 	};
 }));
+
+export const isStaff = () => {
+	const user = useUser.getState().user;
+	return user && (user.role === 'staff');
+}
+export const isAdmin = () => {
+	const user = useUser.getState().user;
+	return user && user.is_admin;
+}
 
 export const userActions = Object.fromEntries(
 	Object.entries(useUser.getState()).filter(([key, value]) => typeof value === 'function')
 );
 
-onGotUser((user) => {
-	if (user && !useUser.getState().user) {
-		useUser.getState().subscribeToUser(user.email.split('@')[0]);
+async function getSession() {
+	const { data: { session }, error } = await supabase.auth.getSession()
+	if (error) return
+	if (session) {
+		useUser.getState().getUserData(session.user.id);
 	}
-});
+}
+getSession();

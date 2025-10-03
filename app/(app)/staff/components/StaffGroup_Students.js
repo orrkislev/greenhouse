@@ -1,30 +1,29 @@
 import { StudentCard } from "./StudentCard";
 import { useEffect, useState } from "react";
-import { userActions, useUser } from "@/utils/store/useUser";
+import { userActions } from "@/utils/store/useUser";
 import Avatar from "@/components/Avatar";
 import { eventsActions } from "@/utils/store/useEvents";
 import { groupsActions, groupUtils, useGroups } from "@/utils/store/useGroups";
 import { daysOfWeek, useTime } from "@/utils/store/useTime";
-import Button, { IconButton } from "@/components/Button";
-import { UserRoundX, VenetianMask, Trash2, Calendar, Pencil } from "lucide-react";
-import { staffActions } from "@/utils/store/useStaff";
+import Button from "@/components/Button";
+import { UserRoundX, VenetianMask, Calendar, Pencil } from "lucide-react";
+import { mentorshipsActions } from "@/utils/store/useMentorships";
 import WithLabel from "@/components/WithLabel";
 import usePopper from "@/components/Popper";
 import { EditMeeting } from "./StaffGroup_Meetings";
-import { meetingsActions, useMeetings } from "@/utils/store/useMeetings";
+import { meetingUtils, useMeetings } from "@/utils/store/useMeetings";
 
 export default function StaffGroup_Students({ group }) {
-    if (!group.students) return null;
+    if (!group.members) return null;
 
-    let displayStudents = group.students;
-    if (group.type === 'class' || group.type === 'major') displayStudents = displayStudents.filter(student => student.roles.includes('student'));
+    const students = group.members.filter(member => member.role === 'student');
 
-    return <Staff_Students_List students={displayStudents} context={group.type} />
+    return <Staff_Students_List students={students} context={group.type} />
 }
 
 
 export function Staff_Students_List({ students, context }) {
-    const [selectedStudent, setSelectedStudent] = useState(students.sort((a, b) => a.firstName.localeCompare(b.firstName, 'he'))[0])
+    const [selectedStudent, setSelectedStudent] = useState(students.sort((a, b) => a.first_name.localeCompare(b.first_name, 'he'))[0])
 
     return (
         <div className="">
@@ -34,7 +33,7 @@ export function Staff_Students_List({ students, context }) {
 
             <div className="flex flex-wrap gap-2">
                 {students
-                    .sort((a, b) => a.firstName.localeCompare(b.firstName, 'he'))
+                    .sort((a, b) => a.first_name.localeCompare(b.first_name, 'he'))
                     .map((student) => (
                         <StudentCard key={student.id}
                             student={student}
@@ -74,7 +73,7 @@ function SelectedStudentCard({ student, context }) {
             <div className="flex items-center gap-2">
                 <Avatar user={data} className="w-16 h-16" />
                 <div>
-                    <div className="font-bold">{data.firstName} {data.lastName}</div>
+                    <div className="font-bold">{data.first_name} {data.last_name}</div>
                     <div className="text-xs text-stone-500">
                         {context === 'class' ? groups.find(g => g.id === data.major)?.name : groups.find(g => g.id === data.class)?.name}
                     </div>
@@ -104,12 +103,12 @@ function SelectedStudentCard({ student, context }) {
 
             <div className="flex gap-2">
                 <Button data-role="edit" onClick={() => goToStudent(data)}>
-                    להיות {data.firstName}
+                    להיות {data.first_name}
                     <VenetianMask className="w-4 h-4" />
                 </Button>
 
                 {context === 'master' && (
-                    <Button data-role="delete" onClick={() => staffActions.removeStudentFromMentoring(data)}>
+                    <Button data-role="delete" onClick={() => mentorshipsActions.deleteMentorship(data)}>
                         הסר
                         <UserRoundX className="w-4 h-4" />
                     </Button>
@@ -124,12 +123,12 @@ function SelectedStudentCard_Meeting({ student }) {
     const { open, close, Popper, baseRef } = usePopper();
     const meetings = useMeetings(state => state.meetings);
 
-    const meeting = meetings.find(meeting => meeting.student === student.id);
+    const meeting = meetings.find(meeting => meetingUtils.hasUser(meeting, student));
 
     return (
         <WithLabel label="פגישה קבועה" icon={Calendar}>
             <Button onClick={open} ref={baseRef}>
-                {meeting && <div className="text-xs">ימי {daysOfWeek[meeting.day - 1]} בשעה {meeting.start}</div>}
+                {meeting && <div className="text-xs">ימי {daysOfWeek[meeting.day_of_the_week - 1]} בשעה {meeting.start.split(':')[0]}:{meeting.start.split(':')[1]}</div>}
                 {!meeting && <div className="text-xs text-stone-500">אין פגישה קבועה</div>}
                 <Pencil className="w-4 h-4" />
             </Button>

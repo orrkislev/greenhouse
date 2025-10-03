@@ -3,8 +3,8 @@ import { Event } from "./Event";
 import { HOURS, useTime } from "@/utils/store/useTime";
 import { tw } from "@/utils/tw";
 import { ScheduleSection } from "../Layout";
-import useWeeksEvents, { getEventDuration, getTimeWithOffset, prepareEventsForSchedule } from "./useWeeksEvents";
-import { eventsActions } from "@/utils/store/useEvents";
+import { getEventDuration, getTimeWithOffset, prepareEventsForSchedule } from "./useWeeksEvents";
+import { eventsActions, useWeekEvents } from "@/utils/store/useEvents";
 
 const EmptySlot = tw`min-h-8 z-1
     flex items-center justify-center text-xs
@@ -27,30 +27,36 @@ const newEventTitles = [
 ];
 export default function Events() {
     const week = useTime(state => state.week);
-    const allEvents = useWeeksEvents(week, true);
+    const allEvents = useWeekEvents();
 
     const [draggingId, setDraggingId] = useState(null);
     const [resizingId, setResizingId] = useState(null);
 
-    if (!week || week.length === 0) return null;
 
-    const displayEvents = prepareEventsForSchedule(allEvents, week, true);
+    if (!week || week.length === 0) return null;
+    if (!allEvents) return null;
+
+
+    const eventsArray = Object.values(allEvents).flat();
+    const displayEvents = prepareEventsForSchedule(eventsArray, week, true);
     const positions = Array(6).fill(0).map((_, col) => Array(5).fill(0).map((_, row) => (
         { row: row + 1, col: col + 1 }))).flat();
 
     const onMove = pos => {
         if (draggingId === null) return;
-        const currEvent = allEvents.find(e => e.id === draggingId);
+        const currEvent = eventsArray.find(e => e.id === draggingId);
         const currDuration = getEventDuration(currEvent);
         eventsActions.updateEvent(draggingId, {
             date: week[pos.col - 1],
             start: HOURS[pos.row - 1],
-            end: getTimeWithOffset(HOURS[pos.row - 1], currDuration),
+            end: getTimeWithOffset(HOURS[pos.row - 1], currDuration * 60),
         })
     }
 
     const onResize = (pos, event) => {
-        const newDuration = pos.row - HOURS.indexOf(event.start);
+        const [h, m] = event.start.split(':').map(Number);
+        const index = HOURS.indexOf(`${h}:${m}`);
+        const newDuration = pos.row - index;
         if (newDuration > 0) {
             eventsActions.updateEvent(resizingId, {
                 end: getTimeWithOffset(event.start, newDuration * 60),
@@ -80,7 +86,7 @@ export default function Events() {
 
             {positions.map((pos, index) => (
                 <TimeSlot key={index} className={`col-${pos.col} row-${pos.row}`}>
-                    {HOURS[pos.row - 1]}
+                    {HOURS[pos.row - 1] === '13:30' ? 'ערב' : HOURS[pos.row - 1]}
                 </TimeSlot>
             ))}
 
@@ -88,9 +94,7 @@ export default function Events() {
 
             {draggingId !== null &&
                 positions.map((pos, index) => (
-                    <Droppable key={index} row={pos.row} col={pos.col}
-                        onPlace={() => onMove(pos)}
-                    />
+                    <Droppable key={index} row={pos.row} col={pos.col} onPlace={() => onMove(pos)} />
                 ))
             }
 
@@ -102,9 +106,7 @@ export default function Events() {
                 return positions
                     .filter(pos => pos.col === eventCol)
                     .map((pos, index) => (
-                        <Droppable key={index} row={pos.row} col={pos.col}
-                            onPlace={() => onResize(pos, event)}
-                        />
+                        <Droppable key={index} row={pos.row} col={pos.col} onPlace={() => onResize(pos, event)} />
                     ));
             })()}
 
@@ -113,7 +115,9 @@ export default function Events() {
                 <Event key={index}
                     edittable={event.edittable}
                     event={event}
-                    onStartDrag={() => setDraggingId(event.id)}
+                    onStartDrag={() => {
+                        if (draggingId === null) setDraggingId(event.id)
+                    }}
                     onEndDrag={() => setDraggingId(null)}
                     onStartResize={() => setResizingId(event.id)}
                     onEndResize={() => setResizingId(null)}

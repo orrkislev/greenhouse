@@ -16,9 +16,7 @@ export default function ResearchPage() {
 
   useEffect(() => {
     const id = searchParams.get('id')
-    if (id) {
-      researchActions.loadResearchById(id)
-    }
+    if (id) researchActions.setResearchById(id)
   }, [searchParams])
 
   return (
@@ -55,6 +53,7 @@ function ResearchList() {
   }
 
   const selectedResearchId = research?.id
+
   return (
     <div>
       {allResearch.map(research => (

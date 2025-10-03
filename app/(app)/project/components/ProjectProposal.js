@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import QuestionCard from "./QuestionCard";
 import { projectActions, useProject } from "@/utils/store/useProject";
-import { useUser } from "@/utils/store/useUser";
+import { isStaff, useUser } from "@/utils/store/useUser";
 import { adminActions } from "@/utils/store/useAdmin";
 import { projectTasksActions } from "@/utils/store/useProjectTasks";
 import Box2 from "@/components/Box2";
@@ -31,25 +31,26 @@ export default function ProjectProposal() {
     const project = useProject();
     const [questions, setQuestions] = useState(QUESTIONS);
 
+
     useEffect(() => {
-        if (project && project.questions) {
-            setQuestions(project.questions)
+        if (project && project.metadata.questions) {
+            setQuestions(project.metadata.questions)
         }
     }, [project]);
 
     const filledThreeQuestions = useMemo(() => questions.slice(0, 3).every(q => q.value && q.value.trim() !== ''), [questions]);
 
-    useEffect(()=>{
+    useEffect(() => {
         if (filledThreeQuestions) {
             projectTasksActions.completeTaskByLabel('הצהרת כוונות');
         }
-    },[filledThreeQuestions])
-    
+    }, [filledThreeQuestions])
+
     const saveQuestionValue = (index, value) => {
         const newQuestions = [...questions];
         newQuestions[index].value = value;
         setQuestions(newQuestions);
-        projectActions.updateProject({ questions: newQuestions });
+        projectActions.updateMetadata({ questions: newQuestions });
     };
 
     return (
@@ -59,9 +60,9 @@ export default function ProjectProposal() {
                     <div className="font-semibold text-lg mb-2">שם הפרויקט</div>
                     <input
                         type="text"
-                        defaultValue={project.name || ''}
-                        onBlur={(e) => projectActions.updateProject({ name: e.target.value })}
-                        placeholder={`הפרויקט המגניב של ${user.firstName || ''}`}
+                        defaultValue={project.title || ''}
+                        onBlur={(e) => projectActions.updateProject({ title: e.target.value })}
+                        placeholder={project.title}
                         dir="rtl"
                         className="border border-stone-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
@@ -85,18 +86,10 @@ export default function ProjectProposal() {
                         'יש להשלים לפחות שלוש שאלות כדי להמשיך לפרויקט'
                     }
                 </div>
-                {filledThreeQuestions && user.roles && user.roles.includes('staff') && (
+                {filledThreeQuestions && isStaff() && (
                     <div className="flex justify-center mt-4">
                         <Button data-role="edit"
-                            onClick={() => {
-                                adminActions.assignMasterToProject(user.id, project.id, user)
-                                const masterData = {
-                                    id: user.id,
-                                    firstName: user.firstName,
-                                    lastName: user.lastName,
-                                }
-                                projectActions.updateProject({ master: masterData })
-                            }}
+                            onClick={() => adminActions.assignMasterToProject(user.id, project.id, user.id)}
                         >
                             I AM MY OWN MASTER <Cat className="w-4 h-4" />
                         </Button>

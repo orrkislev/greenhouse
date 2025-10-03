@@ -1,4 +1,4 @@
-import { useUser } from "@/utils/store/useUser"
+import { isAdmin, useUser } from "@/utils/store/useUser"
 import AuthGoogleCalendar from "./Google/AuthGoogleCalendar";
 import { ganttActions, useGantt } from "@/utils/store/useGantt";
 import { useEffect, useState } from "react";
@@ -23,15 +23,13 @@ function StudyGroupsMessage() {
     const [editMode, setEditMode] = useState(false);
     const [data, setData] = useState([]);
 
+    useEffect(()=>{
+        ganttActions.loadStudyGroups();
+    },[]);
+
     useEffect(() => {
         if (studyGroups) setData(studyGroups);
     }, [studyGroups]);
-
-    useEffect(() => {
-        ganttActions.loadSchoolMessage();
-    }, []);
-
-    const canEdit = user?.roles?.includes('admin');
 
     const days = Object.fromEntries([[0, []], [1, []], [2, []], [3, []], [4, []]]);
     data.forEach((group, index) => {
@@ -57,7 +55,7 @@ function StudyGroupsMessage() {
         <div className="flex flex-col gap-2">
             <div className="flex justify-between items-center">
                 <h3 className="font-semibold">קבוצות למידה</h3>
-                {canEdit && (
+                {isAdmin() && (
                     <button className="text-sm text-gray-500 text-xs flex items-center gap-1 rounded-full p-1 cursor-pointer hover:bg-gray-200" onClick={clickEditSave}>
                         {editMode ? <Save className="w-6 h-6 text-green-800" /> : <Pencil className="w-4 h-4" />}
                     </button>

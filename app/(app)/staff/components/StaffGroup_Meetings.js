@@ -1,9 +1,9 @@
 
 import { ScheduleSection } from "@/app/(app)/schedule/components/Layout";
-import Button, { IconButton } from "@/components/Button";
+import Button from "@/components/Button";
 import TimeRange from "@/components/TimeRange";
-import { meetingsActions, useMeetings } from "@/utils/store/useMeetings";
-import { CalendarCheck, Trash2, X } from "lucide-react";
+import { meetingsActions, meetingUtils, useMeetings } from "@/utils/store/useMeetings";
+import { CalendarCheck, Trash2 } from "lucide-react";
 import { useState } from "react";
 import usePopper from "@/components/Popper";
 
@@ -12,17 +12,19 @@ const daysOfWeek = ['א', 'ב', 'ג', 'ד', 'ה'];
 export default function StaffGroup_Meetings({ group }) {
     const meetings = useMeetings();
 
+    if (!group.members) return null;
+    const students = group.members.filter(member => member.role === 'student');
+
     const studentsWithMeetings = []
     const studentsWithoutMeetings = []
-    if (!group.students) return null;
-    group.students.map(student => {
-        const meeting = meetings.find(m => m.student === student.id);
+    students.forEach(student => {
+        const meeting = meetings.find(m => meetingUtils.hasUser(m, student));
         if (meeting) studentsWithMeetings.push({ ...student, meeting: meeting });
         else studentsWithoutMeetings.push(student);
     });
 
     studentsWithMeetings.sort((a, b) => a.meeting.start - b.meeting.start);
-    studentsWithoutMeetings.sort((a, b) => a.firstName.localeCompare(b.firstName));
+    studentsWithoutMeetings.sort((a, b) => a.first_name.localeCompare(b.first_name));
 
     return (
         <div className={`p-4 border-t`}>
@@ -47,7 +49,7 @@ export default function StaffGroup_Meetings({ group }) {
 
                 {daysOfWeek.map((day, index) => (
                     <div key={day} className="bg-stone-100 flex flex-col gap-2">
-                        {studentsWithMeetings.filter(s => s.meeting?.day === index + 1).map(student => (
+                        {studentsWithMeetings.filter(s => s.meeting?.day_of_the_week === index + 1).map(student => (
                             <StudentMeetingSlot key={student.id} student={student} meeting={student.meeting} />
                         ))}
                     </div>
@@ -56,6 +58,8 @@ export default function StaffGroup_Meetings({ group }) {
         </div>
     );
 }
+
+const displayTime = time => time.split(':')[0] + ':' + time.split(':')[1]
 
 function StudentMeetingSlot({ student, meeting }) {
     const { open, close, Popper, baseRef } = usePopper();
@@ -66,10 +70,10 @@ function StudentMeetingSlot({ student, meeting }) {
                 onClick={open}
                 ref={baseRef}
             >
-                <span className="">{student.firstName} {student.lastName}</span>
+                <span className="">{student.first_name} {student.last_name}</span>
                 {meeting && (
                     <span className="text-stone-600">
-                        {daysOfWeek[meeting.day]} {meeting.start} - {meeting.end}
+                        {displayTime(meeting.start)} - {displayTime(meeting.end)}
                     </span>
                 )}
             </div>
@@ -91,16 +95,16 @@ export function EditMeeting({ student, meeting, onClose }) {
 
     const onSave = () => {
         if (meeting) {
-            meetingsActions.updateMeeting(meeting.id, { start: time.start, end: time.end, day: day });
+            meetingsActions.updateMeeting(meeting.id, { start: time.start, end: time.end, day_of_the_week: day });
         } else {
-            meetingsActions.createMeeting(student, day, time.start, time.end);
+            meetingsActions.createMeeting(student.id, day, time.start, time.end);
         }
         onClose();
     }
 
     return (
         <div className="flex flex-col gap-2">
-            <h4 className="font-bold">שיחה עם {student.firstName}</h4>
+            <h4 className="font-bold">שיחה עם {student.first_name}</h4>
             {!meeting && (
                 <>
                     <p className="text-sm text-stone-600">אין שיחה מתוכננת כרגע.</p>

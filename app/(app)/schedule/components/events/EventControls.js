@@ -5,7 +5,7 @@ export function EventControls({ event, onSelect, visible }) {
 
     const handleDelete = async (e) => {
         e.stopPropagation();
-        eventsActions.deleteEvent(event.id);
+        eventsActions.deleteEvent(event);
     };
 
     if (!visible) return null;

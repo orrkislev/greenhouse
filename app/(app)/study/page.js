@@ -1,19 +1,15 @@
 'use client'
 
 import { DashboardLayout, DashboardPanel, DashboardPanelButton, DashboardMain, DashboardTitle } from "@/components/DashboardLayout"
-import { studyActions, useStudy, useStudyPaths } from "@/utils/store/useStudy"
+import { studyActions, useStudyPaths } from "@/utils/store/useStudy"
 import StudyMain from "./components/StudyMain"
 import StudyPath from "./components/StudyPath"
 import { tw } from "@/utils/tw"
 import ContextBar, { PageMain } from "@/components/ContextBar"
-import { examplePaths, newPathData } from "./components/example study paths"
+import { newPathData } from "./components/example study paths"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import StudyContext from "./components/StudyContext"
-
-const PathButtonSpan = tw.span`
-    ${({ $active }) => $active ? '' : 'line-through'}
-`
 
 export default function LearnPage() {
     const searchParams = useSearchParams()
@@ -22,11 +18,6 @@ export default function LearnPage() {
     const id = searchParams.get('id')
     const selectedPath = paths.find(path => path.id === id)
 
-    const newPath = () => {
-        // const selectedPath = examplePaths[Math.floor(Math.random() * examplePaths.length)]
-        studyActions.addPath(newPathData())
-    }
-
     return (
         <>
         <PageMain>
@@ -34,17 +25,17 @@ export default function LearnPage() {
                 <DashboardTitle>מסלולי למידה שלי</DashboardTitle>
                 {selectedPath && (
                     <DashboardPanel>
-                    <Link href='/learn'>
+                    <Link href='/study'>
                         <DashboardPanelButton $active={!id}>ראשי</DashboardPanelButton>
                     </Link>
                     {paths.map(path => (
-                        <Link href={`/learn?id=${path.id}`} key={path.id}>
+                        <Link href={`/study?id=${path.id}`} key={path.id}>
                             <DashboardPanelButton $active={id === path.id}>
-                                <PathButtonSpan $active={path.active}>{path.name}</PathButtonSpan>
+                                {path.title}
                             </DashboardPanelButton>
                         </Link>
                     ))}
-                    <DashboardPanelButton onClick={newPath} className="bg-emerald-500 text-white">
+                    <DashboardPanelButton onClick={studyActions.addPath} className="bg-emerald-500 text-white">
                         +
                         </DashboardPanelButton>
                     </DashboardPanel>

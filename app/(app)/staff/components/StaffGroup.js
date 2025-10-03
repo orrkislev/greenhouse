@@ -17,7 +17,7 @@ import MessageEditor from "./MessageEditor";
 
 export default function StaffGroup({ group }) {
     useEffect(() => {
-        groupsActions.loadClassStudents(group);
+        groupsActions.loadClassMembers(group);
     }, [group])
 
     return (
@@ -39,7 +39,7 @@ export default function StaffGroup({ group }) {
 function GroupTasks({ group }) {
 
     useEffect(() => {
-        groupsActions.loadGroupTasks(group);
+        groupsActions.loadGroupTasks(group.id);
     }, [group])
 
     return (
@@ -54,16 +54,21 @@ function GroupTasks({ group }) {
 
 function GroupTask({ group, task }) {
 
-    const studentsFinished = group.students ? group.students.filter(student => task.completedBy && task.completedBy.includes(student.id)) : [];
+    useEffect(()=>{
+        groupsActions.loadAllTaskAssignments(task.id);
+    },[])
+
+    const students = group.members ? group.members.filter(member => member.role === 'student') : [];
+
 
     return (
         <div className="flex group gap-16 items-start">
             <div className="flex flex-col gap-1">
                 <div className="flex gap-1 items-center">
-                    <AvatarGroup users={studentsFinished} />
-                    <div className="">{task.text}</div>
+                    {/* <AvatarGroup users={studentsFinished} /> */}
+                    <div className="">{task.title}</div>
                 </div>
-                <div className="flex gap-1 text-xs text-stone-500 items-center"> <Check className="w-3 h-3" />  {group.students && group.students.length} / {studentsFinished.length}</div>
+                <div className="flex gap-1 text-xs text-stone-500 items-center"> <Check className="w-3 h-3" />  {students.length} / {task.assignments && task.assignments.length}</div>
             </div>
             <div className="opacity-0 group-hover:opacity-100 flex gap-1 p-1">
                 <button onClick={() => groupsActions.updateGroupTask(group, task, { active: false })} className="p-1 rounded-full hover:bg-stone-100 cursor-pointer">
@@ -93,11 +98,7 @@ function NewTask({ group }) {
     }
 
     const onCreate = (text) => {
-        groupsActions.createGroupTask(group, {
-            text,
-            active: true,
-            createdBy: user.id,
-        });
+        groupsActions.createGroupTask(group, text);
         setIsEditing(false);
     }
 

@@ -26,7 +26,6 @@ export default function Research() {
         researchActions.createGoogleDoc();
     }
 
-
     return (
         <div className="flex-1 flex flex-col gap-3">
             <div className="flex justify-between gap-4">

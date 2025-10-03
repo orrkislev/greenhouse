@@ -1,7 +1,6 @@
 'use client'
 
-import { groupsActions, useGroups } from "@/utils/store/useGroups";
-import { staffActions, useStaff } from "@/utils/store/useStaff";
+import { mentorshipsActions, useMentorships } from "@/utils/store/useMentorships";
 import { Plus } from "lucide-react";
 import { useEffect } from "react";
 import { Staff_Students_List } from "./StaffGroup_Students";
@@ -9,25 +8,23 @@ import Button from "@/components/Button";
 import WithLabel from "@/components/WithLabel";
 
 export default function StaffStudents() {
-    const students = useStaff(state => state.students);
-    const allStudents = useStaff(state => state.allStudents);
-    const groups = useGroups(state => state.groups);
+    const mentorships = useMentorships(state => state.mentorships);
+    const allStudents = useMentorships(state => state.allStudents);
 
     useEffect(() => {
-        staffActions.getMentoringStudents();
+        mentorshipsActions.getMentorships();
     }, []);
 
     const loadAllStudents = async () => {
-        await staffActions.getAllStudents();
-        await groupsActions.loadAllGroups();
+        await mentorshipsActions.getAllStudents();
     }
 
-    const availableStudents = allStudents.filter(student => !students.some(s => s.id === student.id));
+    const availableStudents = allStudents.filter(student => !mentorships.some(s => s.student_id === student.id));
 
     return (
         <div className="flex flex-col gap-4">
-            {students.length ? (
-                <Staff_Students_List students={students} context={'master'} />
+            {mentorships.length ? (
+                <Staff_Students_List students={mentorships.map(m => m.student)} context={'master'} />
             ) : (
                 <div className="text-center text-stone-500 py-12">
                     אין לך חניכים בליווי אישי...
@@ -42,20 +39,15 @@ export default function StaffStudents() {
                     </Button>
                 ) : (
                     <div className="flex gap-4 flex-wrap">
-                        {groups.filter(g => g.type === 'class').map(group => {
-                            const studentsInGroup = availableStudents.filter(student => student.class === group.id);
-                            if (studentsInGroup.length > 0) return (
-                                <WithLabel key={group.id} label={group.name}>
-                                    <div className="flex gap-2 flex-wrap">
-                                        {studentsInGroup.sort((a, b) => a.firstName.localeCompare(b.firstName)).map(student => (
-                                            <Button key={student.id} data-role="save" onClick={() => staffActions.addStudentToMentoring(student)} >
-                                                {student.firstName} {student.lastName}
-                                            </Button>
-                                        ))}
-                                    </div>
-                                </WithLabel>
-                            )
-                        })}
+                        <WithLabel label="כל החניכים">
+                            <div className="flex gap-2 flex-wrap">
+                                {availableStudents.sort((a, b) => a.first_name.localeCompare(b.first_name)).map(student => (
+                                    <Button key={student.id} data-role="save" onClick={() => mentorshipsActions.createMentorship(student, 'הנחייה חדשה')} >
+                                        {student.first_name} {student.last_name}
+                                    </Button>
+                                ))}
+                            </div>
+                        </WithLabel>
                     </div>
                 )}
             </div>

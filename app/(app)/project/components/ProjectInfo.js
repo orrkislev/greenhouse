@@ -1,39 +1,43 @@
-import { useProjectData  } from "@/utils/store/useProject";
+import { projectActions, useProjectData } from "@/utils/store/useProject";
 import Avatar from "@/components/Avatar";
 import { daysOfWeek, useTime } from "@/utils/store/useTime";
 import { useMeetings } from "@/utils/store/useMeetings";
 import { CalendarFold } from "lucide-react";
+import { useEffect } from "react";
 
 export default function ProjectInfo() {
     const project = useProjectData((state) => state.project);
-    const terms = useTime((state) => state.terms);
     const meetings = useMeetings()
 
-    const termName = (term) => terms.find(t => t.id === term)?.name;
+    useEffect(() => {
+        projectActions.loadProjectTerms();
+        projectActions.loadProjectMasters();
+    }, []);
+
     const meeting = meetings.find(m => m.staff === project.master.id);
 
     return (
         <div className="flex gap-3">
             <div className="flex-1">
-                <div>
-                    {project.terms.length == 1 ? (
-                        <h3 className="text-center text-stone-700 font-medium">פרויקט בתקופת {termName(project.terms[0])}</h3>
-                    ) : (
-                        <h3 className="text-center text-stone-700 font-medium">פרויקט בתקופות {project.terms.map(term => termName(term)).join(', ')}</h3>
-                    )}
-                </div>
+                {project.terms && (
+                    <div>
+                        {project.terms.length == 1 ? (
+                            <h3 className="text-center text-stone-700 font-medium">פרויקט בתקופת {project.terms[0].name}</h3>
+                        ) : (
+                            <h3 className="text-center text-stone-700 font-medium">פרויקט בתקופות {project.terms.map(term => term.name).join(', ')}</h3>
+                        )}
+                    </div>
+                )}
             </div>
 
-            <div className="flex-1">
-
-            </div>
+            <div className="flex-1"></div>
 
             <div className="flex-1">
-                {project.master ? (
+                {project.masters ? (
                     <div className="flex items-center justify-center flex-col" >
                         <div className="flex items-center gap-2">
-                            <Avatar userId={project.master.id} />
-                            <h3 className="text-center text-stone-700 font-medium">המאסטר שלי - {project.master.firstName} {project.master.lastName}</h3>
+                            <Avatar userId={project.master[0].id} />
+                            <h3 className="text-center text-stone-700 font-medium">המאסטר שלי - {project.master[0].first_name} {project.master[0].last_name}</h3>
                         </div>
                         <div className="flex gap-2">
                             <CalendarFold className="w-4 h-4" />

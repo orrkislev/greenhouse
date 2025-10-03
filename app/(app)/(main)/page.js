@@ -2,16 +2,16 @@
 
 import MainGreetings from "./components/MainGreetings"
 import MainMessages from "./components/MainMessages"
-import MainNews from "./components/MainNews"
 import MainProject from "./components/MainProject"
 import MainSchedule from "./components/MainSchedule"
 import MainGroups from "./components/MainGroups"
-import MainLearn from "./components/MainLearn"
 import ContextBar, { PageMain } from "@/components/ContextBar"
 import MainContext from "./components/MainContext"
 import { AuthGoogleListener } from "../schedule/components/Google/AuthGoogleCalendar"
+import MainStudy from "./components/MainStudy"
 
 export default function MainPage() {
+
     return (
         <>
             <PageMain>
@@ -23,7 +23,7 @@ export default function MainPage() {
                     <div className="flex gap-3">
                         <MainProject />
                         <MainSchedule />
-                        <MainLearn />
+                        <MainStudy />
                     </div>
                 </div>
             </PageMain>

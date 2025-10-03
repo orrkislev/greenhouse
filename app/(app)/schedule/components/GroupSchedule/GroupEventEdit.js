@@ -35,7 +35,7 @@ export function GroupEventEdit({ onClose, groupId, date, event }) {
     return (
         <div className="flex flex-col gap-1">
             <WithLabel label="כותרת">
-                <SmartTextArea value={title} onChange={(e) => setTitle(e.target.value)} />
+                <SmartTextArea value={title} onChange={(e) => setTitle(e.target.value)} placeholder="אירוע בקבוצה" />
             </WithLabel>
             <WithLabel label="זמן">
                 <TimeRange

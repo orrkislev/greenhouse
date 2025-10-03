@@ -8,7 +8,8 @@ export const getUsernameFromEmail = (email) => {
   return email.split('@')[0]
 }
 export const preparePassword = (pinPass) => {
-  return pinPass.toString().padStart(6, '0')
+  return pinPass
+  // return pinPass.toString().padStart(6, '0')
 }
 
 export const onGotUser = (callback) => {

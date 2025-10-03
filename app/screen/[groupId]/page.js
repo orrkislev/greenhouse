@@ -10,7 +10,7 @@ export default function ScreenPage({ params }) {
 
     useEffect(()=>{
         if (!group) return;
-        groupsActions.loadClassStudents(group);
+        groupsActions.loadClassMembers(group);
     }, [group]);
 
     if (!group) {
@@ -21,7 +21,7 @@ export default function ScreenPage({ params }) {
         <div className="flex h-screen w-screen items-center justify-center">
             <h1 className="text-4xl font-bold">{group.name}</h1>
             {group.students && group.students.map(student => (
-                <div key={student.id}>{student.firstName} {student.lastName}</div>
+                <div key={student.id}>{student.first_name} {student.last_name}</div>
             ))}
         </div>
     )

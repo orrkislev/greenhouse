@@ -4,7 +4,7 @@ import { HOURS } from "@/utils/store/useTime";
 
 export default function useWeeksEvents(week) {
     const events = useWeekEvents();
-    
+
     // const groups = useInvolvedGroups();
 
     if (!week || week.length === 0) return [];
@@ -33,8 +33,8 @@ export function prepareEventsForSchedule(events, week, edittable = false) {
         const dayIndex = week.findIndex(date => date === event.date);
         if (dayIndex === -1) return;
 
-        const startIndex = getHourIndex(event.start);
-        const endIndex = getHourIndex(event.end, true);
+        const startIndex = event.startIndex;
+        const endIndex = event.endIndex;
         // Find an existing block that fits either by startIndex or endIndex
         const existingBlock = blocks.find(block =>
             block.dayIndex === dayIndex &&
@@ -65,16 +65,18 @@ export function prepareEventsForSchedule(events, week, edittable = false) {
     });
 
     blocks.forEach(block => {
-        block.events.forEach((event, eventIndex) => {
-            event.gridStyle = {
-                gridRowStart: event.startIndex + 1,
-                gridRowEnd: event.endIndex + 1,
-                gridColumn: event.dayIndex + 1,
-                width: `calc(100% / ${block.events.length})`,
-                transform: `translateX(-${eventIndex * 100}%)`,
-            };
-            event.eventIndex = eventIndex;
-        });
+        block.events
+            .sort((a, b) => a.created_at - b.created_at)
+            .forEach((event, eventIndex) => {
+                event.gridStyle = {
+                    gridRowStart: event.startIndex + 1,
+                    gridRowEnd: event.endIndex + 1,
+                    gridColumn: event.dayIndex + 1,
+                    width: `calc(100% / ${block.events.length} - 1px)`,
+                    transform: `translateX(calc(-${eventIndex * 100}% - 2px * ${eventIndex}))`,
+                    margin: '0 -1px',
+                };
+            });
     });
 
     return events;
@@ -86,11 +88,8 @@ export function prepareEventsForSchedule(events, week, edittable = false) {
 
 
 
-let hoursMinutes = [...HOURS]
-hoursMinutes.pop();
-hoursMinutes.push('13:30');
-hoursMinutes = hoursMinutes.map(toMinutes)
 
+const hoursMinutes = HOURS.map(toMinutes)
 function toMinutes(t) {
     const [h, m] = t.split(':').map(Number);
     return h * 60 + m;
@@ -98,12 +97,9 @@ function toMinutes(t) {
 
 function getHourIndex(time, isEnd = false) {
     const timeMinutes = toMinutes(time);
-    const exactIndex = hoursMinutes.findIndex(hm => hm === timeMinutes);
-    if (isEnd && exactIndex !== -1) return exactIndex;
-
     let index = hoursMinutes.findIndex(hm => hm >= timeMinutes);
     if (index === -1) index = HOURS.length - 1;
-
+    // if (isEnd) index--;
     return index;
 }
 

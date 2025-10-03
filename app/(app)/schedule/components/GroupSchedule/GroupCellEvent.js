@@ -11,11 +11,14 @@ const GroupObjectText = tw`h-full
 export function GroupCellEvent({ groupId, date, event, edittable }) {
     const { open, close, Popper, baseRef } = usePopper();
 
+    const [startH, startM] = event.start.split(':').map(Number);
+    const [endH, endM] = event.end.split(':').map(Number);
+
     return (
         <>
             <GroupObjectCellDiv ref={baseRef} onClick={() => edittable && open()}>
                 <GroupObjectText>
-                    <div>{event.start} - {event.end}</div>
+                    <div>{startH}:{startM} - {endH}:{endM}</div>
                     <div>{event.title}</div>
                 </GroupObjectText>
             </GroupObjectCellDiv>

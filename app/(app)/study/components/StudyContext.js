@@ -1,4 +1,4 @@
-import { useUser } from "@/utils/store/useUser"
+import { isAdmin, useUser } from "@/utils/store/useUser"
 import { useEffect, useState } from "react";
 import { ExternalLink, Pencil, Plus, Save, Trash2 } from "lucide-react";
 import { studyActions, useStudySideContext } from "@/utils/store/useStudy";
@@ -13,8 +13,6 @@ export default function StudyContext() {
     useEffect(()=>{
         setData(sideContext)
     }, [sideContext])
-
-    const canEdit = user.roles.includes('admin');
 
     const newLink = () => setData(prev => [...prev, { url: '', name: '', text: '' }])
     const removeLink = (index) => setData(prev => prev.filter((_, i) => i !== index))
@@ -33,7 +31,7 @@ export default function StudyContext() {
         <div className="flex flex-col gap-2">
             <div className="flex justify-between items-center">
                 <h3 className="font-semibold">קישורים </h3>
-                {canEdit && (
+                {isAdmin() && (
                     <button className="text-sm text-gray-500 text-xs flex items-center gap-1 rounded-full p-1 cursor-pointer hover:bg-gray-200" onClick={clickEditSave}>
                         {editMode ? <Save className="w-6 h-6 text-green-800" /> : <Pencil className="w-4 h-4" />}
                     </button>

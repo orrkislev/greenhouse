@@ -17,8 +17,8 @@ export default function Avatar({ user, userId, className, ...props }) {
     if (userData) {
         if (userData.profilePicture) {
             avatarContent = <div style={{ backgroundImage: `url(${userData.profilePicture})` }} className="w-full h-full bg-cover bg-center rounded-full" />
-        } else if (userData.firstName && userData.lastName) {
-            avatarContent = <div className="text-sm text-stone-500">{userData.firstName.charAt(0)}.{userData.lastName.charAt(0)}</div>
+        } else if (userData.first_name && userData.last_name) {
+            avatarContent = <div className="text-sm text-stone-500">{userData.first_name.charAt(0)}.{userData.last_name.charAt(0)}</div>
         }
     }
 
@@ -38,8 +38,8 @@ export function AvatarEdit() {
     let avatarContent = null;
     if (user.profilePicture) {
         avatarContent = <div style={{ backgroundImage: `url(${user.profilePicture})` }} className="absolute top-2 left-2 right-2 bottom-2 bg-cover bg-center rounded-full" />
-    } else if (user.firstName && user.lastName) {
-        avatarContent = <div className="text-2xl text-stone-500">{user.firstName.charAt(0)}.{user.lastName.charAt(0)}</div>
+    } else if (user.first_name && user.last_name) {
+        avatarContent = <div className="text-2xl text-stone-500">{user.first_name.charAt(0)}.{user.last_name.charAt(0)}</div>
     }
 
     if (image) {

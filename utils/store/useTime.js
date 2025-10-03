@@ -1,11 +1,9 @@
-import { addDays, format, isBefore, startOfWeek } from "date-fns";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { addDays, format, isBefore, isSameDay, startOfWeek } from "date-fns";
 import { create } from "zustand";
-import { db } from "@/utils//firebase/firebase";
+import { supabase } from "../supabase/client";
 import { subscribeWithSelector } from "zustand/middleware";
-import { isEqual } from "lodash";
 
-export const HOURS = ['9:30', '10:30', '11:30', '12:30', 'ערב'];
+export const HOURS = ['9:30', '10:30', '11:30', '12:30', '13:30'];
 export const daysOfWeek = ['א', 'ב', 'ג', 'ד', 'ה'];
 
 
@@ -43,37 +41,38 @@ export const useTime = create(subscribeWithSelector((set, get) => {
         // ------ Terms ------
         terms: [],
         currTerm: null,
+        loadTerms: async () => {
+            if (get().terms.length > 0) return;
+            const { data, error } = await supabase.from('terms').select();
+            if (error) throw error;
+            set({ terms: data });
+        },
         addTerm: async (term) => {
-            const termRef = doc(db, 'school', 'terms');
-            const newTerms = [...get().terms, term];
-            await updateDoc(termRef, { terms: newTerms });
+            const { data, error } = await supabase.from('terms').insert(term).select();
+            if (error) throw error;
+            const newTerms = [...get().terms, data[0]];
             set({ terms: newTerms });
         },
         removeTerm: async (termId) => {
-            const termRef = doc(db, 'school', 'terms');
+            const { error } = await supabase.from('terms').delete().eq('id', termId);
+            if (error) throw error;
             const newTerms = get().terms.filter(term => term.id !== termId);
-            await updateDoc(termRef, { terms: newTerms });
             set({ terms: newTerms });
         },
         updateTerm: async (termId, updates) => {
-            const termRef = doc(db, 'school', 'terms');
+            const { error } = await supabase.from('terms').update(updates).eq('id', termId);
+            if (error) throw error;
             const newTerms = get().terms.map(term => term.id === termId ? { ...term, ...updates } : term);
-            await updateDoc(termRef, { terms: newTerms });
             set({ terms: newTerms });
         },
     };
 }));
 
 (async () => {
-    const termsInfo = doc(db, 'school', 'terms');
-    const termsSnapshot = await getDoc(termsInfo);
-    const termsData = termsSnapshot.data();
-    const terms = termsData?.terms || [];
-    const currDate = format(new Date(), 'yyyy-MM-dd');
-    const currTerm = terms.find(term => term.start <= currDate && term.end >= currDate) || null;
-    useTime.setState({ currTerm, terms });
+    const { data, error } = await supabase.from('current_term').select();
+    if (error) throw error;
+    useTime.setState({ currTerm: data[0] });
 })();
-
 
 export const timeActions = Object.fromEntries(
     Object.entries(useTime.getState()).filter(([key, value]) => typeof value === 'function')
@@ -117,11 +116,14 @@ export function dateRange(start, end) {
     const endDate = new Date(end);
     const dates = [];
     let current = startDate;
-  
-    while (isBefore(current, endDate) || isEqual(current, endDate)) {
-      dates.push(new Date(current)); // clone so it's not mutated later
-      current = addDays(current, 1);
+
+    while (isBefore(current, endDate) || isSameDay(current, endDate)) {
+        dates.push(new Date(current)); // clone so it's not mutated later
+        current = addDays(current, 1);
     }
-  
+
     return dates.map(date => format(date, 'yyyy-MM-dd'));
-  }
+}
+
+
+export const getTimeString = (time) => time.split(':')[0] + ':' + time.split(':')[1]

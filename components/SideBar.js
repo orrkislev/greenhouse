@@ -1,6 +1,6 @@
 "use client"
 
-import { userActions, useUser } from "@/utils/store/useUser";
+import { isAdmin, isStaff, userActions, useUser } from "@/utils/store/useUser";
 import { tw } from "@/utils/tw";
 import { BookOpen, Briefcase, Calendar, Snail, UsersRound, TreePalm, Skull, Brain, LogOut } from "lucide-react";
 import Link from "next/link";
@@ -36,7 +36,7 @@ export default function SideBar() {
             <Separator className='w-full' />
             <div className="flex gap-2 items-center p-2 justify-center text-sm">
                 <Avatar user={user} />
-                <div>{user.firstName}</div>
+                <div>{user.first_name}</div>
             </div>
             <Separator className='w-full' />
             <SideBarContent>
@@ -47,27 +47,20 @@ export default function SideBar() {
                 <SideBarItem href="/schedule" icon={<Calendar className="w-4 h-4" />} label="לוח זמנים" active={pathname === '/schedule'} />
 
                 <Separator />
-
-                {/* Learning */}
-                <SideBarItem href="/learn" icon={<BookOpen className="w-4 h-4" />} label="למידה" active={pathname === '/learn'} />
-
-                {/* Projects */}
+                
+                <SideBarItem href="/study" icon={<BookOpen className="w-4 h-4" />} label="למידה" active={pathname === '/study'} />
                 <SideBarItem href="/project" icon={<Snail className="w-4 h-4" />} label="הפרויקט" active={pathname === '/project'} />
-
-                {/* Research */}
                 <SideBarItem href="/research" icon={<Brain className="w-4 h-4" />} label="חקר" active={pathname === '/research'} />
-
-                {/* Vocation */}
                 <SideBarItem href="/vocation" icon={<Briefcase className="w-4 h-4" />} label="תעסוקה" active={pathname === '/vocation'} disabled={true} />
 
                 <Separator />
 
                 {/* Staff only */}
-                {user && user.roles && user.roles.includes('staff') && (
+                {user && isStaff() && (
                     <SideBarItem href="/staff" icon={<UsersRound className="w-4 h-4" />} label="החניכים שלי" active={pathname === '/staff'} />
                 )}
 
-                {user && user.roles && user.roles.includes('admin') && (
+                {user && isAdmin() && (
                     <SideBarItem href="/admin" icon={<Skull className="w-4 h-4" />} label="ניהול" active={pathname === '/admin'} />
                 )}
             </SideBarContent>

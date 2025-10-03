@@ -1,181 +1,163 @@
-import { addDoc, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { createStore } from "./utils/createStore";
-import { db } from "@/utils//firebase/firebase";
 import { useUser } from "@/utils/store/useUser";
-import { dateRange, useTime } from "@/utils/store/useTime";
-import { useEffect } from "react";
+import { useTime } from "@/utils/store/useTime";
+import { supabase } from "../supabase/client";
+import { makeLink, prepareForGroupsTable } from "../supabase/utils";
+import { addDays, format, isSameDay } from "date-fns";
+import { createDataLoadingHook } from "./utils/createStore";
 
-export const [useGroups, groupsActions] = createStore((set, get) => ({
+export const [useGroups, groupsActions] = createStore((set, get, withUser, withLoadingCheck) => ({
     groups: [],
     loading: false,
 
     // ----------- Group Loading -----------
     // -------------------------------------
-    loadGroups: async () => {
-        if (get().loading) return;
-        set({ loading: true });
-        const groupIds = groupUtils.getUserGroupIds();
-        await Promise.all(groupIds.map(groupId => get().loadGroup(groupId)));
-        set({ loading: false });
-    },
-    loadAllGroups: async () => {
-        if (get().loading) return;
-        set({ loading: true });
-        const groupsRef = collection(db, "groups");
-        const snapshot = await getDocs(groupsRef);
-        const groups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const currentGroups = get().groups;
-        const onlyNewGroups = groups.filter(g => !currentGroups.find(g2 => g2.id === g.id));
-        set({ groups: [...currentGroups, ...onlyNewGroups] });
-        set({ loading: false });
-    },
-    loadGroup: async (groupId) => {
-        const stateGroup = get().groups.find(g => g.id === groupId);
-        if (stateGroup) return stateGroup;
-
-        const groupDoc = await getDoc(doc(db, "groups", groupId));
-        if (groupDoc.exists()) {
-            const group = { ...groupDoc.data(), id: groupDoc.id };
-            set((state) => ({ groups: [...state.groups, group] }));
-            return group;
-        }
-
-        return null;
-    },
+    loadUserGroups: withLoadingCheck(async (user) => {
+        const { data, error } = await supabase.rpc('get_user_groups', {
+            p_user_id: user.id
+        })
+        if (error) throw error;
+        set({ groups: data });
+    }),
     updateGroup: async (group, updates) => {
-        const groupDocRef = doc(db, "groups", group.id);
-        await updateDoc(groupDocRef, updates);
+        const { error } = await supabase.from('groups').update(prepareForGroupsTable(updates)).eq('id', group.id);
+        if (error) throw error;
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...group, ...updates } : g) }));
     },
 
     // ----------- Group Events Management -----------
     // ------------------------------------------------
-    loadWeekEvents: async () => {
+    loadTodayEvents: async (groupId) => {
+        const today = useTime.getState().today;
+        if (groupId) {
+            await get().loadGroupEvents(groupId, today);
+            return;
+        }
+        for (const group of get().groups) {
+            await get().loadGroupEvents(group.id, today);
+        }
+    },
+    loadWeekEvents: async (groupId) => {
         const week = useTime.getState().week;
         if (!week || week.length === 0) return;
+        if (groupId) {
+            await get().loadGroupEvents(groupId, week[0], week[week.length - 1]);
+            return;
+        }
         for (const group of get().groups) {
             await get().loadGroupEvents(group.id, week[0], week[week.length - 1]);
         }
     },
-    loadTodayEvents: async () => {
-        const today = useTime.getState().today;
-        const groups = get().groups;
-        for (const group of groups) {
-            await get().loadGroupEvents(group.id, today, today);
-        }
-    },
     loadGroupEvents: async (groupId, start, end) => {
-        if (!groupId) return;
+        if (!end) end = start;
 
-        let stateGroup = get().groups.find(g => g.id === groupId);
-        if (!stateGroup) stateGroup = await get().loadGroup(groupId);
+        let shouldLoad = false;
+        let date = start;
+        const events = { ...get().groups.find(g => g.id === groupId).events } || {}
+        while (date <= end) {
+            if (!events[date]) {
+                shouldLoad = true;
+                break;
+            }
+            date = addDays(date, 1);
+        }
+        if (!shouldLoad) return;
 
-        const eventsRef = collection(db, 'groups', groupId, 'events');
-        const newEvents = stateGroup.events ? { ...stateGroup.events } : {};
-        await Promise.all(dateRange(start, end).map(async date => {
-            if (newEvents[date]) return;
-            const snapshot = await getDocs(query(eventsRef, where('date', '==', date)));
-            const events = snapshot.docs.map(doc => ({ id: doc.id, group: groupId, ...doc.data() }));
-            newEvents[date] = events;
-        }));
-        set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: newEvents } : g) }));
+        const obj = { p_group_id: groupId, p_start_date: start, p_end_date: end || start }
+        const { data, error } = await supabase.rpc('get_group_events', obj)
+        if (error) throw error;
+        date = new Date(start);
+        while (date <= new Date(end)) {
+            const dateStr = format(date, 'yyyy-MM-dd');
+            if (!events[dateStr]) events[dateStr] = [];
+            date = addDays(date, 1);
+        }
+        data.forEach(e => {
+            if (!events[e.date].find(e => e.id === e.id)) events[e.date].push(e)
+        })
+        set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: events } : g) }));
     },
     createGroupEvent: async (groupId, obj) => {
-        const collectionRef = collection(db, 'groups', groupId, 'events');
-        const newDoc = await addDoc(collectionRef, obj);
-        const groupEvents = get().groups.find(g => g.id === groupId).events || {};
-        groupEvents[obj.date] = [...(groupEvents[obj.date] || []), { ...obj, id: newDoc.id }];
-        set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: groupEvents } : g) }));
+        const { data, error } = await supabase.from('events').insert(obj).select().single();
+        if (error) throw error;
+        const newEvents = { ...get().groups.find(g => g.id === groupId).events } || {}
+        if (!newEvents[data.date]) newEvents[data.date] = [];
+        newEvents[data.date].push(data);
+        set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: newEvents } : g) }));
+        await makeLink('events', data.id, 'groups', groupId);
     },
     updateGroupEvent: async (groupId, obj) => {
-        const docRef = doc(db, 'groups', groupId, 'events', obj.id);
-        await updateDoc(docRef, obj);
-        const groupEvents = get().groups.find(g => g.id === groupId).events || {};
-        groupEvents[obj.date] = groupEvents[obj.date].map(e => e.id === obj.id ? obj : e);
-        set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: groupEvents } : g) }));
+        const { error } = await supabase.from('events').update(obj).eq('id', obj.id);
+        if (error) throw error;
+        const newEvents = { ...get().groups.find(g => g.id === groupId).events } || {}
+        newEvents[obj.date] = newEvents[obj.date].map(e => e.id === obj.id ? obj : e)
+        set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: newEvents } : g) }));
     },
     removeGroupEvent: async (groupId, date, objId) => {
-        const docRef = doc(db, 'groups', groupId, 'events', objId);
-        await deleteDoc(docRef);
-        const groupEvents = get().groups.find(g => g.id === groupId).events || {};
-        groupEvents[date] = groupEvents[date]?.filter(e => e.id !== objId);
+        const { error } = await supabase.from('events').delete().eq('id', objId);
+        if (error) throw error;
+        const groupEvents = { ...get().groups.find(g => g.id === groupId).events } || {}
+        groupEvents[date] = groupEvents[date]?.filter(e => e.id !== objId)
         set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: groupEvents } : g) }));
     },
 
     // ----------- Group Students Management -----------
     // -------------------------------------------------
-    loadClassStudents: async (group) => {
-        if (group.students) return;
+    loadClassMembers: async (group) => {
+        if (group.members) return;
 
-        let queryFilter = null
-        if (group.type === 'class') queryFilter = where("class", "==", group.id);
-        else if (group.type === 'major') queryFilter = where("major", "==", group.id);
-        else if (group.type === 'staff') queryFilter = where("roles", "array-contains", "staff");
-        if (!queryFilter) return;
-
-        const snapshot = await getDocs(query(collection(db, "users"), queryFilter));
-        const members = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        let students = members.filter(m => m.roles.includes('student'));
-        const mentors = members.filter(m => m.roles.includes('staff'));
-        if (group.type === 'staff') students = members.filter(m => m.roles.includes('staff'));
-
-        set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, students, mentors } : g) }));
+        const { data, error } = await supabase
+            .from('users_groups')
+            .select('users( id, first_name, last_name, username, avatar_url, role )')
+            .eq('group_id', group.id)
+        if (error) throw error;
+        set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, members: data.map(d => d.users) } : g) }));
     },
 
     // ----------- Group Tasks Management -----------
     // ----------------------------------------------
-    loadGroupTasks: async (group) => {
+    loadGroupTasks: async (groupId) => {
+        if (get().groups.find(g => g.id === groupId).tasks) return;
         const user = useUser.getState().user;
-        if (!user || !user.id) return;
-
-        if (group.tasks) return;
-
-        const tasksRef = collection(db, 'groups', group.id, 'tasks');
-        const tasksQuery = query(tasksRef, where('active', '==', true));
-        const tasksSnapshot = await getDocs(tasksQuery);
-        const tasks = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks } : g) }));
+        const { data, error } = await supabase.rpc('get_user_group_tasks_by_group', {
+            p_group_id: groupId,
+            p_user_id: user.id
+        })
+        if (error) throw error;
+        set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, tasks: data } : g) }));
     },
-    createGroupTask: async (group, task) => {
-        const tasksRef = collection(db, 'groups', group.id, 'tasks');
-        const newDoc = await addDoc(tasksRef, task);
-        set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: [...g.tasks, { ...task, id: newDoc.id }] } : g) }));
+    loadAllTaskAssignments: async (taskId) => {
+        const { data, error } = await supabase.from('task_assignments').select('*').eq('task_id', taskId);
+        if (error) throw error;
+        set((state) => ({ groups: state.groups.map(g => ({ ...g, tasks: g.tasks ? g.tasks.map(t => t.id === taskId ? { ...t, assignments: data } : t) : [] })) }));
+    },
+    createGroupTask: async (group, text) => {
+        const task = {
+            title: text,
+            status: 'todo',
+            created_by: useUser.getState().user.id,
+        }
+        const { data, error } = await supabase.from('tasks').insert(task).select().single();
+        if (error) throw error;
+        set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: [...g.tasks, data] } : g) }));
+        await makeLink('tasks', data.id, 'groups', group.id);
     },
     updateGroupTask: async (group, task, updates) => {
-        const taskDocRef = doc(db, 'groups', group.id, 'tasks', task.id);
-        await updateDoc(taskDocRef, updates);
+        const { error } = await supabase.from('tasks').update(updates).eq('id', task.id);
+        if (error) throw error;
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: g.tasks.map(t => t.id === task.id ? { ...t, ...updates } : t) } : g) }));
     },
     deleteGroupTask: async (group, task) => {
-        const taskDocRef = doc(db, 'groups', group.id, 'tasks', task.id);
-        await deleteDoc(taskDocRef);
+        const { error } = await supabase.from('tasks').delete().eq('id', task.id);
+        if (error) throw error;
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: g.tasks.filter(t => t.id !== task.id) } : g) }));
     },
     completeTask: async (group, task, userId) => {
-        const taskDocRef = doc(db, 'groups', group.id, 'tasks', task.id);
-        await updateDoc(taskDocRef, { completedBy: arrayUnion(userId) });
-        task.completedBy = [...(task.completedBy || []), userId];
+        const { error } = await supabase.from('task_assignments').update({ statud: 'done' }).eq('task_id', task.id).eq('user_id', userId);
+        if (error) throw error;
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: g.tasks.map(t => t.id === task.id ? task : t) } : g) }));
     }
 }))
-
-
-groupsActions.getAllGroups = async () => {
-    const groupsRef = collection(db, "groups");
-    const snapshot = await getDocs(groupsRef);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-}
-groupsActions.getUserGroupEventsForWeek = async (groupId, userId, week) => {
-    const eventsRef = collection(db, `groups/${groupId}/events`);
-    const eventsQuery = query(eventsRef,
-        where("date", ">=", week[0]),
-        where("date", "<=", week[week.length - 1]),
-        where("members", "array-contains", userId)
-    );
-    const eventsSnap = await getDocs(eventsQuery);
-    const events = eventsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return events;
-}
 
 
 export const groupUtils = {
@@ -209,25 +191,4 @@ export const groupUtils = {
     }
 }
 
-export const useMemberGroups = () => {
-    const groups = useGroups(state => state.groups);
-    useEffect(() => {
-        groupsActions.loadGroups()
-    }, [])
-    return groups.filter(g => groupUtils.isMember(g, useUser.getState().user));
-}
-export const useMentorGroups = () => {
-    const groups = useGroups(state => state.groups);
-    useEffect(() => {
-        groupsActions.loadGroups()
-    }, [])
-    const mentoring = groups.filter(g => groupUtils.isMentor(g, useUser.getState().user));
-    return mentoring;
-}
-export const useInvolvedGroups = () => {
-    const groups = useGroups(state => state.groups);
-    useEffect(() => {
-        groupsActions.loadGroups()
-    }, [])
-    return groups.filter(g => groupUtils.isMember(g, useUser.getState().user) || groupUtils.isMentor(g, useUser.getState().user));
-}
+export const useUserGroups = createDataLoadingHook(useGroups, 'groups', 'loadUserGroups');

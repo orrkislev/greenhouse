@@ -1,16 +1,16 @@
 import { useEffect } from "react";
-import { groupsActions, useInvolvedGroups } from "@/utils/store/useGroups";
+import { groupsActions, useUserGroups } from "@/utils/store/useGroups";
 import { useTime } from "@/utils/store/useTime";
 import { ScheduleSection } from "../Layout";
 import GroupScheduleDay from "./GroupScheduleDay";
-import { groupUtils } from "@/utils/store/useGroups";
+import { isStaff } from "@/utils/store/useUser";
 
 export default function GroupSchedules() {
-    const groups = useInvolvedGroups();
+    const groups = useUserGroups();
 
     const groupIds = groups.map(g => g.id).join(',');
 
-    useEffect(()=>{
+    useEffect(() => {
         groupsActions.loadWeekEvents();
     }, [groupIds]);
 
@@ -27,14 +27,14 @@ function GroupSchedule({ group }) {
         return { date, events: group.events ? group.events[date] : [] };
     });
 
-    const edittable = groupUtils.isMentor(group)
+    const edittable = isStaff()
 
     return (
         <ScheduleSection edittable={edittable} name={group.name}>
             {weekEvents.map(({ date, events }, index) => (
                 <GroupScheduleDay key={index}
-                    date={date} 
-                    groupId={group.id} 
+                    date={date}
+                    groupId={group.id}
                     edittable={edittable}
                     events={events}
                 />
