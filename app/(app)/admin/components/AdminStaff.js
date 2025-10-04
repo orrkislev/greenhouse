@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { adminActions, useAdmin } from "@/utils/store/useAdmin";
 import { Plus, Save, UserRoundX } from "lucide-react";
 import { Cell, Checkbox, TableHeader } from "./Common";
+import { userActions } from "@/utils/store/useUser";
 
 export default function AdminStaff() {
     const allMembers = useAdmin(state => state.allMembers);
@@ -78,7 +79,11 @@ export default function AdminStaff() {
                                     />
                                 </Cell>
                             ) : (
-                                <Cell className='text-stone-500'>{staff.username}</Cell>
+                                <Cell>
+                                    <span className='text-stone-500 underline hover:text-stone-800 cursor-pointer' onClick={() => userActions.switchToStudent(staff.id, 'admin')}>
+                                        {staff.username}
+                                    </span>
+                                </Cell>
                             )}
                             <Cell>
                                 <input type="text" defaultValue={staff.first_name} placeholder="שם פרטי" className="border-none outline-none p-0 m-0"

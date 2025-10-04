@@ -1,30 +1,12 @@
 import { userActions, useUser } from "@/utils/store/useUser";
 import { ImageUp, Save } from "lucide-react";
-import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
-export default function Avatar({ user, userId, className, ...props }) {
-    const [userData, setUserData] = useState(user);
-
-    useEffect(() => {
-        if (!user && userId) {
-            userActions.getUserData(userId).then(setUserData);
-        }
-        if (user) setUserData(user);
-    }, [user, userId])
-
-    let avatarContent = null;
-    if (userData) {
-        if (userData.profilePicture) {
-            avatarContent = <div style={{ backgroundImage: `url(${userData.profilePicture})` }} className="w-full h-full bg-cover bg-center rounded-full" />
-        } else if (userData.first_name && userData.last_name) {
-            avatarContent = <div className="text-sm text-stone-500">{userData.first_name.charAt(0)}.{userData.last_name.charAt(0)}</div>
-        }
-    }
-
+export default function Avatar({ user, className, ...props }) {
     return (
-        <div className={`border border-stone-300 w-8 h-8 rounded-full bg-stone-200 overflow-hidden flex items-center justify-center ${className}`} {...props}>
-            {avatarContent}
+        <div className={`border border-stone-300 w-8 h-8 rounded-full bg-stone-200 overflow-hidden relative flex items-center justify-center ${className}`} {...props}>
+            <div className="text-sm text-stone-500">{user.first_name.charAt(0)}.{user.last_name.charAt(0)}</div>
+            <div style={{ backgroundImage: `url(${user.avatar_url})` }} className="absolute w-full h-full bg-cover bg-center rounded-full" />
         </div>
     )
 }
@@ -32,19 +14,9 @@ export default function Avatar({ user, userId, className, ...props }) {
 export function AvatarEdit() {
     const user = useUser((state) => state.user);
     const [image, setImage] = useState(null);
+    const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
     if (!user) return null;
-
-    let avatarContent = null;
-    if (user.profilePicture) {
-        avatarContent = <div style={{ backgroundImage: `url(${user.profilePicture})` }} className="absolute top-2 left-2 right-2 bottom-2 bg-cover bg-center rounded-full" />
-    } else if (user.first_name && user.last_name) {
-        avatarContent = <div className="text-2xl text-stone-500">{user.first_name.charAt(0)}.{user.last_name.charAt(0)}</div>
-    }
-
-    if (image) {
-        avatarContent = <div style={{ backgroundImage: `url(${URL.createObjectURL(image)})` }} className="absolute top-2 left-2 right-2 bottom-2 bg-cover bg-center rounded-full" />
-    }
 
     const onFile = (file) => {
         if (file && (file.type === 'image/png' || file.type === 'image/jpg' || file.type === 'image/jpeg')) {
@@ -58,16 +30,31 @@ export function AvatarEdit() {
             setImage(null);
         }
     }
+    
+    const imgUrl = image ? URL.createObjectURL(image) : user.avatar_url;
 
     return (
         <div className="p-8 pb-2">
-            <div className="flex flex-col gap-2 items-center justify-center relative aspect-square border border-stone-500 rounded-full bg-stone-200"
+            <div className={`flex flex-col gap-2 items-center justify-center relative aspect-square border rounded-full transition-all ${isDragging ? 'border-blue-500 border-2 bg-blue-50' : 'border-stone-500 bg-stone-200'}`}
+                onDragOver={e => {
+                    e.preventDefault();
+                }}
+                onDragEnter={e => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                }}
+                onDragLeave={e => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                }}
                 onDrop={e => {
                     e.preventDefault();
+                    setIsDragging(false);
                     onFile(e.dataTransfer.files[0]);
                 }}
             >
-                {avatarContent}
+                <div className="text-2xl text-stone-500">{user.first_name.charAt(0)}.{user.last_name.charAt(0)}</div>
+                <div className="absolute w-full h-full bg-cover bg-center rounded-full" style={{ backgroundImage: `url(${imgUrl})` }} />
                 <input
                     ref={fileInputRef}
                     type="file"

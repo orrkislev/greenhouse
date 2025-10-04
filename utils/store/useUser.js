@@ -1,11 +1,10 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { prepareEmail } from '@/utils/firebase/auth';
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { storage } from '@/utils/firebase/firebase';
 import { resizeImage } from '@/utils/actions/storage actions';
 import { resetPin } from '../actions/admin actions';
 import { supabase } from '../supabase/client';
+import { redirect } from 'next/navigation';
 
 
 export const useUser = create(subscribeWithSelector((set, get) => {
@@ -44,6 +43,7 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 		// ------------ Staff Switching User ------------------
 		// ----------------------------------------------------
 		switchToStudent: async (studentId, currUrl) => {
+			currUrl = window.location.pathname + window.location.search;
 			const user = get().user;
 			if (!user || !isStaff()) {
 				throw new Error("User does not have permission to switch to student.");
@@ -54,6 +54,8 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 			const { data, error } = await supabase.from('users').select('*').eq('id', studentId).single();
 			if (error) set({ error });
 			else set({ user: data });
+
+			redirect('/')
 		},
 		switchBackToOriginal: async () => {
 			const originalUser = get().originalUser;
@@ -73,12 +75,14 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 		// ----------------------------------------------------
 		updateProfilePicture: async (image) => {
 			const user = get().user;
-			if (!user) return;
-			const storageRef = ref(storage, `profilePictures/${user.id}`);
 			const resizedBlob = await resizeImage(image, 128);
-			await uploadBytes(storageRef, resizedBlob);
-			const url = await getDownloadURL(storageRef);
-			await get().updateUserData({ profilePicture: url });
+			const { error } = await supabase.storage.from('images').upload(`${user.id}.png`, resizedBlob, {
+				upsert: true,
+			});
+			if (error) throw error;
+			const { data, error: downloadError } = await supabase.storage.from('images').getPublicUrl(`${user.id}.png`);
+			if (downloadError) throw downloadError;
+			await get().updateUserData({ avatar_url: data.publicUrl });
 		},
 
 		// ----------------------------------------------------

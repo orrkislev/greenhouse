@@ -65,7 +65,7 @@ function GroupTask({ group, task }) {
         <div className="flex group gap-16 items-start">
             <div className="flex flex-col gap-1">
                 <div className="flex gap-1 items-center">
-                    {/* <AvatarGroup users={studentsFinished} /> */}
+                    <AvatarGroup users={studentsFinished} />
                     <div className="">{task.title}</div>
                 </div>
                 <div className="flex gap-1 text-xs text-stone-500 items-center"> <Check className="w-3 h-3" />  {students.length} / {task.assignments && task.assignments.length}</div>

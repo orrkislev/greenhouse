@@ -36,7 +36,7 @@ export default function ProjectInfo() {
                 {project.masters ? (
                     <div className="flex items-center justify-center flex-col" >
                         <div className="flex items-center gap-2">
-                            <Avatar userId={project.master[0].id} />
+                            <Avatar user={project.master[0]} />
                             <h3 className="text-center text-stone-700 font-medium">המאסטר שלי - {project.master[0].first_name} {project.master[0].last_name}</h3>
                         </div>
                         <div className="flex gap-2">
