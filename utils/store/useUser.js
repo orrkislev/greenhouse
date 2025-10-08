@@ -65,7 +65,7 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 			}
 			const { data, error } = await supabase.from('users').select('*').eq('id', originalUser.user.id).single();
 			if (error) set({ error });
-			else set({ user: data });
+			else set({ user: data, originalUser: null });
 
 			return lastPage;
 		},

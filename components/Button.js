@@ -23,8 +23,41 @@ export default function Button({ children, ...props }) {
     return <ButtonDiv {...props}>{children}</ButtonDiv>
 }
 
-export function IconButton(props) {
-    return <div {...props} className={`p-2 hover:bg-stone-100 rounded-full cursor-pointer transition-colors ${props.className}`}>
-        <props.icon className="w-4 h-4" />
+export function IconButton({small, ...props}) {
+    return <div {...props} className={`${props.className} ${small ? 'p-1' : 'p-2'} hover:bg-stone-100 rounded-full cursor-pointer transition-colors ${props.className}`}>
+        <props.icon className={`${props.small ? 'w-3 h-3' : 'w-4 h-4'}`} />
     </div>
 }
+
+
+export function ButtonGroup({ children, className}) {
+    return (
+        <div className={`flex items-center gap-1 ${className}`}>
+            <div className="flex gap-4">
+                {children}
+            </div>
+        </div>
+    )
+}
+
+export function ButtonGroupItem({ children, ...props }) {
+    return <div {...props} className={`${props.className} ${props.small ? 'text-xs' : 'text-sm'} p-1 rounded-full hover:bg-stone-100 cursor-pointer transition-colors ${props.active ? 'bg-stone-200 font-bold' : ''}`}>
+        {children}
+    </div>
+}
+
+// export function ButtonGroup({ children, className}) {
+//     return (
+//         <div className={`flex items-center gap-1 ${className}`}>
+//             <div className="flex rounded-sm overflow-hidden border border-stone-300 divide-x divide-stone-300">
+//                 {children}
+//             </div>
+//         </div>
+//     )
+// }
+
+// export function ButtonGroupItem({ children, ...props }) {
+//     return <div {...props} className={`${props.className} ${props.small ? 'p-1 text-xs' : 'p-2 text-sm'} hover:bg-stone-100 cursor-pointer transition-colors ${props.active ? 'bg-stone-200' : ''}`}>
+//         {children}
+//     </div>
+// }

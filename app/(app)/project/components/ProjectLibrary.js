@@ -6,11 +6,6 @@ import { projectActions, useProjectData } from '@/utils/store/useProject'
 
 export default function ProjectLibrary() {
 
-    useEffect(()=>{
-        projectActions.loadTldraw()
-    }, [])
-
-
     const components = {
         // ContextMenu: null,
         ActionsMenu: null,
@@ -49,12 +44,12 @@ export default function ProjectLibrary() {
 
 function SaveLogic() {
     const editor = useEditor()
-    const project = useProjectData()
+    const project = useProjectData(state => state.project)
 
     useEffect(()=>{
         if (!editor) return
-        if (!project.tldraw) return
-        loadSnapshot(editor.store, project.tldraw)
+        if (!project.metadata.tldraw) return
+        loadSnapshot(editor.store, project.metadata.tldraw)
     }, [project, editor])
 
     useEffect(() => {
@@ -71,7 +66,7 @@ function SaveLogic() {
 
     const onEveryChange = debounce(() => {
         const { document, session } = getSnapshot(editor.store)
-        projectActions.saveTldraw({document, session})
+        projectActions.updateMetadata({tldraw: {document, session}})
     }, 1000)
 
     return null

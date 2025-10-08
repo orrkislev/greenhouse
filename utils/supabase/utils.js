@@ -13,7 +13,7 @@ function buildSafeUpdates(updates, allowedKeys) {
 const usersFields = ['first_name', 'last_name', 'username', 'role', 'avatar_url', 'profile']
 export const prepareForUsersTable = obj => buildSafeUpdates(obj, usersFields)
 
-const groupsFields = ['name', 'type', 'description', 'metadata','message']
+const groupsFields = ['name', 'type', 'description', 'metadata', 'message']
 export const prepareForGroupsTable = obj => buildSafeUpdates(obj, groupsFields)
 
 const projectsFields = ['title', 'description', 'student_id', 'status', 'metadata']
@@ -28,8 +28,36 @@ export const prepareForStudyPathsTable = obj => buildSafeUpdates(obj, studyPaths
 const tasksFields = ['title', 'description', 'student_id', 'status', 'due_date', 'metadata', 'position', 'goal', 'target_count', 'current_count', 'created_by']
 export const prepareForTasksTable = obj => buildSafeUpdates(obj, tasksFields)
 
+const logsFields = ['user_id', 'action_type', 'text', 'metadata', 'mentor_id', 'context_table', 'context_id']
+export const prepareForLogsTable = obj => buildSafeUpdates(obj, logsFields)
+
+
+export const unLink = async (a_table, a_id, b_table, b_id) => {
+    const { data, error: linkError } = await supabase
+        .from('links').delete()
+        .or([
+            `and(a_table.eq.${a_table},a_id.eq.${a_id},b_table.eq.${b_table},b_id.eq.${b_id})`,
+            `and(a_table.eq.${b_table},a_id.eq.${b_id},b_table.eq.${a_table},b_id.eq.${a_id})`,
+        ].join(','))
+    if (linkError) throw linkError;
+    return data;
+}
+
 export const makeLink = async (a_table, a_id, b_table, b_id) => {
-    const { error } = await supabase.from('links').insert({ a_table, a_id, b_table, b_id });
-    if (error) throw error;
+    const { data, error: linkError } = await supabase
+        .from('links')
+        .select('id')
+        .or(
+            [
+                `and(a_table.eq.${a_table},a_id.eq.${a_id},b_table.eq.${b_table},b_id.eq.${b_id})`,
+                `and(a_table.eq.${b_table},a_id.eq.${b_id},b_table.eq.${a_table},b_id.eq.${a_id})`,
+            ].join(',')
+        );
+
+    if (linkError) throw linkError;
+    if (data && data.length > 0) return;
+
+    const { error: insertError } = await supabase.from('links').insert({ a_table, a_id, b_table, b_id });
+    if (insertError) throw insertError;
     return
 }

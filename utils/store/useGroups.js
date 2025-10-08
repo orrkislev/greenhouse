@@ -153,7 +153,7 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: g.tasks.filter(t => t.id !== task.id) } : g) }));
     },
     completeTask: async (group, task, userId) => {
-        const { error } = await supabase.from('task_assignments').update({ statud: 'done' }).eq('task_id', task.id).eq('user_id', userId);
+        const { error } = await supabase.from('task_assignments').update({ statud: 'completed' }).eq('task_id', task.id).eq('user_id', userId);
         if (error) throw error;
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: g.tasks.map(t => t.id === task.id ? task : t) } : g) }));
     }

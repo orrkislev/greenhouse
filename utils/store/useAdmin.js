@@ -2,11 +2,14 @@ import { create } from "zustand"
 import { createUser, deleteUser } from "@/utils/actions/admin actions";
 import { supabase } from "../supabase/client";
 import { makeLink, prepareForGroupsTable, prepareForUsersTable } from "../supabase/utils";
+import { projectActions } from "./useProject";
+import { createDataLoadingHook } from "./utils/createStore";
 
 export const useAdmin = create((set, get) => ({
     classes: [],
     majors: [],
     allMembers: [],
+    staff: [],
 
     // --------------------------------------
     // -------- Load initial Data -------------
@@ -32,6 +35,13 @@ export const useAdmin = create((set, get) => ({
             `);
         allMembers.forEach(member => member.groups = member.groups.map(g => g.group_id));
         set({ classes, majors, allMembers });
+    },
+
+    loadStaff: async () => {
+        if (get().staff.length > 0) return;
+        const { data, error } = await supabase.from('users').select('*').eq('role', 'staff');
+        if (error) throw error;
+        set({ staff: data });
     },
 
     // ------------------------------
@@ -125,12 +135,18 @@ export const useAdmin = create((set, get) => ({
         }
     },
     assignMasterToProject: async (studentId, projectId, masterId) => {
-        const { data, error } = await supabase.from('mentorships')
-            .upsert({ mentor_id: masterId, student_id: studentId })
-            .select().single();
+        let mentorship = await supabase.from('mentorships').select('*').eq('student_id', studentId).eq('mentor_id', masterId).single();
+        if (mentorship.error) throw mentorship.error;
+        if (!mentorship.data) {
+            mentorship = await supabase.from('mentorships').insert({ mentor_id: masterId, student_id: studentId }).select();
+            if (mentorship.error) throw mentorship.error;
+        }
+        if (mentorship.data) {
+            await makeLink('mentorships', mentorship.data.id, 'projects', projectId);
+        }
+
+        const { error } = await supabase.from('projects').update(prepareForProjectsTable({ status: 'active' })).eq('id', projectId);
         if (error) throw error;
-        const { error: error2 } = await makeLink('mentorships', data.id, 'projects', projectId);
-        if (error2) throw error2;
 
         if (get().allMembers.length > 0) {
             set(state => ({
@@ -141,12 +157,11 @@ export const useAdmin = create((set, get) => ({
             }));
         }
 
-        // TODO ADD TASK
-        // await projectTasksActions.addTaskToStudentProject({
-        //     title: 'לקבוע פגישה שבועית',
-        //     description: `לקבוע פגישה שבועית עם ${master.first_name} ${master.last_name}`,
-        //     due_date: format(new Date(), 'yyyy-MM-dd'),
-        // }, studentId);
+        await projectTasksActions.addTaskToProject({
+            title: 'לקבוע פגישה שבועית',
+            description: `לקבוע פגישה שבועית עם ${master.first_name} ${master.last_name}`,
+            due_date: format(new Date(), 'yyyy-MM-dd'),
+        }, projectId);
     },
 
     // ------------------------------
@@ -154,7 +169,7 @@ export const useAdmin = create((set, get) => ({
     // ------------------------------
     message: '',
     loadMessage: async () => {
-        const {data, error} = await supabase.from('misc').select('data').eq('name', 'school_message').single();
+        const { data, error } = await supabase.from('misc').select('data').eq('name', 'school_message').single();
         if (error) throw error;
         set({ message: data.data.text });
     },
@@ -167,3 +182,5 @@ export const useAdmin = create((set, get) => ({
 export const adminActions = Object.fromEntries(
     Object.entries(useAdmin.getState()).filter(([key, value]) => typeof value === 'function')
 );
+
+export const useAllStaff = createDataLoadingHook(useAdmin, 'staff', 'loadStaff');

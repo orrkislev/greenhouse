@@ -1,12 +1,14 @@
 import SmartText from "@/components/SmartText"
-import { studyActions } from "@/utils/store/useStudy"
-import { Check, EllipsisVertical, HandMetal, Plus, Quote, Sparkle, Target, Trash2 } from "lucide-react"
+import { studyActions, studyUtils } from "@/utils/store/useStudy"
+import { Check, EllipsisVertical, HandMetal, Plus, Quote, Target, Trash2, Edit, Image } from "lucide-react"
 import { getNewStep } from "./example study paths"
 import WithLabel from "@/components/WithLabel"
 import StudyPath_Sources from "./StudyPath_Sources"
 import Button, { IconButton } from "@/components/Button"
-import Menu, { MenuList, MenuItem, MenuSeparator } from "@/components/Menu"
+import Menu, { MenuList, MenuItem } from "@/components/Menu"
 import { motion } from "motion/react"
+import { useState, useRef, useMemo } from "react"
+import TaskModal from "@/components/TaskModal"
 
 export default function StudyPath({ path }) {
 
@@ -15,13 +17,11 @@ export default function StudyPath({ path }) {
             <PathBG key={path.id} path={path} />
             <div className="">
                 <div className="inline-block -mt-4">
-                    <SmartText className="text-6xl font-bold" text={path.title} onEdit={(title) => {
-                        studyActions.updatePath(path.id, { ...path, title })
-                        studyActions.createImage(path, title)
-                    }} />
-                    <SmartText className="text-xl text-stone-500" text={path.description} onEdit={(description) => studyActions.updatePath(path.id, { ...path, description })} />
+                    <SmartText className="text-6xl font-bold" text={path.title}
+                        onEdit={(title) => studyActions.updatePath(path.id, { ...path, title })} />
+                    <SmartText className="text-xl text-stone-500" text={path.description}
+                        onEdit={(description) => studyActions.updatePath(path.id, { ...path, description })} />
                 </div>
-                <PathOptions path={path} />
             </div>
 
             <StudyPath_Sources path={path} />
@@ -34,27 +34,33 @@ export default function StudyPath({ path }) {
     )
 }
 
-function PathOptions({ path }) {
+function PathBG({ path }) {
+    const inputRef = useRef(null)
+
+    const imgUrl = useMemo(() => {
+        if (path.metadata?.image) return `url(${path.metadata?.image})`;
+        return 'linear-gradient(to right, #f7797d, #FBD786, #C6FFDD)'
+    }, [path.metadata?.image])
+
+    const onFile = (e) => {
+        if (e.target.files[0]) {
+            studyActions.uploadImage(path.id, e.target.files[0])
+        }
+    }
 
     const onDelete = () => {
         studyActions.deletePath(path.id)
     }
 
     return (
-        <Menu className='float-left mt-2'>
-            <MenuList>
-                <MenuItem title="מחק תחום" icon={Trash2} onClick={onDelete} />
-            </MenuList>
-        </Menu>
-    )
-}
-
-function PathBG({ path }) {
-    return (
-        <div className="border border-stone-200 w-full h-64 bg-contain bg-center flex items-center justify-center" style={{ backgroundImage: path.image ? `url(${path.image})` : 'none' }} >
-            {!path.image && (
-                <Sparkle className="w-16 h-16 animate-pulse" />
-            )}
+        <div className="relative border border-stone-200 w-full aspect-[5/1] bg-contain bg-center flex items-center justify-center" style={{ backgroundImage: imgUrl }} >
+            <Menu className='absolute top-4 left-4 bg-white'>
+                <MenuList>
+                    <MenuItem title="מחק תחום" icon={Trash2} onClick={onDelete} />
+                    <MenuItem title="העלאת תמונה" icon={Image} onClick={() => inputRef.current.click()} />
+                    <input type="file" accept="image/*" onChange={onFile} className="hidden" ref={inputRef} />
+                </MenuList>
+            </Menu>
         </div>
     )
 }
@@ -116,6 +122,8 @@ const contentIcons = {
 
 function Step({ path, step, side }) {
 
+    const [openTaskModal, setOpenTaskModal] = useState(false);
+
     const addContent = (type) => {
         // TODO
     }
@@ -153,12 +161,13 @@ function Step({ path, step, side }) {
 
                     <Menu className='absolute top-2 left-2 scale-80' icon={EllipsisVertical}>
                         <MenuList>
-                            <MenuItem title="מקור מידע" icon={contentIcons.source.icon} onClick={() => addContent('source')} />
+                            <MenuItem title="עריכה" icon={Edit} onClick={() => setOpenTaskModal(true)} />
+                            {/* <MenuItem title="מקור מידע" icon={contentIcons.source.icon} onClick={() => addContent('source')} />
                             <MenuItem title="ציטוט" icon={contentIcons.quote.icon} onClick={() => addContent('quote')} />
                             <MenuItem title="תרגול" icon={contentIcons.exercise.icon} onClick={() => addContent('exercise')} />
                             <MenuItem title="מטרה" icon={contentIcons.goal.icon} onClick={() => addContent('goal')} />
                             <MenuSeparator />
-                            <MenuItem title="מחק" icon={Trash2} onClick={() => studyActions.deleteStep(path.id, step.id)} />
+                            <MenuItem title="מחק" icon={Trash2} onClick={() => studyActions.deleteStep(path.id, step.id)} /> */}
                         </MenuList>
                     </Menu>
 
@@ -198,6 +207,8 @@ function Step({ path, step, side }) {
                 ${side == 'right' ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2'}
                 h-2 w-2 rounded-full bg-sky-600
                 `} />
+
+            <TaskModal task={{ ...step, context: studyUtils.getContext(path.id) }} isOpen={openTaskModal} onClose={() => setOpenTaskModal(false)} />
 
         </div>
     )

@@ -8,6 +8,7 @@ import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { projectTasksActions, useProjectTasksData } from "@/utils/store/useProjectTasks";
+import TaskModal from "@/components/TaskModal";
 
 const CalendarHeader = tw`flex items-center justify-between p-4 bg-stone-100`;
 const CalendarCell = tw`p-2 flex flex-col gap-1 transition-all duration-200 border border-stone-200 relative
@@ -21,11 +22,14 @@ export default function CalendarView() {
     const tasks = useProjectTasksData((state) => state.tasks);
     const currTerm = useTime((state) => state.currTerm);
     const gantt = useGantt((state) => state.gantt);
-    const [fullView, setFullView] = useState(false);
+    const [fullView, setFullView] = useState(true);
 
     useEffect(() => {
+        if (!currTerm) return;
         ganttActions.fetchGanttEvents(currTerm.start, currTerm.end);
     }, [currTerm]);
+
+    if (!currTerm) return;
 
     const termStart = new Date(currTerm.start);
     const termEnd = new Date(currTerm.end);
@@ -46,7 +50,7 @@ export default function CalendarView() {
                 isWeekend: currentDay.getDay() === 5,
                 isPast: currendDatFormatted < format(new Date(), "yyyy-MM-dd"),
                 gantt: ganttActions.getGanttForDay(currentDay),
-                tasks: tasks.filter(task => task.endDate === currendDatFormatted),
+                tasks: tasks.filter(task => format(new Date(task.due_date), 'yyyy-MM-dd') === currendDatFormatted),
             }
             cellsData.push(newDate);
         }
@@ -114,8 +118,7 @@ function CalendarCellComponent({ cellData }) {
                 if (!taskElement) {
                     const taskId = source.data.taskId;
                     projectTasksActions.updateTask(taskId, {
-                        startDate: cellData.dateFormatted,
-                        endDate: cellData.dateFormatted
+                        due_date: cellData.dateFormatted,
                     });
                 }
             }
@@ -152,6 +155,7 @@ function TaskItem({ task }) {
     const elementRef = useRef(null);
     const gripRef = useRef(null);
     const [dragState, setDragState] = useState('idle');
+    const [openTaskModal, setOpenTaskModal] = useState(false);
 
     const onDelete = (taskId) => {
         projectTasksActions.deleteTask(taskId);
@@ -193,20 +197,22 @@ function TaskItem({ task }) {
     }, [task]);
 
     return (
-        <TaskItemDiv ref={elementRef} $dragging={dragState === 'dragging'} $over={dragState === 'over'} $active={!task.completed}>
-            <div ref={gripRef} className="flex items-center gap-2 text-stone-400 cursor-move hover:text-stone-600 transition-colors p-1 rounded mr-2" >
-                {!task.completed && <Grip className="w-3 h-3" />}
-            </div>
-            <div className="text-sm text-stone-700 flex-1">{task.title}</div>
-            <button className="text-red-500 hover:text-red-700 ml-2" onClick={() => onDelete(task.id)}>
-                <Trash className="w-4 h-4" />
-            </button>
-        </TaskItemDiv>
+        <>
+            <TaskItemDiv ref={elementRef} $dragging={dragState === 'dragging'} $over={dragState === 'over'} $active={!task.completed}>
+                {!task.status !== 'completed' && (
+                    <div ref={gripRef} className="flex items-center text-stone-400 cursor-move hover:text-stone-600 transition-colors p-1 rounded" >
+                        <Grip className="w-3 h-3" />
+                    </div>
+                )}
+                <div className="text-sm text-stone-700 flex-1 hover:underline decoration-dashed cursor-pointer" onClick={() => setOpenTaskModal(true)}>{task.title}</div>
+            </TaskItemDiv>
+            <TaskModal task={task} isOpen={openTaskModal} onClose={() => setOpenTaskModal(false)} />
+        </>
     );
 }
 
 const TaskItemDiv = tw`
-    relative flex items-center justify-between p-2 bg-white border-b border-stone-200 transition-all duration-200
+    relative flex items-center gap-2 bg-stone-200 border-b border-stone-200 transition-all duration-200
     ${props => props.$dragging ? 'opacity-50 transform rotate-2 shadow-lg scale-105' : 'hover:bg-stone-50'}
     ${props => props.$over ? 'border-l-4 border-l-blue-400 bg-blue-50' : ''}
     ${props => props.$active ? '' : 'opacity-50 line-through bg-emerald-100 hover:bg-emerald-100'}

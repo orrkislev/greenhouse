@@ -1,8 +1,8 @@
 import { useTime } from "@/utils/store/useTime";
-import { format } from "date-fns";
 import { createDataLoadingHook, createStore } from "./utils/createStore";
 import { makeLink, prepareForProjectsTable } from "../supabase/utils";
 import { supabase } from "../supabase/client";
+import { resizeImage } from "../actions/storage actions";
 
 
 export const [useProjectData, projectActions] = createStore((set, get, withUser, withLoadingCheck) => {
@@ -16,11 +16,13 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
                 p_student_id: user.id
             })
             if (error) return console.error(error);
-            if (data) set({ project: data })
+            if (data) {
+                set({ project: data })
+                get().loadProjectMasters();
+            }
         }),
         continueProject: async (projectId) => {
-            const { data, error } = await makeLink('projects', projectId, 'terms', useTime.getState().currTerm.id);
-            if (error) throw error;
+            await makeLink('projects', projectId, 'terms', useTime.getState().currTerm.id);
             get().loadProject();
         },
 
@@ -31,7 +33,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
                 p_target_types: ['terms']
             })
             if (error) throw error;
-            set({ project: { ...get().project, terms: data.terms.map(t => t.terms) } });
+            set({ project: { ...get().project, terms: data.map(item => item.data) } });
         },
 
         loadProjectMasters: async () => {
@@ -42,8 +44,9 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             })
             if (error) throw error;
             const masters = [];
-            for (const item of data.mentorships) {
-                const { data: masterData, error: masterError } = await supabase.from('users').select('*').eq('id', item.mentor_id).single();
+            for (const item of data) {
+                const mentorId = item.data.mentor_id;
+                const { data: masterData, error: masterError } = await supabase.from('users').select('*').eq('id', mentorId).single();
                 if (masterError) throw masterError;
                 masters.push(masterData);
             }
@@ -62,19 +65,12 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             if (projectError) throw projectError;
             set({ project: projectData });
 
-            const { error: linkError } = await makeLink('projects', projectData.id, 'terms', useTime.getState().currTerm.id);
-            if (linkError) throw linkError;
+            await makeLink('projects', projectData.id, 'terms', useTime.getState().currTerm.id);
 
-            // TODO MOVE THE TASK CREATION TO PROJECT TASKS
-            const { data: taskData, error: taskError } = await supabase.from('tasks').insert({
+            await projectTasksActions.addTaskToProject({
                 title: 'למלא הצהרת כוונות',
                 description: 'זה חשוב',
-                student_id: user.id,
-                due_date: format(new Date(), 'yyyy-MM-dd'),
-            }).select().single();
-            if (taskError) throw taskError;
-            const { error: linkError2 } = await makeLink('tasks', taskData.id, 'projects', projectData.id);
-            if (linkError2) throw linkError2;
+            }, projectData.id);
         }),
         updateProject: async (updates) => {
             const { error } = await supabase.from('projects').update(prepareForProjectsTable(updates)).eq('id', get().project.id);
@@ -91,11 +87,11 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
         // ------ Project Goals ---------
         // ------------------------------
         updateMetadata: async (updates) => {
-            const metadata = get().project.metadata;
+            const metadata = { ...get().project.metadata };
             Object.assign(metadata, updates);
+            set((state) => ({ project: { ...state.project, metadata: metadata } }));
             const { error } = await supabase.from('projects').update({ metadata: metadata }).eq('id', get().project.id);
             if (error) throw error;
-            set((state) => ({ project: { ...state.project, metadata: metadata } }));
         },
 
         // ------------------------------
@@ -111,35 +107,35 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
         // ------------------------------
         // ------ Project Image -------
         // ------------------------------
-        createImage: withUser(async (user, name) => {
-            // TODO
-            // const project = get().project;
-            // if (!project) return;
 
-            // // if (project.image === 'generating') return;
-            // await get().updateProject({ image: 'generating' })
-
-            // const imageData = await generateImage(name, folkArtStyle);
-            // if (!imageData) {
-            //     await get().updateProject({ image: 'no image' })
-            //     return;
-            // }
-
-            // const byteCharacters = atob(imageData);
-            // const byteNumbers = new Array(byteCharacters.length);
-            // for (let i = 0; i < byteCharacters.length; i++) {
-            //     byteNumbers[i] = byteCharacters.charCodeAt(i);
-            // }
-            // const byteArray = new Uint8Array(byteNumbers);
-            // const blob = new Blob([byteArray], { type: 'image/png' });
-
-            // const storageRef = ref(storage, `projects/${user.id}/${project.id}/image`);
-            // await uploadBytes(storageRef, blob, { contentType: 'image/png' })
-            // const url = await getDownloadURL(storageRef);
-            // await get().updateProject({ image: url });
+        uploadImage: withUser(async (user, file) => {
+            const resizedBlob = await resizeImage(file, 1024);
+            const url = `${user.id}/project_${get().project.id}.png`;
+            const { error } = await supabase.storage.from('images').upload(url, resizedBlob, {
+                upsert: true,
+            });
+            if (error) throw error;
+            const { data, error: downloadError } = await supabase.storage.from('images').getPublicUrl(url);
+            if (downloadError) throw downloadError;
+            await get().updateMetadata({ image: data.publicUrl });
         }),
     }
 });
 
 
 export const useProject = createDataLoadingHook(useProjectData, 'project', 'loadProject');
+export const useAllProjects = createDataLoadingHook(useProjectData, 'allProjects', 'loadAllProjects');
+
+export const projectUtils = {
+    getContext: (projectId) => {
+        const project = projectId ? 
+            useProjectData.getState().allProjects.find(project => project.id === projectId) : 
+            useProjectData.getState().project;
+        if (!project) return null;
+        return {
+            table: 'projects',
+            id: project.id,
+            title: project.title,
+        }
+    }
+}

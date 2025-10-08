@@ -5,6 +5,7 @@ import { TaskPill } from "./MainProject";
 import { useUser } from "@/utils/store/useUser";
 import { Check } from "lucide-react";
 import 'react-quill-new/dist/quill.snow.css';
+import { AvatarGroup } from "@/components/Avatar";
 
 export default function MainGroups() {
     const groups = useUserGroups();
@@ -31,13 +32,15 @@ function MainGroup({ group }) {
     }, [group])
 
     return (
-        <Box2 label={group.label} description={group.description} className="flex-1">
+        <Box2 label={group.label} description={group.description} className="flex-1 relative">
             <div className="text-sm text-stone-500 w-full" dangerouslySetInnerHTML={{ __html: group.message }} />
             <div>
                 {group.tasks && group.tasks.map((task) => (
                     <MainGroupTask key={task.id} group={group} task={task} />
                 ))}
             </div>
+
+            <AvatarGroup users={group.mentors} className='absolute bottom-1 left-1'/>
         </Box2>
     )
 }

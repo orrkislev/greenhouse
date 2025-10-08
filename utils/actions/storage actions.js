@@ -5,13 +5,16 @@ export function resizeImage(imageFile, size) {
             const img = new window.Image();
             img.onload = () => {
                 const canvas = document.createElement("canvas");
-                canvas.width = size;
-                canvas.height = size;
+                const ratio = img.width / img.height;
+                if (ratio > 1) {
+                    canvas.width = size;
+                    canvas.height = size / ratio;
+                } else {
+                    canvas.width = size * ratio;
+                    canvas.height = size;
+                }   
                 const ctx = canvas.getContext("2d");
-                const scale = Math.max(size / img.width, size / img.height);
-                const newWidth = img.width * scale;
-                const newHeight = img.height * scale;
-                ctx.drawImage(img, (size - newWidth) / 2, (size - newHeight) / 2, newWidth, newHeight);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 canvas.toBlob(
                     (blob) => {
                         if (blob) resolve(blob);

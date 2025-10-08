@@ -42,7 +42,7 @@ export default function ProjectProposal() {
 
     useEffect(() => {
         if (filledThreeQuestions) {
-            projectTasksActions.completeTaskByLabel('הצהרת כוונות');
+            projectTasksActions.completeTaskByTitle('הצהרת כוונות');
         }
     }, [filledThreeQuestions])
 
@@ -89,7 +89,10 @@ export default function ProjectProposal() {
                 {filledThreeQuestions && isStaff() && (
                     <div className="flex justify-center mt-4">
                         <Button data-role="edit"
-                            onClick={() => adminActions.assignMasterToProject(user.id, project.id, user.id)}
+                            onClick={async () => {
+                                await adminActions.assignMasterToProject(user.id, project.id, user.id)
+                                await projectActions.updateProject({ status: 'active' })
+                            }}
                         >
                             I AM MY OWN MASTER <Cat className="w-4 h-4" />
                         </Button>

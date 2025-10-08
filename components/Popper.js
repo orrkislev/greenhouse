@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useState, useRef, useEffect } from "react"
 
-export default function usePopper(props = {}) {
+export default function usePopper(props = {onOpen: () => {}, onClose: () => {}}) {
     const [isOpen, setIsOpen] = useState(false)
     const [position, setPosition] = useState(null)
     const baseRef = useRef(null)
@@ -14,8 +14,12 @@ export default function usePopper(props = {}) {
         } else {
             setPosition(null)
         }
+        props.onOpen?.()
     }
-    const close = () => setIsOpen(false)
+    const close = () => {
+        setIsOpen(false)
+        props.onClose?.()
+    }
 
     const Popper = ({ children, className = '' }) => {
         const popperRef = useRef(null)
@@ -45,7 +49,7 @@ export default function usePopper(props = {}) {
             <AnimatePresence >
                 {isOpen && (
                     <motion.div
-                        className={`fixed top-0 left-0 w-full h-full z-[9999] backdrop-blur-[2px] ${position ? '' : 'flex justify-center items-center'} ${className}`}
+                        className={`fixed top-0 left-0 w-full h-full z-[9999] bg-black/20 backdrop-blur-[2px] ${position ? '' : 'flex justify-center items-center'} ${className}`}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}

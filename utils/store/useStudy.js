@@ -1,9 +1,9 @@
-import { newPathData } from "@/app/(app)/study/components/example study paths";
 import { useEffect } from "react";
 import { createDataLoadingHook, createStore } from "./utils/createStore";
 import { supabase } from "../supabase/client";
 import { useUser } from "./useUser";
-import { makeLink, prepareForStudyPathsTable, prepareForTasksTable } from "../supabase/utils";
+import { makeLink, prepareForStudyPathsTable, prepareForTasksTable, unLink } from "../supabase/utils";
+import { resizeImage } from "../actions/storage actions";
 
 export const [useStudy, studyActions] = createStore((set, get, withUser, withLoadingCheck) => ({
     paths: [],
@@ -44,8 +44,7 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
         })).select().single();
         if (stepError) throw stepError;
 
-        const { error: linkError } = await makeLink('tasks', stepData.id, 'study_paths', pathData.id);
-        if (linkError) throw linkError;
+        await makeLink('tasks', stepData.id, 'study_paths', pathData.id);
 
         set({ paths: [...get().paths, { ...pathData, steps: [stepData] }] })
     },
@@ -58,6 +57,12 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
         set(state => ({ paths: state.paths.map(path => path.id === pathId ? { ...path, ...pathData } : path) }))
         await supabase.from('study_paths').update(prepareForStudyPathsTable(pathData)).eq('id', pathId);
     },
+    updatePathMetadata: async (pathId, metadata) => {
+        const path = get().paths.find(path => path.id === pathId)
+        const newMetadata = { ...path.metadata, ...metadata }
+        set(state => ({ paths: state.paths.map(path => path.id === pathId ? { ...path, metadata: newMetadata } : path) }))
+        await supabase.from('study_paths').update({ metadata: newMetadata }).eq('id', pathId);
+    },
 
     addStep: async (pathId, step) => {
         const path = get().paths.find(path => path.id === pathId)
@@ -65,8 +70,15 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
         step.student_id = useUser.getState().user.id
         const { data, error } = await supabase.from('tasks').insert(prepareForTasksTable(step)).select().single();
         if (error) throw error;
-        await makeLink('tasks', data.id, 'study_paths', pathId);
-        set(state => ({ paths: state.paths.map(path => path.id === pathId ? { ...path, steps: [...path.steps, data] } : path) }))
+        await get().linkStepToPath(data, pathId);
+    },
+    linkStepToPath: async (step, pathId) => {
+        await makeLink('tasks', step.id, 'study_paths', pathId);
+        set(state => ({ paths: state.paths.map(path => path.id === pathId ? { ...path, steps: [...path.steps, step] } : path) }))
+    },
+    unlinkStepFromPath: async (stepId) => {
+        await unLink('tasks', stepId, 'study_paths', useStudy.getState().paths.find(path => path.steps.some(step => step.id === stepId))?.id);
+        set(state => ({ paths: state.paths.map(path => path.id === pathId ? { ...path, steps: path.steps.filter(step => step.id !== stepId) } : path) }))
     },
     updateStep: async (pathId, stepId, stepData) => {
         const path = get().paths.find(path => path.id === pathId)
@@ -107,29 +119,17 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
         set(state => ({ paths: state.paths.map(path => path.id === pathId ? path : path) }))
     },
 
-
-    // ------------------------------
-    createImage: withUser(async (user, path, name) => {
-        // TODO
-        // await get().updatePath(path.id, { image: null })
-
-        // const imageData = await generateImage(name);
-        // if (!imageData) return;
-
-        // const byteCharacters = atob(imageData);
-        // const byteNumbers = new Array(byteCharacters.length);
-        // for (let i = 0; i < byteCharacters.length; i++) {
-        //     byteNumbers[i] = byteCharacters.charCodeAt(i);
-        // }
-        // const byteArray = new Uint8Array(byteNumbers);
-        // const blob = new Blob([byteArray], { type: 'image/png' });
-
-        // const storageRef = ref(storage, `studyPaths/${user.id}/${path.id}`);
-        // await uploadBytes(storageRef, blob, { contentType: 'image/png' })
-        // const url = await getDownloadURL(storageRef);
-        // await get().updatePath(path.id, { image: url });
+    uploadImage: withUser(async (user, pathId, file) => {
+        const blob = await resizeImage(file, 1024);
+        const url = `studypaths/${user.id}/${pathId}/image`;
+        const { error } = await supabase.storage.from('images').upload(url, blob, {
+            upsert: true,
+        });
+        if (error) throw error;
+        const { data: downloadData, error: downloadError } = await supabase.storage.from('images').getPublicUrl(url);
+        if (downloadError) throw downloadError;
+        await get().updatePathMetadata(pathId, { image: downloadData.publicUrl });
     }),
-
 
     // ------------------------------
     loadSideContext: async () => {
@@ -152,4 +152,13 @@ export function useStudySideContext() {
         studyActions.loadSideContext();
     }, []);
     return sideContext
+}
+
+
+export const studyUtils = {
+    getContext: (pathId) => {
+        const path = useStudy.getState().paths.find(path => path.id === pathId);
+        if (!path) return null;
+        return { table: 'study_paths', id: pathId, title: path.title };
+    }
 }

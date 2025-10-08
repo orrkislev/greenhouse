@@ -1,4 +1,5 @@
 import { userActions, useUser } from "@/utils/store/useUser";
+import { tw } from "@/utils/tw";
 import { ImageUp, Save } from "lucide-react";
 import { useRef, useState } from "react";
 
@@ -30,7 +31,7 @@ export function AvatarEdit() {
             setImage(null);
         }
     }
-    
+
     const imgUrl = image ? URL.createObjectURL(image) : user.avatar_url;
 
     return (
@@ -86,16 +87,22 @@ export function AvatarEdit() {
 
 
 
+const GroupAvatarItem = tw`group -ml-[12px] hover:z-[100]`
 
-export function AvatarGroup({ users }) {
+export function AvatarGroup({ users, className }) {
     if (!users) return null;
     if (!Array.isArray(users)) return null
     if (users.length === 0) return null;
 
     return (
-        <div className="flex flex-row-reverse">
-            {users.map((user) => (
-                <Avatar key={user.id} user={user} className='-mr-[50%] hover:z-10 scale-75' />
+        <div className={`flex items-center translate-x-[12px] ${className}`}>
+            {users.map((user, idx) => (
+                <GroupAvatarItem key={user.id} $idx={idx}>
+                    <Avatar
+                        user={user}
+                        className="transition-transform duration-150 hover:scale-150 grayscale-50 hover:grayscale-0"
+                    />
+                </GroupAvatarItem>
             ))}
         </div>
     )

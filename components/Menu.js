@@ -24,7 +24,7 @@ export function MenuTitle({ children, className }) {
 }
 export function MenuList({ children, className  }) {
     return (
-        <div className={`p-2 rounded-md flex flex-col gap-2 bg-white border border-stone-200 text-xs ${className}`}>
+        <div className={`rounded-md flex flex-col gap-2 text-xs ${className}`}>
             {children}
         </div>
     )

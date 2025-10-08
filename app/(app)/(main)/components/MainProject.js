@@ -1,42 +1,43 @@
 import { tw } from "@/utils/tw";
-import { useProject } from "@/utils/store/useProject";
+import { projectUtils, useProject } from "@/utils/store/useProject";
 import { projectTasksActions, useProjectNextTasks, useProjectTasksData } from "@/utils/store/useProjectTasks";
-import { Check, ChevronLeft, X } from "lucide-react";
+import { CheckSquare, Square } from "lucide-react";
 import Link from "next/link";
 import Box2 from "@/components/Box2";
 import Image from "next/image";
-import Button from "@/components/Button";
+import { IconButton } from "@/components/Button";
+import { useState } from "react";
+import TaskModal from "@/components/TaskModal";
+import { AvatarGroup } from "@/components/Avatar";
 
 export default function MainProject() {
     const project = useProject();
 
-    const imgUrl = (project?.image === 'generating' || !project?.image) ? null : project?.image;
+    const imgUrl = project?.metadata?.image ?
+        'url(' + project.metadata.image + ')' :
+        'linear-gradient(to right, #f7797d, #FBD786, #C6FFDD)'
 
     return (
         <Box2 label="הפרויקט שלי" className="flex-1 group/project pb-8 relative">
             <div className='flex flex-col gap-3'>
-                {project && <div className='w-full aspect-[7/3] relative group/image'>
-                    {imgUrl && <Image src={imgUrl} alt={project.name} fill className="object-cover" />}
-                    <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-transparent group-hover/image:bg-stone-900/30 transition-all duration-200">
-                        <h1 className="font-bold p-2 bg-white group-hover/image:text-stone-900 group-hover/image:scale-105 transition-all duration-200">{project.title}</h1>
+                {project ? (
+                    <>
+
+                        <Link href={`/project/?id=${project.id}`}>
+                            <div className='w-full aspect-[7/3] relative group/image' style={{ backgroundImage: imgUrl, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                                <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-transparent group-hover/image:bg-stone-900/30 transition-all duration-200">
+                                    <h1 className="font-bold p-2 bg-white group-hover/image:text-stone-900 group-hover/image:scale-105 transition-all duration-200">{project.title}</h1>
+                                </div>
+                            </div>
+                        </Link>
+                        <Tasks />
+                        <AvatarGroup users={project.masters} className='absolute bottom-1 left-1' />
+                    </>) : (
+                    <div className='font-semibold'>
+                        אין פרויקט פעיל
                     </div>
-                </div>
-                }
-
-                {project && <Tasks />}
-
-                {!project && <div className='font-semibold'>
-                    אין פרויקט פעיל
-                </div>}
-
+                )}
             </div>
-
-            <Link href="/project">
-                <Button className="absolute bottom-2 left-2">
-                    לדף הפרויקט
-                    <ChevronLeft className='inline w-4 h-4 text-stone-500' />
-                </Button>
-            </Link>
         </Box2>
     );
 }
@@ -119,36 +120,24 @@ function Tasks() {
 
 export const TaskPill = tw`
     text-sm px-2 py-1 bg-blue-200 text-blue-800 rounded-full
-    ${props => props.tag === 'overdue' && 'bg-red-200 text-red-800'}
-    ${props => props.tag === 'active' && 'bg-green-200 text-green-800'}
-    ${props => props.tag === 'next' && 'bg-yellow-200 text-yellow-800'}
-    ${props => props.tag === 'completed' && 'bg-stone-200 text-stone-800'}
+    ${props => props.status === 'todo' && 'bg-red-200 text-red-800'}
+    ${props => props.status === 'in_progress' && 'bg-green-200 text-green-800'}
+    ${props => props.status === 'blocked' && 'bg-yellow-200 text-yellow-800'}
+    ${props => props.status === 'completed' && 'bg-stone-200 text-stone-800'}
 `;
 
-function Task({ task, description, tag }) {
-    const onCheck = () => {
-        projectTasksActions.completeTask(task.id);
-    }
-    const onDelete = () => {
-        projectTasksActions.cancelTask(task.id);
-    }
+function Task({ task }) {
+    const [open, setOpen] = useState(false)
+    const onCheck = () => projectTasksActions.completeTask(task.id);
 
     return (
         <div key={task.id} className='flex items-center gap-2 group/task'>
-            <TaskPill tag={tag}>
-                {task.title}
-                <span className='text-xs text-stone-500'> ({description || task.description})</span>
-            </TaskPill>
-            {tag != 'completed' && (
-                <div className='flex gap-2 items-center group-hover/task:opacity-100 opacity-0 transition-opacity'>
-                    <button className='p-1 border border-emerald-400 hover:bg-emerald-200 rounded-full' onClick={onCheck}>
-                        <Check className='w-4 h-4 text-emerald-400' />
-                    </button>
-                    <button className='p-1 border border-rose-400 hover:bg-rose-200 rounded-full' onClick={onDelete}>
-                        <X className='w-4 h-4 text-rose-400' />
-                    </button>
-                </div>
-            )}
+            <IconButton icon={task.status == 'completed' ? CheckSquare : Square} onClick={onCheck} className="" />
+            <div className="flex flex-col hover:underline decoration-dashed cursor-pointer" onClick={() => setOpen(true)}>
+                <span className="text-sm text-stone-700">{task.title}</span>
+                <span className='text-xs text-stone-500'> {task.description}</span>
+            </div>
+            <TaskModal task={{ ...task, context: projectUtils.getContext(task.project_id) }} isOpen={open} onClose={() => setOpen(false)} />
         </div>
     )
 }

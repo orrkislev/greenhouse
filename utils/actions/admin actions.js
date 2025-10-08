@@ -17,7 +17,7 @@ export const createUser = async (username, first_name, last_name) => {
 
     const email = prepareEmail(username);
     const password = preparePassword('0000');
-    const { data: userRecord, error: userError } = await supabase.auth.admin.createUser({ email, password });
+    const { data: userRecord, error: userError } = await supabase.auth.admin.createUser({ email, password, email_confirm: true });
 
     if (userError) {
         throw new Error('Failed to create user: ' + userError.message);
