@@ -32,7 +32,7 @@ export default function JournalHandle() {
             />
 
             <div
-                className={`fixed left-1/2 -translate-x-1/2 w-full max-w-2xl transition-all duration-700 z-50 ${isOpen
+                className={`fixed overflow-y-auto max-h-[80vh] left-1/2 -translate-x-1/2 w-full max-w-2xl transition-all duration-700 z-50 ${isOpen
                     ? "bottom-[50%] translate-y-1/2 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
                     : isHovered
                         ? `translate-y-[calc(100%-80px)] ease-out delay-50 ${originalUser ? 'bottom-16' : 'bottom-0'}`

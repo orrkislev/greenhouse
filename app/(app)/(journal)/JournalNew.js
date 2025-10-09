@@ -86,7 +86,7 @@ function JournalNew({ isOpen, setIsOpen }) {
                 onChange={(e) => setText(e.target.value)}
             />
 
-            <Button data-role="save" onClick={handleSave} className="w-full justify-center">
+            <Button data-role="save" onClick={handleSave} className="w-full justify-center" data-active={text.trim().length > 0}>
                 <Save className="w-4 h-4" />
                 שמירה
             </Button>

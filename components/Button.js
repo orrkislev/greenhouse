@@ -17,6 +17,7 @@ const ButtonDiv = tw.button`
     data-[role=close]:text-stone-800 data-[role=close]:border-stone-300 data-[role=close]:hover:bg-stone-100 data-[role=close]:hover:border-stone-400
     data-[role=new]:text-green-800 data-[role=new]:border-green-300 data-[role=new]:hover:bg-green-100 data-[role=new]:hover:border-green-400
     data-[role=main-new]:text-green-800 data-[role=main-new]:border-green-600 data-[role=main-new]:bg-green-100 data-[role=main-new]:hover:bg-green-200 data-[role=main-new]:hover:border-green-400
+    data-[active=false]:grayscale-100 data-[active=false]:opacity-50 data-[active=false]:hover:opacity-30
     `
 
 export default function Button({ children, ...props }) {

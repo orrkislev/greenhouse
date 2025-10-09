@@ -6,7 +6,7 @@ export const [useLogsData, logsActions] = createStore((set, get, withUser, withL
     logs: [],
 
     loadLogs: withLoadingCheck(async (user) => {
-        const { data, error } = await supabase.from('logs').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(30);
+        const { data, error } = await supabase.from('logs').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20);
         if (error) throw error;
         for (const log of data) {
             if (log.context_table && log.context_id) {
@@ -54,6 +54,12 @@ export const [useLogsData, logsActions] = createStore((set, get, withUser, withL
         if (log.context) data.context = log.context;
         if (log.mentor) data.mentor = log.mentor;
         set((state) => ({ logs: [...state.logs, data] }));
+    }),
+
+    deleteLog: withUser(async (user, logId) => {
+        set((state) => ({ logs: state.logs.filter(log => log.id !== logId) }));
+        const { error } = await supabase.from('logs').delete().eq('id', logId).eq('user_id', user.id);
+        if (error) throw error;
     }),
 }));
 

@@ -81,7 +81,9 @@ function TaskModalContent({ task, close, initialContext }) {
     };
 
     const toggleTaskStatus = async () => {
-        if (task) await supabase.from('tasks').update({ status: task.status === 'completed' ? 'todo' : 'completed' }).eq('id', task.id);
+        if (task?.context?.table === 'projects') projectTasksActions.updateTask(task.id, { status: task.status === 'completed' ? 'todo' : 'completed' });
+        else if (task?.context?.table === 'study_paths') studyActions.updateStep(task.context.id, task.id, { status: task.status === 'completed' ? 'todo' : 'completed' });
+        else await supabase.from('tasks').update({ status: task.status === 'completed' ? 'todo' : 'completed' }).eq('id', task.id);
     };
 
     let headerText = task ? 'עריכת משימה' : 'משימה חדשה'
@@ -118,7 +120,11 @@ function TaskModalContent({ task, close, initialContext }) {
             )}
             {task && (
                 <Button data-role="close" onClick={toggleTaskStatus} className={`w-full justify-center mt-4 ${task.status === 'completed' ? 'bg-green-200 opacity-50' : ''}`}>
-                    סיימתי <CheckCircle className="w-4 h-4" />
+                    {task.status === 'todo' ? (
+                        <>סיימתי <CheckCircle className="w-4 h-4" /></>
+                    ) : (
+                        <>לא סיימתי <CircleX className="w-4 h-4" /></>
+                    )}
                 </Button>
             )}
             <div className="flex justify-between gap-2 mt-2">

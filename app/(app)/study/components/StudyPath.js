@@ -5,7 +5,7 @@ import { getNewStep } from "./example study paths"
 import WithLabel from "@/components/WithLabel"
 import StudyPath_Sources from "./StudyPath_Sources"
 import Button, { IconButton } from "@/components/Button"
-import Menu, { MenuList, MenuItem } from "@/components/Menu"
+import Menu, { MenuList, MenuItem, MenuSeparator } from "@/components/Menu"
 import { motion } from "motion/react"
 import { useState, useRef, useMemo } from "react"
 import TaskModal from "@/components/TaskModal"
@@ -66,12 +66,14 @@ function PathBG({ path }) {
 }
 
 function Steps({ path }) {
+    const [openNewStepModal, setOpenNewStepModal] = useState(false)
 
     const NewStepButton = (
         <div className="bg-green-100 rounded-2xl p-4 shadow flex items-center justify-center">
             <Button data-role="new" onClick={async () => {
-                const newStep = await getNewStep(path)
-                studyActions.addStep(path.id, newStep)
+                // const newStep = await getNewStep(path)
+                // studyActions.addStep(path.id, newStep)
+                setOpenNewStepModal(true)
             }}>
                 שלב נוסף
                 <Plus className="w-4 h-4 ml-2" />
@@ -98,6 +100,7 @@ function Steps({ path }) {
                     </div>
                 </div>
             </div>
+            <TaskModal isOpen={openNewStepModal} onClose={() => setOpenNewStepModal(false)} context={studyUtils.getContext(path.id)} />
         </div>
     )
 }
@@ -124,17 +127,17 @@ function Step({ path, step, side }) {
 
     const [openTaskModal, setOpenTaskModal] = useState(false);
 
-    const addContent = (type) => {
-        // TODO
-    }
+    // const addContent = (type) => {
+    //     // TODO
+    // }
 
-    const updateContent = (contentId, data) => {
-        // TODO
-    }
+    // const updateContent = (contentId, data) => {
+    //     // TODO
+    // }
 
-    const removeContent = (contentId) => {
-        // TODO
-    }
+    // const removeContent = (contentId) => {
+    //     // TODO
+    // }
 
     return (
         <div className="group/step w-full relative">
@@ -145,7 +148,7 @@ function Step({ path, step, side }) {
                         opacity: 1,
                     }}
                     animate={{
-                        scale: step.finished ? 8 : 0,
+                        scale: step.status == 'completed' ? 8 : 0,
                         opacity: 1,
                     }}
                     transition={{ duration: 0.4, ease: "easeInOut" }}
@@ -159,22 +162,24 @@ function Step({ path, step, side }) {
 
                 <div className="relative z-10 p-4 pb-8">
 
-                    <Menu className='absolute top-2 left-2 scale-80' icon={EllipsisVertical}>
-                        <MenuList>
-                            <MenuItem title="עריכה" icon={Edit} onClick={() => setOpenTaskModal(true)} />
-                            {/* <MenuItem title="מקור מידע" icon={contentIcons.source.icon} onClick={() => addContent('source')} />
+                    {/* <Menu className='absolute top-2 left-2 scale-80' icon={EllipsisVertical}> */}
+                    {/* <MenuList> */}
+                    {/* <MenuItem title="עריכה" icon={Edit} onClick={() => setOpenTaskModal(true)} /> */}
+                    {/* <MenuItem title="מקור מידע" icon={contentIcons.source.icon} onClick={() => addContent('source')} />
                             <MenuItem title="ציטוט" icon={contentIcons.quote.icon} onClick={() => addContent('quote')} />
                             <MenuItem title="תרגול" icon={contentIcons.exercise.icon} onClick={() => addContent('exercise')} />
                             <MenuItem title="מטרה" icon={contentIcons.goal.icon} onClick={() => addContent('goal')} />
                             <MenuSeparator />
                             <MenuItem title="מחק" icon={Trash2} onClick={() => studyActions.deleteStep(path.id, step.id)} /> */}
-                        </MenuList>
-                    </Menu>
+                    {/* </MenuList> */}
+                    {/* </Menu> */}
 
-                    <div className="flex flex-col gap-1 p-2">
-                        <SmartText text={step.title} className="text-xl font-semibold text-stone-500" onEdit={(title) => studyActions.updateStep(path.id, step.id, { ...step, title })} />
-                        <SmartText text={step.description} className="text-sm text-stone-500" onEdit={(description) => studyActions.updateStep(path.id, step.id, { ...step, description })} />
-                        {step.content && step.content.map((content) => {
+                    <div className="flex flex-col gap-1 p-2 hover:underline decoration-dashed cursor-pointer" onClick={() => setOpenTaskModal(true)}>
+                        <div className='text-xl font-semibold text-stone-500'>{step.title}</div>
+                        <div className='text-sm text-stone-500'>{step.description}</div>
+                        {/* <SmartText text={step.title} className="text-xl font-semibold text-stone-500" onEdit={(title) => studyActions.updateStep(path.id, step.id, { ...step, title })} /> */}
+                        {/* <SmartText text={step.description} className="text-sm text-stone-500" onEdit={(description) => studyActions.updateStep(path.id, step.id, { ...step, description })} /> */}
+                        {/* {step.content && step.content.map((content) => {
                             const Content = contentIcons[content.type]
                             const className = `text-sm text-stone-500 ${Content.className || ''}`
                             return (
@@ -186,7 +191,7 @@ function Step({ path, step, side }) {
                                     />
                                 </div>
                             )
-                        })}
+                        })} */}
                     </div>
 
                     <div className="absolute bottom-2 left-2">
