@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import { prepareEmail } from '@/utils/firebase/auth';
+import { prepareEmail, preparePassword } from '@/utils/firebase/auth';
 import { resizeImage } from '@/utils/actions/storage actions';
 import { resetPin } from '../actions/admin actions';
 import { supabase } from '../supabase/client';
@@ -24,7 +24,8 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 		signIn: async (username, pinPass) => {
 			set({ error: null });
 			const email = prepareEmail(username);
-			const { data, error } = await supabase.auth.signInWithPassword({ email, password: pinPass });
+			const password = preparePassword(pinPass)
+			const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 			if (error) set({ error });
 			if (data) await get().getUserData(data.user.id);
 		},

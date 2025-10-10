@@ -1,6 +1,6 @@
 import { IconButton } from "@/components/Button"
 import { logsActions, useLogs } from "@/utils/store/useLogs"
-import { ArrowDownFromLineIcon, NotebookText, Trash2 } from "lucide-react"
+import { ArrowDownFromLineIcon, NotebookText, Trash2, X } from "lucide-react"
 import { useState } from "react"
 
 const table_names = {
@@ -75,12 +75,7 @@ export default function Journal() {
                                 className="inline-flex items-center gap-1 px-2 py-1 bg-stone-200 rounded-md text-sm"
                             >
                                 <span>{tag}</span>
-                                <button
-                                    onClick={() => removeFilter(tag)}
-                                    className="text-stone-600 hover:text-stone-900 font-bold"
-                                >
-                                    ×
-                                </button>
+                                <IconButton icon={X} onClick={() => removeFilter(tag)} small={true} className="text-stone-600 hover:text-stone-900 font-bold" />
                             </div>
                         ))}
                     </div>
@@ -101,10 +96,16 @@ export default function Journal() {
                             </div>
                             <div className="flex items-center gap-2">
                                 {log.context && (
-                                    <span className='text-xs text-stone-500 rounded-full bg-stone-200 px-2 py-1 group-hover/log:bg-stone-300'> {table_names[log.context_table]} {log.context.title}</span>
+                                    <span className='text-xs text-stone-500 rounded-full bg-stone-200 px-2 py-1 group-hover/log:bg-stone-300'
+                                        onClick={() => setFilterTags([...filterTags, table_names[log.context_table], log.context.title])}
+                                    >
+                                        {table_names[log.context_table]} {log.context.title}
+                                    </span>
                                 )}
                                 {log.mentor && (
-                                    <span className='text-xs text-stone-500 rounded-full bg-stone-200 px-2 py-1 group-hover/log:bg-stone-300'> {log.mentor.first_name} {log.mentor.last_name}</span>
+                                    <span className='text-xs text-stone-500 rounded-full bg-stone-200 px-2 py-1 group-hover/log:bg-stone-300'>
+                                        {log.mentor.first_name} {log.mentor.last_name}
+                                    </span>
                                 )}
                                 <IconButton icon={Trash2} onClick={() => logsActions.deleteLog(log.id)} className="opacity-0 group-hover/log:opacity-100 transition-opacity duration-500 text-stone-700" />
                             </div>

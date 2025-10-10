@@ -39,7 +39,7 @@ export const createUser = async (username, first_name, last_name) => {
 
 export const resetPin = async (userId, newPin = '0000') => {
     const password = preparePassword(newPin);
-    await supabase.auth.admin.updateUserById(userId, {
+    return await supabase.auth.admin.updateUserById(userId, {
         password,
     });
 }
