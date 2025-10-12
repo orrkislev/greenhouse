@@ -6,11 +6,11 @@ import { useEffect, useState } from "react";
 import { groupsActions } from "@/utils/store/useGroups";
 import StaffGroup_Meetings from "./StaffGroup_Meetings";
 import Box2 from "@/components/Box2";
-import { useUser } from "@/utils/store/useUser";
-import { Archive, Check, Plus, Trash } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { AvatarGroup } from "@/components/Avatar";
 import 'react-quill-new/dist/quill.snow.css';
 import MessageEditor from "./MessageEditor";
+import GroupTaskModal from "@/components/GroupTaskModal";
 
 
 
@@ -37,7 +37,6 @@ export default function StaffGroup({ group }) {
 
 
 function GroupTasks({ group }) {
-
     useEffect(() => {
         groupsActions.loadGroupTasks(group.id);
     }, [group])
@@ -53,58 +52,39 @@ function GroupTasks({ group }) {
 }
 
 function GroupTask({ group, task }) {
+    const [open, setOpen] = useState(false)
 
-    useEffect(()=>{
-        groupsActions.loadAllTaskAssignments(task.id);
-    },[])
+    console.log(task)
 
-    const students = group.members ? group.members.filter(member => member.role === 'student') : [];
+    const students = group.members ? group.members.filter(member => member.role === 'student') : []
 
 
     return (
-        <div className="flex group gap-16 items-start">
-            <div className="flex flex-col gap-1">
-                <div className="flex gap-1 items-center">
-                    <AvatarGroup users={studentsFinished} />
-                    <div className="">{task.title}</div>
+        <div className="flex flex-col gap-1 group border-b border-stone-200 pb-2">
+            <div className="flex justify-between">
+                <div className="text-stone-700 hover:underline decoration-dashed cursor-pointer" onClick={() => setOpen(true)}>{task.title}</div>
+            </div>
+
+            <div className='flex justify-between'>
+                <div className="flex gap-2 items-center text-xs">
+                    <Check className="w-3 h-3" />  {students.length} / {task.completed && task.completed.length}
                 </div>
-                <div className="flex gap-1 text-xs text-stone-500 items-center"> <Check className="w-3 h-3" />  {students.length} / {task.assignments && task.assignments.length}</div>
             </div>
-            <div className="opacity-0 group-hover:opacity-100 flex gap-1 p-1">
-                <button onClick={() => groupsActions.updateGroupTask(group, task, { active: false })} className="p-1 rounded-full hover:bg-stone-100 cursor-pointer">
-                    <Archive className="w-4 h-4" />
-                </button>
-                <button onClick={() => groupsActions.deleteGroupTask(group, task)} className="p-1 rounded-full hover:bg-stone-100 cursor-pointer">
-                    <Trash className="w-4 h-4" />
-                </button>
-            </div>
+
+            <GroupTaskModal group={group} task={task} isOpen={open} onClose={() => setOpen(false)} />
         </div>
     )
 }
 
 function NewTask({ group }) {
-    const [isEditing, setIsEditing] = useState(false);
-    const user = useUser(state => state.user);
-    if (!user || !user.id) return null;
-
-    if (!isEditing) {
-        return (
-            <div>
-                <button onClick={() => setIsEditing(true)} className="p-1 rounded-full bg-primary text-white hover:bg-primary/80 cursor-pointer">
-                    <Plus className="w-4 h-4" />
-                </button>
-            </div>
-        )
-    }
-
-    const onCreate = (text) => {
-        groupsActions.createGroupTask(group, text);
-        setIsEditing(false);
-    }
+    const [open, setOpen] = useState(false)
 
     return (
         <div>
-            <input type="text" placeholder="משימה חדשה" onBlur={(e) => onCreate(e.target.value)} />
+            <button onClick={() => setOpen(true)} className="p-1 rounded-full bg-primary text-white hover:bg-primary/80 cursor-pointer">
+                <Plus className="w-4 h-4" />
+            </button>
+            <GroupTaskModal group={group} isOpen={open} onClose={() => setOpen(false)} />
         </div>
     )
 }

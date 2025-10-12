@@ -131,10 +131,12 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
         if (error) throw error;
         set((state) => ({ groups: state.groups.map(g => ({ ...g, tasks: g.tasks ? g.tasks.map(t => t.id === taskId ? { ...t, assignments: data } : t) : [] })) }));
     },
-    createGroupTask: async (group, text) => {
+    createGroupTask: async (group, text, description, due_date) => {
         const task = {
             title: text,
             status: 'todo',
+            description,
+            due_date,
             created_by: useUser.getState().user.id,
         }
         const { data, error } = await supabase.from('tasks').insert(task).select().single();
@@ -152,11 +154,16 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
         if (error) throw error;
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: g.tasks.filter(t => t.id !== task.id) } : g) }));
     },
-    completeTask: async (group, task, userId) => {
-        const { error } = await supabase.from('task_assignments').update({ statud: 'completed' }).eq('task_id', task.id).eq('user_id', userId);
+    toggleGroupTaskStatus: withUser(async (user, group, task) => {
+        const newStatus = task.status === 'completed' ? 'todo' : 'completed';
+        set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: g.tasks.map(t => t.id === task.id ? { ...t, status: newStatus } : t) } : g) }));
+
+        const { error } = await supabase.from('task_assignments').upsert(
+            { task_id: task.id, student_id: user.id, status: newStatus },
+            { onConflict: 'task_id,student_id' }
+        )
         if (error) throw error;
-        set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: g.tasks.map(t => t.id === task.id ? task : t) } : g) }));
-    }
+    })
 }))
 
 
