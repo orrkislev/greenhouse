@@ -18,6 +18,8 @@ export default function Journal() {
     const [filterTags, setFilterTags] = useState([])
     const [filterInput, setFilterInput] = useState('')
 
+    if (logs.length === 0) return null;
+
     const handleAddFilter = (e) => {
         if (e.key === 'Enter' && filterInput.trim()) {
             if (!filterTags.includes(filterInput.trim())) {
@@ -111,7 +113,7 @@ export default function Journal() {
                             </div>
                         </div>
                     ))}
-                {filteredLogs.length % 20 === 0 && (
+                {logs.length % 20 === 0 && (
                     <div className="flex justify-center items-center h-10">
                         <IconButton icon={ArrowDownFromLineIcon} onClick={() => logsActions.loadMoreLogs()} className="text-stone-700" />
                     </div>

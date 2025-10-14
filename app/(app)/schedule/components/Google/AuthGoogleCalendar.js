@@ -1,6 +1,7 @@
 import Button from "@/components/Button";
 import { getAuthUrl, getRefreshToken } from "@/utils/actions/google actions";
 import { userActions, useUser } from "@/utils/store/useUser";
+import { Icon } from "@iconify/react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function AuthGoogleCalendar() {
@@ -18,8 +19,9 @@ export default function AuthGoogleCalendar() {
 
 
     return (
-        <Button onClick={clickAuth}>
-            חיבור חשבון גוגל
+        <Button onClick={clickAuth} className="justify-center">
+            <Icon icon="devicon:google" className="w-4 h-4" />
+            חיבור חשבון גוגל 
         </Button>
     );
 }

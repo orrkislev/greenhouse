@@ -1,7 +1,7 @@
 import { tw } from "@/utils/tw";
 import { useMemo, useState } from "react"
 import ListView from "./ListView";
-import { CalendarDays, BetweenHorizonalEnd, TableOfContents, Plus } from "lucide-react";
+import { CalendarDays, BetweenHorizonalEnd, TableOfContents, Plus, ListCheck } from "lucide-react";
 import WeeklyView from "./WeeklyView";
 import CalendarView from "./CalendarView";
 import { useProjectTasks } from "@/utils/store/useProjectTasks";
@@ -25,7 +25,7 @@ export default function ProjectTasks() {
 
     return (
         <>
-            <Box2 label="תכנית עבודה" className="bg-white pb-6 relative">
+            <Box2 label="תכנית עבודה" className="bg-white pb-6 relative" LabelIcon={ListCheck}>
                 <div className="flex gap-4 mb-4 justify-between">
                     <NewTaskButton onClick={() => setIsOpen(true)} className="group/newTask">
                         <Plus className="w-6 h-6" />

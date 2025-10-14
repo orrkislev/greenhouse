@@ -1,7 +1,7 @@
 import { tw } from "@/utils/tw";
 import { projectUtils, useProject } from "@/utils/store/useProject";
 import { projectTasksActions, useProjectNextTasks, useProjectTasksData } from "@/utils/store/useProjectTasks";
-import { CheckSquare, Square } from "lucide-react";
+import { Briefcase, CheckSquare, Square } from "lucide-react";
 import Link from "next/link";
 import Box2 from "@/components/Box2";
 import Image from "next/image";
@@ -9,6 +9,7 @@ import { IconButton } from "@/components/Button";
 import { useState } from "react";
 import TaskModal from "@/components/TaskModal";
 import { AvatarGroup } from "@/components/Avatar";
+import CoverZoomCard from "@/components/CoverZoomCard";
 
 export default function MainProject() {
     const project = useProject();
@@ -18,18 +19,18 @@ export default function MainProject() {
         'linear-gradient(to right, #f7797d, #FBD786, #C6FFDD)'
 
     return (
-        <Box2 label="הפרויקט שלי" className="flex-1 group/project pb-8 relative">
+        <Box2 label="הפרויקט שלי" className="flex-1 group/project pb-8 relative" LabelIcon={Briefcase}>
             <div className='flex flex-col gap-3'>
                 {project ? (
                     <>
-
-                        <Link href={`/project/?id=${project.id}`}>
+                        <CoverZoomCard href={`/project/?id=${project.id}`} imageUrl={project.metadata?.image} label={project.title} key={project.id} />
+                        {/* <Link href={`/project/?id=${project.id}`}>
                             <div className='w-full aspect-[7/3] relative group/image' style={{ backgroundImage: imgUrl, backgroundSize: 'cover', backgroundPosition: 'center' }}>
                                 <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-transparent group-hover/image:bg-stone-900/30 transition-all duration-200">
                                     <h1 className="font-bold p-2 bg-white group-hover/image:text-stone-900 group-hover/image:scale-105 transition-all duration-200">{project.title}</h1>
                                 </div>
                             </div>
-                        </Link>
+                        </Link> */}
                         <Tasks />
                         <AvatarGroup users={project.masters} className='absolute bottom-1 left-1' />
                     </>) : (

@@ -19,16 +19,13 @@ export function GroupEventEdit({ onClose, groupId, date, event }) {
             end: timeRange.end,
         };
 
-        if (event) {
-            await groupsActions.updateGroupEvent(groupId, { ...newObj, id: event.id });
-        } else {
-            await groupsActions.createGroupEvent(groupId, newObj);
-        }
+        if (event) groupsActions.updateGroupEvent(groupId, { ...newObj, id: event.id });
+        else groupsActions.createGroupEvent(groupId, newObj);
         onClose()
     };
 
     const clickDelete = async () => {
-        await groupsActions.removeGroupEvent(groupId, date, event.id);
+        groupsActions.removeGroupEvent(groupId, date, event.id);
         onClose();
     };
 

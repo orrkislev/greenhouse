@@ -75,7 +75,9 @@ function TaskModalContent({ task, close, initialContext }) {
     const handleDelete = async () => {
         if (task) {
             await supabase.from('tasks').delete().eq('id', task.id);
-            if (task.context) await unLink('tasks', task.id, task.context.table, task.context.id);
+            if (task.context && task.context.table === 'study_paths') await studyActions.unlinkStepFromPath(task.id);
+            else if (task.context && task.context.table === 'projects') await projectTasksActions.unlinkTaskFromProject(task.id);
+            else await unLink('tasks', task.id, task.context.table, task.context.id);
         }
         close();
     };

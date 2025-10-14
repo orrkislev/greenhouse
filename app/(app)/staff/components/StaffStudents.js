@@ -6,20 +6,24 @@ import { useEffect } from "react";
 import { Staff_Students_List } from "./StaffGroup_Students";
 import Button from "@/components/Button";
 import WithLabel from "@/components/WithLabel";
+import { adminActions, useAdmin } from "@/utils/store/useAdmin";
 
 export default function StaffStudents() {
     const mentorships = useMentorships(state => state.mentorships);
-    const allStudents = useMentorships(state => state.allStudents);
+    const allMembers = useAdmin(state => state.allMembers);
+    const classes = useAdmin(state => state.classes);
 
     useEffect(() => {
         mentorshipsActions.getMentorships();
     }, []);
 
     const loadAllStudents = async () => {
-        await mentorshipsActions.getAllStudents();
+        await adminActions.loadData();
     }
 
-    const availableStudents = allStudents.filter(student => !mentorships.some(s => s.student_id === student.id));
+    const availableStudents = allMembers
+        .filter(student => !mentorships.some(s => s.student_id === student.id))
+        .filter(student => student.role === 'student');
 
     return (
         <div className="flex flex-col gap-4">
@@ -33,21 +37,23 @@ export default function StaffStudents() {
 
 
             <div className="text-stone-500">
-                {allStudents.length == 0 ? (
+                {availableStudents.length == 0 ? (
                     <Button onClick={loadAllStudents}>
                         <Plus className="w-4 h-4" /> חניכים נוספים
                     </Button>
                 ) : (
                     <div className="flex gap-4 flex-wrap">
-                        <WithLabel label="כל החניכים">
-                            <div className="flex gap-2 flex-wrap">
-                                {availableStudents.sort((a, b) => a.first_name.localeCompare(b.first_name)).map(student => (
-                                    <Button key={student.id} data-role="save" onClick={() => mentorshipsActions.createMentorship(student, 'הנחייה חדשה')} >
-                                        {student.first_name} {student.last_name}
-                                    </Button>
-                                ))}
-                            </div>
-                        </WithLabel>
+                        {classes.map(cls => (
+                            <WithLabel key={cls.id} label={cls.name}>
+                                <div className="flex gap-2 flex-wrap">
+                                    {availableStudents.filter(student => student.groups.includes(cls.id)).map(student => (
+                                        <Button key={student.id} data-role="save" onClick={() => mentorshipsActions.createMentorship(student, 'הנחייה חדשה')} >
+                                            {student.first_name} {student.last_name}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </WithLabel>
+                        ))}
                     </div>
                 )}
             </div>

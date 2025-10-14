@@ -33,7 +33,7 @@ export default function ProjectInfo() {
       <div className="flex-1"></div>
 
       <div className="flex-1">
-        {project.masters ? (
+        {(project.masters && project.masters.length > 0) ? (
           <div className="flex items-center justify-center flex-col" >
             <div className="flex items-center gap-2">
               <Avatar user={project.masters?.[0]} />

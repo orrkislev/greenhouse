@@ -2,7 +2,7 @@ import Box2 from "@/components/Box2";
 import { groupsActions, useUserGroups } from "@/utils/store/useGroups";
 import { useEffect, useState } from "react";
 import { isStaff, useUser } from "@/utils/store/useUser";
-import { Check, CheckSquare, Square } from "lucide-react";
+import { Check, CheckSquare, PartyPopper, Square } from "lucide-react";
 import 'react-quill-new/dist/quill.snow.css';
 import { AvatarGroup } from "@/components/Avatar";
 import { IconButton } from "@/components/Button";
@@ -33,7 +33,7 @@ function MainGroup({ group }) {
     }, [group])
 
     return (
-        <Box2 label={group.label} description={group.description} className="flex-1 relative">
+        <Box2 label={group.label} description={group.description} className="flex-1 relative" LabelIcon={PartyPopper}>
             <div className="text-sm text-stone-500 w-full" dangerouslySetInnerHTML={{ __html: group.message }} />
             <div>
                 {group.tasks && group.tasks.map((task) => (

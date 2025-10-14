@@ -66,7 +66,7 @@ function StudyGroupsMessage() {
                     <div key={dayIndex}>
                         <h3 className="font-semibold">יום {day}</h3>
                         {days[dayIndex].map(({ group, index }) => (
-                            <div key={index}>
+                            <div key={index} className="py-2">
                                 {editMode ? (
                                     <div className="flex flex-col gap-1 border border-gray-300 rounded-md p-2">
                                         <input name="title" type="text" value={group.title} onChange={(e) => editGroupTitle(index, e.target.value)} className="font-semibold" />
@@ -85,7 +85,7 @@ function StudyGroupsMessage() {
                                 ) : (
                                     <>
                                         <div className="text-sm text-gray-500 font-semibold">{group.title}</div>
-                                        <div className="text-sm text-gray-500">{group.content}</div>
+                                        <div className="text-xs text-gray-500">{group.content}</div>
                                     </>
                                 )}
                             </div>

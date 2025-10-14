@@ -2,6 +2,7 @@ import { adminActions, useAdmin } from "@/utils/store/useAdmin";
 import { useEffect } from "react";
 import MessageEditor from "./MessageEditor";
 import Box2 from "@/components/Box2";
+import { Banana } from "lucide-react";
 
 export default function Staff_Admin() {
     const message = useAdmin(state => state.message);
@@ -19,7 +20,7 @@ export default function Staff_Admin() {
             </div>
             <div className="flex gap-4">
                 <MessageEditor onSave={(value) => adminActions.updateMessage(value)} initialValue={message} />
-                <Box2 label="עוד משהו" className="flex-1">
+                <Box2 label="עוד משהו" className="flex-1" LabelIcon={Banana}>
                 </Box2>
             </div>
         </div>

@@ -1,6 +1,6 @@
 import Box2 from "@/components/Box2";
 import { useEffect, useRef, useState } from "react";
-import { AArrowDown, AArrowUp, Bold, Italic, Strikethrough, Underline } from "lucide-react";
+import { AArrowDown, AArrowUp, Bold, Italic, MessageCircle, Strikethrough, Underline } from "lucide-react";
 import { tw } from "@/utils/tw";
 import ReactQuill from 'react-quill-new';
 
@@ -24,7 +24,7 @@ export default function MessageEditor({ onSave, initialValue }) {
     };
 
     return (
-        <Box2 label="הודעה" className="flex-1">
+        <Box2 label="הודעה" className="flex-1" LabelIcon={MessageCircle}>
             <div className="flex flex-col">
                 <QuillToolbar>
                     <QuillToolbarButton onClick={() => applyFormat('strike')}><Strikethrough className="w-4 h-4" /></QuillToolbarButton>

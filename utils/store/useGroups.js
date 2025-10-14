@@ -87,18 +87,20 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
         await makeLink('events', data.id, 'groups', groupId);
     },
     updateGroupEvent: async (groupId, obj) => {
-        const { error } = await supabase.from('events').update(obj).eq('id', obj.id);
-        if (error) throw error;
         const newEvents = { ...get().groups.find(g => g.id === groupId).events } || {}
         newEvents[obj.date] = newEvents[obj.date].map(e => e.id === obj.id ? obj : e)
         set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: newEvents } : g) }));
+
+        const { error } = await supabase.from('events').update(obj).eq('id', obj.id);
+        if (error) throw error;
     },
     removeGroupEvent: async (groupId, date, objId) => {
-        const { error } = await supabase.from('events').delete().eq('id', objId);
-        if (error) throw error;
         const groupEvents = { ...get().groups.find(g => g.id === groupId).events } || {}
         groupEvents[date] = groupEvents[date]?.filter(e => e.id !== objId)
         set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: groupEvents } : g) }));
+
+        const { error } = await supabase.from('events').delete().eq('id', objId);
+        if (error) throw error;
     },
 
     // ----------- Group Students Management -----------

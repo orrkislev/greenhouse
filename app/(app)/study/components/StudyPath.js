@@ -69,36 +69,36 @@ function Steps({ path }) {
     const [openNewStepModal, setOpenNewStepModal] = useState(false)
 
     const NewStepButton = (
-        <div className="bg-green-100 rounded-2xl p-4 shadow flex items-center justify-center">
-            <Button data-role="new" onClick={async () => {
+        <Button className="border-none bg-emerald-500 hover:bg-emerald-600 text-white px-16 absolute bottom-0 right-1/2 translate-x-1/2"
+            onClick={async () => {
                 // const newStep = await getNewStep(path)
                 // studyActions.addStep(path.id, newStep)
                 setOpenNewStepModal(true)
             }}>
-                שלב נוסף
-                <Plus className="w-4 h-4 ml-2" />
-            </Button>
-        </div>
+            שלב נוסף
+            <Plus className="w-4 h-4 ml-2" />
+        </Button>
     )
 
     return (
         <div key={path.id} className="flex gap-4">
             <div className="relative flex-1">
-                <div className="flex">
-                    <div className="flex-1 flex flex-col gap-8 pb-32">
+                <div className="flex pb-16">
+                    <div className="flex-1 flex flex-col gap-8">
                         {path.steps.filter((_, index) => index % 2 == 0).map((step) => (
                             <Step key={step.id} path={path} step={step} side="right" />
                         ))}
-                        {path.steps.length % 2 == 1 && NewStepButton}
+                        {/* {path.steps.length % 2 == 1 && NewStepButton} */}
                     </div>
                     <StepsMiddleLine path={path} />
-                    <div className="flex-1 flex flex-col gap-8 pt-8 pb-32">
+                    <div className="flex-1 flex flex-col gap-8 pt-8">
                         {path.steps.filter((_, index) => index % 2 == 1).map((step) => (
                             <Step key={step.id} path={path} step={step} side="left" />
                         ))}
-                        {path.steps.length % 2 == 0 && NewStepButton}
+                        {/* {path.steps.length % 2 == 0 && NewStepButton} */}
                     </div>
                 </div>
+                {NewStepButton}
             </div>
             <TaskModal isOpen={openNewStepModal} onClose={() => setOpenNewStepModal(false)} context={studyUtils.getContext(path.id)} />
         </div>
@@ -160,7 +160,7 @@ function Step({ path, step, side }) {
                     }}
                 />
 
-                <div className="relative z-10 p-4 pb-8">
+                <div className="flex justify-between z-10">
 
                     {/* <Menu className='absolute top-2 left-2 scale-80' icon={EllipsisVertical}> */}
                     {/* <MenuList> */}
@@ -174,7 +174,7 @@ function Step({ path, step, side }) {
                     {/* </MenuList> */}
                     {/* </Menu> */}
 
-                    <div className="flex flex-col gap-1 p-2 hover:underline decoration-dashed cursor-pointer" onClick={() => setOpenTaskModal(true)}>
+                    <div className="flex-1 flex flex-col px-4 py-2 hover:underline decoration-dashed cursor-pointer " onClick={() => setOpenTaskModal(true)}>
                         <div className='text-xl font-semibold text-stone-500'>{step.title}</div>
                         <div className='text-sm text-stone-500'>{step.description}</div>
                         {/* <SmartText text={step.title} className="text-xl font-semibold text-stone-500" onEdit={(title) => studyActions.updateStep(path.id, step.id, { ...step, title })} /> */}
@@ -194,7 +194,7 @@ function Step({ path, step, side }) {
                         })} */}
                     </div>
 
-                    <div className="absolute bottom-2 left-2">
+                    <div className="flex flex-col h-full p-2">
                         <IconButton
                             icon={Check}
                             className={`w-8 h-8 border rounded-full transition-colors ${step.status == 'completed' ? 'bg-sky-200 border-sky-300 text-sky-600' : 'border-stone-300'}`}

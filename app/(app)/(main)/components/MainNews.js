@@ -3,7 +3,6 @@
 
 import { useEffect, useState } from "react";
 import { getLatestVideoFromPlaylist } from "@/utils/actions/google actions";
-import Box2 from "@/components/Box2";
 
 export default function MainNews() {
     const [embedUrl, setEmbedUrl] = useState(null);
@@ -19,7 +18,6 @@ export default function MainNews() {
     if (!embedUrl) return <div></div>;
 
     return (
-        <Box2 label="חדשות החממה" className="w-full">
             <div className="w-full h-0 pb-[56.25%] relative ">
                 <iframe
                     src={embedUrl}
@@ -28,6 +26,5 @@ export default function MainNews() {
                     allowFullScreen
                 ></iframe>
             </div>
-        </Box2>
     )
 }

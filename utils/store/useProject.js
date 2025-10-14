@@ -43,6 +43,8 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
                 p_target_types: ['mentorships']
             })
             if (error) throw error;
+            console.log('get masters', data)
+            if (data.length === 0) return;
             const masters = [];
             for (const item of data) {
                 const mentorId = item.data.mentor_id;

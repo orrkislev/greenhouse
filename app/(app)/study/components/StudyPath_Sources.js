@@ -11,7 +11,7 @@ export default function StudyPath_Sources({ path }) {
                 <SmartText
                     text={"מקור מידע חדש"}
                     onEdit={(text) => studyActions.addSource(path.id, text)}
-                    className="text-sm text-stone-500 bg-green-100 border border-green-300 rounded-md p-2"
+                    className="text-sm text-stone-500 bg-emerald-100 border border-emerald-300 rounded-md p-2"
                     withIcon={false}
                 />
                 {path.sources && path.sources.map((source,sourceIndex) => (

@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { groupsActions } from "@/utils/store/useGroups";
 import StaffGroup_Meetings from "./StaffGroup_Meetings";
 import Box2 from "@/components/Box2";
-import { Check, Plus } from "lucide-react";
+import { Banana, Check, Plus } from "lucide-react";
 import { AvatarGroup } from "@/components/Avatar";
 import 'react-quill-new/dist/quill.snow.css';
 import MessageEditor from "./MessageEditor";
@@ -42,7 +42,7 @@ function GroupTasks({ group }) {
     }, [group])
 
     return (
-        <Box2 label="משימות" className="flex-1">
+        <Box2 label="משימות" className="flex-1" LabelIcon={Banana}>
             {group.tasks && group.tasks.map((task) => (
                 <GroupTask key={task.id} group={group} task={task} />
             ))}

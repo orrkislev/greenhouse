@@ -34,7 +34,7 @@ export default function SchedulePage() {
 
                 {view === 'week' && (
                     <>
-                        <Notes />
+                        {/* <Notes /> */}
                         <Meetings />
                         <Events />
                         <GoogleCalendar />
