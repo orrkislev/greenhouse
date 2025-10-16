@@ -3,8 +3,8 @@ import { ChevronRight } from "lucide-react"
 import React, { useState } from "react"
 
 // Main ContextBar component that handles ALL animations
-export default function ContextBar({ name, children }) {
-    const [isOpen, setIsOpen] = useState(true)
+export default function ContextBar({ name, children, initialOpen = true }) {
+    const [isOpen, setIsOpen] = useState(initialOpen)
 
     return (
         <div className={`m-4 p-2 flex flex-col bg-white transition-all duration-500 border border-gray-200 rounded-lg ${isOpen ? 'min-w-64 w-64' : 'min-w-12 w-12'

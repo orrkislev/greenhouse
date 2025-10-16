@@ -10,23 +10,24 @@ export const Cell = ({ children, className = '' }) => (
     </td>
 )
 
-export function Edittable({ value, onChange = () => { }, onFinish = () => { } }) {
-    const [editing, setEditing] = useState(true);
+export function Edittable({ value, onChange = () => { }, onFinish = () => { }, className = '', placeholder = '' }) {
+    const [editing, setEditing] = useState(false);
     const onUpdate = (e) => {
         onChange(e.target.value);
     }
     const onBlur = (e) => {
-        // setEditing(false);
+        setEditing(false);
         onFinish(e.target.value);
     }
     if (editing) {
         return (
             <input type="text" defaultValue={value} onChange={onUpdate} onBlur={onBlur} autoFocus 
-                className="border-none outline-none p-0 m-0"
+                placeholder={placeholder}
+                className={`border-none outline-none p-0 m-0 ${className}`}
             />
         );
     } else {
-        return <div className="cursor-pointer" onClick={() => setEditing(true)}>{value ? value : '-'}</div>;
+        return <div className={`cursor-pointer hover:underline decoration-dashed ${className}`} onClick={() => setEditing(true)}>{value ? value : placeholder}</div>;
     }
 }
 

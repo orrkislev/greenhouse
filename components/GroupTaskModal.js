@@ -4,7 +4,7 @@ import WithLabel from "./WithLabel";
 import Button, { ButtonGroup, ButtonGroupItem, IconButton } from "./Button";
 import { CheckCircle, CircleX, Save, Trash2, X } from "lucide-react";
 import { addDays, format } from "date-fns";
-import { isStaff } from "@/utils/store/useUser";
+import { isStaff, useUser } from "@/utils/store/useUser";
 import { groupsActions } from "@/utils/store/useGroups";
 import { AvatarGroup } from "./Avatar";
 
@@ -26,6 +26,7 @@ function TaskModalContent({ task, close, group }) {
     const [title, setTitle] = useState(task ? task.title : 'משימה חדשה בקבוצה');
     const [description, setDescription] = useState(task ? task.description : 'פירוט המשימה בקבוצה');
     const [due_date, setDueDate] = useState(task ? task.due_date : format(new Date(), 'yyyy-MM-dd'));
+    const user = useUser(state => state.user);
 
     const isMentor = isStaff()
 
@@ -102,7 +103,7 @@ function TaskModalContent({ task, close, group }) {
             {task && isMentor && (
                 <>
                     <WithLabel label="סיימו">
-                        <AvatarGroup users={task.completed.map(id => group.members.find(member => member.id === id))} />
+                        <AvatarGroup users={task?.completed?.map(id => group.members.find(member => member.id === id))} />
                     </WithLabel>
                     <WithLabel label="לא סיימו">
                         <AvatarGroup users={group.members && group.members.filter(member => !task.completed.includes(member.id) && member.role === 'student')} />

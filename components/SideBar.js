@@ -51,7 +51,7 @@ export default function SideBar() {
                 <SideBarItem href="/study" icon={<BookOpen className="w-4 h-4" />} label="למידה" active={pathname === '/study'} />
                 <SideBarItem href="/project" icon={<Snail className="w-4 h-4" />} label="הפרויקט" active={pathname === '/project'} />
                 <SideBarItem href="/research" icon={<Brain className="w-4 h-4" />} label="חקר" active={pathname === '/research'} />
-                <SideBarItem href="/vocation" icon={<Briefcase className="w-4 h-4" />} label="תעסוקה" active={pathname === '/vocation'} disabled={true} />
+                <SideBarItem href="/vocation" icon={<Briefcase className="w-4 h-4" />} label="תעסוקה" active={pathname === '/vocation'} />
 
                 <Separator />
 

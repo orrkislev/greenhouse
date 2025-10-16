@@ -56,7 +56,7 @@ export default function ProjectProposal() {
     return (
         <div className='rtl'>
             <div className="max-w-6xl mx-auto space-y-6">
-                <Box2>
+                <div>
                     <div className="font-semibold text-lg mb-2">שם הפרויקט</div>
                     <input
                         type="text"
@@ -64,9 +64,9 @@ export default function ProjectProposal() {
                         onBlur={(e) => projectActions.updateProject({ title: e.target.value })}
                         placeholder={project.title}
                         dir="rtl"
-                        className="border border-stone-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="bg-white w-full border border-stone-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
-                </Box2>
+                </div>
 
                 <div className="flex gap-6 w-full">
                     <div className="flex flex-1 gap-6">

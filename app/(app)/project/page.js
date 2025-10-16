@@ -22,7 +22,7 @@ export default function ProjectPage() {
             <PageMain>
                 {mainContent}
             </PageMain>
-            <ContextBar name="">
+            <ContextBar name="" initialOpen={false}>
                 <ProjectContext />
             </ContextBar>
         </>

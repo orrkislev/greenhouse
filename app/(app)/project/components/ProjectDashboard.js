@@ -3,10 +3,10 @@ import ProjectGoals from "./ProjectGoals";
 import ProjectLibrary from "./ProjectLibrary";
 import ProjectInfo from "./ProjectInfo";
 import SmartText from "@/components/SmartText";
-import { DotSquare, Image, Sparkle, Trash2 } from "lucide-react";
+import { Image, Trash2 } from "lucide-react";
 import ProjectTasks from "./Project Tasks/ProjectTasks";
 import Menu, { MenuList, MenuItem } from "@/components/Menu";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 
 
 export default function ProjectDashboard() {

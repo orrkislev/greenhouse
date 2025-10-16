@@ -43,7 +43,6 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
                 p_target_types: ['mentorships']
             })
             if (error) throw error;
-            console.log('get masters', data)
             if (data.length === 0) return;
             const masters = [];
             for (const item of data) {
@@ -80,9 +79,13 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             set((state) => ({ project: { ...state.project, ...updates } }));
         },
 
-        closeProject: withUser(async (user) => {
-            // TODO
-        }),
+        closeProject: async () => {
+            const project = get().project;
+            if (!project) return;
+            const { error } = await supabase.from('projects').delete().eq('id', project.id);
+            if (error) throw error;
+            set({ project: null });
+        },
 
 
         // ------------------------------
@@ -130,8 +133,8 @@ export const useAllProjects = createDataLoadingHook(useProjectData, 'allProjects
 
 export const projectUtils = {
     getContext: (projectId) => {
-        const project = projectId ? 
-            useProjectData.getState().allProjects.find(project => project.id === projectId) : 
+        const project = projectId ?
+            useProjectData.getState().allProjects.find(project => project.id === projectId) :
             useProjectData.getState().project;
         if (!project) return null;
         return {

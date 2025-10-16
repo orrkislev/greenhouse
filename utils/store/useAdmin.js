@@ -4,6 +4,8 @@ import { supabase } from "../supabase/client";
 import { makeLink, prepareForGroupsTable, prepareForUsersTable } from "../supabase/utils";
 import { projectActions } from "./useProject";
 import { createDataLoadingHook } from "./utils/createStore";
+import { projectTasksActions } from "./useProjectTasks";
+import { format } from "date-fns";
 
 export const useAdmin = create((set, get) => ({
     classes: [],
@@ -135,18 +137,15 @@ export const useAdmin = create((set, get) => ({
         }
     },
     assignMasterToProject: async (studentId, projectId, masterId) => {
-        let mentorship = await supabase.from('mentorships').select('*').eq('student_id', studentId).eq('mentor_id', masterId).single();
-        if (mentorship.error) throw mentorship.error;
-        if (!mentorship.data) {
-            mentorship = await supabase.from('mentorships').insert({ mentor_id: masterId, student_id: studentId }).select();
-            if (mentorship.error) throw mentorship.error;
-        }
-        if (mentorship.data) {
-            await makeLink('mentorships', mentorship.data.id, 'projects', projectId);
-        }
+        const { data: mentorship, error: mentorshipError } = await supabase.from('mentorships')
+            .upsert({ mentor_id: masterId, student_id: studentId }, { onConflict: 'mentor_id,student_id' })
+            .select().single();
+        if (mentorshipError) throw mentorshipError;
 
-        const { error } = await supabase.from('projects').update(prepareForProjectsTable({ status: 'active' })).eq('id', projectId);
-        if (error) throw error;
+        await makeLink('mentorships', mentorship.id, 'projects', projectId);
+
+        const { error: projectError } = await supabase.from('projects').update({ status: 'active' }).eq('id', projectId);
+        if (projectError) throw projectError;
 
         if (get().allMembers.length > 0) {
             set(state => ({
@@ -155,6 +154,14 @@ export const useAdmin = create((set, get) => ({
                     project: member.project?.id === projectId ? { ...member.project, master: master } : member.project
                 }))
             }));
+        }
+
+        let master = get().allMembers.find(member => member.id === masterId);
+        if (!master) master = get().staff.find(staff => staff.id === masterId);
+        if (!master) {
+            const { data: masterData, error: masterError } = await supabase.from('users').select('*').eq('id', masterId).single();
+            if (masterError) throw masterError;
+            master = masterData;
         }
 
         await projectTasksActions.addTaskToProject({

@@ -18,7 +18,6 @@ export const [useResearchData, researchActions] = createStore((set, get, withUse
         set({ allResearch: data });
     }),
     setResearchById: async (researchId) => {
-        console.log({ allResearch: get().allResearch })
         const research = get().allResearch.find(research => research.id === researchId);
         if (research) set({ research });
     },

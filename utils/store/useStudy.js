@@ -10,8 +10,6 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
     sideContext: [],
 
     loadPaths: withLoadingCheck(async (user) => {
-        if (get().paths.length > 0) return;
-
         const { data, error } = await supabase.from('study_paths').select('*').eq('student_id', user.id);
         if (error) throw error;
 
