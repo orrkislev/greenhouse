@@ -34,6 +34,7 @@ export const [useMeetingsData, meetingsActions] = createStore((set, get, withUse
             });
             if (error2) console.log('error creating meeting', error2);
 
+            data.other_participants = [otherUser];
             set({ meetings: [...get().meetings, data] });
         }),
 
@@ -52,7 +53,7 @@ export const [useMeetingsData, meetingsActions] = createStore((set, get, withUse
 
 export const meetingUtils = {
     hasUser: (meeting, user) => {
-        return meeting.created_by === user.id || meeting.other_participants.find(p => p.id === user.id);
+        return meeting.created_by === user.id || meeting?.other_participants?.find(p => p.id === user.id);
     },
     is_owner: (meeting, user) => {
         return meeting.created_by === user.id;
