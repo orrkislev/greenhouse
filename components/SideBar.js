@@ -34,10 +34,10 @@ export default function SideBar() {
                     sizes="(max-width: 768px) 20vw, (max-width: 1200px) 20vw, 20vw" />
             </Link>
             <Separator className='w-full' />
-            <div className="flex gap-2 items-center p-2 justify-center text-sm">
-                <Avatar user={user} />
+            <SideBarItem href="/profile" active={pathname === '/profile'}>
+                <Avatar user={user} hoverScale={false}/>
                 <div>{user.first_name}</div>
-            </div>
+            </SideBarItem>
             <Separator className='w-full' />
             <SideBarContent>
                 {/* Home */}
@@ -47,7 +47,7 @@ export default function SideBar() {
                 <SideBarItem href="/schedule" Icon={Calendar} label="לוח זמנים" active={pathname === '/schedule'} />
 
                 <Separator />
-                
+
                 <SideBarItem href="/study" Icon={BookOpen} label="למידה" active={pathname === '/study'} />
                 <SideBarItem href="/project" Icon={Snail} label="הפרויקט" active={pathname === '/project'} />
                 <SideBarItem href="/research" Icon={Brain} label="חקר" active={pathname === '/research'} />
@@ -79,7 +79,7 @@ export default function SideBar() {
     );
 }
 
-function SideBarItem({ href, Icon, label, active, disabled }) {
+function SideBarItem({ href, Icon, label, active, disabled, children }) {
 
     return (
         <NavigationMenuItem $active={active} $disabled={disabled}>
@@ -94,8 +94,12 @@ function SideBarItem({ href, Icon, label, active, disabled }) {
                 )}
             </AnimatePresence>
             <Link href={href} className={LinkClasses + ' ' + (active ? 'text-black' : 'hover:bg-white ')} >
-                <Icon className="w-4 h-4" />
-                <div className='text-sm'>{label}</div>
+                {children ? children : (
+                    <>
+                        <Icon className="w-4 h-4" />
+                        <div className='text-sm'>{label}</div>
+                    </>
+                )}
             </Link>
         </NavigationMenuItem>
     )

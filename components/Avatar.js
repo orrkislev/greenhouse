@@ -3,9 +3,9 @@ import { tw } from "@/utils/tw";
 import { ImageUp, Save } from "lucide-react";
 import { useRef, useState } from "react";
 
-export default function Avatar({ user, className, ...props }) {
+export default function Avatar({ user, className, hoverScale = true, ...props }) {
     return (
-        <div className={`group/avatar border border-stone-300 w-8 h-8 rounded-full bg-stone-200 relative flex items-center justify-center transition-transform duration-150 hover:scale-150 grayscale-50 hover:grayscale-0 ${className}`} {...props}>
+        <div className={`border border-stone-300 w-8 h-8 rounded-full bg-stone-200 relative flex items-center justify-center transition-transform duration-150 ${hoverScale ? 'group/avatar hover:scale-150 grayscale-50 hover:grayscale-0' : ''} ${className}`} {...props}>
             <div className="text-sm text-stone-500">{user.first_name.charAt(0)}.{user.last_name.charAt(0)}</div>
             <div style={{ backgroundImage: `url(${user.avatar_url})` }} className="absolute w-full h-full bg-cover bg-center rounded-full" />
             <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-[90%] opacity-0 group-hover/avatar:-translate-y-[105%] text-center bg-white group-hover/avatar:opacity-100 transition-all duration-300"
@@ -23,24 +23,18 @@ export function AvatarEdit() {
     const fileInputRef = useRef(null);
     if (!user) return null;
 
-    const onFile = (file) => {
+    const onFile = async (file) => {
         if (file && (file.type === 'image/png' || file.type === 'image/jpg' || file.type === 'image/jpeg')) {
+            await userActions.updateProfilePicture(file);
             setImage(file);
         }
     };
 
-    const save = async () => {
-        if (image) {
-            await userActions.updateProfilePicture(image);
-            setImage(null);
-        }
-    }
-
     const imgUrl = image ? URL.createObjectURL(image) : user.avatar_url;
 
     return (
-        <div className="p-8 pb-2">
-            <div className={`flex flex-col gap-2 items-center justify-center relative aspect-square border rounded-full transition-all ${isDragging ? 'border-blue-500 border-2 bg-blue-50' : 'border-stone-500 bg-stone-200'}`}
+        <div className="p-8 pb-2 w-full" >
+            <div className={`group/edit-avatar flex flex-col gap-2 items-center justify-center relative aspect-square border rounded-full transition-all ${isDragging ? 'border-blue-500 border-2 bg-blue-50' : 'border-stone-500 bg-stone-200'}`}
                 onDragOver={e => {
                     e.preventDefault();
                 }}
@@ -71,7 +65,7 @@ export function AvatarEdit() {
                     }}
                     tabIndex={-1}
                 />
-                <div className="absolute top-0 right-0 flex items-center justify-center p-2 cursor-pointer bg-white border border-stone-500 text-stone-500 rounded-full"
+                <div className="absolute top-1/2 right-1/2 translate-x-1/2 -translate-y-1/2 opacity-0 group-hover/edit-avatar:opacity-100 transition-all duration-300 flex items-center justify-center p-2 cursor-pointer bg-white text-stone-500 rounded-full"
                     onClick={e => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -79,11 +73,6 @@ export function AvatarEdit() {
                     }}>
                     <ImageUp className="w-4 h-4" />
                 </div>
-                {image && (
-                    <div className="absolute top-0 left-0 flex items-center justify-center p-2 cursor-pointer bg-white border border-stone-500 text-stone-500 rounded-full" onClick={save}>
-                        <Save className="w-4 h-4" />
-                    </div>
-                )}
             </div>
         </div>
     );

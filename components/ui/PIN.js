@@ -1,11 +1,11 @@
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "./input-otp";
 
-export default function PINInput({ onChange, value, hideInput=false }) {
+export default function PINInput({ onChange, value, hideInput=false, withLabel=true}) {
 
     return (
         <div>
-            <label className="block text-sm font-medium mb-1">סיסמא</label>
+            {withLabel && <label className="block text-sm font-medium mb-1">סיסמא</label>}
             <InputOTP
                 maxLength={4}
                 value={value}

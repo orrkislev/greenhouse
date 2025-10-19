@@ -1,3 +1,5 @@
+'use client'
+
 import { tw } from "@/utils/tw"
 import { ChevronRight } from "lucide-react"
 import React, { useMemo, useState } from "react"
