@@ -1,7 +1,7 @@
-import { createStore } from "./utils/createStore";
+import { createDataLoadingHook, createStore } from "./utils/createStore";
 import { supabase } from "../supabase/client";
 
-export const [useVocation, vocationActions] = createStore((set, get, withUser, withLoadingCheck) => {
+export const [useVocationData, vocationActions] = createStore((set, get, withUser, withLoadingCheck) => {
     return {
         jobs: [],
 
@@ -30,3 +30,5 @@ export const [useVocation, vocationActions] = createStore((set, get, withUser, w
         }
     }
 });
+
+export const useVocation = createDataLoadingHook(useVocationData, 'jobs', 'loadJobs');

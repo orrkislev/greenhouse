@@ -32,12 +32,12 @@ export default function MainGreetings() {
     }
 
     return (
-        <div className="flex justify-between">
+        <div className="flex flex-col gap-2 border-b border-stone-300 pb-2">
             <div>
                 <div className="text-2xl font-bold ">{timeGreetings()}, {user.first_name}</div>
                 <div className="font-light text-sm -mt-1"> היום {new Date().toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' })} </div>
             </div>
-            <div className="text-sm text-stone-500 font-light flex flex-col items-end">
+            <div className="text-xs text-stone-500 font-light flex flex-col">
                 <div>
                     {dayNumberInTerm()}
                 </div>

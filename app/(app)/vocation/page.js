@@ -4,16 +4,11 @@ import Box2 from "@/components/Box2";
 import ContextBar, { PageMain } from "@/components/ContextBar";
 import { Briefcase, Plus, Trash2 } from "lucide-react";
 import { Cell, Edittable, TableHeader } from "../admin/components/Common";
-import { useEffect } from "react";
 import { useVocation, vocationActions } from "@/utils/store/useVocation";
 import Menu, { MenuItem } from "@/components/Menu";
 
 export default function VocationPage() {
-  const jobs = useVocation(state => state.jobs);
-
-  useEffect(() => {
-    vocationActions.loadJobs();
-  }, []);
+  const jobs = useVocation();
 
   return (
     <>

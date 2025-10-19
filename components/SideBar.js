@@ -41,27 +41,27 @@ export default function SideBar() {
             <Separator className='w-full' />
             <SideBarContent>
                 {/* Home */}
-                <SideBarItem href="/" icon={<TreePalm className="w-4 h-4" />} label="בית" active={pathname === '/'} />
+                <SideBarItem href="/" Icon={TreePalm} label="בית" active={pathname === '/'} />
 
                 {/* Schedule */}
-                <SideBarItem href="/schedule" icon={<Calendar className="w-4 h-4" />} label="לוח זמנים" active={pathname === '/schedule'} />
+                <SideBarItem href="/schedule" Icon={Calendar} label="לוח זמנים" active={pathname === '/schedule'} />
 
                 <Separator />
                 
-                <SideBarItem href="/study" icon={<BookOpen className="w-4 h-4" />} label="למידה" active={pathname === '/study'} />
-                <SideBarItem href="/project" icon={<Snail className="w-4 h-4" />} label="הפרויקט" active={pathname === '/project'} />
-                <SideBarItem href="/research" icon={<Brain className="w-4 h-4" />} label="חקר" active={pathname === '/research'} />
-                <SideBarItem href="/vocation" icon={<Briefcase className="w-4 h-4" />} label="תעסוקה" active={pathname === '/vocation'} />
+                <SideBarItem href="/study" Icon={BookOpen} label="למידה" active={pathname === '/study'} />
+                <SideBarItem href="/project" Icon={Snail} label="הפרויקט" active={pathname === '/project'} />
+                <SideBarItem href="/research" Icon={Brain} label="חקר" active={pathname === '/research'} />
+                <SideBarItem href="/vocation" Icon={Briefcase} label="תעסוקה" active={pathname === '/vocation'} />
 
                 <Separator />
 
                 {/* Staff only */}
                 {user && isStaff() && (
-                    <SideBarItem href="/staff" icon={<UsersRound className="w-4 h-4" />} label="החניכים שלי" active={pathname === '/staff'} />
+                    <SideBarItem href="/staff" Icon={UsersRound} label="החניכים שלי" active={pathname === '/staff'} />
                 )}
 
                 {user && isAdmin() && (
-                    <SideBarItem href="/admin" icon={<Skull className="w-4 h-4" />} label="ניהול" active={pathname === '/admin'} />
+                    <SideBarItem href="/admin" Icon={Skull} label="ניהול" active={pathname === '/admin'} />
                 )}
             </SideBarContent>
 
@@ -79,7 +79,7 @@ export default function SideBar() {
     );
 }
 
-function SideBarItem({ href, icon, label, active, disabled }) {
+function SideBarItem({ href, Icon, label, active, disabled }) {
 
     return (
         <NavigationMenuItem $active={active} $disabled={disabled}>
@@ -93,9 +93,9 @@ function SideBarItem({ href, icon, label, active, disabled }) {
                     />
                 )}
             </AnimatePresence>
-            <Link href={href} className={LinkClasses + ' ' + (active ? 'text-black' : 'hover:bg-white')} >
-                {icon}
-                <div className="text-sm">{label}</div>
+            <Link href={href} className={LinkClasses + ' ' + (active ? 'text-black' : 'hover:bg-white ')} >
+                <Icon className="w-4 h-4" />
+                <div className='text-sm'>{label}</div>
             </Link>
         </NavigationMenuItem>
     )

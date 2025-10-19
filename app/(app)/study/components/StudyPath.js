@@ -39,7 +39,7 @@ function PathBG({ path }) {
 
     const imgUrl = useMemo(() => {
         if (path.metadata?.image) return `url(${path.metadata?.image})`;
-        return 'linear-gradient(to right, #f7797d, #FBD786, #C6FFDD)'
+        return 'url(/images/study.png)'
     }, [path.metadata?.image])
 
     const onFile = (e) => {
@@ -53,7 +53,7 @@ function PathBG({ path }) {
     }
 
     return (
-        <div className="relative border border-stone-200 w-full aspect-[5/1] bg-contain bg-center flex items-center justify-center" style={{ backgroundImage: imgUrl }} >
+        <div className="relative border border-stone-200 w-full aspect-[5/1] rounded-xl bg-cover bg-center flex items-center justify-center" style={{ backgroundImage: imgUrl }} >
             <Menu className='absolute top-4 left-4 bg-white'>
                 <MenuList>
                     <MenuItem title="מחק תחום" icon={Trash2} onClick={onDelete} />
@@ -143,43 +143,37 @@ function Step({ path, step, side }) {
         <div className="group/step w-full relative">
             <div className="rounded-2xl shadow bg-white overflow-hidden relative">
                 <motion.div
-                    initial={{
-                        scale: 0,
-                        opacity: 1,
-                    }}
-                    animate={{
-                        scale: step.status == 'completed' ? 8 : 0,
-                        opacity: 1,
-                    }}
-                    transition={{ duration: 0.4, ease: "easeInOut" }}
-                    className="absolute left-0 bottom-0 bg-sky-100 rounded-full"
+                    initial={false}
+                    animate={{ scaleX: step.status == 'completed' ? 1 : 0 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="absolute inset-0 z-0 rounded-2xl bg-sky-100 pointer-events-none"
                     style={{
-                        width: "128px",
-                        height: "128px",
-                        zIndex: 0,
+                        transformOrigin: "left",
+                        willChange: "transform",
                     }}
                 />
 
-                <div className="flex justify-between z-10">
+                <div className="relative z-10">
+                    <div className="flex justify-between p-4">
 
-                    {/* <Menu className='absolute top-2 left-2 scale-80' icon={EllipsisVertical}> */}
-                    {/* <MenuList> */}
-                    {/* <MenuItem title="עריכה" icon={Edit} onClick={() => setOpenTaskModal(true)} /> */}
-                    {/* <MenuItem title="מקור מידע" icon={contentIcons.source.icon} onClick={() => addContent('source')} />
+                        {/* <Menu className='absolute top-2 left-2 scale-80' icon={EllipsisVertical}> */}
+                        {/* <MenuList> */}
+                        {/* <MenuItem title="עריכה" icon={Edit} onClick={() => setOpenTaskModal(true)} /> */}
+                        {/* <MenuItem title="מקור מידע" icon={contentIcons.source.icon} onClick={() => addContent('source')} />
                             <MenuItem title="ציטוט" icon={contentIcons.quote.icon} onClick={() => addContent('quote')} />
                             <MenuItem title="תרגול" icon={contentIcons.exercise.icon} onClick={() => addContent('exercise')} />
                             <MenuItem title="מטרה" icon={contentIcons.goal.icon} onClick={() => addContent('goal')} />
                             <MenuSeparator />
                             <MenuItem title="מחק" icon={Trash2} onClick={() => studyActions.deleteStep(path.id, step.id)} /> */}
-                    {/* </MenuList> */}
-                    {/* </Menu> */}
+                        {/* </MenuList> */}
+                        {/* </Menu> */}
 
-                    <div className="flex-1 flex flex-col px-4 py-2 hover:underline decoration-dashed cursor-pointer " onClick={() => setOpenTaskModal(true)}>
-                        <div className='text-xl font-semibold text-stone-500'>{step.title}</div>
-                        <div className='text-sm text-stone-500'>{step.description}</div>
-                        {/* <SmartText text={step.title} className="text-xl font-semibold text-stone-500" onEdit={(title) => studyActions.updateStep(path.id, step.id, { ...step, title })} /> */}
-                        {/* <SmartText text={step.description} className="text-sm text-stone-500" onEdit={(description) => studyActions.updateStep(path.id, step.id, { ...step, description })} /> */}
-                        {/* {step.content && step.content.map((content) => {
+                        <div className="flex-1 flex flex-col px-4 py-2 hover:underline decoration-dashed cursor-pointer " onClick={() => setOpenTaskModal(true)}>
+                            <div className='text-xl font-semibold text-stone-500'>{step.title}</div>
+                            <div className='text-sm text-stone-500'>{step.description}</div>
+                            {/* <SmartText text={step.title} className="text-xl font-semibold text-stone-500" onEdit={(title) => studyActions.updateStep(path.id, step.id, { ...step, title })} /> */}
+                            {/* <SmartText text={step.description} className="text-sm text-stone-500" onEdit={(description) => studyActions.updateStep(path.id, step.id, { ...step, description })} /> */}
+                            {/* {step.content && step.content.map((content) => {
                             const Content = contentIcons[content.type]
                             const className = `text-sm text-stone-500 ${Content.className || ''}`
                             return (
@@ -192,13 +186,14 @@ function Step({ path, step, side }) {
                                 </div>
                             )
                         })} */}
-                    </div>
+                        </div>
 
-                    <div className="flex flex-col h-full p-2">
-                        <IconButton
-                            icon={Check}
-                            className={`w-8 h-8 border rounded-full transition-colors ${step.status == 'completed' ? 'bg-sky-200 border-sky-300 text-sky-600' : 'border-stone-300'}`}
-                            onClick={() => studyActions.updateStep(path.id, step.id, { ...step, status: step.status == 'todo' ? 'completed' : 'todo' })} />
+                        <div className="flex flex-col h-full p-2">
+                            <IconButton
+                                icon={Check}
+                                className={`w-8 h-8 border rounded-full transition-colors ${step.status == 'completed' ? 'bg-sky-200 border-sky-300 text-sky-600' : 'border-stone-300'}`}
+                                onClick={() => studyActions.updateStep(path.id, step.id, { ...step, status: step.status == 'todo' ? 'completed' : 'todo' })} />
+                        </div>
                     </div>
                 </div>
             </div>

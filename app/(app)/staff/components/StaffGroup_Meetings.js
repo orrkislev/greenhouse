@@ -94,10 +94,11 @@ export function EditMeeting({ student, meeting, onClose }) {
     }
 
     const onSave = () => {
+        const formatTime = (time) => time.split(':')[0] + ':' + time.split(':')[1];
         if (meeting) {
-            meetingsActions.updateMeeting(meeting.id, { start: time.start, end: time.end, day_of_the_week: day });
+            meetingsActions.updateMeeting(meeting.id, { start: formatTime(time.start), end: formatTime(time.end), day_of_the_week: day });
         } else {
-            meetingsActions.createMeeting(student.id, day, time.start, time.end);
+            meetingsActions.createMeeting(student, day, formatTime(time.start), formatTime(time.end));
         }
         onClose();
     }

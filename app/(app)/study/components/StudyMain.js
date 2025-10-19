@@ -1,37 +1,72 @@
+import Box2 from "@/components/Box2"
 import { studyActions, useStudy } from "@/utils/store/useStudy"
-import Image from "next/image"
+import { BookOpen } from "lucide-react"
+import { motion } from "motion/react"
 import Link from "next/link"
+import { useState } from "react"
 
 export default function StudyMain() {
     const paths = useStudy(state => state.paths)
 
     return (
-        <div className="flex flex-col gap-4">
-            <div className="flex gap-4 flex-wrap">
+        <div className="flex flex-col gap-8">
+            <div className="grid grid-cols-2 gap-4">
                 {paths.map(path => (
-                    <Link key={path.id} className="bg-white border border-stone-200 p-4 rounded-md min-w-64 relative cursor-pointer hover:bg-stone-100 hover:border-stone-300 transition-all duration-300" href={`/study?id=${path.id}`}>
-                        <div className="w-full aspect-[3/2] relative" style={{ backgroundImage: path.metadata?.image ? `url(${path.metadata?.image})` : 'linear-gradient(to right, #f7797d, #FBD786, #C6FFDD)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-transparent group-hover/image:bg-stone-900/30 transition-all duration-200">
-                                <h1 className="font-bold p-2 bg-white group-hover/image:text-stone-900 group-hover/image:scale-105 transition-all duration-200">{path.title}</h1>
-                            </div>
-                        </div>
+                    <Link key={path.id} href={`/study?id=${path.id}`}>
+                        <Box2 label={path.title} labelIcon={BookOpen} >
+                            <StudyPathCard path={path} />
+                        </Box2>
                     </Link>
                 ))}
             </div>
 
-            <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-md w-64 relative cursor-pointer hover:bg-emerald-100 hover:border-emerald-300 transition-all duration-300"
-                onClick={() => studyActions.addPath()}
-            >
-                <div className="w-full aspect-[5/2] relative">
-                    <Image
-                        src="/studyPath.webp"
-                        alt="studyPath"
-                        fill
-                        className="object-cover object-center rounded-md"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                    />
-                </div>
-                <div className="text-2xl font-bold mt-2">מסלול למידה חדש</div>
+            <div className="flex">
+                <NewLearningPathCard />
+            </div>
+        </div>
+    )
+}
+
+export function NewLearningPathCard() {
+    const [hovered, setHovered] = useState(false);
+  
+    return (
+      <div
+        className={`flex ${hovered ? "flex-col-reverse" : "flex-col"} min-w-[300px] rounded-lg border border-lime-500 bg-lime-500 cursor-pointer overflow-hidden transition-colors duration-300 hover:bg-lime-600`}
+        onClick={() => studyActions.addPath()}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        <motion.div
+          layout
+          transition={{ type: "spring", stiffness: 500, damping: 35 }}
+          style={{ backgroundImage: `url(/images/question.png)` }}
+          className="h-full bg-cover bg-center rounded-md aspect-[7/3]"
+        />
+        <motion.div
+          layout
+          transition={{ type: "spring", stiffness: 500, damping: 35 }}
+          className="font-bold text-white p-2 text-center"
+        >
+          מסלול למידה חדש
+        </motion.div>
+      </div>
+    );
+  }
+
+function StudyPathCard({ path, ...props }) {
+    const step = path ? path.steps.find(step => step.status == 'todo') : null;
+    return (
+        <div className="w-full flex gap-4 min-h-[200px]" {...props}>
+            <div className="flex-1">
+                <div
+                    style={{ backgroundImage: `url(${path ? (path.metadata?.image || '/images/study.png') : '/images/question.png'})` }}
+                    className={`h-full bg-cover bg-center rounded-md border border-stone-200 transition-all duration-300`} />
+            </div>
+            <div className="flex flex-col gap-2 flex-1 justify-center">
+                <div className="text-lg font-bold">{path ? path.title : 'איזה תחום מענין אותי ללמוד?'}</div>
+                <div className="text-sm text-stone-500">{path ? path.description : 'מה בעצם אני רוצה ללמוד?'}</div>
+                <div className="text-sm text-stone-500">{step ? step.title : 'מה הדבר הראשון שאני אלמד?'}</div>
             </div>
         </div>
     )

@@ -8,6 +8,8 @@ import Box2 from "@/components/Box2";
 import Button from "@/components/Button";
 import Link from "next/link";
 import { Calendar } from "lucide-react";
+import MainGreetings from "./MainGreetings";
+import Image from "next/image";
 
 export default function MainSchedule() {
     const today = useTime(state => state.today);
@@ -37,7 +39,8 @@ export default function MainSchedule() {
     })
 
     return (
-        <Box2 label="מה יש לי היום" className="flex-1 relative" LabelIcon={Calendar}>
+        <Box2 label="מה יש לי היום" className="row-span-3 flex-1 relative" LabelIcon={Calendar}>
+            <MainGreetings />
             <div className="flex flex-col gap-2">
                 {allEvents.length > 0 ? allEvents.map(event => (
                     <div key={event.id} className={`flex gap-3 items-center  ${nextEvent?.id === event.id ? 'bg-stone-300 rounded-[8px] border-2 border-stone-300' : ''}`}>
@@ -47,7 +50,12 @@ export default function MainSchedule() {
                             {event.group && <div className="text-xs font-normal text-stone-500">(ב{event.group})</div>}
                         </div>
                     </div>
-                )) : <div className="text-xs text-stone-500">אין אירועים היום</div>}
+                )) : (
+                    <div className="flex flex-col items-center justify-center h-full">
+                        <Image src="/images/no_events.png" alt="empty" width={200} height={200} className="w-[70%] object-cover" />
+                        <div className="text-xs text-stone-500">אין אירועים היום</div>
+                    </div>
+                )}
             </div>
 
             <Link href="/schedule" className="absolute bottom-2 left-2">

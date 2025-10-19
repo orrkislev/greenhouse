@@ -123,6 +123,7 @@ function SelectedStudentCard_Meeting({ student }) {
     const { open, close, Popper, baseRef } = usePopper();
     const meetings = useMeetings(state => state.meetings);
 
+    console.log(meetings)
     const meeting = meetings.find(meeting => meetingUtils.hasUser(meeting, student));
 
     return (

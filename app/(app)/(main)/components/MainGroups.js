@@ -18,7 +18,7 @@ export default function MainGroups() {
     })
 
     return (
-        <div className="flex gap-3 flex-1">
+        <div className={`col-span-2 row-span-${groups.length} flex flex-col gap-4`}>
             {groups.map(group => (
                 <MainGroup key={group.id} group={group} />
             ))}
@@ -41,7 +41,7 @@ function MainGroup({ group }) {
                 ))}
             </div>
 
-            <AvatarGroup users={group.mentors} className='absolute bottom-1 left-1' />
+            {/* <AvatarGroup users={group.mentors} className='absolute bottom-1 left-1' /> */}
         </Box2>
     )
 }

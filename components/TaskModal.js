@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import usePopper from "./Popper";
 import WithLabel from "./WithLabel";
 import Button, { ButtonGroup, ButtonGroupItem, IconButton } from "./Button";
-import { CheckCircle, CircleX, Save, Trash2, X } from "lucide-react";
+import { Bookmark, CheckCircle, CircleX, Save, Trash2, X } from "lucide-react";
 import { addDays, format } from "date-fns";
 import ItemContextPicker from "./ItemContextPicker";
 import { supabase } from "@/utils/supabase/client";
@@ -86,6 +86,7 @@ function TaskModalContent({ task, close, initialContext }) {
         if (task?.context?.table === 'projects') projectTasksActions.updateTask(task.id, { status: task.status === 'completed' ? 'todo' : 'completed' });
         else if (task?.context?.table === 'study_paths') studyActions.updateStep(task.context.id, task.id, { status: task.status === 'completed' ? 'todo' : 'completed' });
         else await supabase.from('tasks').update({ status: task.status === 'completed' ? 'todo' : 'completed' }).eq('id', task.id);
+        close()
     };
 
     let headerText = task ? 'עריכת משימה' : 'משימה חדשה'
@@ -121,16 +122,16 @@ function TaskModalContent({ task, close, initialContext }) {
                 </WithLabel>
             )}
             {task && (
-                <Button data-role="close" onClick={toggleTaskStatus} className={`w-full justify-center mt-4 ${task.status === 'completed' ? 'bg-green-200 opacity-50' : ''}`}>
+                <Button data-role="close" onClick={toggleTaskStatus} className={`w-full justify-center mt-4 bg-stone-200 border-stone-300 text-lg text-stone-700 ${task.status === 'completed' ? 'bg-green-200 opacity-50' : ''}`}>
                     {task.status === 'todo' ? (
-                        <>סיימתי <CheckCircle className="w-4 h-4" /></>
+                        <>בוצע <Bookmark className="w-4 h-4" /></>
                     ) : (
-                        <>לא סיימתי <CircleX className="w-4 h-4" /></>
+                        <>בוצע <CheckCircle className="w-4 h-4" /></>
                     )}
                 </Button>
             )}
             <div className="flex justify-between gap-2 mt-2">
-                <Button data-role="save" onClick={handleSave} className='flex-1'>
+                <Button data-role="save" onClick={handleSave} className='flex-1 justify-center'>
                     שמירה <Save className="w-4 h-4" />
                 </Button>
                 <Button data-role="delete" onClick={handleDelete} >

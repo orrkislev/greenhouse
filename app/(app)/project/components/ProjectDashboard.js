@@ -25,14 +25,6 @@ export default function ProjectDashboard() {
 
 
 
-const gradients = [
-    'linear-gradient(to right, #f7797d, #FBD786, #C6FFDD)',
-    'linear-gradient(to right, #99f2c8, #1f4037)',
-    'linear-gradient(to right, #009fff, #ec2f4b)',
-    'linear-gradient(to right, #fffbd5, #b20a2c)',
-]
-
-
 function ProjectImage() {
     const img = useProjectData(state => state.project.metadata?.image);
     const inputRef = useRef(null);
@@ -43,13 +35,9 @@ function ProjectImage() {
         }
     }
 
-
-
     const imgUrl = useMemo(() =>
-        img ?
-            'url(' + img + ')' :
-            gradients[Math.floor(Math.random() * gradients.length)]
-        , [img]);
+        img ? 'url(' + img + ')' : 'url(/images/fun.png)'
+    , [img]);
 
     return (
         <div className="relative w-full aspect-[20/3] bg-stone-300 bg-cover bg-center bg-no-repeat border-b border-stone-200" style={{ backgroundImage: imgUrl }}>
