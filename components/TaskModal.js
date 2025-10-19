@@ -50,12 +50,12 @@ function TaskModalContent({ task, close, initialContext }) {
                 status: 'todo',
                 title, description, due_date,
             };
-            if (context.table === 'projects') await projectTasksActions.addTaskToProject(taskData, context.id);
-            else if (context.table === 'study_paths') await studyActions.addStep(context.id, taskData);
+            if (context && context.table === 'projects') await projectTasksActions.addTaskToProject(taskData, context.id);
+            else if (context && context .table === 'study_paths') await studyActions.addStep(context.id, taskData);
             else {
                 const { data, error } = await supabase.from('tasks').insert(taskData).select().single();
                 if (error) throw error;
-                await makeLink('tasks', data.id, context.table, context.id);
+                if (context) await makeLink('tasks', data.id, context.table, context.id);
             }
         } else {
             await supabase.from('tasks').update({ title, description, due_date }).eq('id', task.id);
@@ -66,7 +66,7 @@ function TaskModalContent({ task, close, initialContext }) {
 
                 if (context.table === 'projects') await projectTasksActions.linkTaskToProject(task, context.id);
                 else if (context.table === 'study_paths') await studyActions.linkStepToPath(task, context.id);
-                else await makeLink('tasks', task.id, context.table, context.id);
+                else if (context) await makeLink('tasks', task.id, context.table, context.id);
             }
         }
         close();
@@ -77,7 +77,7 @@ function TaskModalContent({ task, close, initialContext }) {
             await supabase.from('tasks').delete().eq('id', task.id);
             if (task.context && task.context.table === 'study_paths') await studyActions.unlinkStepFromPath(task.id);
             else if (task.context && task.context.table === 'projects') await projectTasksActions.unlinkTaskFromProject(task.id);
-            else await unLink('tasks', task.id, task.context.table, task.context.id);
+            else if (task.context) await unLink('tasks', task.id, task.context.table, task.context.id);
         }
         close();
     };

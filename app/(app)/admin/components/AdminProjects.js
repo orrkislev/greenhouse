@@ -37,17 +37,12 @@ export default function AdminProjects() {
     const data = useMemo(() => {
         if (allMembers.length === 0 || classes.length === 0 || majors.length === 0) return [];
         return allMembers.filter(member => member.role === 'student').map(student => {
-            const groupName = classes.find(g => student.groups.includes(g.id))?.name;
+            const group = classes.find(g => student.groups.includes(g.id))?.name;
             const major = majors.find(m => student.groups.includes(m.id))?.name;
-            const project = student.project?.name;
-            const requested = student.project?.metadata?.questions?.[2]?.value;
-            const master = student.project?.masters?.[0]?.name;
-            const projectId = student.project?.id;
             return {
-                id: student.id,
+                ...student,
                 name: student.first_name + ' ' + student.last_name,
-                group: groupName,
-                major, project, requested, master, projectId,
+                group, major,
             }
         });
     }, [allMembers, classes, majors]);
@@ -123,21 +118,21 @@ export default function AdminProjects() {
                                 {student.project ? (
                                     <div className="bg-blue-300 rounded-sm hover:bg-blue-500 text-stone-400 hover:text-white px-2 py-1"
                                         onClick={() => clickOnProject(student.id)}>
-                                        {student.project}
+                                        {student.project.title}
                                     </div>
                                 ) : (<span className="text-stone-500">אין פרויקט</span>
                                 )}
                             </Cell>
-                            <Cell>{student.requested}</Cell>
+                            <Cell>{student.project?.metadata?.questions?.[2]?.value}</Cell>
                             <Cell>
-                                {student.projectId && (
+                                {student.project && (
                                     <select
-                                        value={student.master?.id || ''}
+                                        value={student.project?.masters?.[0]?.id || ''}
                                         onChange={e => selectMaster(student.id, student.projectId, e.target.value)}
                                         className="bg-white border border-stone-300 rounded-md p-1"
                                     >
                                         <option value="">בחר מנחה</option>
-                                        {staff.map(mentor => (
+                                        {staff.sort((a, b) => a.first_name.localeCompare(b.first_name)).map(mentor => (
                                             <option key={mentor.id} value={mentor.id}>
                                                 {mentor.first_name} {mentor.last_name}
                                             </option>

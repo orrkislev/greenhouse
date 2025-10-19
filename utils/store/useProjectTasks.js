@@ -1,8 +1,10 @@
-import { projectActions, projectUtils, useProjectData } from "@/utils/store/useProject";
+import { projectActions, projectUtils, useProject, useProjectData } from "@/utils/store/useProject";
 import { makeLink, unLink } from "../supabase/utils";
 import { createDataLoadingHook, createStore } from "./utils/createStore";
 import { supabase } from "../supabase/client";
 import { format } from "date-fns";
+import { useUser } from "./useUser";
+import { useEffect } from "react";
 
 export const [useProjectTasksData, projectTasksActions] = createStore((set, get, withUser, withLoadingCheck) => {
     return {
@@ -10,7 +12,8 @@ export const [useProjectTasksData, projectTasksActions] = createStore((set, get,
         view: 'list',
         loaded: false,
 
-        loadAllTasks: withLoadingCheck(async (user) => {
+        loadAllTasks: async () => {
+            if (!useProjectData.getState().project) return;
             const { data, error } = await supabase.rpc('get_linked_items', {
                 p_table_name: 'projects',
                 p_item_id: useProjectData.getState().project.id,
@@ -20,13 +23,14 @@ export const [useProjectTasksData, projectTasksActions] = createStore((set, get,
             const tasks = data.map(item => item.data);
             tasks.forEach(task => task.context = projectUtils.getContext(task.project_id));
             set({ tasks });
-        }),
-        loadNextTasks: withLoadingCheck(async (user) => {
+        },
+        loadNextTasks: async () => {
+            if (!useProjectData.getState().project) return;
             const projectId = useProjectData.getState().project.id;
             const { data, error } = await supabase.rpc('get_next_project_tasks', { p_project_id: projectId })
             if (error) throw error;
             set({ tasks: data });
-        }),
+        },
 
 
         setView: (view) => {
@@ -91,5 +95,20 @@ export const [useProjectTasksData, projectTasksActions] = createStore((set, get,
     }
 });
 
-export const useProjectTasks = createDataLoadingHook(useProjectTasksData, 'tasks', 'loadAllTasks');
-export const useProjectNextTasks = createDataLoadingHook(useProjectTasksData, 'tasks', 'loadNextTasks');
+export function useProjectTasks() {
+    const project = useProject();
+    const tasks = useProjectTasksData(state => state.tasks);
+    useEffect(() => {
+        projectTasksActions.loadAllTasks();
+    }, [project?.id]);
+    return tasks;
+}
+
+export function useProjectNextTasks() {
+    const project = useProject();
+    const tasks = useProjectTasksData(state => state.tasks);
+    useEffect(() => {
+        projectTasksActions.loadNextTasks();
+    }, [project?.id]);
+    return tasks;
+}

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { projectTasksActions, useProjectTasksData } from "@/utils/store/useProjectTasks";
 import { IconButton } from "@/components/Button";
 import TaskModal from "@/components/TaskModal";
+import { projectUtils } from "@/utils/store/useProject";
 
 export default function ListView() {
     const tasks = useProjectTasksData((state) => state.tasks);
@@ -75,7 +76,7 @@ function SingleTask({ task }) {
                     </div> */}
                 </div>
             </ParentItem>
-            <TaskModal task={task} isOpen={openTaskModal} onClose={() => setOpenTaskModal(false)} />
+            <TaskModal task={{...task, context: projectUtils.getContext(task.project_id)}} isOpen={openTaskModal} onClose={() => setOpenTaskModal(false)} />
         </>
     )
 }

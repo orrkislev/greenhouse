@@ -117,24 +117,20 @@ export const useAdmin = create((set, get) => ({
     loadProjects: async () => {
         const allMembers = get().allMembers;
         if (allMembers.some(member => member.project)) return;
-        for (const member of allMembers) {
-            const { data, error } = await supabase.rpc('get_student_current_term_project', { p_student_id: member.id });
-            if (error) throw error;
-            if (data.length > 0) {
-                const { data: data2, error: error2 } = await supabase.rpc('get_linked_items', {
-                    p_table_name: 'projects',
-                    p_item_id: data[0].id,
-                    p_target_types: ['mentorships']
-                })
-                if (error2) throw error2;
-                if (data2) {
-                    data[0].masters = data2.mentorships.map(d => d.mentorId).map(id => allMembers.find(m => m.id === id));
-                    set(state => ({
-                        allMembers: state.allMembers.map(member => member.id === member.id ? { ...member, project: data[0] } : member)
-                    }));
-                }
-            }
+        const { data, error } = await supabase.rpc('get_projects_in_current_term');
+        if (error) throw error;
+        for (const project of data) {
+            const { data: mentorships, error: mentorshipsError } = await supabase.from('mentorships').select('*').eq('student_id', project.student_id);
+            if (mentorshipsError) throw mentorshipsError;
+            if (mentorships.length > 0) project.masters = get().staff.filter(s => mentorships.some(m => m.mentor_id === s.id));
         }
+        const newAllMembers = allMembers.map(member => {
+            const project = data.find(p => p.student_id === member.id);
+            const res = {...member}
+            if (project) res.project = project;
+            return res;
+        })
+        set({ allMembers: newAllMembers });
     },
     assignMasterToProject: async (studentId, projectId, masterId) => {
         const { data: mentorship, error: mentorshipError } = await supabase.from('mentorships')
@@ -147,6 +143,14 @@ export const useAdmin = create((set, get) => ({
         const { error: projectError } = await supabase.from('projects').update({ status: 'active' }).eq('id', projectId);
         if (projectError) throw projectError;
 
+        let master = get().allMembers.find(member => member.id === masterId);
+        if (!master) master = get().staff.find(staff => staff.id === masterId);
+        if (!master) {
+            const { data: masterData, error: masterError } = await supabase.from('users').select('*').eq('id', masterId).single();
+            if (masterError) throw masterError;
+            master = masterData;
+        }
+
         if (get().allMembers.length > 0) {
             set(state => ({
                 allMembers: state.allMembers.map(member => ({
@@ -156,18 +160,11 @@ export const useAdmin = create((set, get) => ({
             }));
         }
 
-        let master = get().allMembers.find(member => member.id === masterId);
-        if (!master) master = get().staff.find(staff => staff.id === masterId);
-        if (!master) {
-            const { data: masterData, error: masterError } = await supabase.from('users').select('*').eq('id', masterId).single();
-            if (masterError) throw masterError;
-            master = masterData;
-        }
-
         await projectTasksActions.addTaskToProject({
             title: 'לקבוע פגישה שבועית',
             description: `לקבוע פגישה שבועית עם ${master.first_name} ${master.last_name}`,
             due_date: format(new Date(), 'yyyy-MM-dd'),
+            student_id: studentId,
         }, projectId);
     },
 

@@ -3,6 +3,7 @@ import { adminActions, useAdmin } from "@/utils/store/useAdmin";
 import { Edit2, Meh, Plus, Trash, UserRoundX, Users2, XIcon } from "lucide-react";
 import { tw } from "@/utils/tw";
 import { Cell, Edittable, TableHeader } from "./Common";
+import { userActions } from "@/utils/store/useUser";
 
 const SpecialButton = tw`p-4 border border-stone-200 rounded-md flex items-center gap-2 text-xs hover:bg-stone-100 cursor-pointer`;
 
@@ -157,7 +158,7 @@ function GroupStudents({ group }) {
             delete student.dirty;
             delete student.id;
             if (student.major == '') delete student.major;
-            const newID = await adminActions.createMember( student );
+            const newID = await adminActions.createMember(student);
             await adminActions.addUserToGroup(group.id, newID);
             if (student.major) await adminActions.addUserToGroup(student.major, newID);
         }
@@ -201,7 +202,10 @@ function GroupStudents({ group }) {
                                         />
                                     </Cell>
                                 ) : (
-                                    <Cell className="text-stone-500">{student.username}</Cell>
+                                    <Cell>
+                                        <span className='text-stone-500 underline hover:text-stone-800 cursor-pointer' onClick={() => userActions.switchToStudent(student.id, 'admin')}>
+                                            {student.username}</span>
+                                    </Cell>
                                 )}
                                 <Cell>
                                     <input type="text" defaultValue={student.first_name} placeholder="שם פרטי" className="border-none outline-none p-0 m-0"
