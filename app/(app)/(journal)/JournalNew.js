@@ -45,7 +45,7 @@ function JournalNew({ isOpen, setIsOpen }) {
 
     return (
         <div className="flex flex-col gap-4 relative p-4">
-            {isOpen && <IconButton icon={X} onClick={() => setIsOpen(false)} className="absolute top-2 left-2" />}
+            {isOpen && <IconButton icon={X} onClick={() => setIsOpen(false)} className="absolute top-2 left-2 z-10" />}
 
             <div className="flex items-start justify-between mb-4 flex-shrink-0 relative">
                 <div>

@@ -39,6 +39,12 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 			if (error) set({ error });
 			else set((state) => ({ user: { ...state.user, ...updates } }));
 		},
+		signInWithGoogle: async () => {
+			console.log(window.location.origin);
+			const { data, error } = await supabase.auth.signInWithOAuth({
+				provider: 'google',
+			});
+		},
 
 		// ----------------------------------------------------
 		// ------------ Staff Switching User ------------------

@@ -1,9 +1,11 @@
 import { tw } from "@/utils/tw";
 import { IconButton } from "./Button";
-import { Minus, Plus, X } from "lucide-react";
+import { Minus, Plus, Trash2, X } from "lucide-react";
 import { useAllProjects } from "@/utils/store/useProject";
 import { useStudyPaths } from "@/utils/store/useStudy";
 import { useState } from "react";
+import usePopper from "./Popper";
+import { createPortal } from "react-dom";
 
 const contextNames = {
     projects: "פרויקט",
@@ -25,40 +27,33 @@ const ContextTagDiv = tw`px-3 py-1 rounded-full font-medium flex items-center ga
 
 
 export default function ItemContextPicker({ context, onContextChange }) {
-    const [isOpen, setIsOpen] = useState(false)
-
-    const handleContextChange = (context) => {
-        onContextChange(context)
-        setIsOpen(false)
-    }
+    const { isOpen, open, close, baseRef, Popper } = usePopper()
 
     return (
-        <div className="flex gap-1 group relative">
-            {context ? (
-                <ContextTagDiv tag={context.table}>
-                    <div className="text-sm flex gap-1 items-center">
+        <>
+            <div ref={baseRef} className="flex group/context-picker">
+                {context ? (
+                    <div className="flex items-center gap-2 text-sm p-1 rounded-md bg-sky-200 group-hover/context-picker:bg-sky-300 transition-all duration-300">
                         {context.title}
-                        <span className='text-xs'>
-                            ({contextNames[context.table]})
-                        </span>
+                        <X onClick={() => onContextChange(null)} className="w-0 h-4 group-hover/context-picker:w-4 group-hover/context-picker:h-4 cursor-pointer hover:bg-white  rounded-full transition-all duration-300" />
                     </div>
-                    <IconButton icon={X} onClick={() => onContextChange(null)} small className="opacity-0 group-hover:opacity-100 transition-opacity hover:text-black" />
-                </ContextTagDiv>
-            ) : (
-                <>
-                    {isOpen ? (
-                        <IconButton icon={Minus} onClick={() => setIsOpen(false)} />
-                    ) : (
-                        <IconButton icon={Plus} onClick={() => setIsOpen(true)} />
-                    )}
-                </>
-            )}
-            {isOpen && <ContextPicker onContextChange={handleContextChange} />}
-        </div>
+                ) : (
+                    <div onClick={open} className="text-sm p-1 rounded-md border border-stone-300 group-hover/context-picker:bg-stone-100 transition-all duration-300 cursor-pointer">
+                        בחר נושא
+                    </div>
+                )}
+            </div>
+            {createPortal(
+                isOpen && (
+                    <Popper className="bg-transparent p-1 blur-0">
+                        <ContextPicker onPick={onContextChange} close={close} />
+                    </Popper>
+                ), document.body)}
+        </>
     )
 }
 
-function ContextPicker({ onContextChange }) {
+function ContextPicker({ onPick, close }) {
     const allProjects = useAllProjects()
     const allProjectsContexts = allProjects.map(project => ({ table: 'projects', id: project.id, title: project.title }))
     const allStudyPaths = useStudyPaths(state => state.paths)
@@ -66,20 +61,18 @@ function ContextPicker({ onContextChange }) {
 
     const allContexts = [...allProjectsContexts, ...allStudyPathsContexts]
 
+    const pickContext = (context) => {
+        onPick(context)
+        close()
+    }
+
     return (
-        <div className="bg-white max-w-xl border border-stone-300 p-2 rounded-md">
-            <div className="flex gap-1 flex-wrap">
-                {allContexts.map(context => (
-                    <ContextTagDiv key={context.table} tag={context.table} onClick={() => onContextChange(context)} className="cursor-pointer opacity-50 scale-90 hover:scale-100 hover:opacity-100 transition-all duration-300">
-                        <div className="text-sm flex gap-1 items-center">
-                            {context.title}
-                            <span className='text-xs'>
-                                ({contextNames[context.table]})
-                            </span>
-                        </div>
-                    </ContextTagDiv>
-                ))}
-            </div>
+        <div className="flex flex-col gap-1 divide-y divide-stone-300">
+            {allContexts.map(context => (
+                <div key={context.id} className="text-sm p-1 hover:bg-stone-100 cursor-pointer" onClick={() => pickContext(context)}>
+                    {context.title} <span className="text-xs text-stone-500">({contextNames[context.table]})</span>
+                </div>
+            ))}
         </div>
     )
 }
