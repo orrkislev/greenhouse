@@ -41,8 +41,11 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 		},
 		signInWithGoogle: async () => {
 			console.log(window.location.origin);
-			const { data, error } = await supabase.auth.signInWithOAuth({
+			await supabase.auth.signInWithOAuth({
 				provider: 'google',
+				options: {
+					redirectTo: window.location.origin,
+				},
 			});
 		},
 
