@@ -58,7 +58,9 @@ function TaskModalContent({ task, close, initialContext }) {
                 if (context) await makeLink('tasks', data.id, context.table, context.id);
             }
         } else {
-            await supabase.from('tasks').update({ title, description, due_date }).eq('id', task.id);
+            if (task.context.table === 'projects') await projectTasksActions.updateTask(task.id, { title, description, due_date });
+            else if (task.context.table === 'study_paths') await studyActions.updateStep(task.context.id, task.id, { title, description, due_date });
+            else  await supabase.from('tasks').update({ title, description, due_date }).eq('id', task.id);
             if (task.context && task.context.id !== context.id) {
                 if (task.context.table === 'projects') await projectTasksActions.unlinkTaskFromProject(task.id);
                 else if (task.context.table === 'study_paths') await studyActions.unlinkStepFromPath(task.id);
