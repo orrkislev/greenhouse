@@ -26,7 +26,7 @@ export default function Button({ children, ...props }) {
 
 export function IconButton({small, ...props}) {
     return <div {...props} className={`${props.className} ${small ? 'p-1' : 'p-2'} hover:bg-stone-100 rounded-full cursor-pointer transition-colors ${props.className}`}>
-        <props.icon className={`${props.small ? 'w-3 h-3' : 'w-4 h-4'}`} />
+        <props.icon className={`${props.small ? 'w-3 h-3' : 'w-4 h-4'} `} />
     </div>
 }
 

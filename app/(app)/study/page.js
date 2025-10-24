@@ -20,9 +20,9 @@ export default function LearnPage() {
 
     return (
         <>
-        <PageMain>
-            <DashboardLayout>
-                <DashboardTitle>מסלולי למידה שלי</DashboardTitle>
+        <PageMain className="pt-0">
+            {/* <DashboardLayout> */}
+                {/* <DashboardTitle>מסלולי למידה שלי</DashboardTitle>
                 {selectedPath && (
                     <DashboardPanel>
                     <Link href='/study'>
@@ -39,11 +39,11 @@ export default function LearnPage() {
                         +
                         </DashboardPanelButton>
                     </DashboardPanel>
-                )}
-                <DashboardMain>
+                )} */}
+                {/* <DashboardMain> */}
                     {selectedPath ? <StudyPath path={selectedPath} /> : <StudyMain />}
-                </DashboardMain>
-            </DashboardLayout>
+                {/* </DashboardMain> */}
+            {/* </DashboardLayout> */}
         </PageMain>
         <ContextBar>
             <StudyContext />

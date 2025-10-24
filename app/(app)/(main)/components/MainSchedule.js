@@ -41,7 +41,7 @@ export default function MainSchedule() {
     return (
         <Box2 label="מה יש לי היום" className="row-span-3 flex-1 relative" LabelIcon={Calendar}>
             <MainGreetings />
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 mt-2">
                 {allEvents.length > 0 ? allEvents.map(event => (
                     <div key={event.id} className={`flex gap-3 items-center  ${nextEvent?.id === event.id ? 'bg-stone-300 rounded-[8px] border-2 border-stone-300' : ''}`}>
                         <EventTime time={event.start} />

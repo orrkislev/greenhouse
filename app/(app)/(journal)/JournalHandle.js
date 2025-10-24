@@ -31,7 +31,7 @@ export default function JournalHandle() {
             />
 
             <div
-                className={`fixed overflow-y-hidden max-h-[80vh] left-1/2 -translate-x-1/2 w-full max-w-2xl transition-all duration-700 z-50 ${isOpen
+                className={`fixed max-h-[80vh] left-1/2 -translate-x-1/2 w-full max-w-2xl transition-all duration-700 z-50 ${isOpen
                     ? "bottom-[50%] translate-y-1/2 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
                     : isHovered
                         ? `translate-y-[calc(100%-80px)] ease-out delay-50 ${originalUser ? 'bottom-16' : 'bottom-0'}`
@@ -67,7 +67,7 @@ export default function JournalHandle() {
 }
 
 
-const JournalTabDiv = tw.button`min-w-32 h-[40px] flex items-center justify-center gap-3 cursor-pointer relative overflow-hidden flex-shrink-0 transition-all duration-300
+const JournalTabDiv = tw.button`min-w-32 h-[40px] flex items-center justify-center gap-3 cursor-pointer relative flex-shrink-0 transition-all duration-300
     px-32 bg-stone-600 group-hover:bg-gradient-to-t from-stone-700 to-stone-600 text-stone-100/70 hover:text-stone-100 z-10`;
 
 const JournalTabHandle = tw.div`absolute top-1 left-1/2 -translate-x-1/2 h-1 rounded-full transition-all duration-300 bg-stone-200/30 w-12 group-hover:w-16`

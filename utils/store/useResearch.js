@@ -2,15 +2,20 @@ import { createDataLoadingHook, createStore } from "./utils/createStore";
 import { createGoogleDoc } from "../actions/google actions";
 import { useTime } from "./useTime";
 import { supabase } from "../supabase/client";
+import { makeLink } from "../supabase/utils";
 
 export const [useResearchData, researchActions] = createStore((set, get, withUser, withLoadingCheck) => ({
     research: null,
     allResearch: [],
 
     loadResearch: withLoadingCheck(async (user) => {
-        const { data, error } = await supabase.rpc('get_student_current_term_research', { p_student_id: user.id });
+        // const { data, error } = await supabase.rpc('get_student_current_term_research', { p_student_id: user.id });
+        const { data, error } = await supabase.from('research').select('*')
+            .eq('student_id', user.id).eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .single();
         if (error) throw error;
-        set({ research: data });
+        if (data) set({ research: data });
     }),
     loadAllResearch: withUser(async (user) => {
         const { data, error } = await supabase.from('research').select('*').eq('student_id', user.id);
@@ -40,6 +45,14 @@ export const [useResearchData, researchActions] = createStore((set, get, withUse
         const { error } = await supabase.from('research').delete().eq('id', researchId);
         if (error) throw error;
         set({ research: null, allResearch: get().allResearch.filter(research => research.id !== researchId) });
+    },
+
+    updateSections: async (updates) => {
+        const newSections = { ...get().research.sections } || {};
+        Object.assign(newSections, updates);
+        const { error } = await supabase.from('research').update({ sections: newSections }).eq('id', get().research.id);
+        if (error) throw error;
+        set({ research: { ...get().research, sections: newSections } });
     },
 
 

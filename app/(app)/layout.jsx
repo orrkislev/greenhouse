@@ -12,7 +12,7 @@ export default function RootLayout({ children }) {
 		<WithAuth>
 			<div className="flex h-screen overflow-y-hidden overscroll-none">
 				<SideBar />
-				<div className={`flex-1 flex justify-between ${originalUser ? 'pb-16' : ''}`}>
+				<div className={`flex-1 flex justify-between justify-center ${originalUser ? 'pb-16' : ''}`}>
 					{children}
 					<JournalHandle />
 					<SwitchBackPanel />

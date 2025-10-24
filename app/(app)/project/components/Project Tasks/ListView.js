@@ -1,10 +1,11 @@
-import { Check, CheckSquare, GripVertical, Square, Trash, X } from "lucide-react";
+import { Check, CheckSquare, ExternalLink, GripVertical, Square, Trash, X } from "lucide-react";
 import { Reorder, useDragControls } from "framer-motion";
 import { useState } from "react";
 import { projectTasksActions, useProjectTasksData } from "@/utils/store/useProjectTasks";
-import { IconButton } from "@/components/Button";
+import Button, { IconButton } from "@/components/Button";
 import TaskModal from "@/components/TaskModal";
 import { projectUtils } from "@/utils/store/useProject";
+import Link from "next/link";
 
 export default function ListView() {
     const tasks = useProjectTasksData((state) => state.tasks);
@@ -70,6 +71,14 @@ function SingleTask({ task }) {
                     <div className='flex items-center gap-2 hover:underline decoration-dashed cursor-pointer'  onClick={() => setOpenTaskModal(true)}>
                         <div className="text-sm text-stone-700">{task.title}</div>
                         <div className="text-xs text-stone-500">{task.description}</div>
+                        {task.url && (
+                            <Link href={task.url.startsWith('http') ? task.url : `https://${task.url}`} target="_blank">
+                                <Button className="p-1 bg-stone-200 text-sm text-stone-500 underline decoration-none cursor-pointer hover:text-blue-500 transition-all duration-200 flex gap-2 items-center">
+                                    <ExternalLink className="w-4 h-4" />
+                                    {task.url.length > 20 ? task.url.slice(0, 20) + '...' : task.url}
+                                </Button>
+                            </Link>
+                        )}
                     </div>
                     {/* <div className="flex gap-2">
                         <IconButton icon={X} onClick={() => projectTasksActions.deleteTask(task.id)} />

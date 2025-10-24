@@ -19,7 +19,7 @@ export default function ProjectPage() {
 
     return (
         <>
-            <PageMain>
+            <PageMain className="pt-0">
                 {mainContent}
             </PageMain>
             <ContextBar name="" initialOpen={false}>

@@ -27,6 +27,7 @@ export default function TaskModal({ task, isOpen, onClose: onCloseProp, context 
 
 function TaskModalContent({ task, close, initialContext }) {
     const [title, setTitle] = useState(task ? task.title : 'משימה חדשה');
+    const [url, setUrl] = useState(task ? task.url : '');
     const [description, setDescription] = useState(task ? task.description : 'פירוט המשימה');
     const [due_date, setDueDate] = useState(task ? task.due_date : format(new Date(), 'yyyy-MM-dd'));
     const [context, setContext] = useState(initialContext);
@@ -38,29 +39,31 @@ function TaskModalContent({ task, close, initialContext }) {
     useEffect(() => {
         if (!task) return;
         setTitle(task.title);
+        setUrl(task.url);
         setDescription(task.description);
         setDueDate(task.due_date);
         setContext(task.context);
     }, [task])
 
     const handleSave = async () => {
+        const taskContent = { title, description, due_date, url};
         if (!task) {
             const taskData = {
                 student_id: useUser.getState().user.id,
                 status: 'todo',
-                title, description, due_date,
+                ...taskContent,
             };
             if (context && context.table === 'projects') await projectTasksActions.addTaskToProject(taskData, context.id);
-            else if (context && context .table === 'study_paths') await studyActions.addStep(context.id, taskData);
+            else if (context && context.table === 'study_paths') await studyActions.addStep(context.id, taskData);
             else {
                 const { data, error } = await supabase.from('tasks').insert(taskData).select().single();
                 if (error) throw error;
                 if (context) await makeLink('tasks', data.id, context.table, context.id);
             }
         } else {
-            if (task.context.table === 'projects') await projectTasksActions.updateTask(task.id, { title, description, due_date });
-            else if (task.context.table === 'study_paths') await studyActions.updateStep(task.context.id, task.id, { title, description, due_date });
-            else  await supabase.from('tasks').update({ title, description, due_date }).eq('id', task.id);
+            if (task.context.table === 'projects') await projectTasksActions.updateTask(task.id, taskContent);
+            else if (task.context.table === 'study_paths') await studyActions.updateStep(task.context.id, task.id, taskContent);
+            else await supabase.from('tasks').update(taskContent).eq('id', task.id);
             if (task.context && task.context.id !== context.id) {
                 if (task.context.table === 'projects') await projectTasksActions.unlinkTaskFromProject(task.id);
                 else if (task.context.table === 'study_paths') await studyActions.unlinkStepFromPath(task.id);
@@ -123,6 +126,9 @@ function TaskModalContent({ task, close, initialContext }) {
                     </ButtonGroup>
                 </WithLabel>
             )}
+            <WithLabel label="קישור">
+                <input type="text" value={url} onChange={e => setUrl(e.target.value)} className="rounded-sm p-2 border border-stone-100 w-full" />
+            </WithLabel>
             {task && (
                 <Button data-role="close" onClick={toggleTaskStatus} className={`w-full justify-center mt-4 bg-stone-200 border-stone-300 text-lg text-stone-700 ${task.status === 'completed' ? 'bg-green-200 opacity-50' : ''}`}>
                     {task.status === 'todo' ? (

@@ -40,6 +40,7 @@ export const [useProjectTasksData, projectTasksActions] = createStore((set, get,
             set({ view });
         },
         updateTask: async (taskId, updates) => {
+            updates.updated_at = new Date().toISOString()
             set({ tasks: get().tasks.map(task => task.id === taskId ? { ...task, ...updates } : task) });
             const { error } = await supabase.from('tasks').update(updates).eq('id', taskId);
             if (error) throw error;
@@ -88,8 +89,12 @@ export const [useProjectTasksData, projectTasksActions] = createStore((set, get,
             }
         },
         unlinkTaskFromProject: async (taskId) => {
-            await unLink('tasks', taskId, 'projects', useProjectData.getState().project?.id);
-            set({ tasks: get().tasks.filter(t => t.id !== taskId) });
+            const projectId = useProjectData.getState().project?.id;
+            if (!projectId) return;
+            await unLink('tasks', taskId, 'projects', projectId);
+            if (useProjectData.getState().project?.id === projectId) {
+                set({ tasks: get().tasks.filter(t => t.id !== taskId) });
+            }
         },
 
     }

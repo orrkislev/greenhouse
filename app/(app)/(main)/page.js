@@ -32,7 +32,7 @@ export default function MainPage() {
                 <MainContext />
             </ContextBar> */}
 
-            <AuthGoogleListener />
+            {/* <AuthGoogleListener /> */}
         </div>
     )
 }

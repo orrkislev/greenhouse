@@ -33,7 +33,7 @@ export function AuthGoogleListener() {
     const router = useRouter();
     const code = searchParams.get('code');
 
-    if (!router) return
+    console.log('found google code!', code);
 
     if (code) {
         (async () => {
@@ -45,7 +45,7 @@ export function AuthGoogleListener() {
                 })
                 const redirectUrl = localStorage.getItem('redirectUrl') || '/';
                 localStorage.removeItem('redirectUrl');
-                router.push(redirectUrl);
+                if (router) router.push(redirectUrl);
             }
         })();
     }

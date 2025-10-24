@@ -25,7 +25,7 @@ export const prepareForEventsTable = obj => buildSafeUpdates(obj, eventsFields)
 const studyPathsFields = ['title', 'description', 'student_id', 'status', 'metadata', 'sources']
 export const prepareForStudyPathsTable = obj => buildSafeUpdates(obj, studyPathsFields)
 
-const tasksFields = ['title', 'description', 'student_id', 'status', 'due_date', 'metadata', 'position', 'goal', 'target_count', 'current_count', 'created_by']
+const tasksFields = ['title', 'description', 'student_id', 'status', 'due_date','url', 'metadata', 'position', 'goal', 'target_count', 'current_count', 'created_by']
 export const prepareForTasksTable = obj => buildSafeUpdates(obj, tasksFields)
 
 const logsFields = ['user_id', 'action_type', 'text', 'metadata', 'mentor_id', 'context_table', 'context_id']

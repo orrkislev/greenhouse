@@ -5,6 +5,8 @@ import { useUser } from "./useUser";
 import { makeLink, prepareForStudyPathsTable, prepareForTasksTable, unLink } from "../supabase/utils";
 import { resizeImage } from "../actions/storage actions";
 
+export const EnglishPathID = 'd5b55c53-5f6b-4832-97cf-3fbb99037218';
+
 export const [useStudy, studyActions] = createStore((set, get, withUser, withLoadingCheck) => ({
     paths: [],
     sideContext: [],
@@ -22,6 +24,17 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
             if (stepsError) throw stepsError;
             path.steps = stepsData ? stepsData.map(t => t.data) : [];
         }
+
+        if (!data.some(path => path.id === EnglishPathID)) {
+            const { data: englishPath, error: englishPathError } = await supabase.from('study_paths').select('*').eq('id', EnglishPathID).single();
+            if (englishPath) {
+                data.push(englishPath);
+                const { data: stepsData, error: stepsError } = await supabase.from('tasks').select('*').eq('metadata->>english', 'true');
+                if (stepsError) throw stepsError;
+                englishPath.steps = stepsData
+            }
+        }
+
         set({ paths: data });
     }),
 
@@ -66,6 +79,7 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
         const path = get().paths.find(path => path.id === pathId)
         step.position = path.steps.length
         step.student_id = useUser.getState().user.id
+        if (path.id === EnglishPathID) step.metadata = { ...step.metadata, english: true }
         const { data, error } = await supabase.from('tasks').insert(prepareForTasksTable(step)).select().single();
         if (error) throw error;
         await get().linkStepToPath(data, pathId);
@@ -75,14 +89,19 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
         set(state => ({ paths: state.paths.map(path => path.id === pathId ? { ...path, steps: [...path.steps, step] } : path) }))
     },
     unlinkStepFromPath: async (stepId) => {
-        await unLink('tasks', stepId, 'study_paths', useStudy.getState().paths.find(path => path.steps.some(step => step.id === stepId))?.id);
-        set(state => ({ paths: state.paths.map(path => path.id === pathId ? { ...path, steps: path.steps.filter(step => step.id !== stepId) } : path) }))
+        const path = useStudy.getState().paths.find(path => path.steps.some(step => step.id === stepId))
+        if (!path) return;
+        await unLink('tasks', stepId, 'study_paths', path.id);
+        if (path) {
+            set(state => ({ paths: state.paths.map(path => path.id === path.id ? { ...path, steps: path.steps.filter(step => step.id !== stepId) } : path) }))
+        }
     },
     updateStep: async (pathId, stepId, stepData) => {
         const path = get().paths.find(path => path.id === pathId)
         set(state => ({ paths: state.paths.map(path => path.id === pathId ? path : path) }))
         const step = path.steps.find(step => step.id === stepId)
         Object.assign(step, stepData)
+        step.updated_at = new Date().toISOString()
         const { error } = await supabase.from('tasks').update(prepareForTasksTable(stepData)).eq('id', stepId);
         if (error) throw error;
     },
@@ -114,6 +133,28 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
         if (!path.sources) return;
         path.sources = path.sources.filter((_, index) => index !== sourceIndex)
         await supabase.from('study_paths').update({ sources: path.sources }).eq('id', pathId);
+        set(state => ({ paths: state.paths.map(path => path.id === pathId ? path : path) }))
+    },
+
+    // ------------------------------
+    // ---------- vocabulary
+    // ------------------------------
+    addVocabulary: async (pathId, word) => {
+        const path = get().paths.find(path => path.id === pathId)
+        path.vocabulary.push(word)
+        await supabase.from('study_paths').update({ vocabulary: path.vocabulary }).eq('id', pathId);
+        set(state => ({ paths: state.paths.map(path => path.id === pathId ? path : path) }))
+    },
+    updateVocabulary: async (pathId, wordIndex, word) => {
+        const path = get().paths.find(path => path.id === pathId)
+        path.vocabulary[wordIndex] = word
+        await supabase.from('study_paths').update({ vocabulary: path.vocabulary }).eq('id', pathId);
+        set(state => ({ paths: state.paths.map(path => path.id === pathId ? path : path) }))
+    },
+    deleteVocabulary: async (pathId, wordIndex) => {
+        const path = get().paths.find(path => path.id === pathId)
+        path.vocabulary = path.vocabulary.filter((_, index) => index !== wordIndex)
+        await supabase.from('study_paths').update({ vocabulary: path.vocabulary }).eq('id', pathId);
         set(state => ({ paths: state.paths.map(path => path.id === pathId ? path : path) }))
     },
 

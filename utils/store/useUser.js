@@ -33,6 +33,13 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 			const { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
 			if (error) set({ error });
 			else set({ user: data });
+
+			if (!data.googleRefreshToken){
+				const { data: { session } } = await supabase.auth.getSession();
+				if (session?.provider_refresh_token) {
+					await get().updateUserData({ googleRefreshToken: session.provider_refresh_token });
+				}
+			}
 		},
 		updateUserData: async (updates) => {
 			const { error } = await supabase.from('users').update(updates).eq('id', get().user.id);
@@ -45,6 +52,17 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 				provider: 'google',
 				options: {
 					redirectTo: window.location.origin,
+					// Space-separated string is the Supabase convention
+					scopes: [
+						'https://www.googleapis.com/auth/calendar.readonly',
+						'https://www.googleapis.com/auth/documents',
+						'https://www.googleapis.com/auth/drive.file',
+					].join(' '),
+					queryParams: {
+						access_type: 'offline',
+						// prompt: 'consent',
+						include_granted_scopes: 'true'
+					},
 				},
 			});
 		},

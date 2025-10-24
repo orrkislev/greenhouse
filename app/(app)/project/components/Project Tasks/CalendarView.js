@@ -2,13 +2,15 @@ import { tw } from "@/utils/tw";
 import { ganttActions, useGantt } from "@/utils/store/useGantt";
 import { useTime } from "@/utils/store/useTime";
 import { endOfWeek, format, startOfWeek, add, subWeeks } from "date-fns";
-import { Trash, Grip, ArrowDownToLine } from "lucide-react";
+import { Trash, Grip, ArrowDownToLine, ExternalLink } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { projectTasksActions, useProjectTasksData } from "@/utils/store/useProjectTasks";
 import TaskModal from "@/components/TaskModal";
+import Link from "next/link";
+import Button from "@/components/Button";
 
 const CalendarHeader = tw`flex items-center justify-between p-4 bg-stone-100`;
 const CalendarCell = tw`p-2 flex flex-col gap-1 transition-all duration-200 border border-stone-200 relative
@@ -200,11 +202,18 @@ function TaskItem({ task }) {
         <>
             <TaskItemDiv ref={elementRef} $dragging={dragState === 'dragging'} $over={dragState === 'over'} $active={!task.completed}>
                 {!task.status !== 'completed' && (
-                    <div ref={gripRef} className="flex items-center text-stone-400 cursor-move hover:text-stone-600 transition-colors p-1 rounded" >
+                    <div ref={gripRef} className="flex items-center text-stone-800 cursor-move hover:text-stone-600 transition-colors p-1 rounded" >
                         <Grip className="w-3 h-3" />
                     </div>
                 )}
                 <div className="text-sm text-stone-700 flex-1 hover:underline decoration-dashed cursor-pointer" onClick={() => setOpenTaskModal(true)}>{task.title}</div>
+                {task.url && (
+                    <Link href={task.url.startsWith('http') ? task.url : `https://${task.url}`} target="_blank">
+                        <Button className="ml-1 p-1 rounded-full bg-white text-sm text-stone-500 underline decoration-none cursor-pointer hover:text-blue-500 transition-all duration-200 flex gap-2 items-center">
+                            <ExternalLink className="w-4 h-4" />
+                        </Button>
+                    </Link>
+                )}
             </TaskItemDiv>
             <TaskModal task={task} isOpen={openTaskModal} onClose={() => setOpenTaskModal(false)} />
         </>
@@ -212,7 +221,7 @@ function TaskItem({ task }) {
 }
 
 const TaskItemDiv = tw`
-    relative flex items-center gap-2 bg-stone-200 border-b border-stone-200 transition-all duration-200
+    relative flex items-center gap-2 bg-orange-200 border border-orange-300 transition-all duration-200 rounded-full p-1
     ${props => props.$dragging ? 'opacity-50 transform rotate-2 shadow-lg scale-105' : 'hover:bg-stone-50'}
     ${props => props.$over ? 'border-l-4 border-l-blue-400 bg-blue-50' : ''}
     ${props => props.$active ? '' : 'opacity-50 line-through bg-emerald-100 hover:bg-emerald-100'}

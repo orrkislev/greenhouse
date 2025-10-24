@@ -4,10 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
-import { ArrowDownToLine, Grip } from "lucide-react";
+import { ArrowDownToLine, ExternalLink, Grip } from "lucide-react";
 import { projectTasksActions, useProjectTasksData } from "@/utils/store/useProjectTasks";
 import { tw } from "@/utils/tw";
 import TaskModal from "@/components/TaskModal";
+import Link from "next/link";
+import Button from "@/components/Button";
 
 export default function WeeklyView() {
     const [fullView, setFullView] = useState(true);
@@ -194,32 +196,39 @@ function DraggableTask({ task, taskIndex, weekNumber, onTaskMove, setIsDragging 
 
     return (
         <>
-        <div
-            ref={elementRef}
-            className={`relative flex items-center justify-between p-2 gap-4 border rounded-lg select-none transition-all ${dragState === 'dragging'
-                ? 'opacity-50 transform rotate-2 shadow-lg'
-                : dragState === 'over'
-                    ? 'border-blue-300 bg-stone-50'
-                    : 'hover:bg-stone-50 border-stone-200'
-                }
+            <div
+                ref={elementRef}
+                className={`relative flex items-center justify-between p-2 gap-4 border rounded-lg select-none transition-all ${dragState === 'dragging'
+                    ? 'opacity-50 transform rotate-2 shadow-lg'
+                    : dragState === 'over'
+                        ? 'border-blue-300 bg-stone-50'
+                        : 'hover:bg-stone-50 border-stone-200'
+                    }
                 ${task.completed ? 'opacity-50 line-through bg-emerald-100 hover:bg-emerald-100' : ''}
                 `}>
-            <div
-                ref={gripRef}
-                className="flex items-center gap-2 text-stone-400 cursor-move hover:text-stone-600 transition-colors p-1 rounded"
-            >
-                {!task.completed && <Grip className="w-4 h-4" />}
-            </div>
-            {dragState === 'over' && (
-                <DropIndicator edge="right" gap="4px" />
-            )}
-            <div className="flex-1 hover:underline decoration-dashed cursor-pointer" onClick={() => setOpenTaskModal(true)}>
-                <div className="font-medium">{task.title}</div>
-                <div className="text-sm text-stone-600">{task.description}</div>
-            </div>
+                <div
+                    ref={gripRef}
+                    className="flex items-center gap-2 text-stone-400 cursor-move hover:text-stone-600 transition-colors p-1 rounded"
+                >
+                    {!task.completed && <Grip className="w-4 h-4" />}
+                </div>
+                {dragState === 'over' && (
+                    <DropIndicator edge="right" gap="4px" />
+                )}
+                <div className="flex-1 hover:underline decoration-dashed cursor-pointer" onClick={() => setOpenTaskModal(true)}>
+                    <div className="font-medium">{task.title}</div>
+                    <div className="text-sm text-stone-600">{task.description}</div>
 
-        </div>
-        <TaskModal task={task} isOpen={openTaskModal} onClose={() => setOpenTaskModal(false)} />
+                </div>
+                {task.url && (
+                    <Link href={task.url.startsWith('http') ? task.url : `https://${task.url}`} target="_blank">
+                        <Button className="p-1 bg-stone-200 text-sm text-stone-500 underline decoration-none cursor-pointer hover:text-blue-500 transition-all duration-200 flex gap-2 items-center">
+                            <ExternalLink className="w-4 h-4" />
+                        </Button>
+                    </Link>
+                )}
+            </div>
+            <TaskModal task={task} isOpen={openTaskModal} onClose={() => setOpenTaskModal(false)} />
         </>
     );
 }

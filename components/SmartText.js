@@ -4,12 +4,12 @@ import { Pencil, Trash2 } from "lucide-react";
 import SmartTextArea from "@/components/SmartTextArea";
 
 
-export default function SmartText({ text, className, onEdit, withIcon = true, onRemove }) {
+export default function SmartText({ text, className, onEdit, withIcon = true, onRemove, editable = true }) {
     const [isEditing, setIsEditing] = useState(false);
     const [lastValue, setLastValue] = useState(text);
     const [value, setValue] = useState(text);
 
-    if (!onEdit) return <SmartLabel text={text} className={className} />
+    if (!onEdit || !editable) return <SmartLabel text={text} className={className} />
 
     const startEditing = (e) => {
         e.stopPropagation();
@@ -35,11 +35,11 @@ export default function SmartText({ text, className, onEdit, withIcon = true, on
 
     return (
         <div className="flex gap-4 group items-center">
-            <SmartLabel text={text || ''} className={className} onClick={startEditing} />
+            <SmartLabel text={text || ''} className={className} onClick={editable ? startEditing : undefined} />
             {withIcon && <Pencil className="w-4 h-4 cursor-pointer opacity-0 group-hover:opacity-50 hover:opacity-100 transition-all"
                 onClick={startEditing}
             />}
-            {onRemove && <Trash2 className="w-4 h-4 cursor-pointer opacity-0 group-hover:opacity-50 hover:opacity-100 transition-all"
+            {onRemove && editable && <Trash2 className="w-4 h-4 cursor-pointer opacity-0 group-hover:opacity-50 hover:opacity-100 transition-all"
                 onClick={onRemove}
             />}
         </div>
