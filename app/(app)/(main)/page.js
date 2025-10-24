@@ -14,14 +14,14 @@ import MainNews from "./components/MainNews"
 export default function MainPage() {
 
     return (
-        <div className="relative overflow-hidden">
+        <div className="inset-0 absolute overflow-hidden">
             <BGGrads />
-            <PageMain className="flex items-center justify-center mx-16">
-                <div className="grid grid-cols-4 gap-4">
-                    <MainMessages />
-                    <MainGroups />
-                    <MainNews />
+            <PageMain className="flex mx-16">
+                <div className="grid grid-cols-5 gap-4">
                     <MainSchedule />
+                    <MainMessages />
+                    <MainNews />
+                    <MainGroups />
                     <MainProject />
                     <MainStudy />
                     <MainResearch />

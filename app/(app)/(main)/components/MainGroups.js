@@ -2,9 +2,8 @@ import Box2 from "@/components/Box2";
 import { groupsActions, useUserGroups } from "@/utils/store/useGroups";
 import { useEffect, useState } from "react";
 import { isStaff, useUser } from "@/utils/store/useUser";
-import { Check, CheckSquare, PartyPopper, Square } from "lucide-react";
+import { Check, CheckSquare, Square, Users2 } from "lucide-react";
 import 'react-quill-new/dist/quill.snow.css';
-import { AvatarGroup } from "@/components/Avatar";
 import { IconButton } from "@/components/Button";
 import GroupTaskModal from "@/components/GroupTaskModal";
 
@@ -18,10 +17,14 @@ export default function MainGroups() {
     })
 
     return (
-        <div className={`col-span-2 row-span-${groups.length} flex flex-col gap-4`}>
-            {groups.map(group => (
-                <MainGroup key={group.id} group={group} />
-            ))}
+        <div className={`row-span-3 flex flex-col gap-4`}>
+            <Box2 label="קבוצות" className="flex-1" LabelIcon={Users2}>
+                <div className="flex flex-col gap-2 divide-y divide-stone-200">
+                    {groups.map(group => (
+                        <MainGroup key={group.id} group={group} />
+                    ))}
+                </div>
+            </Box2>
         </div>
     )
 }
@@ -32,17 +35,25 @@ function MainGroup({ group }) {
         groupsActions.loadWeekEvents(group.id);
     }, [group])
 
+    const groupName = group.type === 'class' ? 'קבוצת ' + group.name : group.type === 'major' ? 'מגמת ' + group.name : group.name;
+
     return (
-        <Box2 label={group.label} description={group.description} className="flex-1 relative" LabelIcon={PartyPopper}>
-            <div className="text-sm text-stone-500 w-full" dangerouslySetInnerHTML={{ __html: group.message }} />
+        <div className="flex flex-col gap-2">
+            <div className="text-sm text-stone-700 flex items-center gap-2">
+                <Users2 className="w-4 h-4" />
+                {groupName}
+            </div>
+            {group.message ? (
+                <div className="text-sm text-stone-500 w-full" dangerouslySetInnerHTML={{ __html: group.message }} />
+            ) : (
+                <div className="text-xs text-stone-500 w-full">אין הודעה</div>
+            )}
             <div>
                 {group.tasks && group.tasks.map((task) => (
                     <MainGroupTask key={task.id} group={group} task={task} />
                 ))}
             </div>
-
-            {/* <AvatarGroup users={group.mentors} className='absolute bottom-1 left-1' /> */}
-        </Box2>
+        </div>
     )
 }
 

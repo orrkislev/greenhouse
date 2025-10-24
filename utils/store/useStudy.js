@@ -12,6 +12,7 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
     sideContext: [],
 
     loadPaths: withLoadingCheck(async (user) => {
+        set({ paths: [] });
         const { data, error } = await supabase.from('study_paths').select('*').eq('student_id', user.id);
         if (error) throw error;
 
@@ -25,16 +26,16 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
             path.steps = stepsData ? stepsData.map(t => t.data) : [];
         }
 
+
         if (!data.some(path => path.id === EnglishPathID)) {
             const { data: englishPath, error: englishPathError } = await supabase.from('study_paths').select('*').eq('id', EnglishPathID).single();
             if (englishPath) {
                 data.push(englishPath);
-                const { data: stepsData, error: stepsError } = await supabase.from('tasks').select('*').eq('metadata->>english', 'true');
+                const { data: stepsData, error: stepsError } = await supabase.from('tasks').select('*').eq('student_id', user.id).eq('metadata->>english', 'true');
                 if (stepsError) throw stepsError;
                 englishPath.steps = stepsData
             }
         }
-
         set({ paths: data });
     }),
 

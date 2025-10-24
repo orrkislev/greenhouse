@@ -1,5 +1,7 @@
+import Avatar from "@/components/Avatar"
 import { IconButton } from "@/components/Button"
 import { logsActions, useLogs } from "@/utils/store/useLogs"
+import { useUser } from "@/utils/store/useUser"
 import { ArrowDownFromLineIcon, NotebookText, Trash2, X } from "lucide-react"
 import { useState } from "react"
 
@@ -14,6 +16,7 @@ const table_names = {
 
 
 export default function Journal() {
+    const user = useUser(state => state.user)
     const logs = useLogs()
     const [filterTags, setFilterTags] = useState([])
     const [filterInput, setFilterInput] = useState('')
@@ -90,6 +93,9 @@ export default function Journal() {
                     .map(log => (
                         <div key={log.id} className='flex justify-between items-center hover:bg-stone-100 group/log'>
                             <div className='py-[3px] flex items-center gap-2'>
+                                {log.user.id !== user.id && (
+                                    <Avatar user={log.user} />
+                                )}
                                 <JournalDate date={log.created_at} />
                                 <h2 className='text-sm'>
                                     {log.text}

@@ -9,6 +9,7 @@ export const [useResearchData, researchActions] = createStore((set, get, withUse
     allResearch: [],
 
     loadResearch: withLoadingCheck(async (user) => {
+        set({ research: null });
         // const { data, error } = await supabase.rpc('get_student_current_term_research', { p_student_id: user.id });
         const { data, error } = await supabase.from('research').select('*')
             .eq('student_id', user.id).eq('status', 'active')

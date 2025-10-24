@@ -9,7 +9,7 @@ export default function MainVocation() {
     const job = jobs.length > 0 ? jobs[jobs.length - 1] : null;
 
     return (
-        <Box2 label="תעסוקה" LabelIcon={Briefcase} className="min-h-[100px]">
+        <Box2 label="תעסוקה" LabelIcon={Briefcase} className="min-h-[100px] col-span-2">
             {job ? (
                 <div className="text-center text-sm">
                     התעסוקה שלי ב

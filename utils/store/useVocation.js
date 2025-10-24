@@ -6,6 +6,7 @@ export const [useVocationData, vocationActions] = createStore((set, get, withUse
         jobs: [],
 
         loadJobs: withLoadingCheck(async (user) => {
+            set({ jobs: [] });
             const { data, error } = await supabase.from('vocation').select('*').eq('user_id', user.id);
             if (error) throw error;
             set({ jobs: data });

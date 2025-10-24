@@ -6,11 +6,12 @@ import { useEffect, useState } from "react";
 import { groupsActions } from "@/utils/store/useGroups";
 import StaffGroup_Meetings from "./StaffGroup_Meetings";
 import Box2 from "@/components/Box2";
-import { Banana, Check, Plus } from "lucide-react";
+import { Banana, Check, Plus, Trash2 } from "lucide-react";
 import { AvatarGroup } from "@/components/Avatar";
 import 'react-quill-new/dist/quill.snow.css';
 import MessageEditor from "./MessageEditor";
 import GroupTaskModal from "@/components/GroupTaskModal";
+import Menu, { MenuItem, MenuList } from "@/components/Menu";
 
 
 
@@ -21,7 +22,7 @@ export default function StaffGroup({ group }) {
     }, [group])
 
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 relative">
             <StaffGroup_Header group={group} />
             <div className="flex gap-4 ">
                 <MessageEditor onSave={(value) => groupsActions.updateGroup(group, { message: value })} initialValue={group.message} />
@@ -29,6 +30,14 @@ export default function StaffGroup({ group }) {
             </div>
             <StaffGroup_Students group={group} />
             {group.type === 'class' && <StaffGroup_Meetings group={group} />}
+
+            {group.type === 'club' && (
+                <Menu className="absolute top-0 left-0">
+                    <MenuList>
+                        <MenuItem title="מחק מועדון" icon={Trash2} onClick={() => groupsActions.deleteGroup(group.id)} />
+                    </MenuList>
+                </Menu>
+            )}
         </div>
     );
 }

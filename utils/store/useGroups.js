@@ -13,6 +13,7 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
     // ----------- Group Loading -----------
     // -------------------------------------
     loadUserGroups: withLoadingCheck(async (user) => {
+        set({ groups: [] });
         const { data, error } = await supabase.rpc('get_user_groups', {
             p_user_id: user.id
         })
@@ -23,6 +24,36 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
         const { error } = await supabase.from('groups').update(prepareForGroupsTable(updates)).eq('id', group.id);
         if (error) throw error;
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...group, ...updates } : g) }));
+    },
+
+    // ----------- Group Members Management -----------
+    // ------------------------------------------------
+    createGroup: async (name, type) => {
+        const { data: groupData, error: groupError } = await supabase.from('groups').insert({ name, type }).select().single();
+        if (groupError) throw groupError;
+        const user = useUser.getState().user;
+        const { data: membersData, error: membersError } = await supabase.from('users_groups').insert({ group_id: groupData.id, user_id: user.id });
+        if (membersError) throw membersError;
+        groupData.members = [user];
+        set({ groups: [...get().groups, groupData] });
+    },
+    deleteGroup: async (groupId) => {
+        const { error } = await supabase.from('groups').delete().eq('id', groupId);
+        if (error) throw error;
+        set((state) => ({ groups: state.groups.filter(g => g.id !== groupId) }));
+        await supabase.from('users_groups').delete().eq('group_id', groupId);
+        await supabase.from('events').delete().eq('group_id', groupId);
+        await supabase.from('tasks').delete().eq('group_id', groupId);
+    },
+    addMember: async (groupId, user) => {
+        set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, members: [...g.members, user] } : g) }));
+        const { data, error } = await supabase.from('users_groups').insert({ group_id: groupId, user_id: user.id });
+        if (error) throw error;
+    },
+    removeMember: async (groupId, userId) => {
+        set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, members: g.members.filter(m => m.id !== userId) } : g) }));
+        const { error } = await supabase.from('users_groups').delete().eq('group_id', groupId).eq('user_id', userId);
+        if (error) throw error;
     },
 
     // ----------- Group Events Management -----------

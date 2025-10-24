@@ -39,7 +39,7 @@ export default function MainSchedule() {
     })
 
     return (
-        <Box2 label="מה יש לי היום" className="row-span-3 flex-1 relative" LabelIcon={Calendar}>
+        <Box2 label="מה יש לי היום" className="col-start-1 row-start-1 row-span-4 flex-1 relative" LabelIcon={Calendar}>
             <MainGreetings />
             <div className="flex flex-col gap-2 mt-2">
                 {allEvents.length > 0 ? allEvents.map(event => (

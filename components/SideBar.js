@@ -28,8 +28,6 @@ export default function SideBar() {
     const user = useUser((state) => state.user)
     if (!user) return null;
 
-    console.log(user)
-
     return (
         <SideBarDiv>
             <Link href="/" className="aspect-square flex items-center justify-center p-2 relative">

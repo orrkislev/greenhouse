@@ -1,4 +1,6 @@
 import { IconButton } from "@/components/Button";
+import SmartText from "@/components/SmartText";
+import { groupsActions } from "@/utils/store/useGroups";
 import { Monitor, Users } from "lucide-react";
 import Link from "next/link";
 
@@ -7,7 +9,13 @@ export default function StaffGroup_Header({ group }) {
         <div className="p-4">
             <div className="flex items-center justify-between">
                 <div>
-                    <h3 className="text-lg font-bold">{group.name}</h3>
+                    {group.type == 'club' ? (
+                        <SmartText text={group.name} onEdit={(val) => groupsActions.updateGroup(group, { name: val })} className="text-lg font-boldborder-none text-center text-2xl font-semibold" />
+                    ) : (
+                        <h3 className="text-lg font-bold">
+                            {group.name}
+                        </h3>
+                    )}
                     <Link href={`/screen/${group.id}`}>
                         <IconButton icon={Monitor} />
                     </Link>

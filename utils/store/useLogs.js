@@ -6,7 +6,10 @@ export const [useLogsData, logsActions] = createStore((set, get, withUser, withL
     logs: [],
 
     loadLogs: withLoadingCheck(async (user) => {
-        const { data, error } = await supabase.from('logs').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20);
+        set({ logs: [] });
+        const { data, error } = await supabase.from('logs').select('*')
+            .or(`user_id.eq.${user.id},mentor_id.eq.${user.id}`)
+            .order('created_at', { ascending: false }).limit(20);
         if (error) throw error;
         for (const log of data) {
             if (log.context_table && log.context_id) {
@@ -14,16 +17,24 @@ export const [useLogsData, logsActions] = createStore((set, get, withUser, withL
                 if (contextError) throw contextError;
                 log.context = context;
             }
+            if (log.user_id !== user.id) {
+                const { data: user, error: userError } = await supabase.from('users').select('id, first_name, last_name, avatar_url').eq('id', log.user_id).single();
+                if (userError) throw userError;
+                log.user = user;
+            } else log.user = user;
             if (log.mentor_id) {
-                const { data: mentor, error: mentorError } = await supabase.from('users').select('id, first_name, last_name, avatar_url').eq('id', log.mentor_id).single();
-                if (mentorError) throw mentorError;
-                log.mentor = mentor;
+                if (log.mentor_id !== user.id) {
+                    const { data: mentor, error: mentorError } = await supabase.from('users').select('id, first_name, last_name, avatar_url').eq('id', log.mentor_id).single();
+                    if (mentorError) throw mentorError;
+                    log.mentor = mentor;
+                } else log.mentor = user;
             }
         }
         set({ logs: data });
     }),
 
     loadMoreLogs: withLoadingCheck(async (user) => {
+        set({ logs: [] });
         const lastId = get().logs[get().logs.length - 1].id;
         const { data, error } = await supabase.from('logs').select('*').eq('user_id', user.id).gt('id', lastId).order('created_at', { ascending: false }).limit(30);
         if (error) throw error;

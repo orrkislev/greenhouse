@@ -4,8 +4,6 @@
 import { useEffect, useState } from "react";
 import { getLatestVideoFromPlaylist } from "@/utils/actions/google actions";
 import { useUserGroups } from "@/utils/store/useGroups";
-import Box2 from "@/components/Box2";
-import { Tv } from "lucide-react";
 
 export default function MainNews() {
     const groups = useUserGroups();
@@ -21,7 +19,7 @@ export default function MainNews() {
 
     return (
         // <Box2 label="חדשות החממה" LabelIcon={Tv} className={`row-span-${groups.length} grayscale-100 hover:grayscale-0 transition-all duration-300`}>
-        <div className={`row-span-${groups.length} grayscale-100 hover:grayscale-0 transition-all duration-300`}>
+        <div className={`row-span-2 grayscale-100 hover:grayscale-0 transition-all duration-300`}>
             <div className="w-full h-full relative rounded-xl overflow-hidden aspect-[16/9] border border-stone-400">
                 {embedUrl && (
                 <iframe

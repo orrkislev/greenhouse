@@ -10,9 +10,9 @@ export default function RootLayout({ children }) {
 	const originalUser = useUser(state => state.originalUser);
 	return (
 		<WithAuth>
-			<div className="flex h-screen overflow-y-hidden overscroll-none">
+			<div className="flex h-screen overflow-y-hidden overscroll-none ">
 				<SideBar />
-				<div className={`flex-1 flex justify-between justify-center ${originalUser ? 'pb-16' : ''}`}>
+				<div className={`relative flex-1 flex justify-between justify-center ${originalUser ? 'pb-16' : 'pb-8'}`}>
 					{children}
 					<JournalHandle />
 					<SwitchBackPanel />

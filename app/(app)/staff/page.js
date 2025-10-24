@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import StaffGroup from "./components/StaffGroup";
 import StaffStudents from "./components/StaffStudents";
 import { useMentorships } from "@/utils/store/useMentorships";
-import { useUserGroups } from "@/utils/store/useGroups";
+import { groupsActions, useUserGroups } from "@/utils/store/useGroups";
 import { DashboardLayout, DashboardPanel, DashboardPanelButton, DashboardMain } from "@/components/DashboardLayout"
 import Staff_Admin from "./components/Staff_Admin";
 import { isAdmin } from "@/utils/store/useUser";
+import { Plus } from "lucide-react";
 
 export default function StaffPage() {
     const groups = useUserGroups();
@@ -27,6 +28,7 @@ export default function StaffPage() {
                     <DashboardPanelButton key={group.id} onClick={() => setActiveTab(group.id)} $active={activeTab === group.id}>
                         {group.type == 'major' && 'מגמת '}
                         {group.type == 'class' && 'קבוצת '}
+                        {group.type == 'club' && 'מועדון '}
                         {group.name}
                     </DashboardPanelButton>
                 ))}
@@ -34,6 +36,9 @@ export default function StaffPage() {
                 {isAdmin() && (
                     <DashboardPanelButton onClick={() => setActiveTab('admin')} $active={activeTab === 'admin'}>תיכון החממה</DashboardPanelButton>
                 )}
+                <DashboardPanelButton onClick={() => groupsActions.createGroup('לימוד', 'club')}>
+                    <Plus className="w-4 h-4" />
+                </DashboardPanelButton>
             </DashboardPanel>
             <DashboardMain>
                 {activeTab === 'students' && <StaffStudents students={students} />}

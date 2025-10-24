@@ -12,23 +12,39 @@ import WithLabel from "@/components/WithLabel";
 import usePopper from "@/components/Popper";
 import { EditMeeting } from "./StaffGroup_Meetings";
 import { meetingUtils, useMeetings } from "@/utils/store/useMeetings";
+import { AllStudentPicker } from "./StaffStudents";
 
 export default function StaffGroup_Students({ group }) {
     if (!group.members) return null;
 
     const students = group.members.filter(member => member.role === 'student');
 
-    return <Staff_Students_List students={students} context={group.type} />
+    const onSelect = (student) => {
+        groupsActions.addMember(group.id, student);
+    }
+
+    return (
+        <div className="flex flex-col gap-4">
+            <Staff_Students_List students={students} context={group.type} />
+            <AllStudentPicker unavailableStudents={students} onSelect={onSelect} />
+        </div>
+    )
 }
 
 
 export function Staff_Students_List({ students, context }) {
-    const [selectedStudent, setSelectedStudent] = useState(students.sort((a, b) => a.first_name.localeCompare(b.first_name, 'he'))[0])
+    const [selectedStudent, setSelectedStudent] = useState(null)
+
+    useEffect(() => {
+        if (students.length > 0) {
+            setSelectedStudent(students.sort((a, b) => a.first_name.localeCompare(b.first_name, 'he'))[0])
+        }
+    }, [students])
 
     return (
         <div className="">
             <div className="float-right ml-4">
-                <SelectedStudentCard student={selectedStudent} context={context} />
+                {selectedStudent != null && <SelectedStudentCard student={selectedStudent} context={context} />}
             </div>
 
             <div className="flex flex-wrap gap-2">
