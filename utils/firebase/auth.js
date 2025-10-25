@@ -2,7 +2,7 @@ import { EmailAuthProvider, GoogleAuthProvider, onAuthStateChanged, signInWithEm
 import { auth } from './firebase';
 
 export const prepareEmail = (username) => {
-  return username.split('@')[0] + '@chamama.org'
+  return username.toLowerCase().split('@')[0] + '@chamama.org'
 }
 export const getUsernameFromEmail = (email) => {
   return email.split('@')[0]

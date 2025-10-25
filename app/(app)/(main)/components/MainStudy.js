@@ -26,17 +26,18 @@ export default function MainStudy() {
 
     return (
         <Box2 label="למידה" className="col-span-2" LabelIcon={BookOpen}>
-            <div className="w-full flex gap-2">
-                <div className="flex-1 p-4">
+            <div className="absolute top-4 right-2 left-2 bottom-8 flex ">
+                <div className="flex-1 flex items-center justify-center">
                     <div
                         style={{ backgroundImage: `url(${path ? (path.metadata?.image || '/images/study.png') : '/images/question.png'})` }}
-                        className={`h-full bg-cover bg-center rounded-md border border-stone-200 ${pathIndex % 2 == 0 ? 'rotate-2' : '-rotate-2'} transition-all duration-300`} />
+                        className={` w-[80%] h-[80%] bg-cover bg-center rounded-md border border-stone-200 ${pathIndex % 2 == 0 ? 'rotate-2' : '-rotate-2'} transition-all duration-300`} />
                 </div>
-                <div className="flex flex-col gap-2 flex-1 justify-center">
+                <div className="flex-1 flex flex-col gap-2 justify-center">
                     <div className="text-lg font-bold">{path ? path.title : 'איזה תחום מענין אותי ללמוד?'}</div>
                     <div className="text-sm text-stone-500">{path ? path.description : 'מה בעצם אני רוצה ללמוד?'}</div>
                     <div className="text-sm text-stone-500">{step ? step.title : 'מה הדבר הראשון שאני אלמד?'}</div>
                 </div>
+
             </div>
             <Link href="/study" className="absolute bottom-2 left-2 z-10 bg-white">
                 <Button>

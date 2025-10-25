@@ -36,60 +36,64 @@ export default function WithAuth({ children, role }) {
 
     return (
         <div className="min-h-screen flex">
-            {/* Left Side - Sign In Form */}
-            <div className="flex-1 bg-white flex items-center justify-center">
-                <div className="w-full max-w-md -mt-8">
-                    {/* Logo/Icon Section */}
+            <div className="flex-2 bg-white flex items-center justify-center">
+                <div className="w-[50vw] -mt-8">
                     <div className="flex flex-col items-center justify-center mb-4">
                         <Image src="/logo.png" alt="logo" width={300} height={300} priority={true} style={{ width: 'auto', height: 'auto' }} />
-                        {/* <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full mx-auto mb-4 flex items-center justify-center">
-                            <UserCircle2 className="h-8 w-8 text-white" />
-                        </div> */}
-                        <p className="text-sm text-stone-600 text-center">
-                            היכנסו עם שם המשתמש והסיסמא שלכם <br />
-                            אם אתם לא זוכרים, פנו למנטורים
-                        </p>
                     </div>
 
-                    <form onSubmit={onSubmit} className="space-y-6">
-                        {error && (
-                            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-                                {error.message}
-                            </div>
-                        )}
+                    <div className='flex gap-4'>
+                        <form onSubmit={onSubmit} className="flex-1 flex flex-col justify-center px-4 gap-8">
+                            {error && (
+                                <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                                    {error.message}
+                                </div>
+                            )}
 
-                        <WithLabel label="שם משתמש">
-                            <input
-                                id="username-sidebar"
-                                type="text"
-                                placeholder="שם משתמש"
-                                className="w-full border border-stone-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                value={username}
-                                onChange={e => setUsername(e.target.value)}
-                                autoComplete="username"
-                            />
-                        </WithLabel>
+                            <p className="text-sm text-stone-600 text-center">
+                                היכנסו עם שם המשתמש והסיסמא הקצרה <br />
+                                אם אתם לא זוכרים, פנו למנטורים
+                            </p>
 
-                        <WithLabel label="סיסמא (4 ספרות)">
-                            <div className="flex justify-center">
-                                <PINInput onChange={e => setPin(e.target.value)} hideInput={true} />
-                            </div>
-                        </WithLabel>
+                            <WithLabel label="שם משתמש">
+                                <input
+                                    id="username-sidebar"
+                                    type="text"
+                                    placeholder="שם משתמש"
+                                    className="w-full border border-stone-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                    value={username}
+                                    onChange={e => setUsername(e.target.value)}
+                                    autoComplete="username"
+                                />
+                            </WithLabel>
 
-                        <button
-                            type="submit"
-                            className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-3 px-4 rounded-lg disabled:opacity-50 transition-all duration-200"
-                            disabled={loading}
-                        >
-                            {loading ? 'ממתין...' : 'התחבר'}
-                        </button>
+                            <WithLabel label="סיסמא (4 ספרות)">
+                                <div className="flex justify-center">
+                                    <PINInput onChange={e => setPin(e.target.value)} hideInput={true} withLabel={false} />
+                                </div>
+                            </WithLabel>
+                            <button
+                                type="submit"
+                                className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-3 px-4 rounded-lg disabled:opacity-50 transition-all duration-200"
+                                disabled={loading}
+                            >
+                                {loading ? 'ממתין...' : 'התחבר'}
+                            </button>
+                        </form>
 
-                        <div className='flex items-center justify-center'>
+                        <div className='flex-1 flex flex-col items-center justify-center gap-4'>
+                            <div className='flex-1 w-[1px] bg-stone-200'></div>
+                            <p className='text-sm text-stone-500 text-center'>או</p>
+                            <div className='flex-1 w-[1px] bg-stone-200'></div>
+                        </div>
+
+                        <div className='flex-1 flex flex-col items-center justify-center gap-4'>
+                            <p className='text-sm text-stone-500 text-center'>התחברות עם חשבון חממה</p>
                             <Icon icon="devicon:google" className="w-12 h-12 p-2 grayscale-20 hover:grayscale-0 hover:saturate-300 hover:bg-stone-100 rounded-full cursor-pointer transition-all duration-200"
                                 onClick={() => userActions.signInWithGoogle()}
                             />
                         </div>
-                    </form>
+                    </div>
 
                 </div>
             </div>

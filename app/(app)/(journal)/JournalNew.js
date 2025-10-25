@@ -4,7 +4,7 @@ import { X, Calendar, Save } from "lucide-react"
 import Button, { IconButton } from "@/components/Button"
 import WithLabel from "@/components/WithLabel"
 import ItemContextPicker from "@/components/ItemContextPicker"
-import { useAllStaff } from "@/utils/store/useAdmin"
+import { adminActions, useAdmin, useAllStaff } from "@/utils/store/useAdmin"
 import { usePathname, useSearchParams } from "next/navigation"
 import { studyUtils } from "@/utils/store/useStudy"
 import { projectUtils } from "@/utils/store/useProject"
@@ -17,10 +17,15 @@ function JournalNew({ isOpen, setIsOpen }) {
     const originalUser = useUser(state => state.originalUser)
     const path = usePathname()
     const searchParams = useSearchParams()
-    const staff = useAllStaff()
+    const allMembers = useAdmin(state => state.allMembers)
     const [selectedStaff, setSelectedStaff] = useState(originalUser ? originalUser.user : null)
     const [context, setContext] = useState(null)
     const [text, setText] = useState('')
+    const user = useUser(state => state.user)
+
+    useEffect(() => {
+        adminActions.loadData();
+    }, [])
 
     useEffect(() => {
         setSelectedStaff(originalUser ? originalUser.user : null)
@@ -70,12 +75,22 @@ function JournalNew({ isOpen, setIsOpen }) {
 
                 <WithLabel label="הפגישה שלי עם..." className='flex-1 px-4'>
                     <div className="flex w-64">
-                        <select className="w-full text-sm rounded-md px-2 py-1 border border-stone-300" value={selectedStaff?.id} onChange={(e) => setSelectedStaff(staff.find(s => s.id === e.target.value))}>
-                            <option value="">בחר מנטור / מאסטר</option>
-                            {staff.map(s => (
-                                <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
-                            ))}
-                        </select>
+                        {user.role === 'student' && (
+                            <select className="w-full text-sm rounded-md px-2 py-1 border border-stone-300" value={selectedStaff?.id} onChange={(e) => setSelectedStaff(staff.find(s => s.id === e.target.value))}>
+                                <option value="">בחר מנטור / מאסטר</option>
+                                {allMembers.filter(m => m.role === 'staff').map(s => (
+                                    <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
+                                ))}
+                            </select>
+                        )}
+                        {user.role === 'staff' && (
+                            <select className="w-full text-sm rounded-md px-2 py-1 border border-stone-300" value={selectedStaff?.id} onChange={(e) => setSelectedStaff(staff.find(s => s.id === e.target.value))}>
+                                <option value="">בחר חניך</option>
+                                {allMembers.filter(m => m.role === 'student').map(s => (
+                                    <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
+                                ))}
+                            </select>
+                        )}
                     </div>
                 </WithLabel>
             </div>
