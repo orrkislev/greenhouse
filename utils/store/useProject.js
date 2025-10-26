@@ -3,6 +3,7 @@ import { createDataLoadingHook, createStore } from "./utils/createStore";
 import { makeLink, prepareForProjectsTable } from "../supabase/utils";
 import { supabase } from "../supabase/client";
 import { resizeImage } from "../actions/storage actions";
+import { newLogActions } from "./useLogs";
 
 
 export const [useProjectData, projectActions] = createStore((set, get, withUser, withLoadingCheck) => {
@@ -66,12 +67,14 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             if (projectError) throw projectError;
             set({ project: projectData });
 
-            await makeLink('projects', projectData.id, 'terms', useTime.getState().currTerm.id);
+            makeLink('projects', projectData.id, 'terms', useTime.getState().currTerm.id);
 
-            await projectTasksActions.addTaskToProject({
+            projectTasksActions.addTaskToProject({
                 title: 'למלא הצהרת כוונות',
                 description: 'זה חשוב',
             }, projectData.id);
+
+            newLogActions.add(`התחלתי פרויקט חדש בתקופת ${useTime.getState().currTerm.name}. `);
         }),
         updateProject: async (updates) => {
             const { error } = await supabase.from('projects').update(prepareForProjectsTable(updates)).eq('id', get().project.id);
@@ -85,6 +88,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             const { error } = await supabase.from('projects').delete().eq('id', project.id);
             if (error) throw error;
             set({ project: null });
+            newLogActions.add(`סגרתי את הפרויקט ${project.title}. `)
         },
 
 

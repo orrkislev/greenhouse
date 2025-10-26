@@ -75,3 +75,10 @@ export const [useLogsData, logsActions] = createStore((set, get, withUser, withL
 }));
 
 export const useLogs = createDataLoadingHook(useLogsData, 'logs', 'loadLogs');
+
+export const [useNewLog, newLogActions] = createStore((set, get, withUser, withLoadingCheck) => ({
+    text: '',
+    add: (text) => {
+        set(state => ({ text: state.text + ' ' + text }));
+    },
+}));

@@ -1,3 +1,4 @@
+import Button from "@/components/Button";
 import WithLabel from "@/components/WithLabel";
 import { projectActions, useProject, useProjectData } from "@/utils/store/useProject";
 import { timeActions, useTime } from "@/utils/store/useTime";
@@ -11,10 +12,10 @@ export default function ProjectContext() {
 
     return (
         <div className="flex flex-col gap-4">
-            {project && !project.isOld && project.master && (
+            {project && (
                 <div className="flex-1 flex gap-3 flex-col">
                     <div className="p-4 flex flex-col gap-4 border border-stone-300 text-sm text-stone-600">
-                        {project.questions && project.questions.map((question, index) => (
+                        {project.metadata.questions && project.metadata.questions.map((question, index) => (
                             <WithLabel key={index} label={question.title}>
                                 <div className="text-sm text-stone-500">{question.value}</div>
                             </WithLabel>
@@ -30,6 +31,13 @@ export default function ProjectContext() {
             )}
 
             <OtherProjects />
+
+            {project && project.terms && !project.terms.some(term => term.id === useTime.getState().currTerm.id) && (
+                <Button data-role="close" onClick={() => projectActions.setProject(null)}>
+                    חזרה
+                    <ChevronLeft className="w-4 h-4" />
+                </Button>
+            )}
         </div>
     )
 }

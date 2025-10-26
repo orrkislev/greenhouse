@@ -4,6 +4,7 @@ import { supabase } from "../supabase/client";
 import { useUser } from "./useUser";
 import { makeLink, prepareForStudyPathsTable, prepareForTasksTable, unLink } from "../supabase/utils";
 import { resizeImage } from "../actions/storage actions";
+import { newLogActions } from "./useLogs";
 
 export const EnglishPathID = 'd5b55c53-5f6b-4832-97cf-3fbb99037218';
 
@@ -59,11 +60,14 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
         await makeLink('tasks', stepData.id, 'study_paths', pathData.id);
 
         set({ paths: [...get().paths, { ...pathData, steps: [stepData] }] })
+
+        newLogActions.add(`התחלתי תחום למידה חדש.`);
     },
     deletePath: async (pathId) => {
         const { error } = await supabase.from('study_paths').delete().eq('id', pathId);
         if (error) throw error;
         set({ paths: get().paths.filter(path => path.id !== pathId) })
+        newLogActions.add(`מחקתי את תחום הלמידה ${path.title}.`);
     },
     updatePath: async (pathId, pathData) => {
         set(state => ({ paths: state.paths.map(path => path.id === pathId ? { ...path, ...pathData } : path) }))
@@ -84,6 +88,7 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
         const { data, error } = await supabase.from('tasks').insert(prepareForTasksTable(step)).select().single();
         if (error) throw error;
         await get().linkStepToPath(data, pathId);
+        newLogActions.add(`הוספתי שלב לתחום הלמידה ${path.title}.`);
     },
     linkStepToPath: async (step, pathId) => {
         await makeLink('tasks', step.id, 'study_paths', pathId);
@@ -93,9 +98,8 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
         const path = useStudy.getState().paths.find(path => path.steps.some(step => step.id === stepId))
         if (!path) return;
         await unLink('tasks', stepId, 'study_paths', path.id);
-        if (path) {
-            set(state => ({ paths: state.paths.map(path => path.id === path.id ? { ...path, steps: path.steps.filter(step => step.id !== stepId) } : path) }))
-        }
+        set(state => ({ paths: state.paths.map(path => path.id === path.id ? { ...path, steps: path.steps.filter(step => step.id !== stepId) } : path) }))
+        newLogActions.add(`מחקתי שלב מתחום הלמידה ${path.title}.`);
     },
     updateStep: async (pathId, stepId, stepData) => {
         const path = get().paths.find(path => path.id === pathId)

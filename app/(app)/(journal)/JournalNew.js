@@ -4,11 +4,11 @@ import { X, Calendar, Save } from "lucide-react"
 import Button, { IconButton } from "@/components/Button"
 import WithLabel from "@/components/WithLabel"
 import ItemContextPicker from "@/components/ItemContextPicker"
-import { adminActions, useAdmin, useAllStaff } from "@/utils/store/useAdmin"
+import { adminActions, useAdmin } from "@/utils/store/useAdmin"
 import { usePathname, useSearchParams } from "next/navigation"
 import { studyUtils } from "@/utils/store/useStudy"
 import { projectUtils } from "@/utils/store/useProject"
-import { logsActions } from "@/utils/store/useLogs"
+import { logsActions, useNewLog } from "@/utils/store/useLogs"
 import Journal from "./Journal"
 import { useUser } from "@/utils/store/useUser"
 
@@ -20,8 +20,14 @@ function JournalNew({ isOpen, setIsOpen }) {
     const allMembers = useAdmin(state => state.allMembers)
     const [selectedStaff, setSelectedStaff] = useState(originalUser ? originalUser.user : null)
     const [context, setContext] = useState(null)
+    const logText = useNewLog(state => state.text)
     const [text, setText] = useState('')
     const user = useUser(state => state.user)
+
+    useEffect(() => {
+        if (!logText) return;
+        setText(logText)
+    }, [logText])
 
     useEffect(() => {
         adminActions.loadData();

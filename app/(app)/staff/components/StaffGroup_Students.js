@@ -26,7 +26,7 @@ export default function StaffGroup_Students({ group }) {
     return (
         <div className="flex flex-col gap-4">
             <Staff_Students_List students={students} context={group.type} />
-            <AllStudentPicker unavailableStudents={students} onSelect={onSelect} />
+            {group.type === 'club' && <AllStudentPicker unavailableStudents={students} onSelect={onSelect} />}
         </div>
     )
 }

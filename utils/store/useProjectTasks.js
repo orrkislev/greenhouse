@@ -5,6 +5,7 @@ import { supabase } from "../supabase/client";
 import { format } from "date-fns";
 import { useUser } from "./useUser";
 import { useEffect } from "react";
+import { newLogActions } from "./useLogs";
 
 export const [useProjectTasksData, projectTasksActions] = createStore((set, get, withUser, withLoadingCheck) => {
     return {
@@ -82,6 +83,7 @@ export const [useProjectTasksData, projectTasksActions] = createStore((set, get,
             const { data, error } = await supabase.from('tasks').insert(task).select().single();
             if (error) throw error;
             await get().linkTaskToProject(data, projectId);
+            newLogActions.add(`הוספתי משימה חדשה בפרויקט`);
         },
         linkTaskToProject: async (task, projectId) => {
             await makeLink('tasks', task.id, 'projects', projectId);

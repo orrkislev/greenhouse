@@ -1,19 +1,29 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { BookOpen, NotebookTabs } from "lucide-react"
 import { useUser } from "@/utils/store/useUser"
 import JournalNew from "./JournalNew"
 import Journal from "./Journal"
 import { tw } from "@/utils/tw"
+import { useNewLog } from "@/utils/store/useLogs"
 
 export default function JournalHandle() {
     const originalUser = useUser(state => state.originalUser);
-
+    const newLog = useNewLog(state => state.text)
     const [isOpen, setIsOpen] = useState(false)
     const [isHovered, setIsHovered] = useState(false)
-
     const [rotation, setRotation] = useState(0)
+    const [notifyNewLog, setNotifyNewLog] = useState(false)
+
+    useEffect(() => {
+        if (newLog.length > 0) setNotifyNewLog(true)
+    }, [newLog])
+
+    useEffect(()=>{
+        if (isOpen) setNotifyNewLog(false)
+    },[isOpen])
+
 
     const handleMouseMove = (e) => {
         setRotation(-(e.clientX - window.innerWidth / 2) / 50)
@@ -53,6 +63,7 @@ export default function JournalHandle() {
                             onClick={() => setIsOpen(true)}
                             label="השורה התחתונה"
                             Icon={BookOpen}
+                            notifyNewLog={notifyNewLog}
                         />
                     </div>
 
@@ -72,7 +83,7 @@ const JournalTabDiv = tw.button`min-w-32 h-[40px] flex items-center justify-cent
 
 const JournalTabHandle = tw.div`absolute top-1 left-1/2 -translate-x-1/2 h-1 rounded-full transition-all duration-300 bg-stone-200/30 w-12 group-hover:w-16`
 
-function JournalTab({ onClick, label, Icon}) {
+function JournalTab({ onClick, label, Icon, notifyNewLog}) {
     return (
         <JournalTabDiv onClick={onClick}
             style={{
@@ -88,6 +99,7 @@ function JournalTab({ onClick, label, Icon}) {
             <span className="tracking-wider transition-colors duration-300 relative z-10">
                 {label}
             </span>
+            {notifyNewLog && <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse" />}
         </JournalTabDiv>
     )
 }
