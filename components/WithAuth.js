@@ -39,7 +39,7 @@ export default function WithAuth({ children, role }) {
             <div className="flex-2 bg-white flex items-center justify-center">
                 <div className="w-[50vw] -mt-8">
                     <div className="flex flex-col items-center justify-center mb-4">
-                        <Image src="/logo.png" alt="logo" width={300} height={300} priority={true} style={{ width: 'auto', height: 'auto' }} />
+                        <Image src="/logo.png" alt="logo" width={300} height={300} priority={true} style={{ width: '300px' }} />
                     </div>
 
                     <div className='flex gap-4'>

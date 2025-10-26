@@ -2,8 +2,6 @@ import Box2 from "@/components/Box2";
 import Button from "@/components/Button";
 import { useStudyPaths } from "@/utils/store/useStudy";
 import { BookOpen } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
