@@ -12,11 +12,9 @@ const MeetingContainer = tw`flex flex-col items-center justify-center text-stone
 export default function Meetings() {
     const week = useTime((state) => state.week);
     const meetings = useMeetings();
-    const user = useUser(state => state.user);
 
     const getOtherParticipant = (meeting) => {
-        if (meeting.created_by === user.id) return meeting.other_participants[0].first_name + ' ' + meeting.other_participants[0].last_name;
-        return meeting.created_by.first_name + ' ' + meeting.created_by.last_name;
+        return meeting.other_participants[0].first_name + ' ' + meeting.other_participants[0].last_name;
     }
 
     return (

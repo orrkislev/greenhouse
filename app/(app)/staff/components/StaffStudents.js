@@ -7,6 +7,9 @@ import { Staff_Students_List } from "./StaffGroup_Students";
 import Button from "@/components/Button";
 import WithLabel from "@/components/WithLabel";
 import { adminActions, useAdmin } from "@/utils/store/useAdmin";
+import { groupsActions } from "@/utils/store/useGroups";
+import usePopper from "@/components/Popper";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 
 export default function StaffStudents() {
     const mentorships = useMentorships(state => state.mentorships);
@@ -34,42 +37,42 @@ export default function StaffStudents() {
     );
 }
 
-export function AllStudentPicker({ unavailableStudents=[], onSelect }) {
+export function AllStudentPicker({ unavailableStudents = [], onSelect }) {
     const classes = useAdmin(state => state.classes);
     const allMembers = useAdmin(state => state.allMembers);
-    
-    const loadAllStudents = async () => {
-        await adminActions.loadData();
-    }
+    const {open, close, Popper, baseRef} = usePopper();
 
     const availableStudents = allMembers
         .filter(student => !unavailableStudents.some(s => s.student_id === student.id))
         .filter(student => student.role === 'student');
 
     return (
-        <div className="text-stone-500">
-            {availableStudents.length == 0 ? (
-                <Button onClick={loadAllStudents}>
+        <>
+            <div className="text-stone-500" ref={baseRef}>
+                <Button onClick={open}>
                     <Plus className="w-4 h-4" /> חניכים נוספים
                 </Button>
-            ) : (
-                <div className="flex gap-4 flex-wrap">
-                    {classes.sort((a, b) => a.name.localeCompare(b.name, 'he')).map(cls => (
-                        <WithLabel key={cls.id} label={cls.name}>
-                            <div className="flex gap-2 flex-wrap">
-                                {availableStudents
-                                    .filter(student => student.groups.includes(cls.id))
-                                    .sort((a, b) => a.first_name.localeCompare(b.first_name, 'he'))
-                                    .map(student => (
-                                    <Button key={student.id} data-role="save" onClick={() => onSelect(student)} >
+            </div>
+
+            <Popper>
+                <Command>
+                    <CommandInput placeholder="חפש חניכים" />
+                    <CommandList>
+                        <CommandEmpty>בחר חניכים</CommandEmpty>
+                        {classes.map(group => (
+                            <CommandGroup key={group.id} heading={group.name}>
+                                {availableStudents.filter(student => student.groups.includes(group.id)).map(student => (
+                                    <CommandItem key={student.id}
+                                        onSelect={_ => onSelect(student)}
+                                        value={student.first_name + ' ' + student.last_name}>
                                         {student.first_name} {student.last_name}
-                                    </Button>
+                                    </CommandItem>
                                 ))}
-                            </div>
-                        </WithLabel>
-                    ))}
-                </div>
-            )}
-        </div>
+                            </CommandGroup>
+                            ))}
+                    </CommandList>
+                </Command>
+            </Popper>
+        </>
     );
 }

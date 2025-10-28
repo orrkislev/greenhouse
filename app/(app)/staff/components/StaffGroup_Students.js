@@ -25,14 +25,14 @@ export default function StaffGroup_Students({ group }) {
 
     return (
         <div className="flex flex-col gap-4">
-            <Staff_Students_List students={students} context={group.type} />
+            <Staff_Students_List students={students} context={group.type} group={group} />
             {group.type === 'club' && <AllStudentPicker unavailableStudents={students} onSelect={onSelect} />}
         </div>
     )
 }
 
 
-export function Staff_Students_List({ students, context }) {
+export function Staff_Students_List({ students, context, group }) {
     const [selectedStudent, setSelectedStudent] = useState(null)
 
     useEffect(() => {
@@ -44,7 +44,7 @@ export function Staff_Students_List({ students, context }) {
     return (
         <div className="">
             <div className="float-right ml-4">
-                {selectedStudent != null && <SelectedStudentCard student={selectedStudent} context={context} />}
+                {selectedStudent != null && <SelectedStudentCard student={selectedStudent} context={context} group={group} />}
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -63,7 +63,7 @@ export function Staff_Students_List({ students, context }) {
     )
 }
 
-function SelectedStudentCard({ student, context }) {
+function SelectedStudentCard({ student, context, group }) {
     const [data, setData] = useState(null)
     const groups = useGroups(state => state.groups);
     const today = useTime(state => state.today);
@@ -83,6 +83,13 @@ function SelectedStudentCard({ student, context }) {
 
     if (!data) return null;
 
+    const clickRemove = () => {
+        if (context === 'club') {
+            groupsActions.removeMember(group.id, data.id);
+        } else {
+            mentorshipsActions.deleteMentorship(data);
+        }
+    }
 
     return (
         <div className="p-6 border border-stone-200 flex flex-col gap-6 justify-between">
@@ -123,8 +130,8 @@ function SelectedStudentCard({ student, context }) {
                     <VenetianMask className="w-4 h-4" />
                 </Button>
 
-                {context === 'master' && (
-                    <Button data-role="delete" onClick={() => mentorshipsActions.deleteMentorship(data)}>
+                {(context === 'master' || context === 'club') && (
+                    <Button data-role="delete" onClick={clickRemove}>
                         הסר
                         <UserRoundX className="w-4 h-4" />
                     </Button>
