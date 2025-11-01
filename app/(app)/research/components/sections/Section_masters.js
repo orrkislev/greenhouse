@@ -3,6 +3,7 @@ import { IconButton } from "@/components/Button";
 import { researchActions, useResearchData } from "@/utils/store/useResearch";
 import { Plus, Trash2, ChevronUp, ChevronDown, Users2, User2 } from "lucide-react";
 import { useState } from "react";
+import TextInput from "./TextInput";
 
 export default function Section_masters() {
     const research = useResearchData(state => state.research)
@@ -42,15 +43,9 @@ function Master({ master, index }) {
             <div className="flex justify-between group/source transition-all h-[fit-content] border-b border-stone-300 items-center">
                 {isOpen ? (
                     <div>
-                        <div contentEditable={true} suppressContentEditableWarning onBlur={(e) => updateMaster('name', e.target.innerText)} className="w-full outline-none p-1 hover:bg-stone-100 rounded-md w-full text-sm">
-                            {master.name}
-                        </div>
-                        <div contentEditable={true} suppressContentEditableWarning onBlur={(e) => updateMaster('title', e.target.innerText)} className="w-full outline-none p-1 hover:bg-stone-100 rounded-md w-full text-xs text-stone-500">
-                            {master.title || 'כותרת'}
-                        </div>
-                        <div contentEditable={true} suppressContentEditableWarning onBlur={(e) => updateMaster('contact', e.target.innerText)} className="w-full outline-none p-1 hover:bg-stone-100 rounded-md w-full text-sky-800 text-xs">
-                            {master.contact || 'פרטי קשר'}
-                        </div>
+                        <TextInput onChange={(value) => updateMaster('name', value)} value={master.name} className="w-full p-1 hover:bg-stone-100 rounded-md w-full text-sm" />
+                        <TextInput onChange={(value) => updateMaster('title', value)} value={master.title || 'כותרת'} className="w-full p-1 hover:bg-stone-100 rounded-md w-full text-xs text-stone-500" />
+                        <TextInput onChange={(value) => updateMaster('contact', value)} value={master.contact || 'פרטי קשר'} className="w-full p-1 hover:bg-stone-100 rounded-md w-full text-sky-800 text-xs" />
                     </div>
                 ) : (
                     <div className="w-full outline-none p-1 flex items-center gap-1">

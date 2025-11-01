@@ -25,14 +25,13 @@ export default function MainSchedule() {
 
     if (!today) return null;
 
-    const todayEvents = events[today] ?? [];
+    const todayEvents = [...(events[today] ?? [])];
     todayEvents.push(...googleCalendarEvents.filter(event => event.date === today));
+    
+    groups.forEach(group => group.events?.[today]?.forEach(event => todayEvents.push({ ...event, group: group.name })));
+    todayEvents.sort((a, b) => a.start.localeCompare(b.start));
 
-    const allEvents = [...todayEvents];
-    groups.forEach(group => group.events?.[today]?.forEach(event => allEvents.push({ ...event, group: group.name })));
-    allEvents.sort((a, b) => a.start.localeCompare(b.start));
-
-    const nextEvent = allEvents.find(event => {
+    const nextEvent = todayEvents.find(event => {
         let eventDate = new Date(event.date);
         eventDate.setHours(event.start.split(':')[0], event.start.split(':')[1], 0, 0);
         return eventDate > new Date();
@@ -42,7 +41,7 @@ export default function MainSchedule() {
         <Box2 label="מה יש לי היום" className="col-start-1 row-start-1 row-span-4 flex-1 relative overflow-hidden" LabelIcon={Calendar}>
             <MainGreetings />
             <div className="flex flex-col gap-2 mt-2">
-                {allEvents.length > 0 ? allEvents.map(event => (
+                {todayEvents.length > 0 ? todayEvents.map(event => (
                     <div key={event.id} className={`flex gap-3 items-center  ${nextEvent?.id === event.id ? 'bg-stone-300 rounded-[8px] border-2 border-stone-300' : ''}`}>
                         <EventTime time={event.start} />
                         <div className="text-sm font-bold flex items-center gap-1">

@@ -2,6 +2,7 @@ import Box2 from "@/components/Box2";
 import { IconButton } from "@/components/Button";
 import { researchActions, useResearchData } from "@/utils/store/useResearch";
 import { Quote, Plus, Trash2 } from "lucide-react";
+import TextInput from "./TextInput";
 
 export default function Section_quotes() {
     const research = useResearchData(state => state.research)
@@ -33,9 +34,7 @@ export default function Section_quotes() {
                 {quotes.map((quote, index) => (
                     <div key={index} className="pb-2 flex gap-2 justify-between group/quote transition-all h-[fit-content] border-b border-stone-300 items-center">
                         <Quote className="w-4 h-4 self-start" />
-                        <div contentEditable={true} suppressContentEditableWarning onBlur={(e) => updateQuote(index, e.target.innerText)} className="text-sm italic w-full outline-none transition-all duration-200 cursor-text leading-tight">
-                            {quote}
-                        </div>
+                        <TextInput onChange={(value) => updateQuote(index, value)} value={quote} className="text-sm italic w-full outline-none transition-all duration-200 cursor-text leading-tight" />
                         <Quote className="w-4 h-4 rotate-180 self-end" />
                         <IconButton icon={Trash2} onClick={() => removeQuote(index)} className="p-2 hover:bg-stone-100 rounded-full opacity-0 group-hover/quote:opacity-100 transition-opacity" />
                     </div>

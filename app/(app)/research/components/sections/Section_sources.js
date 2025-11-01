@@ -5,6 +5,7 @@ import { researchActions, useResearchData } from "@/utils/store/useResearch";
 import { BookOpen, Plus, Trash2, Cog, ChevronUp, ChevronDown, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import TextInput from "./TextInput";
 
 export default function Section_sources() {
     const research = useResearchData(state => state.research)
@@ -51,15 +52,11 @@ function Source({ source, index, updateSource, removeSource }) {
 
     return (
         <>
-            <div className="flex justify-between group/source transition-all h-[fit-content] border-b border-stone-300 items-center">
+            <div className="flex justify-between group/source transition-all h-[fit-content] border-b border-stone-300 items-center rtl">
                 {isOpen ? (
                     <div>
-                        <div contentEditable={true} suppressContentEditableWarning onBlur={(e) => updateTitle(e.target.innerText)} className="w-full outline-none p-1 hover:bg-stone-100 rounded-md w-full">
-                            {source.title}
-                        </div>
-                        <div contentEditable={true} suppressContentEditableWarning onBlur={(e) => updateUrl(e.target.innerText)} className="w-full outline-none p-1 hover:bg-stone-100 rounded-md w-full font-mono text-xs text-stone-500 mx-2 -mt-2">
-                            {url}
-                        </div>
+                        <TextInput onChange={(value) => updateTitle(value)} value={source.title} className="w-full p-1 hover:bg-stone-100 rounded-md w-full" />
+                        <TextInput onChange={(value) => updateUrl(value)} value={url} className="w-full p-1 hover:bg-stone-100 rounded-md w-full font-mono text-xs text-stone-500 mx-2 -mt-2" />
                     </div>
                 ) : (
                     <>

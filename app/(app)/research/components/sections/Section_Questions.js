@@ -3,6 +3,7 @@ import Button, { IconButton } from "@/components/Button";
 import SmartTextArea from "@/components/SmartTextArea";
 import { researchActions, useResearchData } from "@/utils/store/useResearch";
 import { BadgeHelp, Plus, Trash2 } from "lucide-react";
+import TextInput from "./TextInput";
 
 export default function Section_Questions({ section }) {
     const research = useResearchData(state => state.research)
@@ -32,9 +33,7 @@ export default function Section_Questions({ section }) {
                 <div className="flex flex-col flex-1 overflow-y-auto">
                     {questions.map((question, index) => (
                         <div key={index} className="flex justify-between group/question border-b border-stone-300 items-center">
-                            <div contentEditable={true} suppressContentEditableWarning onBlur={(e) => updateQuestion(index, e.target.innerText)} className="w-full outline-none transition-all duration-200 cursor-text leading-tight">
-                                {question}
-                            </div>
+                            <TextInput onChange={(value) => updateQuestion(index, value)} value={question} className="w-full" />
                             <IconButton icon={Trash2} onClick={() => removeQuestion(index)} className="p-2 hover:bg-stone-100 rounded-full opacity-0 group-hover/question:opacity-100 transition-opacity" />
                         </div>
                     ))}
@@ -46,3 +45,4 @@ export default function Section_Questions({ section }) {
         </Box2>
     )
 }
+

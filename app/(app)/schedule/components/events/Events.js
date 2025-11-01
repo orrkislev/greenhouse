@@ -12,7 +12,6 @@ const EmptySlot = tw`min-h-8 z-1
     text-transparent hover:text-stone-800
     cursor-pointer transition-all
 `;
-const Empty = tw`min-h-8 z-1 bg-[#F3C5C599]`
 
 const TimeSlot = tw.div`flex items-start justify-start text-black/50 text-xs pointer-events-none z-6 p-1`;
 

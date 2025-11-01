@@ -86,7 +86,7 @@ function StudentMeetingSlot({ student, meeting }) {
 
 export function EditMeeting({ student, meeting, onClose }) {
     const [time, setTime] = useState({ start: meeting ? meeting.start : '09:30', end: meeting ? meeting.end : '10:00' });
-    const [day, setDay] = useState(meeting ? meeting.day : 1);
+    const [day, setDay] = useState(meeting ? meeting.day_of_the_week : 1);
 
     const onDelete = () => {
         meetingsActions.deleteMeeting(meeting.id);
