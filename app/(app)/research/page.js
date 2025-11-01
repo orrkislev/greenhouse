@@ -59,8 +59,6 @@ function ResearchList() {
   
   const selectedResearchId = research?.id
 
-  console.log(allResearch)
-
   return (
     <div>
       {allResearch.map(research => (

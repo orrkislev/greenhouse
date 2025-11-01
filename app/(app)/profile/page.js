@@ -9,7 +9,7 @@ import { useUser } from "@/utils/store/useUser";
 
 export default function ProfilePage() {
     const user = useUser(state => state.user);
-    console.log(user);
+
     return (
         <PageMain className="flex items-center justify-center">
             <Box2 label="פרופיל" LabelIcon={User} className="w-64">

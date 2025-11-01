@@ -8,7 +8,6 @@ import Steps from "../Steps"
 import Box2 from "@/components/Box2"
 import Button from "@/components/Button"
 import { useUser } from "@/utils/store/useUser"
-import TextInput from "@/components/TextInput"
 
 export default function StudyPath({ path }) {
     const user = useUser(state => state.user)
@@ -91,7 +90,9 @@ function Vocabulary({ path }) {
             <div className="flex gap-2 flex-wrap">
                 {path.vocabulary.map((word, index) => (
                     <div key={index} className="flex items-center justify-between gap-2 bg-stone-200 px-2 py-1 rounded-full text-xs hover:bg-stone-300 transition-colors">
-                        <TextInput onChange={(value) => updateWord(index, value)} value={word} className="w-full outline-none min-w-2" />
+                        <div contentEditable={true} suppressContentEditableWarning onBlur={(e) => updateWord(index, e.target.innerText)} className="w-full outline-none min-w-2">
+                            {word}
+                        </div>
                     </div>
                 ))}
             </div>

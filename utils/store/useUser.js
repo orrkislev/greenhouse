@@ -47,7 +47,6 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 			else set((state) => ({ user: { ...state.user, ...updates } }));
 		},
 		signInWithGoogle: async () => {
-			console.log(window.location.origin);
 			await supabase.auth.signInWithOAuth({
 				provider: 'google',
 				options: {
