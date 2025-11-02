@@ -91,9 +91,6 @@ export default function AdminProjects() {
         setSortings(newSorting);
     }
 
-    const irisProject = sortedData.filter(student => student.name.includes('איריס'));
-    console.log(irisProject)
-
     return (
         <div className="p-6 overflow-scroll px-0">
             <table className="w-full table-auto text-left text-xs border-spacing-8">

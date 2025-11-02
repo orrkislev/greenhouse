@@ -127,7 +127,6 @@ export const useAdmin = create((set, get) => ({
             })
             if (masters.length > 0) {
                 const master = get().allMembers.find(s => masters.some(m => m.data.mentor_id === s.id));
-                console.log('got masters', master, project.title)
                 project.master = get().allMembers.find(s => masters.some(m => m.data.mentor_id === s.id));
             }
         }
@@ -145,7 +144,6 @@ export const useAdmin = create((set, get) => ({
             .select().single();
         if (mentorshipError) throw mentorshipError;
 
-        console.log('assigning master to project', studentId, projectId, masterId, 'using mentorship', mentorship.id)
         await makeLink('mentorships', mentorship.id, 'projects', projectId);
 
         const { error: projectError } = await supabase.from('projects').update({ status: 'active' }).eq('id', projectId);

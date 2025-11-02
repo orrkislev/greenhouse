@@ -64,6 +64,7 @@ export const [useLogsData, logsActions] = createStore((set, get, withUser, withL
         if (error) throw error;
         if (log.context) data.context = log.context;
         if (log.mentor) data.mentor = log.mentor;
+        data.user = user;
         set((state) => ({ logs: [...state.logs, data] }));
     }),
 
