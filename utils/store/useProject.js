@@ -124,6 +124,19 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             if (downloadError) throw downloadError;
             await get().updateMetadata({ image: data.publicUrl });
         }),
+
+
+
+        // ------------------------------
+        getProjectForStudent: async (studentId) => {
+            const { data, error } = await supabase.from('projects').select('*')
+                .eq('student_id', studentId)
+                .eq('status', 'active')
+                .order('created_at', { ascending: false })
+                .single();
+            if (error) throw error;
+            return data;
+        },
     }
 });
 

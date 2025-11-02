@@ -6,13 +6,14 @@ import { eventsActions } from "@/utils/store/useEvents";
 import { groupsActions, groupUtils, useGroups } from "@/utils/store/useGroups";
 import { daysOfWeek, useTime } from "@/utils/store/useTime";
 import Button from "@/components/Button";
-import { UserRoundX, VenetianMask, Calendar, Pencil } from "lucide-react";
+import { UserRoundX, VenetianMask, Calendar, Pencil, FileText } from "lucide-react";
 import { mentorshipsActions } from "@/utils/store/useMentorships";
 import WithLabel from "@/components/WithLabel";
 import usePopper from "@/components/Popper";
 import { EditMeeting } from "./StaffGroup_Meetings";
 import { meetingUtils, useMeetings } from "@/utils/store/useMeetings";
 import { AllStudentPicker } from "./StaffStudents";
+import { projectActions } from "@/utils/store/useProject";
 
 export default function StaffGroup_Students({ group }) {
     if (!group.members) return null;
@@ -73,7 +74,8 @@ function SelectedStudentCard({ student, context, group }) {
         (async () => {
             const events = await eventsActions.getTodaysEventsForUser(student.id);
             groupUtils.getUserGroupIds(student).forEach(groupId => groupsActions.loadGroupEvents(groupId, today, today));
-            setData({ ...student, events });
+            const project = await projectActions.getProjectForStudent(student.id);
+            setData({ ...student, events, project });
         })()
     }, [student, today])
 
@@ -102,6 +104,11 @@ function SelectedStudentCard({ student, context, group }) {
                     </div>
                 </div>
             </div>
+            <WithLabel label="פרויקט">
+                {data.project ? (
+                    <div className="text-xs">{data.project.title}</div>
+                ) : <div className="text-xs text-stone-500">אין פרויקט </div>}
+            </WithLabel>
             <WithLabel label="לוז היום">
                 {data.events && data.events.length > 0 ? data.events.map(event => (
                     <div key={event.id} className="flex gap-3 items-center">
