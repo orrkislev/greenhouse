@@ -14,7 +14,7 @@ export default function ProjectInfo() {
     projectActions.loadProjectMasters();
   }, []);
 
-  const meeting = meetings.find(m => m.staff === project.masters?.[0]?.id);
+  const meeting = meetings.find(m => m.staff === project.master?.id);
 
   return (
     <div className="flex gap-3">
@@ -33,11 +33,11 @@ export default function ProjectInfo() {
       <div className="flex-1"></div>
 
       <div className="flex-1">
-        {(project.masters && project.masters.length > 0) ? (
+        {project.master ? (
           <div className="flex items-center justify-center flex-col" >
             <div className="flex items-center gap-2">
-              <Avatar user={project.masters?.[0]} />
-              <h3 className="text-center text-stone-700 font-medium">המאסטר שלי - {project.masters?.[0].first_name} {project.masters?.[0].last_name}</h3>
+              <Avatar user={project.master} />
+              <h3 className="text-center text-stone-700 font-medium">המאסטר שלי - {project.master.first_name} {project.master.last_name}</h3>
             </div>
             <div className="flex gap-2">
               <CalendarFold className="w-4 h-4" />

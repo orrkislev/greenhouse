@@ -44,6 +44,7 @@ export const unLink = async (a_table, a_id, b_table, b_id) => {
 }
 
 export const makeLink = async (a_table, a_id, b_table, b_id) => {
+    console.log('making link', a_table, a_id, b_table, b_id)
     const { data, error: linkError } = await supabase
         .from('links')
         .select('id')
@@ -55,9 +56,11 @@ export const makeLink = async (a_table, a_id, b_table, b_id) => {
         );
 
     if (linkError) throw linkError;
+    console.log('got data', data, linkError)
     if (data && data.length > 0) return;
 
     const { error: insertError } = await supabase.from('links').insert({ a_table, a_id, b_table, b_id });
     if (insertError) throw insertError;
+    console.log('inserted data', insertError)
     return
 }

@@ -21,7 +21,6 @@ export default function MainProject() {
                     <>
                         <CoverZoomCard href={`/project/?id=${project.id}`} imageUrl={project.metadata?.image || '/images/fun.png'} label={project.title} key={project.id} />
                         <Tasks />
-                        {/* <AvatarGroup users={project.masters} className='absolute bottom-1 left-1' /> */}
                     </>
                 ) : (
                     <>

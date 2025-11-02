@@ -16,11 +16,12 @@ const compareStrings = (left, right, locale = 'he') => {
 
 
 export default function AdminProjects() {
-    const staff = useAdmin(state => state.staff);
     const classes = useAdmin(state => state.classes);
     const majors = useAdmin(state => state.majors);
     const allMembers = useAdmin(state => state.allMembers);
     const router = useRouter();
+
+    const staff = allMembers.filter(member => member.role === 'staff');
 
     const [sortings, setSortings] = useState([
         { key: 'name', type: 'asc' },
@@ -39,10 +40,11 @@ export default function AdminProjects() {
         return allMembers.filter(member => member.role === 'student').map(student => {
             const group = classes.find(g => student.groups.includes(g.id))?.name;
             const major = majors.find(m => student.groups.includes(m.id))?.name;
+            const master = student.project?.master?.first_name;
             return {
                 ...student,
                 name: student.first_name + ' ' + student.last_name,
-                group, major,
+                group, major, master
             }
         });
     }, [allMembers, classes, majors]);
@@ -89,9 +91,12 @@ export default function AdminProjects() {
         setSortings(newSorting);
     }
 
+    const irisProject = sortedData.filter(student => student.name.includes('איריס'));
+    console.log(irisProject)
+
     return (
         <div className="p-6 overflow-scroll px-0">
-            <table className="w-full min-w-max table-auto text-left text-xs">
+            <table className="w-full table-auto text-left text-xs border-spacing-8">
                 <thead>
                     <tr>
                         {headers.map(header => (
@@ -116,19 +121,19 @@ export default function AdminProjects() {
                             <Cell>{student.major}</Cell>
                             <Cell>
                                 {student.project ? (
-                                    <div className="bg-blue-300 rounded-sm hover:bg-blue-500 text-stone-400 hover:text-white px-2 py-1"
+                                    <div className="bg-blue-500 rounded-sm hover:bg-blue-500 text-white hover:text-blue-200 hover:cursor-pointer hover:underline transition-all duration-200 px-2 py-1"
                                         onClick={() => clickOnProject(student.id)}>
                                         {student.project.title}
                                     </div>
                                 ) : (<span className="text-stone-500">אין פרויקט</span>
                                 )}
                             </Cell>
-                            <Cell>{student.project?.metadata?.questions?.[2]?.value}</Cell>
+                            <DetailCell text={student.project?.metadata?.questions?.[2]?.value} />
                             <Cell>
                                 {student.project && (
                                     <select
-                                        value={student.project?.masters?.[0]?.id || ''}
-                                        onChange={e => selectMaster(student.id, student.projectId, e.target.value)}
+                                        value={student.project?.master?.id || ''}
+                                        onChange={e => selectMaster(student.id, student.project.id, e.target.value)}
                                         className="bg-white border border-stone-300 rounded-md p-1"
                                     >
                                         <option value="">בחר מנחה</option>
@@ -151,9 +156,29 @@ export default function AdminProjects() {
 const Cell = ({ children }) => (
     <td className="p-1 border-b border-blue-stone-50">
         <div className="flex items-center">
-            <div className="block antialiased font-sans leading-normal text-blue-stone-900 font-normal">
+            <div className="block antialiased font-sans leading-normal text-blue-stone-900 font-normal rtl text-right">
                 {children}
             </div>
         </div>
     </td>
 );
+
+function DetailCell({ text }) {
+    if (!text || text.length < 60) return <Cell>{text}</Cell>;
+    return (
+        <td className="p-1 border-b border-blue-stone-50">
+            <div className="flex items-center">
+                <div className="block antialiased font-sans leading-normal text-blue-stone-900 font-normal rtl text-right">
+                    <details>
+                        <summary>
+                            {text.substring(0, 60) + '...'}
+                        </summary>
+                        <div>
+                            {text}
+                        </div>
+                    </details>
+                </div>
+            </div>            
+        </td>
+    );
+}

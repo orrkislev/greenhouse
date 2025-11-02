@@ -45,14 +45,10 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             })
             if (error) throw error;
             if (data.length === 0) return;
-            const masters = [];
-            for (const item of data) {
-                const mentorId = item.data.mentor_id;
-                const { data: masterData, error: masterError } = await supabase.from('users').select('*').eq('id', mentorId).single();
-                if (masterError) throw masterError;
-                masters.push(masterData);
-            }
-            set({ project: { ...get().project, masters } });
+            const mentorId = data[0].data.mentor_id;
+            const { data: masterData, error: masterError } = await supabase.from('users').select('*').eq('id', mentorId).single();
+            if (masterError) throw masterError;
+            set({ project: { ...get().project, master: masterData } });
         },
 
         // ------------------------------

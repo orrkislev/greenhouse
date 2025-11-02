@@ -10,6 +10,7 @@ import MainStudy from "./components/MainStudy"
 import MainResearch from "./components/MainResearch"
 import MainVocation from "./components/MainVocation"
 import MainNews from "./components/MainNews"
+import { supabase } from "@/utils/supabase/client"
 
 export default function MainPage() {
 

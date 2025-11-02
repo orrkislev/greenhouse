@@ -41,10 +41,10 @@ export default function JournalHandle() {
             />
 
             <div
-                className={`fixed max-h-[80vh] left-1/2 -translate-x-1/2 w-full max-w-2xl transition-all duration-700 z-50 ${isOpen
-                    ? "bottom-[50%] translate-y-1/2 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                className={`fixed max-h-[70vh] left-1/2 -translate-x-1/2 w-full max-w-2xl transition-all duration-700 z-50 ${isOpen
+                    ? "bottom-[50%] translate-y-[20vh] ease-[cubic-bezier(0.34,1.56,0.64,1)]"
                     : isHovered
-                        ? `translate-y-[calc(100%-80px)] ease-out delay-50 ${originalUser ? 'bottom-16' : 'bottom-0'}`
+                        ? `translate-y-[calc(100%-10vh)] ease-out delay-50 ${originalUser ? 'bottom-16' : 'bottom-0'}`
                         : `translate-y-[calc(100%-40px)] ease-out ${originalUser ? 'bottom-16' : 'bottom-0'}`
                     }`}
                 onMouseEnter={() => !isOpen && setIsHovered(true)}

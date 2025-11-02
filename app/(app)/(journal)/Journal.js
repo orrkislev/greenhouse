@@ -87,7 +87,7 @@ export default function Journal() {
                 )}
             </div>
 
-            <div className="flex flex-col divide-y divide-stone-300">
+            <div className="flex flex-col divide-y divide-stone-300 overflow-y-auto">
                 {filteredLogs
                     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                     .map(log => (

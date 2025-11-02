@@ -120,13 +120,20 @@ export const useAdmin = create((set, get) => ({
         const { data, error } = await supabase.rpc('get_projects_in_current_term');
         if (error) throw error;
         for (const project of data) {
-            const { data: mentorships, error: mentorshipsError } = await supabase.from('mentorships').select('*').eq('student_id', project.student_id);
-            if (mentorshipsError) throw mentorshipsError;
-            if (mentorships.length > 0) project.masters = get().staff.filter(s => mentorships.some(m => m.mentor_id === s.id));
+            const { data: masters } = await supabase.rpc('get_linked_items', {
+                p_table_name: 'projects',
+                p_item_id: project.id,
+                p_target_types: ['mentorships']
+            })
+            if (masters.length > 0) {
+                const master = get().allMembers.find(s => masters.some(m => m.data.mentor_id === s.id));
+                console.log('got masters', master, project.title)
+                project.master = get().allMembers.find(s => masters.some(m => m.data.mentor_id === s.id));
+            }
         }
         const newAllMembers = allMembers.map(member => {
             const project = data.find(p => p.student_id === member.id);
-            const res = {...member}
+            const res = { ...member }
             if (project) res.project = project;
             return res;
         })
@@ -138,13 +145,14 @@ export const useAdmin = create((set, get) => ({
             .select().single();
         if (mentorshipError) throw mentorshipError;
 
+        console.log('assigning master to project', studentId, projectId, masterId, 'using mentorship', mentorship.id)
         await makeLink('mentorships', mentorship.id, 'projects', projectId);
 
         const { error: projectError } = await supabase.from('projects').update({ status: 'active' }).eq('id', projectId);
         if (projectError) throw projectError;
 
         let master = get().allMembers.find(member => member.id === masterId);
-        if (!master) master = get().staff.find(staff => staff.id === masterId);
+        if (!master) master = get().allMembers.find(staff => staff.id === masterId);
         if (!master) {
             const { data: masterData, error: masterError } = await supabase.from('users').select('*').eq('id', masterId).single();
             if (masterError) throw masterError;
