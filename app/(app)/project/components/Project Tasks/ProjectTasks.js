@@ -22,6 +22,7 @@ export default function ProjectTasks() {
     const ViewComponent = taskStyle ? views[taskStyle].component : views.list.component
 
     const taskContext = useMemo(() => projectUtils.getContext(project.id), [project])
+    console.log(taskContext)
 
     return (
         <>

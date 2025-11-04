@@ -67,7 +67,7 @@ export default function MainSchedule() {
     )
 }
 
-function EventTime({ time }) {
+export function EventTime({ time }) {
     let [startH, startM] = time.split(':').map(Number);
     startH = startH.toString().padStart(2, '0');
     startM = startM.toString().padStart(2, '0');

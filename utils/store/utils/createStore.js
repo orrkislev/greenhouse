@@ -15,30 +15,30 @@ export function createStore(dataFn) {
     };
 
     const withLoadingCheck = (loadFn) => {
+        const name = crypto.randomUUID();
         return async (...args) => {
             const user = useUser.getState().user;
-            if (!user) return;
+            if (!user) return
 
             const state = storeRef.getState();
-            if (state.loadedForUser === user.id) return;
-            if (state.loading) return;
+            if (state.loadedForUser[name] === user.id) return;
+            if (state.loading[name]) return;
 
-            storeRef.setState({ loadedForUser: user.id, loading: true });
+            storeRef.setState({ loadedForUser: { ...state.loadedForUser, [name]: user.id }, loading: { ...state.loading, [name]: true } });
 
             try {
                 await loadFn(user, ...args);
             } catch (error) {
-                console.error('Loading error:', error);
                 throw error;
             } finally {
-                storeRef.setState({ loading: false });
+                storeRef.setState({ loading: { ...state.loading, [name]: false } });
             }
         };
     };
 
     const useStore = create((set, get) => ({
-        loadedForUser: null,
-        loading: false,
+        loadedForUser: {},
+        loading: {},
 
         ...dataFn(set, get, withUser, withLoadingCheck),
     }));

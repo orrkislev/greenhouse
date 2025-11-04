@@ -34,7 +34,7 @@ export function IconButton({small, ...props}) {
 export function ButtonGroup({ children, className}) {
     return (
         <div className={`flex items-center gap-1 ${className}`}>
-            <div className="flex gap-4">
+            <div className="flex gap-4 rounded-full p-1 bg-stone-100">
                 {children}
             </div>
         </div>
@@ -42,23 +42,7 @@ export function ButtonGroup({ children, className}) {
 }
 
 export function ButtonGroupItem({ children, ...props }) {
-    return <div {...props} className={`${props.className} ${props.small ? 'text-xs' : 'text-sm'} p-1 rounded-full hover:bg-stone-100 cursor-pointer transition-colors ${props.active ? 'bg-stone-200 font-bold' : ''}`}>
+    return <div {...props} className={`${props.className} ${props.small ? 'text-xs' : 'text-sm'} p-1 rounded-full hover:bg-stone-400 cursor-pointer transition-colors ${props.active ? 'bg-stone-300 font-bold' : ''}`}>
         {children}
     </div>
 }
-
-// export function ButtonGroup({ children, className}) {
-//     return (
-//         <div className={`flex items-center gap-1 ${className}`}>
-//             <div className="flex rounded-sm overflow-hidden border border-stone-300 divide-x divide-stone-300">
-//                 {children}
-//             </div>
-//         </div>
-//     )
-// }
-
-// export function ButtonGroupItem({ children, ...props }) {
-//     return <div {...props} className={`${props.className} ${props.small ? 'p-1 text-xs' : 'p-2 text-sm'} hover:bg-stone-100 cursor-pointer transition-colors ${props.active ? 'bg-stone-200' : ''}`}>
-//         {children}
-//     </div>
-// }

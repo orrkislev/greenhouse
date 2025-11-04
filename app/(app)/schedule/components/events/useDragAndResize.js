@@ -8,7 +8,7 @@ export function useDragAndResize({ onStartDrag, onEndDrag, onStartResize, onEndR
     // Dragging logic
     useEffect(() => {
         if (!isDragging) return;
-        onStartDrag?.(isDragging);
+        if (isDragging && onStartDrag) onStartDrag();
         
         const onMouseUp = () => {
             setIsDragging(false);
@@ -33,16 +33,13 @@ export function useDragAndResize({ onStartDrag, onEndDrag, onStartResize, onEndR
         return () => window.removeEventListener('mouseup', onMouseUp);
     }, [isResizing, onStartResize, onEndResize]);
 
-    const handleMouseDown = (e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        setIsDragging(e.clientY - rect.top);
-    };
-
+    
     const handleResizeDown = (e) => {
         e.stopPropagation();
         setIsResizing(true);
     };
-
+    
+    const handleMouseDown = (e) => setIsDragging(true);
     const handleMouseEnter = () => setIsHovered(true);
     const handleMouseLeave = () => setIsHovered(false);
 

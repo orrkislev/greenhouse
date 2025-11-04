@@ -105,10 +105,10 @@ function TaskModalContent({ task, close, initialContext }) {
             </div>
             <IconButton icon={X} onClick={close} className="absolute top-0 left-0 bg-white" />
             <WithLabel label="כותרת">
-                <input type="text" value={title} onChange={e => setTitle(e.target.value)} className="rounded-sm p-2 border border-stone-100 w-full" />
+                <input type="text" value={title} onChange={e => setTitle(e.target.value)} className="rounded-sm p-2 border border-stone-200 w-full" />
             </WithLabel>
             <WithLabel label="תיאור">
-                <textarea rows={3} value={description} onChange={e => setDescription(e.target.value)} className="rounded-sm p-2 border border-stone-100 w-full" />
+                <textarea rows={3} value={description} onChange={e => setDescription(e.target.value)} className="rounded-sm p-2 border border-stone-200 w-full" />
             </WithLabel>
             {!context || context.table !== 'study_paths' && (
                 <WithLabel label="תאריך">
@@ -127,12 +127,12 @@ function TaskModalContent({ task, close, initialContext }) {
                 </WithLabel>
             )}
             <WithLabel label="קישור">
-                <input type="text" value={url} onChange={e => setUrl(e.target.value)} className="rounded-sm p-2 border border-stone-100 w-full" />
+                <input type="text" value={url} onChange={e => setUrl(e.target.value)} className="rounded-sm p-2 border border-stone-200 w-full" />
             </WithLabel>
             {task && (
-                <Button data-role="close" onClick={toggleTaskStatus} className={`w-full justify-center mt-4 bg-stone-200 border-stone-300 text-lg text-stone-700 ${task.status === 'completed' ? 'bg-green-200 opacity-50' : ''}`}>
+                <Button data-role="close" onClick={toggleTaskStatus} className={`w-full justify-center mt-4 bg-stone-200 border-stone-300 text-stone-700 ${task.status === 'completed' ? 'bg-green-200 opacity-50' : ''}`}>
                     {task.status === 'todo' ? (
-                        <>בוצע <Bookmark className="w-4 h-4" /></>
+                        <>סמן כבוצע <Bookmark className="w-4 h-4" /></>
                     ) : (
                         <>בוצע <CheckCircle className="w-4 h-4" /></>
                     )}
@@ -140,7 +140,8 @@ function TaskModalContent({ task, close, initialContext }) {
             )}
             <div className="flex justify-between gap-2 mt-2">
                 <Button data-role="save" onClick={handleSave} className='flex-1 justify-center'>
-                    שמירה <Save className="w-4 h-4" />
+                    {task ? 'שמירת שינויים' : 'הוספה'} 
+                    <Save className="w-4 h-4" />
                 </Button>
                 <Button data-role="delete" onClick={handleDelete} >
                     {task ? <Trash2 className="w-4 h-4" /> : <CircleX className="w-4 h-4" />}

@@ -21,7 +21,7 @@ export default function SchedulePage() {
 
     return (
         <>
-        <PageMain>
+        <PageMain className='select-none'>
             <DashboardLayout>
             <DashboardTitle>לוח זמנים</DashboardTitle>
             <DashboardPanel>

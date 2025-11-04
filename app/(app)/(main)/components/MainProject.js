@@ -30,7 +30,7 @@ export default function MainProject() {
                                 אין פרויקט פעיל
                             </div>
                         </div>
-                        <Link href="/study" className="absolute bottom-2 left-2">
+                        <Link href="/project" className="absolute bottom-2 left-2">
                             <Button>
                                 <Bird className="w-4 h-4" />
                                 הפרויקט

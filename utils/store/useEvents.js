@@ -35,13 +35,19 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
             if (!week || week.length === 0) return;
             await get().loadEvents(user, week[0], week[week.length - 1]);
         }),
+        loadTermEvents: withLoadingCheck(async (user) => {
+            const term = useTime.getState().currTerm
+            if (!term || !term.start || !term.end) return console.error('Term not found');
+            await get().loadEvents(user, term.start, term.end);
+        }),
 
         loadEvents: async (user, start, end) => {
             if (!end) end = start;
-            let date = start
+            let date = new Date(start)
             let shouldLoad = false;
-            while (date <= end) {
-                if (!get().events[date]) {
+            const currEvents = get().events;
+            while (date <= new Date(end)) {
+                if (!currEvents[format(date, 'yyyy-MM-dd')]) {
                     shouldLoad = true;
                     break;
                 }
@@ -56,13 +62,14 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
             });
             if (error) throw error;
 
-
             const newEvents = { ...get().events };
             date = new Date(start);
             while (date <= new Date(end)) {
                 const dateStr = format(date, 'yyyy-MM-dd');
                 if (!newEvents[dateStr]) newEvents[dateStr] = [];
-                newEvents[dateStr].push(...data.filter(e => e.date === dateStr));
+                data.filter(e => e.date === dateStr).sort((a, b) => a.start.localeCompare(b.start)).forEach(e => {
+                    if (!newEvents[dateStr].find(e => e.id === e.id)) newEvents[dateStr].push(e);
+                });
                 date = addDays(date, 1);
             }
             set({ events: newEvents });
@@ -81,17 +88,20 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
         }),
         updateEvent: async (eventId, updates) => {
             const event = Object.values(get().events).flat().find(event => event.id === eventId);
+            if (!event) return;
             const newEvents = { ...get().events };
+
+            if (!newEvents[event.date]) newEvents[event.date] = [];
             newEvents[event.date] = newEvents[event.date].filter(event => event.id !== eventId);
             Object.assign(event, updates);
             event._dirty = true;
-            newEvents[event.date] = [...newEvents[event.date], event];
+            newEvents[event.date] = [...(newEvents[event.date] || []), event];
             set({ events: newEvents });
             debouncedUpdateEvents();
         },
         deleteEvent: async (event) => {
             const newEvents = { ...get().events };
-            newEvents[event.date] = newEvents[event.date].filter(event => event.id !== event.id);
+            newEvents[event.date] = newEvents[event.date].filter(e => e.id !== event.id);
             set({ events: newEvents });
             await supabase.from('events').delete().eq('id', event.id);
         },
@@ -118,3 +128,4 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
 
 export const useTodayEvents = createDataLoadingHook(useEventsData, 'events', 'loadTodayEvents');
 export const useWeekEvents = createDataLoadingHook(useEventsData, 'events', 'loadWeekEvents');
+export const useTermEvents = createDataLoadingHook(useEventsData, 'events', 'loadTermEvents');

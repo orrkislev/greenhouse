@@ -14,6 +14,7 @@ import { CalendarCheck, Trash2 } from "lucide-react";
 import TimeRange from "@/components/TimeRange";
 import usePopper from "@/components/Popper";
 import SmartTextArea from "@/components/SmartTextArea";
+import { format } from "date-fns";
 
 export function EditableEvent({ event, onStartDrag, onEndDrag, onStartResize, onEndResize }) {
     const { isDragging, isResizing, isHovered,
@@ -70,11 +71,12 @@ export function EditableEvent({ event, onStartDrag, onEndDrag, onStartResize, on
 }
 
 
-function EditEvent({ event, onClose }) {
+export function EditEvent({ event, onClose }) {
     const [startTime, setStartTime] = useState(event.start);
     const [endTime, setEndTime] = useState(event.end);
     const [title, setTitle] = useState(event.title);
-
+    const [date, setDate] = useState(event.date);
+    
     const handleSave = (e) => {
         e.preventDefault();
         onClose();
@@ -82,6 +84,7 @@ function EditEvent({ event, onClose }) {
             title: title,
             start: startTime,
             end: endTime,
+            date: format(date, 'yyyy-MM-dd'),
         });
     };
 
@@ -103,6 +106,9 @@ function EditEvent({ event, onClose }) {
                         setEndTime(end);
                     }}
                 />
+            </WithLabel>
+            <WithLabel label="תאריך">
+                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
             </WithLabel>
             <div className="flex justify-between mt-4">
                 <Button data-role="save" onClick={handleSave} >
