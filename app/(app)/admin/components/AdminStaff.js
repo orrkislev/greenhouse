@@ -69,7 +69,7 @@ export default function AdminStaff() {
             <table className="text-left text-xs border-collapse border-stone-200 border">
                 <TableHeader headers={headers} />
                 <tbody>
-                    {staffData.sort((a, b) => a.first_name.localeCompare(b.first_name)).map((staff, index) => (
+                    {staffData.map((staff, index) => (
                         <tr key={index}>
                             <Cell>{index + 1}</Cell>
                             {staff.isNew ? (

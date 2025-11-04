@@ -126,8 +126,8 @@ export const useAdmin = create((set, get) => ({
                 p_target_types: ['mentorships']
             })
             if (masters.length > 0) {
-                const master = get().allMembers.find(s => masters.some(m => m.data.mentor_id === s.id));
-                project.master = get().allMembers.find(s => masters.some(m => m.data.mentor_id === s.id));
+                const master = get().allMembers.find(s => masters.some(m => m.data?.mentor_id === s.id));
+                project.master = get().allMembers.find(s => masters.some(m => m.data?.mentor_id === s.id));
             }
         }
         const newAllMembers = allMembers.map(member => {

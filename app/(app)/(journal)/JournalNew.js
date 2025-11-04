@@ -11,6 +11,7 @@ import { projectUtils } from "@/utils/store/useProject"
 import { logsActions, useNewLog } from "@/utils/store/useLogs"
 import Journal from "./Journal"
 import { useUser } from "@/utils/store/useUser"
+import { Combobox } from "@/components/ui/combobox"
 
 
 function JournalNew({ isOpen, setIsOpen }) {
@@ -82,20 +83,22 @@ function JournalNew({ isOpen, setIsOpen }) {
                 <WithLabel label="הפגישה שלי עם..." className='flex-1 px-4'>
                     <div className="flex w-64">
                         {user.role === 'student' && (
-                            <select className="w-full text-sm rounded-md px-2 py-1 border border-stone-300" value={selectedStaff?.id} onChange={(e) => setSelectedStaff(staff.find(s => s.id === e.target.value))}>
-                                <option value="">בחר מנטור / מאסטר</option>
-                                {allMembers.filter(m => m.role === 'staff').map(s => (
-                                    <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
-                                ))}
-                            </select>
+                            <Combobox items={allMembers.filter(m => m.role === 'staff').map(s => ({ value: s.id, label: s.first_name + ' ' + s.last_name }))} value={selectedStaff?.id} onChange={(value) => setSelectedStaff(allMembers.find(s => s.id === value))} />
+                            // <select className="w-full text-sm rounded-md px-2 py-1 border border-stone-300" value={selectedStaff?.id} onChange={(e) => setSelectedStaff(staff.find(s => s.id === e.target.value))}>
+                            //     <option value="">בחר מנטור / מאסטר</option>
+                            //     {allMembers.filter(m => m.role === 'staff').map(s => (
+                            //         <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
+                            //     ))}
+                            // </select>
                         )}
                         {user.role === 'staff' && (
-                            <select className="w-full text-sm rounded-md px-2 py-1 border border-stone-300" value={selectedStaff?.id} onChange={(e) => setSelectedStaff(staff.find(s => s.id === e.target.value))}>
-                                <option value="">בחר חניך</option>
-                                {allMembers.filter(m => m.role === 'student').map(s => (
-                                    <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
-                                ))}
-                            </select>
+                            <Combobox items={allMembers.filter(m => m.role === 'student').map(s => ({ value: s.id, label: s.first_name + ' ' + s.last_name }))} value={selectedStaff?.id} onChange={(value) => setSelectedStaff(allMembers.find(s => s.id === value))} />
+                            // <select className="w-full text-sm rounded-md px-2 py-1 border border-stone-300" value={selectedStaff?.id} onChange={(e) => setSelectedStaff(staff.find(s => s.id === e.target.value))}>
+                            //     <option value="">בחר חניך</option>
+                            //     {allMembers.filter(m => m.role === 'student').map(s => (
+                            //         <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
+                            //     ))}
+                            // </select>
                         )}
                     </div>
                 </WithLabel>

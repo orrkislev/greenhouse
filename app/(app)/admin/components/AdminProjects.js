@@ -125,7 +125,7 @@ export default function AdminProjects() {
                                 ) : (<span className="text-stone-500">אין פרויקט</span>
                                 )}
                             </Cell>
-                            <DetailCell text={student.project?.metadata?.questions?.[2]?.value} />
+                            <DetailCell text={student.project?.metadata?.questions?.map(q => q.title + ': ' + q.value).join('\n')} />
                             <Cell>
                                 {student.project && (
                                     <select
