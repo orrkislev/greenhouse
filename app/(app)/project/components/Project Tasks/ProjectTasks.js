@@ -4,7 +4,6 @@ import ListView from "./ListView";
 import { CalendarDays, BetweenHorizonalEnd, TableOfContents, Plus, ListCheck } from "lucide-react";
 import WeeklyView from "./WeeklyView";
 import CalendarView from "./CalendarView";
-import { useProjectTasks } from "@/utils/store/useProjectTasks";
 import Box2 from "@/components/Box2";
 import { projectActions, projectUtils, useProjectData } from "@/utils/store/useProject";
 import TaskModal from "@/components/TaskModal";
@@ -14,7 +13,6 @@ import Menu, { MenuItem, MenuList } from "@/components/Menu";
 const NewTaskButton = tw`px-4 py-1 bg-primary text-white hover:bg-primary/80 transition-colors flex gap-1 transition-all duration-300 rounded-lg`;
 
 export default function ProjectTasks() {
-    const projectTasks = useProjectTasks()
     const project = useProjectData(state => state.project)
     const taskStyle = useProjectData(state => state.project.metadata.taskStyle)
     const [isOpen, setIsOpen] = useState(false)

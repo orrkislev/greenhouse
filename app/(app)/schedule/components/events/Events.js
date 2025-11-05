@@ -27,14 +27,11 @@ const newEventTitles = [
 export default function Events() {
     const week = useTime(state => state.week);
     const allEvents = useWeekEvents();
-
     const [draggingId, setDraggingId] = useState(null);
     const [resizingId, setResizingId] = useState(null);
 
-
     if (!week || week.length === 0) return null;
     if (!allEvents) return null;
-
 
     const eventsArray = Object.values(allEvents).flat();
     const displayEvents = prepareEventsForSchedule(eventsArray, week, true);

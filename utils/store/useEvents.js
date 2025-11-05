@@ -25,17 +25,17 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
     return {
         events: {},
 
-        loadTodayEvents: withLoadingCheck(async (user) => {
+        loadTodayEvents: withUser(async (user) => {
             set({ events: {} });
             await get().loadEvents(user, format(new Date(), 'yyyy-MM-dd'));
         }),
-        loadWeekEvents: withLoadingCheck(async (user, week) => {
+        loadWeekEvents: withUser(async (user, week) => {
             set({ events: {} });
             if (!week) week = useTime.getState().week;
             if (!week || week.length === 0) return;
             await get().loadEvents(user, week[0], week[week.length - 1]);
         }),
-        loadTermEvents: withLoadingCheck(async (user) => {
+        loadTermEvents: withUser(async (user) => {
             const term = useTime.getState().currTerm
             if (!term || !term.start || !term.end) return console.error('Term not found');
             await get().loadEvents(user, term.start, term.end);

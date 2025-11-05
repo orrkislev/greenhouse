@@ -1,15 +1,15 @@
 import { tw } from "@/utils/tw";
-import { projectUtils, useProject } from "@/utils/store/useProject";
-import { projectTasksActions, useProjectNextTasks, useProjectTasksData } from "@/utils/store/useProjectTasks";
-import { Bird, Briefcase, CheckSquare, Square } from "lucide-react";
+import { projectUtils, useProject, useProjectData } from "@/utils/store/useProject";
+import { Bird, CheckSquare, Square } from "lucide-react";
 import Link from "next/link";
 import Box2 from "@/components/Box2";
 import Image from "next/image";
 import Button, { IconButton } from "@/components/Button";
 import { useState } from "react";
 import TaskModal from "@/components/TaskModal";
-import { AvatarGroup } from "@/components/Avatar";
 import CoverZoomCard from "@/components/CoverZoomCard";
+import ProjectTasks from "../../project/components/Project Tasks/ProjectTasks";
+import WithLabel from "@/components/WithLabel";
 
 export default function MainProject() {
     const project = useProject();
@@ -49,72 +49,23 @@ export default function MainProject() {
 
 
 function Tasks() {
-    const tasks = useProjectNextTasks()
-    const view = useProjectTasksData((state) => state.view);
+    const tasks = useProjectData((state) => state.tasks);   
 
-    if (tasks.length === 0) {
+    if (tasks?.length === 0) {
         return <div className='text-stone-500 text-center p-4'>אין משימות</div>;
     }
 
+    const nextTasks = tasks
+        .sort((a, b) => a.position - b.position)
+        .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
+        .filter(task => task.status === 'todo');
+
     return (
-        <div className='flex flex-col gap-2'>
-            {view === 'list' && (
-                <>
-                    <div className='text-xs text-stone-600'>המשימות הבאות</div>
-                    {tasks.filter(task => task.completed).slice(0, 2).map(task => (
-                        <Task key={task.id} tag="completed" task={task} description={'משימה הושלמה'} />
-                    ))}
-                    {tasks.filter(task => !task.completed).slice(0, 2).map(task => (
-                        <Task key={task.id} tag="next" task={task} />
-                    ))}
-                </>
-            )}
-            {view === 'weekly' && (
-                <>
-                    {tasks.filter(tasks => tasks.mark === 'overdue').map(task => (
-                        <Task key={task.id} tag="overdue" task={task} description={'מטרה באיחור'} />
-                    ))}
-
-                    {tasks.filter(task => task.mark === 'week').length > 0 && (
-                        <>
-                            <div className='text-xs text-stone-600'>מטרות שבועיות</div>
-                            {tasks.filter(task => task.mark === 'week').map(task => (
-                                <Task key={task.id} tag="active" task={task} />
-                            ))}
-                        </>
-                    )}
-                </>
-            )}
-            {view === 'calendar' && (
-                <>
-                    {tasks.filter(task => task.mark === 'overdue').map(task => (
-                        <Task key={task.id} tag="overdue" task={task} description={'משימה באיחור'} />
-                    ))}
-
-                    {tasks.filter(task => task.mark === 'today').length > 0 && (
-                        <>
-                            <div className='text-xs text-stone-600'>משימות להיום</div>
-                            {tasks.filter(task => task.mark === 'today').map(task => (
-                                <Task key={task.id} tag="active" task={task} />
-                            ))}
-                        </>
-                    )}
-
-                    {tasks.filter(task => task.mark === 'next').length > 0 && (
-                        <>
-                            <div className='text-xs text-stone-600'>המשימות הבאות</div>
-                            {tasks.filter(task => task.mark === 'next').map(task => (
-                                <Task key={task.id} tag="next" task={task} description={new Date(task.startDate).toLocaleDateString('he-IL', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    weekday: 'short'
-                                })} />
-                            ))}
-                        </>
-                    )}
-                </>
-            )}
-        </div>
+        <WithLabel label="משימות">
+            <div className="flex flex-col gap-2">
+                <Task key={nextTasks[0].id} task={nextTasks[0]} />
+            </div>
+        </WithLabel>
     );
 }
 
@@ -129,7 +80,7 @@ export const TaskPill = tw`
 
 function Task({ task }) {
     const [open, setOpen] = useState(false)
-    const onCheck = () => projectTasksActions.completeTask(task.id);
+    const onCheck = () => ProjectTasks.completeTask(task.id);
 
     return (
         <div key={task.id} className='flex items-center gap-2 group/task'>

@@ -7,10 +7,10 @@ import { useEffect, useRef, useState } from "react";
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
-import { projectTasksActions, useProjectTasksData } from "@/utils/store/useProjectTasks";
 import TaskModal from "@/components/TaskModal";
 import Link from "next/link";
 import Button from "@/components/Button";
+import { projectActions, useProjectData } from "@/utils/store/useProject";
 
 const CalendarHeader = tw`flex items-center justify-between p-4 bg-stone-100`;
 const CalendarCell = tw`p-2 flex flex-col gap-1 transition-all duration-200 border border-stone-200 relative
@@ -21,10 +21,10 @@ const CalendarCell = tw`p-2 flex flex-col gap-1 transition-all duration-200 bord
 
 
 export default function CalendarView() {
-    const tasks = useProjectTasksData((state) => state.tasks);
     const currTerm = useTime((state) => state.currTerm);
     const gantt = useGantt((state) => state.gantt);
     const [fullView, setFullView] = useState(true);
+    const tasks = useProjectData((state) => state.tasks);
 
     useEffect(() => {
         if (!currTerm) return;
@@ -119,7 +119,7 @@ function CalendarCellComponent({ cellData }) {
                 // Only handle the drop if no task element was involved
                 if (!taskElement) {
                     const taskId = source.data.taskId;
-                    projectTasksActions.updateTask(taskId, {
+                    projectActions.updateTask(taskId, {
                         due_date: cellData.dateFormatted,
                     });
                 }
@@ -158,10 +158,6 @@ function TaskItem({ task }) {
     const gripRef = useRef(null);
     const [dragState, setDragState] = useState('idle');
     const [openTaskModal, setOpenTaskModal] = useState(false);
-
-    const onDelete = (taskId) => {
-        projectTasksActions.deleteTask(taskId);
-    };
 
     useEffect(() => {
         if (!task) return;

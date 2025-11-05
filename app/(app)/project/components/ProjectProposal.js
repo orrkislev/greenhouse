@@ -5,10 +5,9 @@ import QuestionCard from "./QuestionCard";
 import { projectActions, useProject } from "@/utils/store/useProject";
 import { isStaff, useUser } from "@/utils/store/useUser";
 import { adminActions } from "@/utils/store/useAdmin";
-import { projectTasksActions } from "@/utils/store/useProjectTasks";
-import Box2 from "@/components/Box2";
 import Button from "@/components/Button";
 import { Cat } from "lucide-react";
+import ProjectTasks from "./Project Tasks/ProjectTasks";
 
 const QUESTIONS = [
     {
@@ -42,7 +41,7 @@ export default function ProjectProposal() {
 
     useEffect(() => {
         if (filledThreeQuestions) {
-            projectTasksActions.completeTaskByTitle('הצהרת כוונות');
+            ProjectTasks.completeTaskByTitle('הצהרת כוונות');
         }
     }, [filledThreeQuestions])
 

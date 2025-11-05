@@ -4,8 +4,8 @@ import { supabase } from "../supabase/client";
 import { makeLink, prepareForGroupsTable, prepareForUsersTable } from "../supabase/utils";
 import { projectActions } from "./useProject";
 import { createDataLoadingHook } from "./utils/createStore";
-import { projectTasksActions } from "./useProjectTasks";
 import { format } from "date-fns";
+
 
 export const useAdmin = create((set, get) => ({
     classes: [],
@@ -166,7 +166,7 @@ export const useAdmin = create((set, get) => ({
             }));
         }
 
-        await projectTasksActions.addTaskToProject({
+        await projectActions.addTaskToProject({
             title: 'לקבוע פגישה שבועית',
             description: `לקבוע פגישה שבועית עם ${master.first_name} ${master.last_name}`,
             due_date: format(new Date(), 'yyyy-MM-dd'),

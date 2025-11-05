@@ -6,7 +6,6 @@ export default function useWeeksEvents(week) {
     const events = useWeekEvents();
 
     // const groups = useInvolvedGroups();
-
     if (!week || week.length === 0) return [];
 
     const userEvents = events.filter(event => event.date >= week[0] && event.date <= week[week.length - 1]);
@@ -17,19 +16,21 @@ export default function useWeeksEvents(week) {
 }
 
 export function prepareEventsForSchedule(events, week, edittable = false) {
-    events.forEach(event => {
+    let weekEvents = events.filter(event => event.date >= week[0] && event.date <= week[week.length - 1]);
+
+    weekEvents.forEach(event => {
         event.edittable = event.group ? false : edittable;
     })
 
     // ------ event position --------
-    events.forEach(event => {
+    weekEvents.forEach(event => {
         event.dayIndex = week.findIndex(date => date === event.date);
         event.startIndex = getHourIndex(event.start);
         event.endIndex = getHourIndex(event.end, true);
     });
 
     const blocks = [];
-    events.forEach(event => {
+    weekEvents.forEach(event => {
         const dayIndex = week.findIndex(date => date === event.date);
         if (dayIndex === -1) return;
 
@@ -79,7 +80,7 @@ export function prepareEventsForSchedule(events, week, edittable = false) {
             });
     });
 
-    return events;
+    return weekEvents;
 }
 
 

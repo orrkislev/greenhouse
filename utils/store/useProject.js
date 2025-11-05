@@ -12,7 +12,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
 
         setProject: (project) => set({ project }),
         loadProject: withLoadingCheck(async (user) => {
-            set({ project: null });
+            set({ project: null, tasks: [] });
             const { data, error } = await supabase.rpc('get_student_current_term_project', {
                 p_student_id: user.id
             })
@@ -20,6 +20,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             if (data) {
                 set({ project: data })
                 get().loadProjectMasters();
+                get().loadTasks();
             }
         }),
         continueProject: async (projectId) => {
@@ -44,7 +45,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
                 p_target_types: ['mentorships']
             })
             if (error) throw error;
-            if (data.length === 0) return;
+            if (data.length === 0 || !data[0].data?.mentor_id) return;
             const mentorId = data[0].data.mentor_id;
             const { data: masterData, error: masterError } = await supabase.from('users').select('*').eq('id', mentorId).single();
             if (masterError) throw masterError;
@@ -135,6 +136,92 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
                 .single();
             if (error) throw error;
             return data;
+        },
+
+
+        // ------------------------------
+        // ------ Project Tasks -------
+        // ------------------------------
+        tasks: [],
+        view: 'list',
+        loadTasks: withLoadingCheck(async () => {
+            console.log('loadTasks');
+            set({ tasks: [] });
+            if (!useProjectData.getState().project) return;
+            const { data, error } = await supabase.rpc('get_linked_items', {
+                p_table_name: 'projects',
+                p_item_id: useProjectData.getState().project.id,
+                p_target_types: ['tasks']
+            })
+            if (error) throw error;
+            const tasks = data.map(item => item.data);
+            tasks.forEach(task => task.context = projectUtils.getContext(task.project_id));
+            set({ tasks });
+        }),
+        // loadNextTasks: withLoadingCheck(async () => {
+        //     set({ tasks: [] });
+        //     if (!useProjectData.getState().project) return;
+        //     const projectId = useProjectData.getState().project.id;
+        //     const { data, error } = await supabase.rpc('get_next_project_tasks', { p_project_id: projectId })
+        //     if (error) throw error;
+        //     set({ tasks: data });
+        // }),
+
+        updateTask: async (taskId, updates) => {
+            updates.updated_at = new Date().toISOString()
+            set({ tasks: get().tasks.map(task => task.id === taskId ? { ...task, ...updates } : task) });
+            const { error } = await supabase.from('tasks').update(updates).eq('id', taskId);
+            if (error) throw error;
+        },
+        deleteTask: async (taskId) => {
+            const { error } = await supabase.from('tasks').delete().eq('id', taskId);
+            if (error) throw error;
+            set({ tasks: get().tasks.filter(task => task.id !== taskId) });
+        },
+
+        changeOrder: (taskId, newSpot) => {
+            const task = get().tasks.find(t => t.id === taskId);
+            const newTasks = get().tasks.filter(t => t.id !== taskId);
+            newTasks.splice(newSpot, 0, task);
+            set({ tasks: newTasks });
+        },
+
+        completeTaskByTitle: async title => {
+            const task = get().tasks.find(t => t.title.toLowerCase().includes(title.toLowerCase()));
+            if (!task || task.status === 'completed') return;
+            get().completeTask(task.id);
+        },
+        completeTask: async (taskId) => {
+            get().updateTask(taskId, { status: 'completed' });
+        },
+
+
+        addTaskToProject: async (task, projectId) => {
+            if (!projectId) projectId = useProjectData.getState().project.id;
+            if (!task.due_date) task.due_date = format(new Date(), 'yyyy-MM-dd');
+            if (!task.status) task.status = 'todo';
+            if (!task.student_id) task.student_id = useProjectData.getState().project.student_id;
+            const { data, error } = await supabase.from('tasks').insert(task).select().single();
+            if (error) throw error;
+            await get().linkTaskToProject(data, projectId);
+            newLogActions.add(`הוספתי משימה חדשה בפרויקט. `);
+            set(state => ({ tasks: [...state.tasks, data] }));
+        },
+        linkTaskToProject: async (task, projectId) => {
+            await makeLink('tasks', task.id, 'projects', projectId);
+            if (useProjectData.getState().project?.id === projectId) {
+                task.context = projectUtils.getContext(projectId);
+                set({ tasks: get().tasks.map(t => t.id === task.id ? task : t) });
+            }
+        },
+        deleteTask: async (taskId) => {
+            const projectId = useProjectData.getState().project?.id;
+            if (!projectId) return;
+            await supabase.from('tasks').delete().eq('id', taskId);
+            await unLink('tasks', taskId, 'projects', projectId);
+            if (useProjectData.getState().project?.id === projectId) {
+                set({ tasks: get().tasks.filter(t => t.id !== taskId) });
+            }
         },
     }
 });

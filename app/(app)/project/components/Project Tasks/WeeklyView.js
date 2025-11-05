@@ -5,7 +5,7 @@ import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { ArrowDownToLine, ExternalLink, Grip } from "lucide-react";
-import { projectTasksActions, useProjectTasksData } from "@/utils/store/useProjectTasks";
+import { projectActions, useProjectData } from "@/utils/store/useProject";
 import { tw } from "@/utils/tw";
 import TaskModal from "@/components/TaskModal";
 import Link from "next/link";
@@ -13,7 +13,7 @@ import Button from "@/components/Button";
 
 export default function WeeklyView() {
     const [fullView, setFullView] = useState(true);
-    const tasks = useProjectTasksData((state) => state.tasks);
+    const tasks = useProjectData((state) => state.tasks);
     const currTerm = useTime((state) => state.currTerm);
     const [isDragging, setIsDragging] = useState(false);
 
@@ -33,7 +33,7 @@ export default function WeeklyView() {
 
     const handleTaskMove = (taskId, targetWeekIndex, positionInWeek) => {
         const targetWeek = termWeeks[targetWeekIndex];
-        projectTasksActions.updateTask(taskId, { due_date: format(targetWeek.start, 'yyyy-MM-dd'), position: positionInWeek });
+        projectActions.updateTask(taskId, { due_date: format(targetWeek.start, 'yyyy-MM-dd'), position: positionInWeek });
     };
 
     let displayWeeks = termWeeks;
