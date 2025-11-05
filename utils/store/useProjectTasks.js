@@ -84,6 +84,7 @@ export const [useProjectTasksData, projectTasksActions] = createStore((set, get,
             if (error) throw error;
             await get().linkTaskToProject(data, projectId);
             newLogActions.add(`הוספתי משימה חדשה בפרויקט`);
+            set(state => ({ tasks: [...state.tasks, data] }));
         },
         linkTaskToProject: async (task, projectId) => {
             await makeLink('tasks', task.id, 'projects', projectId);
