@@ -1,5 +1,5 @@
 import { tw } from "@/utils/tw";
-import { projectUtils, useProject, useProjectData } from "@/utils/store/useProject";
+import { projectActions, projectUtils, useProject, useProjectData } from "@/utils/store/useProject";
 import { Bird, CheckSquare, Square } from "lucide-react";
 import Link from "next/link";
 import Box2 from "@/components/Box2";
@@ -8,7 +8,6 @@ import Button, { IconButton } from "@/components/Button";
 import { useState } from "react";
 import TaskModal from "@/components/TaskModal";
 import CoverZoomCard from "@/components/CoverZoomCard";
-import ProjectTasks from "../../project/components/Project Tasks/ProjectTasks";
 import WithLabel from "@/components/WithLabel";
 
 export default function MainProject() {
@@ -80,7 +79,7 @@ export const TaskPill = tw`
 
 function Task({ task }) {
     const [open, setOpen] = useState(false)
-    const onCheck = () => ProjectTasks.completeTask(task.id);
+    const onCheck = () => projectActions.completeTask(task.id);
 
     return (
         <div key={task.id} className='flex items-center gap-2 group/task'>
