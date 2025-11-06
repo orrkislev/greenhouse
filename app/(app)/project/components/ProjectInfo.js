@@ -14,7 +14,8 @@ export default function ProjectInfo() {
     projectActions.loadProjectMasters();
   }, []);
 
-  const meeting = meetings.find(m => m.staff === project.master?.id);
+  console.log({meetings})
+  const meeting = meetings.find(m => m.other_participants[0].id === project.master?.id);
 
   return (
     <div className="flex gap-3">

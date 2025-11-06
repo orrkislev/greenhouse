@@ -144,8 +144,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
         // ------------------------------
         tasks: [],
         view: 'list',
-        loadTasks: withLoadingCheck(async () => {
-            console.log('loadTasks');
+        loadTasks: async () => {
             set({ tasks: [] });
             if (!useProjectData.getState().project) return;
             const { data, error } = await supabase.rpc('get_linked_items', {
@@ -157,7 +156,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             const tasks = data.map(item => item.data);
             tasks.forEach(task => task.context = projectUtils.getContext(task.project_id));
             set({ tasks });
-        }),
+        },
         // loadNextTasks: withLoadingCheck(async () => {
         //     set({ tasks: [] });
         //     if (!useProjectData.getState().project) return;
