@@ -35,22 +35,32 @@ export default function WithAuth({ children, role }) {
     };
 
     return (
-        <div className="min-h-screen flex">
-            <div className="flex-2 bg-white flex items-center justify-center">
-                <div className="w-[50vw] -mt-8">
-                    <div className="flex flex-col items-center justify-center mb-4">
-                        <Image src="/logo.png" alt="logo" width={300} height={300} priority={true} style={{ width: '300px' }} />
+        <div className="min-h-screen flex flex-col md:flex-row">
+            {/* Main Login Section */}
+            <div className="flex-1 md:flex-2 bg-white flex items-center justify-center p-4 md:p-8">
+                <div className="w-full max-w-md md:max-w-lg">
+                    {/* Logo - smaller on mobile */}
+                    <div className="flex flex-col items-center justify-center mb-6 md:mb-4">
+                        <Image
+                            src="/logo.png"
+                            alt="logo"
+                            width={200}
+                            height={200}
+                            priority={true}
+                            className="w-40 md:w-72"
+                        />
                     </div>
 
-                    <div className='flex gap-4'>
-                        <form onSubmit={onSubmit} className="flex-1 flex flex-col justify-center px-4 gap-8">
+                    {/* Login Form - vertical stack on mobile */}
+                    <div className='flex flex-col md:flex-row gap-4 md:gap-4'>
+                        <form onSubmit={onSubmit} className="flex-1 flex flex-col justify-center px-2 md:px-4 gap-4 md:gap-8">
                             {error && (
                                 <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
                                     {error.message}
                                 </div>
                             )}
 
-                            <p className="text-sm text-stone-600 text-center">
+                            <p className="text-xs md:text-sm text-stone-600 text-center">
                                 היכנסו עם שם המשתמש והסיסמא הקצרה <br />
                                 אם אתם לא זוכרים, פנו למנטורים
                             </p>
@@ -81,25 +91,28 @@ export default function WithAuth({ children, role }) {
                             </button>
                         </form>
 
-                        <div className='flex-1 flex flex-col items-center justify-center gap-4'>
-                            <div className='flex-1 w-[1px] bg-stone-200'></div>
-                            <p className='text-sm text-stone-500 text-center'>או</p>
-                            <div className='flex-1 w-[1px] bg-stone-200'></div>
+                        {/* Separator - horizontal on mobile, vertical on desktop */}
+                        <div className='flex md:flex-col items-center justify-center gap-2 md:gap-4 my-2 md:my-0'>
+                            <div className='h-[1px] md:h-auto md:flex-1 w-24 md:w-[1px] bg-stone-200'></div>
+                            <p className='text-xs md:text-sm text-stone-500 text-center'>או</p>
+                            <div className='h-[1px] md:h-auto md:flex-1 w-24 md:w-[1px] bg-stone-200'></div>
                         </div>
 
-                        <div className='flex-1 flex flex-col items-center justify-center gap-4'>
-                            <p className='text-sm text-stone-500 text-center'>התחברות עם חשבון חממה</p>
-                            <Icon icon="devicon:google" className="w-12 h-12 p-2 grayscale-20 hover:grayscale-0 hover:saturate-300 hover:bg-stone-100 rounded-full cursor-pointer transition-all duration-200"
+                        {/* Google Sign-in */}
+                        <div className='flex-1 flex flex-col items-center justify-center gap-2 md:gap-4 pb-4 md:pb-0'>
+                            <p className='text-xs md:text-sm text-stone-500 text-center'>התחברות עם חשבון חממה</p>
+                            <Icon
+                                icon="devicon:google"
+                                className="w-10 h-10 md:w-12 md:h-12 p-2 grayscale-20 hover:grayscale-0 hover:saturate-300 hover:bg-stone-100 rounded-full cursor-pointer transition-all duration-200"
                                 onClick={() => userActions.signInWithGoogle()}
                             />
                         </div>
                     </div>
-
                 </div>
             </div>
 
-            {/* Right Side - Beautiful Gradient Graphics */}
-            <div className="flex-1 bg-gradient-to-br from-purple-200 via-pink-100 to-orange-200 relative overflow-hidden">
+            {/* Gradient Graphics Side - hidden on mobile, shown on desktop */}
+            <div className="hidden md:block md:flex-1 bg-gradient-to-br from-purple-200 via-pink-100 to-orange-200 relative overflow-hidden">
                 {/* Abstract geometric shapes for visual interest */}
                 <div className="absolute inset-0">
                     {/* Large gradient circle */}

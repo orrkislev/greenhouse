@@ -14,7 +14,7 @@ import { useUser } from "@/utils/store/useUser"
 import { Combobox } from "@/components/ui/combobox"
 
 
-function JournalNew({ isOpen, setIsOpen }) {
+function JournalNew({ isOpen, setIsOpen, showArchive = true }) {
     const originalUser = useUser(state => state.originalUser)
     const path = usePathname()
     const searchParams = useSearchParams()
@@ -103,7 +103,7 @@ function JournalNew({ isOpen, setIsOpen }) {
                 שמירה
             </Button>
 
-            <Journal />
+            {showArchive && <Journal />}
         </div>
     )
 }
