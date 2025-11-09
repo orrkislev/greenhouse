@@ -84,21 +84,9 @@ function JournalNew({ isOpen, setIsOpen }) {
                     <div className="flex w-64">
                         {user.role === 'student' && (
                             <Combobox items={allMembers.filter(m => m.role === 'staff').map(s => ({ value: s.id, label: s.first_name + ' ' + s.last_name }))} value={selectedStaff?.id} onChange={(value) => setSelectedStaff(allMembers.find(s => s.id === value))} />
-                            // <select className="w-full text-sm rounded-md px-2 py-1 border border-stone-300" value={selectedStaff?.id} onChange={(e) => setSelectedStaff(staff.find(s => s.id === e.target.value))}>
-                            //     <option value="">בחר מנטור / מאסטר</option>
-                            //     {allMembers.filter(m => m.role === 'staff').map(s => (
-                            //         <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
-                            //     ))}
-                            // </select>
                         )}
                         {user.role === 'staff' && (
                             <Combobox items={allMembers.filter(m => m.role === 'student').map(s => ({ value: s.id, label: s.first_name + ' ' + s.last_name }))} value={selectedStaff?.id} onChange={(value) => setSelectedStaff(allMembers.find(s => s.id === value))} />
-                            // <select className="w-full text-sm rounded-md px-2 py-1 border border-stone-300" value={selectedStaff?.id} onChange={(e) => setSelectedStaff(staff.find(s => s.id === e.target.value))}>
-                            //     <option value="">בחר חניך</option>
-                            //     {allMembers.filter(m => m.role === 'student').map(s => (
-                            //         <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
-                            //     ))}
-                            // </select>
                         )}
                     </div>
                 </WithLabel>

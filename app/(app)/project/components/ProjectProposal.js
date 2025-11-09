@@ -7,7 +7,6 @@ import { isStaff, useUser } from "@/utils/store/useUser";
 import { adminActions } from "@/utils/store/useAdmin";
 import Button from "@/components/Button";
 import { Cat } from "lucide-react";
-import ProjectTasks from "./Project Tasks/ProjectTasks";
 
 const QUESTIONS = [
     {
@@ -41,7 +40,7 @@ export default function ProjectProposal() {
 
     useEffect(() => {
         if (filledThreeQuestions) {
-            ProjectTasks.completeTaskByTitle('הצהרת כוונות');
+            projectActions.completeTaskByTitle('הצהרת כוונות');
         }
     }, [filledThreeQuestions])
 

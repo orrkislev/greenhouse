@@ -52,7 +52,7 @@ export function Combobox({ items, value, onChange, placeholder = "Select..." }) 
               {search ? `${search} לא נמצא.` : "אין תוצאות."}
             </CommandEmpty>
             <CommandGroup>
-              {filteredItems.map((item) => (
+              {filteredItems.sort((a, b) => a.label.localeCompare(b.label)).map((item) => (
                 <CommandItem
                   key={item.value}
                   // Use label for cmdk’s internal matching/highlighting
