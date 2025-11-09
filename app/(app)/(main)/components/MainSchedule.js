@@ -10,6 +10,7 @@ import Link from "next/link";
 import { Calendar } from "lucide-react";
 import MainGreetings from "./MainGreetings";
 import Image from "next/image";
+import { useMeetings } from "@/utils/store/useMeetings";
 
 export default function MainSchedule() {
     const today = useTime(state => state.today);
@@ -17,6 +18,7 @@ export default function MainSchedule() {
     const events = useTodayEvents();
     const groups = useUserGroups();
     const googleCalendarEvents = useGoogleCalendarEventsToday();
+    const meetings = useMeetings();
 
     const groupIds = groups.map(g => g.id).join(',');
     useEffect(() => {
@@ -27,9 +29,10 @@ export default function MainSchedule() {
 
     const todayEvents = [...(events[today] ?? [])];
     todayEvents.push(...googleCalendarEvents.filter(event => event.date === today));
-    
     groups.forEach(group => group.events?.[today]?.forEach(event => todayEvents.push({ ...event, group: group.name })));
     todayEvents.sort((a, b) => a.start.localeCompare(b.start));
+
+    const todayMeetings = meetings.filter(meeting => meeting.day_of_the_week === new Date(today).getDay() + 1);
 
     const nextEvent = todayEvents.find(event => {
         let eventDate = new Date(event.date);
@@ -41,6 +44,14 @@ export default function MainSchedule() {
         <Box2 label="מה יש לי היום" className="col-start-1 row-start-1 row-span-4 flex-1 relative overflow-hidden" LabelIcon={Calendar}>
             <MainGreetings />
             <div className="flex flex-col gap-2 mt-2">
+                {todayMeetings.map(meeting => (
+                    <div key={meeting.id} className="flex gap-3 items-center">
+                        <EventTime time={meeting.start} />
+                        <div className="text-sm font-bold flex items-center gap-1">
+                            {meeting.other_participants[0].first_name} {meeting.other_participants[0].last_name}
+                        </div>
+                    </div>
+                ))}
                 {todayEvents.length > 0 ? todayEvents.map(event => (
                     <div key={event.id} className={`flex gap-3 items-center  ${nextEvent?.id === event.id ? 'bg-stone-300 rounded-[8px] border-2 border-stone-300' : ''}`}>
                         <EventTime time={event.start} />
