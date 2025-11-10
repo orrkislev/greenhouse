@@ -24,7 +24,7 @@ export default function StaffGroup({ group }) {
     return (
         <div className="flex flex-col gap-4 relative">
             <StaffGroup_Header group={group} />
-            <div className="flex gap-4 ">
+            <div className="flex flex-col md:flex-row gap-4">
                 <MessageEditor onSave={(value) => groupsActions.updateGroup(group, { message: value })} initialValue={group.message} />
                 <GroupTasks group={group} />
             </div>

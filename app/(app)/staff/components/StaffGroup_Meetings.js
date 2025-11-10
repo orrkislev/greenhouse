@@ -27,34 +27,63 @@ export default function StaffGroup_Meetings({ group }) {
     studentsWithoutMeetings.sort((a, b) => a.first_name.localeCompare(b.first_name));
 
     return (
-        <div className={`p-4 border-t`}>
-            <h4 className={`font-bold`}>שיחות אישיות</h4>
+        <div className={`p-2 md:p-4 border-t`}>
+            <h4 className={`font-bold text-base md:text-lg mb-2`}>שיחות אישיות</h4>
 
-            <ScheduleSection withLabel={false}>
-                <div className="bg-stone-100 px-2 py-1 text-sm">
-                    חניכים ללא שיחה מתוכננת
-                </div>
-                {daysOfWeek.map((day, index) => (
-                    <div key={day} className="bg-stone-100 text-sm flex items-center justify-center">
-                        {day}
-                    </div>
-                ))}
-
-
+            {/* Mobile view - single column */}
+            <div className="md:hidden flex flex-col gap-4">
                 <div>
-                    {studentsWithoutMeetings.map(student => (
-                        <StudentMeetingSlot key={student.id} student={student} />
-                    ))}
-                </div>
-
-                {daysOfWeek.map((day, index) => (
-                    <div key={day} className="bg-stone-100 flex flex-col gap-2">
-                        {studentsWithMeetings.filter(s => s.meeting?.day_of_the_week === index + 1).map(student => (
-                            <StudentMeetingSlot key={student.id} student={student} meeting={student.meeting} />
+                    <div className="bg-stone-100 px-2 py-1 text-sm font-semibold mb-2">
+                        חניכים ללא שיחה מתוכננת
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        {studentsWithoutMeetings.map(student => (
+                            <StudentMeetingSlot key={student.id} student={student} />
                         ))}
                     </div>
+                </div>
+                {daysOfWeek.map((day, index) => (
+                    <div key={day}>
+                        <div className="bg-stone-100 px-2 py-1 text-sm font-semibold mb-2">
+                            יום {day}
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            {studentsWithMeetings.filter(s => s.meeting?.day_of_the_week === index + 1).map(student => (
+                                <StudentMeetingSlot key={student.id} student={student} meeting={student.meeting} />
+                            ))}
+                        </div>
+                    </div>
                 ))}
-            </ScheduleSection>
+            </div>
+
+            {/* Desktop view - grid */}
+            <div className="hidden md:block">
+                <ScheduleSection withLabel={false}>
+                    <div className="bg-stone-100 px-2 py-1 text-sm">
+                        חניכים ללא שיחה מתוכננת
+                    </div>
+                    {daysOfWeek.map((day, index) => (
+                        <div key={day} className="bg-stone-100 text-sm flex items-center justify-center">
+                            {day}
+                        </div>
+                    ))}
+
+
+                    <div>
+                        {studentsWithoutMeetings.map(student => (
+                            <StudentMeetingSlot key={student.id} student={student} />
+                        ))}
+                    </div>
+
+                    {daysOfWeek.map((day, index) => (
+                        <div key={day} className="bg-stone-100 flex flex-col gap-2">
+                            {studentsWithMeetings.filter(s => s.meeting?.day_of_the_week === index + 1).map(student => (
+                                <StudentMeetingSlot key={student.id} student={student} meeting={student.meeting} />
+                            ))}
+                        </div>
+                    ))}
+                </ScheduleSection>
+            </div>
         </div>
     );
 }
@@ -105,7 +134,7 @@ export function EditMeeting({ student, meeting, onClose }) {
 
     return (
         <div className="flex flex-col gap-2">
-            <h4 className="font-bold">שיחה עם {student.first_name}</h4>
+            <h4 className="font-bold text-base md:text-lg">שיחה עם {student.first_name}</h4>
             {!meeting && (
                 <>
                     <p className="text-sm text-stone-600">אין שיחה מתוכננת כרגע.</p>
@@ -116,12 +145,12 @@ export function EditMeeting({ student, meeting, onClose }) {
                 defaultValue={time}
                 onUpdate={(newTime) => setTime(newTime)}
             />
-            <select value={day} onChange={(e) => setDay(Number(e.target.value))} className="border border-stone-300 rounded px-2 py-1 w-full">
+            <select value={day} onChange={(e) => setDay(Number(e.target.value))} className="border border-stone-300 rounded px-2 py-1 w-full text-sm md:text-base">
                 {daysOfWeek.map((day, index) => (
                     <option key={day} value={index + 1}>{day}</option>
                 ))}
             </select>
-            <div className="flex justify-end">
+            <div className="flex flex-col md:flex-row gap-2 md:justify-end">
                 <Button onClick={onSave} data-role="save">
                     שמירה <CalendarCheck className="w-4 h-4" />
                 </Button>

@@ -14,6 +14,7 @@ import { EditMeeting } from "./StaffGroup_Meetings";
 import { meetingUtils, useMeetings } from "@/utils/store/useMeetings";
 import { AllStudentPicker } from "./StaffStudents";
 import { projectActions } from "@/utils/store/useProject";
+import { motion } from "motion/react";
 
 export default function StaffGroup_Students({ group }) {
     if (!group.members) return null;
@@ -43,8 +44,8 @@ export function Staff_Students_List({ students, context, group }) {
     }, [students])
 
     return (
-        <div className="">
-            <div className="float-right ml-4">
+        <div className="flex flex-col md:block">
+            <div className="md:float-right md:ml-4 mb-4 md:mb-0">
                 {selectedStudent != null && <SelectedStudentCard student={selectedStudent} context={context} group={group} />}
             </div>
 
@@ -94,11 +95,16 @@ function SelectedStudentCard({ student, context, group }) {
     }
 
     return (
-        <div className="p-6 border border-stone-200 flex flex-col gap-6 justify-between">
+        <motion.div key={student.id} 
+            initial={{ opacity: 0, y: -10, scale: 0.98 }} 
+            animate={{ opacity: 1, y: 0, scale: 1 }} 
+            transition={{ duration: 0.3, ease: 'easeInOut' }} 
+            className="p-4 md:p-6 border border-stone-200 flex flex-col gap-4 md:gap-6 justify-between">
+
             <div className="flex items-center gap-2">
-                <Avatar user={data} className="w-16 h-16" />
+                <Avatar user={data} className="w-12 h-12 md:w-16 md:h-16" />
                 <div>
-                    <div className="font-bold">{data.first_name} {data.last_name}</div>
+                    <div className="font-bold text-sm md:text-base">{data.first_name} {data.last_name}</div>
                     <div className="text-xs text-stone-500">
                         {context === 'class' ? groups.find(g => g.id === data.major)?.name : groups.find(g => g.id === data.class)?.name}
                     </div>
@@ -131,7 +137,7 @@ function SelectedStudentCard({ student, context, group }) {
 
             <SelectedStudentCard_Meeting student={data} />
 
-            <div className="flex gap-2">
+            <div className="flex flex-col md:flex-row gap-2">
                 <Button data-role="edit" onClick={() => goToStudent(data)}>
                     להיות {data.first_name}
                     <VenetianMask className="w-4 h-4" />
@@ -144,7 +150,7 @@ function SelectedStudentCard({ student, context, group }) {
                     </Button>
                 )}
             </div>
-        </div>
+        </motion.div>
     )
 }
 

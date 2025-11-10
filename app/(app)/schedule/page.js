@@ -14,7 +14,7 @@ import ContextBar, { PageMain } from "@/components/ContextBar";
 import { DashboardLayout, DashboardPanel, DashboardPanelButton, DashboardTitle } from "@/components/DashboardLayout";
 import ScheduleContext from "./components/ScheduleContext";
 
-const ScheduleOuter = tw`w-full h-full pr-16 pt-8`;
+const ScheduleOuter = tw`w-full h-full pr-2 md:pr-16 pt-4 md:pt-8`;
 
 export default function SchedulePage() {
     const [view, setView] = useState('week');

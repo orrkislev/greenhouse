@@ -58,7 +58,7 @@ export default function Journal() {
     })
 
     return (
-        <div className="flex flex-col gap-2 mt-4 border-t-2 border-dashed border-stone-300 pt-4">
+        <div className="flex flex-col gap-2 pt-4 p-3">
             <div className="text-sm font-medium flex items-center gap-2">
                 <NotebookText className="w-4 h-4" />
                 ארכיון
