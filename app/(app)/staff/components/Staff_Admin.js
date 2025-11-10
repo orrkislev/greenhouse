@@ -13,12 +13,12 @@ export default function Staff_Admin() {
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="p-4">
+            <div className="p-2 md:p-4">
                 <div className="flex items-center justify-between">
                     <h3 className="text-lg font-bold">כל החניכים בתיכון</h3>
                 </div>
             </div>
-            <div className="flex gap-4">
+            <div className="flex flex-col md:flex-row gap-4">
                 <MessageEditor onSave={(value) => adminActions.updateMessage(value)} initialValue={message} />
                 <Box2 label="עוד משהו" className="flex-1" LabelIcon={Banana}>
                 </Box2>

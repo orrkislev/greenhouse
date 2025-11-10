@@ -7,6 +7,11 @@ import JournalNew from "./JournalNew"
 import Journal from "./Journal"
 import { tw } from "@/utils/tw"
 import { useNewLog } from "@/utils/store/useLogs"
+import Button from "@/components/Button"
+
+const InnerTab = tw.div`flex items-center gap-2 p-2 rounded-md cursor-pointer transition-all duration-300
+${props => props.$isActive ? 'bg-stone-500 text-white' : 'bg-white text-stone-700'}
+`
 
 export default function JournalHandle() {
     const originalUser = useUser(state => state.originalUser);
@@ -21,9 +26,9 @@ export default function JournalHandle() {
         if (newLog.length > 0) setNotifyNewLog(true)
     }, [newLog])
 
-    useEffect(()=>{
+    useEffect(() => {
         if (isOpen) setNotifyNewLog(false)
-    },[isOpen])
+    }, [isOpen])
 
 
     const handleMouseMove = (e) => {
@@ -60,58 +65,22 @@ export default function JournalHandle() {
                 >
 
                     {/* Mobile: Show tabs when open, Desktop: Show single tab */}
-                    {isOpen ? (
-                        <div className="h-[40px] flex items-center justify-center gap-1 md:hidden">
-                            <JournalTab
-                                onClick={() => setActiveTab('new')}
-                                label="יומן חדש"
-                                Icon={BookOpen}
-                                isActive={activeTab === 'new'}
-                            />
-                            <JournalTab
-                                onClick={() => setActiveTab('archive')}
-                                label="ארכיון"
-                                Icon={Archive}
-                                isActive={activeTab === 'archive'}
-                            />
-                        </div>
-                    ) : (
-                        <div className="h-[40px] flex items-center justify-center gap-3">
-                            <JournalTab
-                                onClick={() => { setIsOpen(true); setActiveTab('new'); }}
-                                label="השורה התחתונה"
-                                Icon={BookOpen}
-                                notifyNewLog={notifyNewLog}
-                            />
-                        </div>
-                    )}
-
-                    {/* Desktop always shows both tabs when open */}
-                    {isOpen && (
-                        <div className="hidden md:flex h-[40px] items-center justify-center gap-1">
-                            <JournalTab
-                                onClick={() => setActiveTab('new')}
-                                label="יומן חדש"
-                                Icon={BookOpen}
-                                isActive={activeTab === 'new'}
-                            />
-                            <JournalTab
-                                onClick={() => setActiveTab('archive')}
-                                label="ארכיון"
-                                Icon={Archive}
-                                isActive={activeTab === 'archive'}
-                            />
-                        </div>
-                    )}
+                    <div className="h-[40px] flex items-center justify-center gap-3">
+                        <JournalTab
+                            onClick={() => { setIsOpen(true); setActiveTab('new'); }}
+                            label="השורה התחתונה"
+                            Icon={BookOpen}
+                            notifyNewLog={notifyNewLog}
+                        />
+                    </div>
 
                     <div className="flex-1 bg-white w-full border border-stone-300 rounded-md max-h-[60vh] md:max-h-[70vh] overflow-y-auto">
-                        {activeTab === 'new' ? (
-                            <JournalNew isOpen={isOpen} setIsOpen={setIsOpen} showArchive={false} />
-                        ) : (
-                            <div className="p-4">
-                                <Journal />
-                            </div>
-                        )}
+                        <div className="flex gap-2 justify-center">
+                            <InnerTab onClick={() => setActiveTab('new')} $isActive={activeTab === 'new'}><BookOpen className="w-4 h-4" /> השורה התחתונה</InnerTab>
+                            <InnerTab onClick={() => setActiveTab('archive')} $isActive={activeTab === 'archive'}><Archive className="w-4 h-4" /> ארכיון</InnerTab>
+                        </div>
+                        {activeTab === 'new' && <JournalNew isOpen={isOpen} setIsOpen={setIsOpen} showArchive={false} />}
+                        {activeTab === 'archive' && <Journal />}
                     </div>
                 </div>
             </div>

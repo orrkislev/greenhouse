@@ -43,7 +43,7 @@ export default function SideBar() {
         <>
             {/* Mobile Top Bar */}
             <TopBarDiv>
-                <Link href="/" className="w-12 h-12 flex items-center justify-center relative flex-shrink-0">
+                <Link href="/" className="w-12 h-12 flex items-center justify-center relative flex-shrink-0 hidden md:block">
                     <Image src="/logo.png" alt="logo" fill={true} style={{ objectFit: 'contain' }} priority={true} sizes="48px" />
                 </Link>
 
@@ -65,7 +65,7 @@ export default function SideBar() {
 
             {/* Mobile Menu Dropdown */}
             {mobileMenuOpen && (
-                <div className="md:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setMobileMenuOpen(false)}>
+                <div className="md:hidden fixed inset-0 bg-black/50 z-40 mt-12" onClick={() => setMobileMenuOpen(false)}>
                     <div className="bg-stone-100 w-64 h-full p-4 flex flex-col gap-2" onClick={e => e.stopPropagation()}>
                         <Link href="/profile" className="flex items-center gap-2 p-2 hover:bg-stone-200 rounded-lg" onClick={() => setMobileMenuOpen(false)}>
                             <Avatar user={user} hoverScale={false} />

@@ -98,12 +98,12 @@ function TaskModalContent({ task, close, initialContext }) {
     if (context && context.table === 'study_paths') headerText = task ? 'עריכת שלב בתחום הלמידה' : 'שלב בתחום הלמידה חדש'
 
     return (
-        <div className="flex flex-col gap-2 min-w-xl relative">
-            <div className="flex gap-2 items-center">
+        <div className="flex flex-col gap-2 md:min-w-xl relative max-md:h-full max-md:w-[90vw]">
+            <div className="flex gap-2 items-center max-md:pt-8">
                 <span className="font-bold">{headerText}: </span>
                 <ItemContextPicker context={context} onContextChange={setContext} />
             </div>
-            <IconButton icon={X} onClick={close} className="absolute top-0 left-0 bg-white" />
+            <IconButton icon={X} onClick={close} className="absolute top-0 left-0 bg-white z-10 max-md:bg-transparent max-md:hover:bg-stone-100" />
             <WithLabel label="כותרת">
                 <input type="text" value={title} onChange={e => setTitle(e.target.value)} className="rounded-sm p-2 border border-stone-200 w-full" />
             </WithLabel>

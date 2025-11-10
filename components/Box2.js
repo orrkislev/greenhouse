@@ -1,7 +1,7 @@
 
 export default function Box2({ children, style, label, className, description, LabelIcon }) {
     return (
-        <div className={`overflow-hidden bg-white relative rounded-xl border border-stone-300 group/box transition-all hover:border-stone-400 ${className}`} style={style}>
+        <div className={`bg-white relative rounded-xl border border-stone-300 group/box transition-all hover:border-stone-400 ${className}`} style={style}>
             {label && (
                 <div className="w-[80%] flex gap-2 z-10">
                     <div className="flex gap-1 items-center text-sm text-stone-500 border-b border-l border-stone-300 px-1 text-xs group-hover/box:text-stone-800 transition-all duration-300">

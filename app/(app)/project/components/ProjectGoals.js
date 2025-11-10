@@ -43,7 +43,7 @@ const InitialGoals = [
 export default function ProjectGoals() {
 
     return (
-        <div className="flex gap-3">
+        <div className="flex flex-col md:flex-row gap-3">
             <FocusedGoal index={0} />
             <FocusedGoal index={1} />
             <FocusedGoal index={2} />

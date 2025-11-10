@@ -21,8 +21,8 @@ export default function Research() {
     }
 
     return (
-        <div className="flex-1 flex flex-col gap-8 mx-16">
-            <div className="flex justify-between gap-4">
+        <div className="flex-1 flex flex-col gap-8 md:mx-16">
+            <div className="flex flex-col-reverse md:flex-row justify-between gap-4">
                 <WithLabel label="על מה החקר שלי" className="flex-1">
                     <input type="text" placeholder="על מה החקר שלי" key={research.id}
                         defaultValue={research.title} onBlur={(e) => researchActions.updateResearch({ title: e.target.value })}
@@ -42,7 +42,7 @@ export default function Research() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 auto-rows-fr">
+            <div className="flex flex-col mg:grid mg:grid-cols-3 gap-2 auto-rows-fr">
                 <Section_Questions />
                 <Section_sources />
                 <Section_quotes />

@@ -8,7 +8,7 @@ export default function StudyMain() {
 
 	return (
 		<div className="flex flex-col gap-8 mt-8">
-			<div className="grid grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 				{paths.map(path => (
 					<Link key={path.id} href={`/study?id=${path.id}`}>
 						{/* <Box2 label={path.title} labelIcon={BookOpen} > */}
