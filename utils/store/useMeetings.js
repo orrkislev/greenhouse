@@ -47,6 +47,15 @@ export const [useMeetingsData, meetingsActions] = createStore((set, get, withUse
             const { error } = await supabase.from('events').delete().eq('id', meetingId);
             if (error) console.error('error deleting meeting', error);
             set({ meetings: get().meetings.filter(meeting => meeting.id !== meetingId) });
+        },
+
+        getTodaysMeetingsForUser: async (userId) => {
+            const { data, error } = await supabase.rpc('get_user_recurring_events', {
+                p_user_id: userId,
+                p_day_of_week: new Date().getDay() + 1
+            });
+            if (error) console.error('error loading meetings', error);
+            return data;
         }
     }
 });

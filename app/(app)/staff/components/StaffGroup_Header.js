@@ -16,9 +16,9 @@ export default function StaffGroup_Header({ group }) {
                             {group.name}
                         </h3>
                     )}
-                    {/* <Link href={`/screen/${group.id}`}>
+                    <Link href={`/screen/${group.id}`}>
                         <IconButton icon={Monitor} />
-                    </Link> */}
+                    </Link>
                 </div>
                 {group.students && (
                     <div className="flex items-center gap-3">

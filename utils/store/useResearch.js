@@ -75,6 +75,13 @@ export const [useResearchData, researchActions] = createStore((set, get, withUse
         });
         get().updateResearch({ docUrl });
     }),
+
+
+    getStudentLatestResearch: async (studentId) => {
+        const { data, error } = await supabase.from('research').select('*').eq('student_id', studentId).eq('status', 'active').single();
+        if (error) throw error;
+        return data;
+    },
 }));
 
 export const useResearch = createDataLoadingHook(useResearchData, 'research', 'loadResearch');
