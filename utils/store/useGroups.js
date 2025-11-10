@@ -84,7 +84,7 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
 
         let shouldLoad = false;
         let date = start;
-        const events = { ...get().groups.find(g => g.id === groupId).events } || {}
+        const events = { ...get().groups.find(g => g.id === groupId)?.events } || {}
         while (date <= end) {
             if (!events[date]) {
                 shouldLoad = true;
@@ -111,14 +111,14 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
     createGroupEvent: async (groupId, obj) => {
         const { data, error } = await supabase.from('events').insert(obj).select().single();
         if (error) throw error;
-        const newEvents = { ...get().groups.find(g => g.id === groupId).events } || {}
+        const newEvents = { ...get().groups.find(g => g.id === groupId)?.events } || {}
         if (!newEvents[data.date]) newEvents[data.date] = [];
         newEvents[data.date].push(data);
         set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: newEvents } : g) }));
         await makeLink('events', data.id, 'groups', groupId);
     },
     updateGroupEvent: async (groupId, obj) => {
-        const newEvents = { ...get().groups.find(g => g.id === groupId).events } || {}
+        const newEvents = { ...get().groups.find(g => g.id === groupId)?.events } || {}
         newEvents[obj.date] = newEvents[obj.date].map(e => e.id === obj.id ? obj : e)
         set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: newEvents } : g) }));
 
@@ -126,7 +126,7 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
         if (error) throw error;
     },
     removeGroupEvent: async (groupId, date, objId) => {
-        const groupEvents = { ...get().groups.find(g => g.id === groupId).events } || {}
+        const groupEvents = { ...get().groups.find(g => g.id === groupId)?.events } || {}
         groupEvents[date] = groupEvents[date]?.filter(e => e.id !== objId)
         set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: groupEvents } : g) }));
 
@@ -150,7 +150,7 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
     // ----------- Group Tasks Management -----------
     // ----------------------------------------------
     loadGroupTasks: async (groupId) => {
-        if (get().groups.find(g => g.id === groupId).tasks) return;
+        if (get().groups.find(g => g.id === groupId)?.tasks) return;
         const user = useUser.getState().user;
         const { data, error } = await supabase.rpc('get_user_group_tasks_by_group', {
             p_group_id: groupId,

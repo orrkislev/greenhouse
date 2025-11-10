@@ -58,6 +58,10 @@ function Tasks() {
         .sort((a, b) => a.position - b.position)
         .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
         .filter(task => task.status === 'todo');
+    
+    if (nextTasks.length === 0) {
+        return <div className='text-stone-500 text-center p-4'>אין משימות</div>;
+    }
 
     return (
         <WithLabel label="משימות">
