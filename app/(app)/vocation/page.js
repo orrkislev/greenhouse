@@ -13,7 +13,7 @@ export default function VocationPage() {
   return (
     <>
       <PageMain>
-        <div className="flex gap-4 flex-wrap">
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4 md:flex-wrap">
           {jobs.map((job, index) => (
             <JobCard key={index} job={job} />
           ))}
@@ -29,7 +29,7 @@ export default function VocationPage() {
 function NewJobCard() {
   const click = () => vocationActions.addJob();
   return (
-    <div className="w-32 border border-stone-200 rounded-lg p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-green-100 group/new-job-card" onClick={click}>
+    <div className="w-full md:w-32 border border-stone-200 rounded-lg p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-green-100 group/new-job-card" onClick={click}>
       <Plus className="w-4 h-4 group-hover/new-job-card:text-green-500 group-hover/new-job-card:scale-150 transition-all duration-200 group-hover/new-job-card:rotate-90" />
       <span className="text-center text-sm text-stone-700 group-hover/new-job-card:text-green-500 transition-all duration-200 group-hover/new-job-card:font-bold">
         מקום עבודה חדש
@@ -45,24 +45,24 @@ function JobCard({ job }) {
   const removeJob = () => vocationActions.removeJob(job.id);
 
   return (
-    <Box2 label={job.place_of_work} LabelIcon={Briefcase} className="group/job-card">
-      <Menu className="absolute top-2 left-2 opacity-0 group-hover/job-card:opacity-100 transition-all duration-200">
+    <Box2 label={job.place_of_work} LabelIcon={Briefcase} className="group/job-card w-full md:w-auto">
+      <Menu className="absolute top-2 left-2 opacity-0 md:opacity-0 md:group-hover/job-card:opacity-100 transition-all duration-200">
         <MenuItem title="מחק" icon={Trash2} onClick={removeJob} />
       </Menu>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4 md:gap-8">
         <div className="flex flex-col gap-1">
-          <Edittable value={job.place_of_work} onFinish={updatePlaceOfWork} className="w-64" placeholder="מקום העבודה" />
-          <Edittable value={job.position} onFinish={updatePosition} className="w-64 text-sm text-stone-700" placeholder="תפקיד" />
+          <Edittable value={job.place_of_work} onFinish={updatePlaceOfWork} className="w-full md:w-64" placeholder="מקום העבודה" />
+          <Edittable value={job.position} onFinish={updatePosition} className="w-full md:w-64 text-sm text-stone-700" placeholder="תפקיד" />
         </div>
-        <div className="flex gap-4">
-          <table>
+        <div className="flex gap-4 overflow-x-auto">
+          <table className="w-full">
             <TableHeader headers={[{ key: 'year', label: 'שנה' }, { key: 'month', label: 'חודש' }, { key: 'hours', label: 'שעות עבודה' }]} />
             <tbody>
               {job.work_hours.map((hour, index) => (
                 <tr key={index}>
-                  <Cell><Edittable value={hour.year} onFinish={value => updateWorkHours(job.work_hours.map((h, i) => i === index ? { ...h, year: value } : h))} className="w-16" /></Cell>
-                  <Cell><Edittable value={hour.month} onFinish={value => updateWorkHours(job.work_hours.map((h, i) => i === index ? { ...h, month: value } : h))} className="w-16" /></Cell>
-                  <Cell><Edittable value={hour.hours} onFinish={value => updateWorkHours(job.work_hours.map((h, i) => i === index ? { ...h, hours: value } : h))} className="w-16" /></Cell>
+                  <Cell><Edittable value={hour.year} onFinish={value => updateWorkHours(job.work_hours.map((h, i) => i === index ? { ...h, year: value } : h))} className="w-12 md:w-16" /></Cell>
+                  <Cell><Edittable value={hour.month} onFinish={value => updateWorkHours(job.work_hours.map((h, i) => i === index ? { ...h, month: value } : h))} className="w-12 md:w-16" /></Cell>
+                  <Cell><Edittable value={hour.hours} onFinish={value => updateWorkHours(job.work_hours.map((h, i) => i === index ? { ...h, hours: value } : h))} className="w-12 md:w-16" /></Cell>
                 </tr>
               ))}
               <div className="flex gap-1 items-center text-xs cursor-pointer bg-stone-100 hover:bg-green-100 rounded-md p-1 mt-2"
