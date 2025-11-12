@@ -153,7 +153,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
                 p_target_types: ['tasks']
             })
             if (error) throw error;
-            const tasks = data.map(item => item.data);
+            const tasks = data.map(item => item.data).filter(task => task)
             tasks.forEach(task => task.context = projectUtils.getContext(task.project_id));
             set({ tasks });
         },

@@ -5,12 +5,10 @@ import MainProject from "./components/MainProject"
 import MainSchedule from "./components/MainSchedule"
 import MainGroups from "./components/MainGroups"
 import { BGGrads, PageMain } from "@/components/ContextBar"
-import { AuthGoogleListener } from "../schedule/components/Google/AuthGoogleCalendar"
 import MainStudy from "./components/MainStudy"
 import MainResearch from "./components/MainResearch"
 import MainVocation from "./components/MainVocation"
 import MainNews from "./components/MainNews"
-import { supabase } from "@/utils/supabase/client"
 
 export default function MainPage() {
 
@@ -29,11 +27,6 @@ export default function MainPage() {
                     <MainVocation />
                 </div>
             </PageMain>
-            {/* <ContextBar name="">
-                <MainContext />
-            </ContextBar> */}
-
-            {/* <AuthGoogleListener /> */}
         </div>
     )
 }
