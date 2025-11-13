@@ -1,14 +1,14 @@
 import { create } from "zustand";
 import { useUser } from "@/utils/store/useUser";
 import { supabase } from "../supabase/client";
+import { createStore } from "./utils/createStore";
 
-export const useMentorships = create((set, get) => ({
+export const [useMentorships, mentorshipsActions] = createStore((set, get, withUser, withLoadingCheck) => ({
     mentorships: [],
     allStudents: [],
 
-    getMentorships: async () => {
-        if (get().mentorships.length > 0) return;
-        const user = useUser.getState().user;
+    getMentorships: withLoadingCheck(async (user) => {
+        set({ mentorships: [] });
         let query = supabase.from('mentorships')
             .select(`*, 
                 student:users!mentorships_student_id_fkey (
@@ -22,7 +22,7 @@ export const useMentorships = create((set, get) => ({
         const { data, error } = await query;
         if (error) throw error;
         set({ mentorships: data });
-    },
+    }),
 
     getAllStudents: async () => {
         if (get().allStudents.length > 0) return;
@@ -45,8 +45,3 @@ export const useMentorships = create((set, get) => ({
         await supabase.from('mentorships').delete().eq('mentor_id', user.id).eq('student_id', student.id);
     }
 }));
-
-
-export const mentorshipsActions = Object.fromEntries(
-    Object.entries(useMentorships.getState()).map(([key, value]) => [key, useMentorships.getState()[key]])
-);

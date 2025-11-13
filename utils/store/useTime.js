@@ -1,4 +1,4 @@
-import { addDays, format, isBefore, isSameDay, startOfWeek } from "date-fns";
+import { add, addDays, format, isBefore, isSameDay, startOfWeek, subDays } from "date-fns";
 import { create } from "zustand";
 import { supabase } from "../supabase/client";
 import { subscribeWithSelector } from "zustand/middleware";
@@ -22,20 +22,12 @@ export const useTime = create(subscribeWithSelector((set, get) => {
         week: getWeekDates(new Date()),
         setWeek: (date) => set({ week: getWeekDates(date) }),
         nextWeek: () => set((state) => {
-            const newWeek = state.week.map(date => {
-                const nextDate = new Date(date);
-                nextDate.setDate(date.getDate() + 7);
-                return nextDate;
-            });
-            return { week: newWeek };
+            const firstDate = addDays(state.week[0], 7);
+            return { week: getWeekDates(firstDate) };
         }),
         prevWeek: () => set((state) => {
-            const newWeek = state.week.map(date => {
-                const prevDate = new Date(date);
-                prevDate.setDate(date.getDate() - 7);
-                return prevDate;
-            });
-            return { week: newWeek };
+            const firstDate = subDays(state.week[0], 7);
+            return { week: getWeekDates(firstDate) };
         }),
 
         // ------ Terms ------

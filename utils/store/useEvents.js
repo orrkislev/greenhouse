@@ -4,6 +4,8 @@ import { createStore, createDataLoadingHook } from "./utils/createStore";
 import { useTime } from "./useTime";
 import { prepareForEventsTable } from "../supabase/utils";
 import { supabase } from "../supabase/client";
+import { useEffect } from "react";
+import { useUser } from "./useUser";
 
 
 export const [useEventsData, eventsActions] = createStore((set, get, withUser, withLoadingCheck) => {
@@ -30,7 +32,6 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
             await get().loadEvents(user, format(new Date(), 'yyyy-MM-dd'));
         }),
         loadWeekEvents: withUser(async (user, week) => {
-            set({ events: {} });
             if (!week) week = useTime.getState().week;
             if (!week || week.length === 0) return;
             await get().loadEvents(user, week[0], week[week.length - 1]);
@@ -55,6 +56,7 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
             }
             if (!shouldLoad) return;
 
+
             const { data, error } = await supabase.rpc('get_user_events', {
                 p_user_id: user.id,
                 p_start_date: start,
@@ -63,6 +65,7 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
             if (error) throw error;
 
             const newEvents = { ...get().events };
+
             date = new Date(start);
             while (date <= new Date(end)) {
                 const dateStr = format(date, 'yyyy-MM-dd');
@@ -127,5 +130,16 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
 });
 
 export const useTodayEvents = createDataLoadingHook(useEventsData, 'events', 'loadTodayEvents');
-export const useWeekEvents = createDataLoadingHook(useEventsData, 'events', 'loadWeekEvents');
+// export const useWeekEvents = createDataLoadingHook(useEventsData, 'events', 'loadWeekEvents');
+export const useWeekEvents = function useWeekEvents() {
+    const week = useTime(state => state.week);
+    const user = useUser(state => state.user);
+    const events = useEventsData(state => state.events);
+    if (!week || week.length === 0) return null;
+    useEffect(() => {
+        if (!user) return;
+        eventsActions.loadWeekEvents(week);
+    }, [week, user]);
+    return events;
+}
 export const useTermEvents = createDataLoadingHook(useEventsData, 'events', 'loadTermEvents');

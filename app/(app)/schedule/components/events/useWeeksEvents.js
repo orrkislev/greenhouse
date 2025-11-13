@@ -29,6 +29,7 @@ export function prepareEventsForSchedule(events, week, edittable = false) {
         event.endIndex = getHourIndex(event.end, true);
     });
 
+
     const blocks = [];
     weekEvents.forEach(event => {
         const dayIndex = week.findIndex(date => date === event.date);
