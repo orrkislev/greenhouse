@@ -42,13 +42,13 @@ export default function Research() {
                 </div>
             </div>
 
-            <div className="flex flex-col mg:grid mg:grid-cols-3 gap-2 auto-rows-fr">
+            <div className="flex flex-col md:grid md:grid-cols-3 gap-2 auto-rows-fr">
                 <Section_Questions />
                 <Section_sources />
                 <Section_quotes />
                 <Section_summary />
                 <Section_masters />
-                <Box2 label="ציר זמן" LabelIcon={Clock} className="col-span-2 row-span-2"></Box2>
+                <Box2 label="ציר זמן" LabelIcon={Clock} className="col-span-2 row-span-2 opacity-50"></Box2>
                 <Section_vocabulary />
                 {/* <Box2 label="שלוש נקודות מבט" LabelIcon={Eye} className="row-span-3 col-span-2"></Box2> */}
             </div>

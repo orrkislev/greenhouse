@@ -86,7 +86,8 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
             const { data, error } = await supabase.from('events').insert(prepareForEventsTable(event)).select().single();
             if (error) throw error;
             const newEvents = { ...get().events };
-            newEvents[event.date] = [...(newEvents[event.date] || []), data];
+            if (!newEvents[event.date]) newEvents[event.date] = [];
+            newEvents[event.date].push(data);
             set({ events: newEvents });
         }),
         updateEvent: async (eventId, updates) => {
