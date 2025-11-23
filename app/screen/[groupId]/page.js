@@ -1,15 +1,65 @@
 'use client'
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import StudentCard from "./StudentCard";
 import ScreenTopBar from "./ScreenTopBar";
 import { useScreenData, useColumnLayout } from "./useScreenData";
 
 export default function ScreenPage({ params }) {
     const { groupId } = use(params);
-    const { group, students, isLoading } = useScreenData(groupId);
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    
+    // Read staff parameter from URL (defaults to false)
+    const includeStaff = searchParams.get('staff') === '1';
+    
+    // Read rotate parameter from URL
+    const rotateParam = searchParams.get('rotate');
+    const rotateSeconds = rotateParam ? parseInt(rotateParam, 10) : 0;
+    const isRotating = rotateSeconds > 0;
+    
+    const { group, students, isLoading } = useScreenData(groupId, includeStaff);
     const columns = useColumnLayout(students);
     const [viewMode, setViewMode] = useState('events'); // 'events', 'project', 'research'
+    
+    // Auto-rotation logic
+    useEffect(() => {
+        if (!isRotating || rotateSeconds <= 0) return;
+        
+        const viewModes = ['events', 'project', 'research'];
+        
+        const interval = setInterval(() => {
+            setViewMode(prevMode => {
+                const prevIndex = viewModes.indexOf(prevMode);
+                const nextIndex = (prevIndex + 1) % viewModes.length;
+                return viewModes[nextIndex];
+            });
+        }, rotateSeconds * 1000);
+        
+        return () => clearInterval(interval);
+    }, [isRotating, rotateSeconds]);
+    
+    const toggleStaff = () => {
+        const newIncludeStaff = !includeStaff;
+        const params = new URLSearchParams(searchParams.toString());
+        if (newIncludeStaff) {
+            params.set('staff', '1');
+        } else {
+            params.delete('staff');
+        }
+        router.push(`/screen/${groupId}${params.toString() ? '?' + params.toString() : ''}`);
+    };
+    
+    const toggleRotate = () => {
+        const params = new URLSearchParams(searchParams.toString());
+        if (isRotating) {
+            params.delete('rotate');
+        } else {
+            params.set('rotate', '15');
+        }
+        router.push(`/screen/${groupId}${params.toString() ? '?' + params.toString() : ''}`);
+    };
 
     if (isLoading) {
         return (
@@ -35,7 +85,15 @@ export default function ScreenPage({ params }) {
 
     return (
         <div className="h-screen w-screen bg-gradient-to-br from-slate-900 via-gray-900 to-stone-900 overflow-hidden flex flex-col">
-            <ScreenTopBar group={group} viewMode={viewMode} setViewMode={setViewMode} />
+            <ScreenTopBar 
+                group={group} 
+                viewMode={viewMode} 
+                setViewMode={setViewMode}
+                includeStaff={includeStaff}
+                toggleStaff={toggleStaff}
+                isRotating={isRotating}
+                toggleRotate={toggleRotate}
+            />
 
             {/* Content */}
             <div className="flex-1 overflow-hidden p-3">

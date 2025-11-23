@@ -7,7 +7,7 @@ const TopBarButton = tw`px-4 py-2 rounded-t-lg font-semibold text-sm transition-
 text-stone-800 hover:bg-stone-300 hover:text-stone-800
 ${props => props.active ? 'bg-slate-900 text-white shadow-lg' : ''}`;
 
-export default function ScreenTopBar({ group, viewMode, setViewMode }) {
+export default function ScreenTopBar({ group, viewMode, setViewMode, includeStaff, toggleStaff, isRotating, toggleRotate }) {
     const currTerm = useTime((state) => state.currTerm);
 
     const dayNumberInTerm = () => {
@@ -36,7 +36,7 @@ export default function ScreenTopBar({ group, viewMode, setViewMode }) {
                 </div>
             </div>
 
-            {/* Center: View Mode Buttons */}
+            {/* Center: View Mode Buttons and Checkboxes */}
             <div className="flex items-center gap-3 justify-self-end">
                 <TopBarButton
                     onClick={() => setViewMode('events')}
@@ -59,6 +59,28 @@ export default function ScreenTopBar({ group, viewMode, setViewMode }) {
                     <Brain className="w-4 h-4" />
                     חקר
                 </TopBarButton>
+                
+                {/* Checkboxes */}
+                <div className="flex items-center gap-4 mr-4">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm text-stone-700 hover:text-stone-900">
+                        <input
+                            type="checkbox"
+                            checked={includeStaff}
+                            onChange={toggleStaff}
+                            className="w-4 h-4 text-slate-900 border-stone-300 rounded focus:ring-slate-900 focus:ring-2"
+                        />
+                        <span>גם צוות</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm text-stone-700 hover:text-stone-900">
+                        <input
+                            type="checkbox"
+                            checked={isRotating}
+                            onChange={toggleRotate}
+                            className="w-4 h-4 text-slate-900 border-stone-300 rounded focus:ring-slate-900 focus:ring-2"
+                        />
+                        <span>דפדוף</span>
+                    </label>
+                </div>
             </div>
 
             {/* Empty space for balance */}

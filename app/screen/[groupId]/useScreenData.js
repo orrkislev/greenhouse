@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/utils/supabase/client";
 
-export function useScreenData(groupId) {
+export function useScreenData(groupId, includeStaff = false) {
     const [group, setGroup] = useState(null);
     const [students, setStudents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -20,7 +20,7 @@ export function useScreenData(groupId) {
                 if (groupError) throw groupError;
                 setGroup(groupData);
 
-                // Fetch all students in the group
+                // Fetch all users in the group
                 const { data: usersGroupsData, error: usersGroupsError } = await supabase
                     .from('users_groups')
                     .select('users( id, first_name, last_name, username, avatar_url, role )')
@@ -28,13 +28,13 @@ export function useScreenData(groupId) {
 
                 if (usersGroupsError) throw usersGroupsError;
 
-                // Filter for students only and sort by first name
-                const studentsList = usersGroupsData
+                // Filter based on includeStaff flag and sort by first name
+                const usersList = usersGroupsData
                     .map(d => d.users)
-                    .filter(user => user.role === 'student')
+                    .filter(user => includeStaff || user.role === 'student')
                     .sort((a, b) => a.first_name.localeCompare(b.first_name, 'he'));
 
-                setStudents(studentsList);
+                setStudents(usersList);
             } catch (error) {
                 console.error('Error loading data:', error);
             } finally {
@@ -43,7 +43,7 @@ export function useScreenData(groupId) {
         };
 
         loadData();
-    }, [groupId]);
+    }, [groupId, includeStaff]);
 
     return { group, students, isLoading };
 }
