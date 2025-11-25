@@ -10,7 +10,7 @@ import { useNewLog } from "@/utils/store/useLogs"
 import Button from "@/components/Button"
 
 const InnerTab = tw.div`flex items-center gap-2 p-2 rounded-md cursor-pointer transition-all duration-300
-${props => props.$isActive ? 'bg-secondary-200' : 'bg-secondary-100'}
+${props => props.$isActive ? 'bg-secondary-200' : 'bg-secondary-50 border border-secondary-200'}
 `
 
 export default function JournalHandle() {
@@ -50,8 +50,8 @@ export default function JournalHandle() {
                 className={`fixed max-h-[70vh] md:max-h-[70vh] left-1/2 -translate-x-1/2 w-full transition-all duration-700 z-50 ${isOpen
                     ? "top-[10%] md:top-[50%] md:-translate-y-[20vh] ease-[cubic-bezier(0.34,1.56,0.64,1)]"
                     : isHovered
-                        ? `translate-y-[calc(100%-10vh)] ease-out delay-50 ${originalUser ? 'top-[100%-16px]' : 'bottom-0'}`
-                        : `translate-y-[calc(100%-40px)] ease-out ${originalUser ? 'top-[100%-16px]' : 'bottom-0'}`
+                        ? `translate-y-[calc(100%-10vh)] ease-out delay-50 ${originalUser ? 'bottom-16' : 'bottom-0'}`
+                        : `translate-y-[calc(100%-40px)] ease-out ${originalUser ? 'bottom-16' : 'bottom-0'}`
                     }`}
                 onMouseEnter={() => !isOpen && setIsHovered(true)}
                 onMouseLeave={() => !isOpen && setIsHovered(false)}

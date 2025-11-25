@@ -21,9 +21,6 @@ export default function Journal() {
     const [filterTags, setFilterTags] = useState([])
     const [filterInput, setFilterInput] = useState('')
 
-    console.log({ logs })
-    if (logs.length === 0) return null;
-
     const handleAddFilter = (e) => {
         if (e.key === 'Enter' && filterInput.trim()) {
             if (!filterTags.includes(filterInput.trim())) {
@@ -89,6 +86,11 @@ export default function Journal() {
             </div>
 
             <div className="flex flex-col divide-y divide-stone-300 overflow-y-auto">
+                {filteredLogs.length == 0 && (
+                    <div className="flex items-center justify-center py-4 text-sm">
+                        אין תוצאות
+                    </div>
+                )}
                 {filteredLogs
                     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                     .map(log => (
