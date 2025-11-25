@@ -39,14 +39,14 @@ function MainGroup({ group }) {
 
     return (
         <div className="flex flex-col gap-2">
-            <div className="text-sm text-stone-700 flex items-center gap-2">
+            <div className="text-sm text-foreground flex items-center gap-2">
                 <Users2 className="w-4 h-4" />
                 {groupName}
             </div>
             {group.message ? (
-                <div className="text-sm text-stone-500 w-full" dangerouslySetInnerHTML={{ __html: group.message }} />
+                <div className="text-sm text-muted-foreground w-full" dangerouslySetInnerHTML={{ __html: group.message }} />
             ) : (
-                <div className="text-xs text-stone-500 w-full">אין הודעה</div>
+                <div className="text-xs text-muted-foreground w-full">אין הודעה</div>
             )}
             <div>
                 {group.tasks && group.tasks.map((task) => (
@@ -81,8 +81,8 @@ function MainGroupTask({ group, task }) {
                     <IconButton icon={task.status === 'completed' ? CheckSquare : Square} onClick={onCheck} className="" />
                 )}
                 <div className="flex flex-col hover:underline decoration-dashed cursor-pointer" onClick={() => setOpen(true)}>
-                    <span className="text-sm text-stone-700">{task.title}</span>
-                    <span className='text-xs text-stone-500'> {task.description}</span>
+                    <span className="text-sm text-foreground">{task.title}</span>
+                    <span className='text-xs text-muted-foreground'> {task.description}</span>
                 </div>
 
             </div>

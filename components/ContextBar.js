@@ -41,7 +41,7 @@ export default function ContextBar({ name, children, initialOpen = true }) {
 
 export const PageMain = tw`flex-1 h-screen pt-4 md:pt-8 px-2 md:px-4 pb-16 overflow-y-auto relative`
 
-const pasterColors = ["#797d62","#9b9b7a","#d9ae94","#f1dca7","#ffcb69","#d08c60","#997b66"]
+const pasterColors = ["#797d62", "#9b9b7a", "#d9ae94", "#f1dca7", "#ffcb69", "#d08c60", "#997b66"]
 export const BGGrads = ({ ammount = 20, opacity = 0.2 }) => {
 
     const circles = useMemo(() => Array(ammount).fill(0).map((_, index) => (

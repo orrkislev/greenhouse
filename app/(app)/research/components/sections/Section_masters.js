@@ -40,12 +40,12 @@ function Master({ master, index }) {
 
     return (
         <>
-            <div className="flex justify-between group/source transition-all h-[fit-content] border-b border-stone-300 items-center">
+            <div className="flex justify-between group/source transition-all h-[fit-content] border-b border-border items-center">
                 {isOpen ? (
                     <div>
-                        <TextInput onChange={(value) => updateMaster('name', value)} value={master.name} className="w-full p-1 hover:bg-stone-100 rounded-md w-full text-sm" />
-                        <TextInput onChange={(value) => updateMaster('title', value)} value={master.title || 'כותרת'} className="w-full p-1 hover:bg-stone-100 rounded-md w-full text-xs text-stone-500" />
-                        <TextInput onChange={(value) => updateMaster('contact', value)} value={master.contact || 'פרטי קשר'} className="w-full p-1 hover:bg-stone-100 rounded-md w-full text-sky-800 text-xs" />
+                        <TextInput onChange={(value) => updateMaster('name', value)} value={master.name} className="w-full p-1 hover:bg-muted rounded-md w-full text-sm" />
+                        <TextInput onChange={(value) => updateMaster('title', value)} value={master.title || 'כותרת'} className="w-full p-1 hover:bg-muted rounded-md w-full text-xs text-muted-foreground" />
+                        <TextInput onChange={(value) => updateMaster('contact', value)} value={master.contact || 'פרטי קשר'} className="w-full p-1 hover:bg-muted rounded-md w-full text-sky-800 text-xs" />
                     </div>
                 ) : (
                     <div className="w-full outline-none p-1 flex items-center gap-1">
@@ -54,8 +54,8 @@ function Master({ master, index }) {
                     </div>
                 )}
                 <div className="flex">
-                    {isOpen ? <IconButton icon={Trash2} onClick={() => removeSource(index)} className="p-2 hover:bg-stone-100 rounded-full opacity-0 group-hover/source:opacity-100 transition-opacity" /> : null}
-                    <IconButton icon={isOpen ? ChevronUp : ChevronDown} onClick={() => setIsOpen(!isOpen)} className="p-2 hover:bg-stone-100 rounded-full opacity-0 group-hover/source:opacity-100 transition-opacity" />
+                    {isOpen ? <IconButton icon={Trash2} onClick={() => removeSource(index)} className="p-2 hover:bg-muted rounded-full opacity-0 group-hover/source:opacity-100 transition-opacity" /> : null}
+                    <IconButton icon={isOpen ? ChevronUp : ChevronDown} onClick={() => setIsOpen(!isOpen)} className="p-2 hover:bg-muted rounded-full opacity-0 group-hover/source:opacity-100 transition-opacity" />
                 </div>
             </div>
         </>

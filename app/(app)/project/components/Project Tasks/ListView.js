@@ -44,10 +44,10 @@ function SingleTask({ task }) {
         value: task,
         dragListener: false,
         dragControls: controls,
-        className: 'flex gap-4 w-full items-center hover:bg-stone-100 py-1 group bg-stone-100 my-2',
+        className: 'flex gap-4 w-full items-center hover:bg-muted py-1 group bg-muted my-2',
     } : {
         key: task.id,
-        className: 'flex gap-4 w-full items-center hover:bg-stone-100 py-1 group opacity-60 my-2',
+        className: 'flex gap-4 w-full items-center hover:bg-muted py-1 group opacity-60 my-2',
     };
 
     return (
@@ -57,11 +57,11 @@ function SingleTask({ task }) {
                 <div className={`flex items-center gap-4 ${task.status === 'completed' ? 'opacity-80' : ''}`}>
                     {task.status === 'completed' && <Check className="w-4 h-4" />}
                     <div className='flex items-center gap-2 hover:underline decoration-dashed cursor-pointer'  onClick={() => setOpenTaskModal(true)}>
-                        <div className="text-sm text-stone-700">{task.title}</div>
-                        <div className="text-xs text-stone-500">{task.description}</div>
+                        <div className="text-sm text-foreground">{task.title}</div>
+                        <div className="text-xs text-muted-foreground">{task.description}</div>
                         {task.url && (
                             <Link href={task.url.startsWith('http') ? task.url : `https://${task.url}`} target="_blank">
-                                <Button className="p-1 bg-stone-200 text-sm text-stone-500 underline decoration-none cursor-pointer hover:text-blue-500 transition-all duration-200 flex gap-2 items-center">
+                                <Button className="p-1 bg-accent text-sm text-muted-foreground underline decoration-none cursor-pointer hover:text-secondary transition-all duration-200 flex gap-2 items-center">
                                     <ExternalLink className="w-4 h-4" />
                                     {task.url.length > 20 ? task.url.slice(0, 20) + '...' : task.url}
                                 </Button>

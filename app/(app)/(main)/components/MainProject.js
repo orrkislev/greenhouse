@@ -25,7 +25,7 @@ export default function MainProject() {
                     <>
                         <div className='flex flex-col items-center justify-center'>
                             <Image src="/images/bored.png" alt="project" width={150} height={150} />
-                            <div className='text-stone-500 text-center text-sm'>
+                            <div className='text-muted-foreground text-center text-sm'>
                                 אין פרויקט פעיל
                             </div>
                         </div>
@@ -48,19 +48,19 @@ export default function MainProject() {
 
 
 function Tasks() {
-    const tasks = useProjectData((state) => state.tasks);   
+    const tasks = useProjectData((state) => state.tasks);
 
     if (tasks?.length === 0) {
-        return <div className='text-stone-500 text-center p-4'>אין משימות</div>;
+        return <div className='text-muted-foreground text-center p-4'>אין משימות</div>;
     }
 
     const nextTasks = tasks
         .sort((a, b) => a.position - b.position)
         .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
         .filter(task => task.status === 'todo');
-    
+
     if (nextTasks.length === 0) {
-        return <div className='text-stone-500 text-center p-4'>אין משימות</div>;
+        return <div className='text-muted-foreground text-center p-4'>אין משימות</div>;
     }
 
     return (
@@ -74,11 +74,11 @@ function Tasks() {
 
 
 export const TaskPill = tw`
-    text-sm px-2 py-1 bg-blue-200 text-blue-800 rounded-full
-    ${props => props.status === 'todo' && 'bg-red-200 text-red-800'}
-    ${props => props.status === 'in_progress' && 'bg-green-200 text-green-800'}
+    text-sm px-2 py-1 bg-secondary/20 text-secondary rounded-full
+    ${props => props.status === 'todo' && 'bg-destructive/20 text-destructive'}
+    ${props => props.status === 'in_progress' && 'bg-primary/20 text-primary'}
     ${props => props.status === 'blocked' && 'bg-yellow-200 text-yellow-800'}
-    ${props => props.status === 'completed' && 'bg-stone-200 text-stone-800'}
+    ${props => props.status === 'completed' && 'bg-muted text-muted-foreground'}
 `;
 
 function Task({ task }) {
@@ -89,8 +89,8 @@ function Task({ task }) {
         <div key={task.id} className='flex items-center gap-2 group/task'>
             <IconButton icon={task.status == 'completed' ? CheckSquare : Square} onClick={onCheck} className="" />
             <div className="flex flex-col hover:underline decoration-dashed cursor-pointer" onClick={() => setOpen(true)}>
-                <span className="text-sm text-stone-700">{task.title}</span>
-                <span className='text-xs text-stone-500'> {task.description}</span>
+                <span className="text-sm text-foreground">{task.title}</span>
+                <span className='text-xs text-muted-foreground'> {task.description}</span>
             </div>
             <TaskModal task={{ ...task, context: projectUtils.getContext(task.project_id) }} isOpen={open} onClose={() => setOpen(false)} />
         </div>

@@ -65,8 +65,8 @@ export default function ScreenPage({ params }) {
         return (
             <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4"></div>
-                    <h2 className="text-2xl font-semibold text-gray-700">טוען נתונים...</h2>
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-secondary mx-auto mb-4"></div>
+                    <h2 className="text-2xl font-semibold text-foreground">טוען נתונים...</h2>
                 </div>
             </div>
         );
@@ -76,8 +76,8 @@ export default function ScreenPage({ params }) {
         return (
             <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
                 <div className="text-center">
-                    <h1 className="text-4xl font-bold text-gray-700 mb-4">אוי לא מצאנו את הקבוצה</h1>
-                    <p className="text-gray-500">נסה לרענן את הדף</p>
+                    <h1 className="text-4xl font-bold text-foreground mb-4">אוי לא מצאנו את הקבוצה</h1>
+                    <p className="text-muted-foreground">נסה לרענן את הדף</p>
                 </div>
             </div>
         );
@@ -109,7 +109,7 @@ export default function ScreenPage({ params }) {
                     </div>
                 ) : (
                     <div className="flex items-center justify-center h-full">
-                        <p className="text-xl text-gray-400">אין תלמידים בקבוצה</p>
+                        <p className="text-xl text-muted-foreground">אין תלמידים בקבוצה</p>
                     </div>
                 )}
             </div>

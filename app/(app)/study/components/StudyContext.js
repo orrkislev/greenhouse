@@ -32,29 +32,29 @@ export default function StudyContext() {
             <div className="flex justify-between items-center">
                 <h3 className="font-semibold">קישורים </h3>
                 {isAdmin() && (
-                    <button className="text-sm text-gray-500 text-xs flex items-center gap-1 rounded-full p-1 cursor-pointer hover:bg-gray-200" onClick={clickEditSave}>
+                    <button className="text-sm text-muted-foreground text-xs flex items-center gap-1 rounded-full p-1 cursor-pointer hover:bg-accent" onClick={clickEditSave}>
                         {editMode ? <Save className="w-6 h-6 text-green-800" /> : <Pencil className="w-4 h-4" />}
                     </button>
                 )}
             </div>
             <div className="flex flex-col gap-4">
                 {data.map((link, index) => (
-                    <div key={index} className="p-4 rounded-md border border-stone-300 text-sm text-stone-600 group/link relative hover:bg-stone-100 transition-colors duration-300">
+                    <div key={index} className="p-4 rounded-md border border-border text-sm text-muted-foreground group/link relative hover:bg-muted transition-colors duration-300">
                         { editMode ? (
                             <>
                                 <input name="name" type="text" value={link.name} onChange={(e) => updateLink(index, 'name', e.target.value)} className="font-semibold" placeholder="שם"/>
-                                <input name="url" type="text" value={link.url} onChange={(e) => updateLink(index, 'url', e.target.value)} className="text-sm text-gray-500" placeholder="כתובת"/>
-                                <input name="text" type="text" value={link.text} onChange={(e) => updateLink(index, 'text', e.target.value)} className="text-sm text-gray-500" placeholder="תיאור"/>
-                                <button className="text-gray-500 p-1 rounded-full cursor-pointer hover:bg-gray-200 flex justify-center items-center" onClick={() => removeLink(index)}>
+                                <input name="url" type="text" value={link.url} onChange={(e) => updateLink(index, 'url', e.target.value)} className="text-sm text-muted-foreground" placeholder="כתובת"/>
+                                <input name="text" type="text" value={link.text} onChange={(e) => updateLink(index, 'text', e.target.value)} className="text-sm text-muted-foreground" placeholder="תיאור"/>
+                                <button className="text-muted-foreground p-1 rounded-full cursor-pointer hover:bg-accent flex justify-center items-center" onClick={() => removeLink(index)}>
                                     <Trash2 className="w-4 h-4" />
                                 </button>
                             </>
                         ) : (
                             <Link href={link.url} target="_blank" rel="noopener noreferrer" >
-                                <div className="text-sm text-gray-500 font-semibold">{link.name}</div>
-                                <div className="text-sm text-gray-500 pr-2">{link.text}</div>
-                                <div className="absolute top-2 left-2 bg-stone-100 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300 flex justify-center items-center">
-                                    <ExternalLink className="w-4 h-4 text-stone-600 opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
+                                <div className="text-sm text-muted-foreground font-semibold">{link.name}</div>
+                                <div className="text-sm text-muted-foreground pr-2">{link.text}</div>
+                                <div className="absolute top-2 left-2 bg-muted opacity-0 group-hover/link:opacity-100 transition-opacity duration-300 flex justify-center items-center">
+                                    <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover/link:opacity-100 transition-opacity duration-300" />
                                 </div>
                             </Link>
                         )}
@@ -62,7 +62,7 @@ export default function StudyContext() {
                 ))}
             </div>
             {editMode && (
-                <button className="text-gray-500 p-1 rounded-full cursor-pointer hover:bg-gray-200 flex justify-center items-center" onClick={newLink}>
+                <button className="text-muted-foreground p-1 rounded-full cursor-pointer hover:bg-accent flex justify-center items-center" onClick={newLink}>
                     <Plus className="w-4 h-4" />
                 </button>
             )}

@@ -12,11 +12,11 @@ import Link from "next/link";
 import Button from "@/components/Button";
 import { projectActions, useProjectData } from "@/utils/store/useProject";
 
-const CalendarHeader = tw`flex items-center justify-between p-4 bg-stone-100`;
-const CalendarCell = tw`p-2 flex flex-col gap-1 transition-all duration-200 border border-stone-200 relative
-    ${props => props.$over ? 'border-l-4 border-l-blue-400 bg-blue-50 shadow-md ring-2 ring-blue-200' : ''}
-    ${props => props.$isWeekend ? 'text-stone-500' : 'text-stone-700'}
-    ${props => props.$inTerm ? 'text-stone-500' : 'text-stone-700'}
+const CalendarHeader = tw`flex items-center justify-between p-4 bg-muted`;
+const CalendarCell = tw`p-2 flex flex-col gap-1 transition-all duration-200 border border-border relative
+    ${props => props.$over ? 'border-l-4 border-l-blue-400 bg-secondary/10 shadow-md ring-2 ring-blue-200' : ''}
+    ${props => props.$isWeekend ? 'text-muted-foreground' : 'text-foreground'}
+    ${props => props.$inTerm ? 'text-muted-foreground' : 'text-foreground'}
     ${props => props.$isPast ? 'stripes' : ''}`;
 
 
@@ -84,7 +84,7 @@ export default function CalendarView() {
                 <>
                     <div className="absolute top-0 left-0 right-0 h-32 bg-linear-to-t from-transparent to-white" />
                     <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-b from-transparent to-white" />
-                    <ArrowDownToLine className="w-8 h-8 border border-stone-200 absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 text-stone-400 bg-white p-1 rounded-full hover:bg-stone-100  hover:scale-110 cursor-pointer transition-all" onClick={() => setFullView(true)} />
+                    <ArrowDownToLine className="w-8 h-8 border border-border absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 text-stone-400 bg-white p-1 rounded-full hover:bg-muted  hover:scale-110 cursor-pointer transition-all" onClick={() => setFullView(true)} />
                 </>
             )}
         </div>
@@ -132,7 +132,7 @@ function CalendarCellComponent({ cellData }) {
             $isWeekend={cellData.isWeekend}
             $inTerm={cellData.inTerm}
             $isPast={cellData.isPast}>
-            <div className="text-sm text-stone-500 mb-2">
+            <div className="text-sm text-muted-foreground mb-2">
                 {cellData.date.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' })}
 
                 {cellData.gantt.map(ganttEvent => (
@@ -198,14 +198,14 @@ function TaskItem({ task }) {
         <>
             <TaskItemDiv ref={elementRef} $dragging={dragState === 'dragging'} $over={dragState === 'over'} $active={!task.completed}>
                 {!task.status !== 'completed' && (
-                    <div ref={gripRef} className="flex items-center text-stone-800 cursor-move hover:text-stone-600 transition-colors p-1 rounded" >
+                    <div ref={gripRef} className="flex items-center text-foreground cursor-move hover:text-muted-foreground transition-colors p-1 rounded" >
                         <Grip className="w-3 h-3" />
                     </div>
                 )}
-                <div className="text-sm text-stone-700 flex-1 hover:underline decoration-dashed cursor-pointer" onClick={() => setOpenTaskModal(true)}>{task.title}</div>
+                <div className="text-sm text-foreground flex-1 hover:underline decoration-dashed cursor-pointer" onClick={() => setOpenTaskModal(true)}>{task.title}</div>
                 {task.url && (
                     <Link href={task.url.startsWith('http') ? task.url : `https://${task.url}`} target="_blank">
-                        <Button className="ml-1 p-1 rounded-full bg-white text-sm text-stone-500 underline decoration-none cursor-pointer hover:text-blue-500 transition-all duration-200 flex gap-2 items-center">
+                        <Button className="ml-1 p-1 rounded-full bg-white text-sm text-muted-foreground underline decoration-none cursor-pointer hover:text-secondary transition-all duration-200 flex gap-2 items-center">
                             <ExternalLink className="w-4 h-4" />
                         </Button>
                     </Link>
@@ -218,7 +218,7 @@ function TaskItem({ task }) {
 
 const TaskItemDiv = tw`
     relative flex items-center gap-2 bg-orange-200 border border-orange-300 transition-all duration-200 rounded-full p-1
-    ${props => props.$dragging ? 'opacity-50 transform rotate-2 shadow-lg scale-105' : 'hover:bg-stone-50'}
-    ${props => props.$over ? 'border-l-4 border-l-blue-400 bg-blue-50' : ''}
+    ${props => props.$dragging ? 'opacity-50 transform rotate-2 shadow-lg scale-105' : 'hover:bg-muted'}
+    ${props => props.$over ? 'border-l-4 border-l-blue-400 bg-secondary/10' : ''}
     ${props => props.$active ? '' : 'opacity-50 line-through bg-emerald-100 hover:bg-emerald-100'}
 `;

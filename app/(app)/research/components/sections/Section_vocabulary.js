@@ -30,7 +30,7 @@ export default function Section_vocabulary() {
         <Box2 label="מושגים חשובים" LabelIcon={Library} className="row-span-3">
             <div className="flex gap-2 flex-wrap">
                 {vocabulary.map((word, index) => (
-                    <div key={index} className="flex items-center justify-between gap-2 bg-stone-200 px-2 py-1 rounded-full text-xs hover:bg-stone-300 transition-colors">
+                    <div key={index} className="flex items-center justify-between gap-2 bg-accent px-2 py-1 rounded-full text-xs hover:bg-accent transition-colors">
                         <TextInput onChange={(value) => updateWord(index, value)} value={word} className="w-full outline-none min-w-2" />
                     </div>
                 ))}

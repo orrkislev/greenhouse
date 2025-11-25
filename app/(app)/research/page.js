@@ -39,9 +39,9 @@ export default function ResearchPage() {
 }
 
 const ResearchRow = tw.div`
-    text-sm text-stone-500 mr-2 p-1 hover:bg-stone-100 hover:text-stone-700 rounded-md cursor-pointer transition-colors
+    text-sm text-muted-foreground mr-2 p-1 hover:bg-muted hover:text-foreground rounded-md cursor-pointer transition-colors
     flex justify-between items-center group/research-row
-    ${props => props.$isActive && 'bg-stone-500 text-white'}
+    ${props => props.$isActive && 'bg-muted0 text-white'}
 `
 
 function ResearchList() {
@@ -64,7 +64,7 @@ function ResearchList() {
       {allResearch.map(research => (
         <ResearchRow key={research.id} onClick={() => clickResearch(research.id)} $isActive={research.id === selectedResearchId}>
           {research.title}
-          <IconButton icon={Trash2} onClick={() => removeResearch(research.id)} className="p-2 hover:bg-stone-100 rounded-full opacity-0 group-hover/research-row:opacity-100 transition-opacity hover:bg-stone-200 hover:text-stone-800" />
+          <IconButton icon={Trash2} onClick={() => removeResearch(research.id)} className="p-2 hover:bg-muted rounded-full opacity-0 group-hover/research-row:opacity-100 transition-opacity hover:bg-accent hover:text-foreground" />
         </ResearchRow>
       ))}
     </div>

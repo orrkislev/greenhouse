@@ -21,38 +21,38 @@ export default function SchedulePage() {
 
     return (
         <>
-        <PageMain className='select-none'>
-            <DashboardLayout>
-            <DashboardTitle>לוח זמנים</DashboardTitle>
-            <DashboardPanel>
-                <DashboardPanelButton onClick={() => setView('week')} $active={view === 'week'}>שבוע</DashboardPanelButton>
-                <DashboardPanelButton onClick={() => setView('semester')} $active={view === 'semester'}>תקופה</DashboardPanelButton>
-            </DashboardPanel>
-            <ScheduleOuter>
+            <PageMain className='select-none'>
+                <DashboardLayout>
+                    <DashboardTitle>לוח זמנים</DashboardTitle>
+                    <DashboardPanel>
+                        <DashboardPanelButton onClick={() => setView('week')} $active={view === 'week'}>שבוע</DashboardPanelButton>
+                        <DashboardPanelButton onClick={() => setView('semester')} $active={view === 'semester'}>תקופה</DashboardPanelButton>
+                    </DashboardPanel>
+                    <ScheduleOuter>
 
-                <ScheduleTop view={view} />
+                        <ScheduleTop view={view} />
 
-                {view === 'week' && (
-                    <>
-                        {/* <Notes /> */}
-                        <Meetings />
-                        <Events />
-                        <GoogleCalendar />
-                        <GroupSchedules />
-                        <Gantt />
-                    </>
-                )}
-                {view === 'semester' && (
-                    <>
-                        <Term />
-                    </>
-                    )}
-                </ScheduleOuter>
-            </DashboardLayout>
-        </PageMain>
-        <ContextBar>
-            <ScheduleContext />
-        </ContextBar>
+                        {view === 'week' && (
+                            <>
+                                {/* <Notes /> */}
+                                <Meetings />
+                                <Events />
+                                <GoogleCalendar />
+                                <GroupSchedules />
+                                <Gantt />
+                            </>
+                        )}
+                        {view === 'semester' && (
+                            <>
+                                <Term />
+                            </>
+                        )}
+                    </ScheduleOuter>
+                </DashboardLayout>
+            </PageMain>
+            <ContextBar>
+                <ScheduleContext />
+            </ContextBar>
         </>
     )
 }

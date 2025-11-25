@@ -60,15 +60,15 @@ export default function Step({ path, step, side }) {
                         {/* </Menu> */}
 
                         <div className="flex-1 flex flex-col px-4 py-2 hover:underline decoration-dashed cursor-pointer " onClick={() => setOpenTaskModal(true)}>
-                            <div className='text-xl font-semibold text-stone-500'>{step.title}</div>
-                            <div className='text-sm text-stone-500'>{step.description}</div>
-                            {/* <SmartText text={step.title} className="text-xl font-semibold text-stone-500" onEdit={(title) => studyActions.updateStep(path.id, step.id, { ...step, title })} /> */}
-                            {/* <SmartText text={step.description} className="text-sm text-stone-500" onEdit={(description) => studyActions.updateStep(path.id, step.id, { ...step, description })} /> */}
+                            <div className='text-xl font-semibold text-muted-foreground'>{step.title}</div>
+                            <div className='text-sm text-muted-foreground'>{step.description}</div>
+                            {/* <SmartText text={step.title} className="text-xl font-semibold text-muted-foreground" onEdit={(title) => studyActions.updateStep(path.id, step.id, { ...step, title })} /> */}
+                            {/* <SmartText text={step.description} className="text-sm text-muted-foreground" onEdit={(description) => studyActions.updateStep(path.id, step.id, { ...step, description })} /> */}
                             {/* {step.content && step.content.map((content) => {
                             const Content = contentIcons[content.type]
-                            const className = `text-sm text-stone-500 ${Content.className || ''}`
+                            const className = `text-sm text-muted-foreground ${Content.className || ''}`
                             return (
-                                <div key={content.id} className="flex gap-2 items-center text-sm text-stone-500 p-1">
+                                <div key={content.id} className="flex gap-2 items-center text-sm text-muted-foreground p-1">
                                     <Content.icon className="w-4 h-4" />
                                     <SmartText text={content.text} className={className}
                                         onEdit={(text) => updateContent(content.id, { text })}
@@ -80,7 +80,7 @@ export default function Step({ path, step, side }) {
 
                             {step.url && (
                                 <Link href={step.url.startsWith('http') ? step.url : `https://${step.url}`} target="_blank">
-                                    <Button className="mt-4 p-1 bg-stone-200 text-sm text-stone-500 underline decoration-none cursor-pointer hover:text-blue-500 transition-all duration-200 flex gap-2 items-center"
+                                    <Button className="mt-4 p-1 bg-accent text-sm text-muted-foreground underline decoration-none cursor-pointer hover:text-secondary transition-all duration-200 flex gap-2 items-center"
                                      onClick={(e) => e.stopPropagation()}>
                             
                                         <ExternalLink className="w-4 h-4" />
@@ -93,7 +93,7 @@ export default function Step({ path, step, side }) {
                         <div className="flex flex-col h-full p-2">
                             <IconButton
                                 icon={Check}
-                                className={`w-8 h-8 border rounded-full transition-colors ${step.status == 'completed' ? 'bg-sky-200 border-sky-300 text-sky-600' : 'border-stone-300'}`}
+                                className={`w-8 h-8 border rounded-full transition-colors ${step.status == 'completed' ? 'bg-sky-200 border-sky-300 text-sky-600' : 'border-border'}`}
                                 onClick={() => studyActions.updateStep(path.id, step.id, { ...step, status: step.status == 'todo' ? 'completed' : 'todo' })} />
                         </div>
                     </div>

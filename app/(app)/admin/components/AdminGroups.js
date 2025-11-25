@@ -5,7 +5,7 @@ import { tw } from "@/utils/tw";
 import { Cell, Edittable, TableHeader } from "./Common";
 import { userActions } from "@/utils/store/useUser";
 
-const SpecialButton = tw`p-4 border border-stone-200 rounded-md flex items-center gap-2 text-xs hover:bg-stone-100 cursor-pointer`;
+const SpecialButton = tw`p-4 border border-border rounded-md flex items-center gap-2 text-xs hover:bg-muted cursor-pointer`;
 
 export default function AdminGroups() {
     const groups = useAdmin(state => state.classes);
@@ -19,14 +19,14 @@ export default function AdminGroups() {
     return (
         <div className="flex flex-col gap-4">
             {groups.map(group => (
-                <div key={group.id} className="p-4 border border-stone-200 flex gap-4">
+                <div key={group.id} className="p-4 border border-border flex gap-4">
                     <div>
                         <GroupHeader group={group} />
                         <GroupStudents group={group} />
                     </div>
                     <GroupMentors group={group} />
                     {group.students && group.students.length == 0 && (
-                        <div className="text-sm text-stone-500 flex items-center gap-2 cursor-pointer" onClick={() => adminActions.deleteGroup(group.id)}>
+                        <div className="text-sm text-muted-foreground flex items-center gap-2 cursor-pointer" onClick={() => adminActions.deleteGroup(group.id)}>
                             <Trash className="w-4 h-4" />
                             מחק קבוצה
                         </div>
@@ -61,7 +61,7 @@ function GroupHeader({ group }) {
         return (
             <form className="flex items-center mb-2 group gap-2" onSubmit={handleSubmit}>
                 <input type="text" name="name" defaultValue={group.name} className="p-1 border rounded" />
-                <button type="submit" className="px-4 py-1 bg-blue-500 text-white text-xs hover:bg-blue-600">
+                <button type="submit" className="px-4 py-1 bg-secondary/100 text-white text-xs hover:bg-blue-600">
                     שמור
                 </button>
                 <XIcon className="w-4 h-4 cursor-pointer" onClick={() => setIsEditing(false)} />
@@ -95,10 +95,10 @@ function GroupMentors({ group }) {
     };
 
     return (
-        <div className="flex flex-col gap-2 border border-stone-200 p-4 sticky top-0">
+        <div className="flex flex-col gap-2 border border-border p-4 sticky top-0">
             <h3 className="text-sm">מנטורים</h3>
             {groupMentors.map(mentor => (
-                <div key={mentor.id} className="flex justify-between gap-2 items-center text-sm text-blue-800 px-2 rounded-full group relative border border-blue-400">
+                <div key={mentor.id} className="flex justify-between gap-2 items-center text-sm text-blue-800 px-2 rounded-full group relative border border-secondary">
                     <span>{mentor.first_name} {mentor.last_name}</span>
                     <XIcon className="w-4 h-4 opacity-30 group-hover:opacity-100 cursor-pointer"
                         onClick={() => handleRemoveMentor(mentor.id)} />
@@ -186,14 +186,14 @@ function GroupStudents({ group }) {
     return (
         <div>
             <h3 className="text-sm">תלמידים</h3>
-            <table className="text-left text-xs border-collapse border-stone-200 border">
+            <table className="text-left text-xs border-collapse border-border border">
                 <TableHeader headers={headers} />
                 <tbody>
                     {studentsData
                         .sort((a, b) => a.first_name.localeCompare(b.first_name))
                         .sort((a, b) => a.isNew ? 1 : b.isNew ? -1 : 0)
                         .map((student, index) => (
-                            <tr key={student.id + index} className="border-b border-stone-200">
+                            <tr key={student.id + index} className="border-b border-border">
                                 <Cell >{index + 1}</Cell>
                                 {student.isNew ? (
                                     <Cell>
@@ -203,7 +203,7 @@ function GroupStudents({ group }) {
                                     </Cell>
                                 ) : (
                                     <Cell>
-                                        <span className='text-stone-500 underline hover:text-stone-800 cursor-pointer' onClick={() => userActions.switchToStudent(student.id, 'admin')}>
+                                        <span className='text-muted-foreground underline hover:text-foreground cursor-pointer' onClick={() => userActions.switchToStudent(student.id, 'admin')}>
                                             {student.username}</span>
                                     </Cell>
                                 )}
@@ -225,7 +225,7 @@ function GroupStudents({ group }) {
                                         ))}
                                     </select>
                                 </Cell>
-                                <Cell><button className="p-1 bg-red-500 my-1 rounded text-white text-xs hover:bg-red-600 flex items-center gap-2" onClick={() => deleteStudent(student)}><UserRoundX className="w-4 h-4" /></button></Cell>
+                                <Cell><button className="p-1 bg-destructive my-1 rounded text-white text-xs hover:bg-red-600 flex items-center gap-2" onClick={() => deleteStudent(student)}><UserRoundX className="w-4 h-4" /></button></Cell>
                             </tr>
                         ))}
                     <tr>
@@ -240,7 +240,7 @@ function GroupStudents({ group }) {
                                 <td />
                                 <td />
                                 <Cell>
-                                    <button className="px-4 py-1 bg-blue-500 text-white text-xs hover:bg-blue-600" onClick={saveChanges}>שמירה</button>
+                                    <button className="px-4 py-1 bg-secondary/100 text-white text-xs hover:bg-blue-600" onClick={saveChanges}>שמירה</button>
                                 </Cell>
                             </>
                         )}
@@ -261,16 +261,16 @@ function AdminMajors() {
     const addMajor = () => adminActions.createGroup('מגמה חדשה', 'major');
 
     return (
-        <div className="flex flex-col gap-4 border border-stone-200 p-4">
+        <div className="flex flex-col gap-4 border border-border p-4">
             <h3 className="text-sm">מגמות</h3>
             <div className="flex gap-2">
                 {majors.map(major => (
-                    <div key={major.id} className="flex flex-col p-4 group relative border border-stone-200">
+                    <div key={major.id} className="flex flex-col p-4 group relative border border-border">
                         <div>מגמת</div>
                         <Edittable value={major.name} onFinish={(value) => editMajor(major.id, value)} />
                         <div className="flex items-center gap-2 pr-4 text-stone-400 mt-2" >
                             <Users2 className="w-4 h-4" />
-                            <span className="text-xs text-stone-500">
+                            <span className="text-xs text-muted-foreground">
                                 {allMembers.filter(member => member.role === 'student' && member.groups?.includes(major.id)).length}
                             </span>
                         </div>

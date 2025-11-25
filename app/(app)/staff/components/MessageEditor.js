@@ -6,7 +6,7 @@ import ReactQuill from 'react-quill-new';
 
 
 const QuillToolbar = tw.div`flex gap-1 justify-end`
-const QuillToolbarButton = tw.button`p-1 rounded-full hover:bg-stone-100 cursor-pointer`
+const QuillToolbarButton = tw.button`p-1 rounded-full hover:bg-muted cursor-pointer`
 
 export default function MessageEditor({ onSave, initialValue }) {
     const [value, setValue] = useState(initialValue || '');

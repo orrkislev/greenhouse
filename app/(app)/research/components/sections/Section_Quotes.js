@@ -32,11 +32,11 @@ export default function Section_quotes() {
         <Box2 label="ציטוטים" LabelIcon={Quote} className="row-span-3">
             <div className="flex flex-col justify-between h-full mb-8 overflow-y-auto">
                 {quotes.map((quote, index) => (
-                    <div key={index} className="pb-2 flex gap-2 justify-between group/quote transition-all h-[fit-content] border-b border-stone-300 items-center">
+                    <div key={index} className="pb-2 flex gap-2 justify-between group/quote transition-all h-[fit-content] border-b border-border items-center">
                         <Quote className="w-4 h-4 self-start" />
                         <TextInput onChange={(value) => updateQuote(index, value)} value={quote} className="text-sm italic w-full outline-none transition-all duration-200 cursor-text leading-tight" />
                         <Quote className="w-4 h-4 rotate-180 self-end" />
-                        <IconButton icon={Trash2} onClick={() => removeQuote(index)} className="p-2 hover:bg-stone-100 rounded-full opacity-0 group-hover/quote:opacity-100 transition-opacity" />
+                        <IconButton icon={Trash2} onClick={() => removeQuote(index)} className="p-2 hover:bg-muted rounded-full opacity-0 group-hover/quote:opacity-100 transition-opacity" />
                     </div>
                 ))}
                 <div className="group/new-quote p-2 cursor-pointer" onClick={addQuote}>

@@ -4,7 +4,7 @@ import { useMeetings } from "@/utils/store/useMeetings";
 import { ScheduleSection } from "../Layout";
 import { useUser } from "@/utils/store/useUser";
 
-const MeetingContainer = tw`flex flex-col items-center justify-center text-stone-800 text-xs p-2
+const MeetingContainer = tw`flex flex-col items-center justify-center text-foreground text-xs p-2
     gap-2 divide-y divide-black/10 z-[10]
     bg-[#D5D2FD]
     `;
@@ -22,7 +22,7 @@ export default function Meetings() {
             {week.map((date, index) => (
                 <MeetingContainer key={`meeting-${index}`} className={`pointer-events-none col-${index + 1}`}>
                     {meetings.filter(meeting => meeting.day_of_the_week === index + 1).map((meeting, i) => (
-                        <div key={i} className="text-xs text-stone-700 text-center flex gap-2">
+                        <div key={i} className="text-xs text-foreground text-center flex gap-2">
                             <div>{getTimeString(meeting.start)} - {getTimeString(meeting.end)}</div>
                             {getOtherParticipant(meeting)}
                         </div>

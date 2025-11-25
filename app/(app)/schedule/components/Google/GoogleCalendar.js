@@ -4,7 +4,7 @@ import { ScheduleSection } from "../Layout";
 import { tw } from "@/utils/tw";
 import { useTime } from "@/utils/store/useTime";
 
-const GanttDay = tw`flex flex-col items-center justify-center text-stone-800 text-xs p-2
+const GanttDay = tw`flex flex-col items-center justify-center text-foreground text-xs p-2
     gap-2 divide-y divide-black/10 z-[10]
     bg-[#4285F4] text-white
     `;

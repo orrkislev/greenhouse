@@ -34,7 +34,7 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 			if (error) set({ error });
 			else set({ user: data });
 
-			if (!data.googleRefreshToken){
+			if (!data.googleRefreshToken) {
 				const { data: { session } } = await supabase.auth.getSession();
 				if (session?.provider_refresh_token) {
 					await get().updateUserData({ googleRefreshToken: session.provider_refresh_token });
@@ -76,7 +76,8 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 				throw new Error("User does not have permission to switch to student.");
 			}
 
-			set({ originalUser: { user, lastPage: currUrl }, user: null });
+			const originalUser = get().originalUser;
+			set({ originalUser: originalUser || { user, lastPage: currUrl }, user: null });
 
 			const { data, error } = await supabase.from('users').select('*').eq('id', studentId).single();
 			if (error) set({ error });

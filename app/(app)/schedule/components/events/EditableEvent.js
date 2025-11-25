@@ -37,7 +37,7 @@ export function EditableEvent({ event, onStartDrag, onEndDrag, onStartResize, on
     };
 
     const eventClasses = `
-        bg-[#EF98A1] p-2 pt-5 text-stone-800
+        bg-[#EF98A1] p-2 pt-5 text-foreground
         flex items-center justify-start text-sm
         pointer-events-auto transition-all cursor-grab
         z-5 relative

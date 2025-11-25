@@ -14,7 +14,6 @@ export default function MainPage() {
 
     return (
         <div className="inset-0 absolute overflow-hidden">
-            <BGGrads />
             <PageMain className="flex px-2 md:mx-16">
                 <div className="flex flex-col md:grid md:grid-cols-5 gap-3 md:gap-4 w-full">
                     <MainSchedule />

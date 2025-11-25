@@ -10,10 +10,10 @@ import { EditEvent } from "../events/EditableEvent";
 import { Plus } from "lucide-react";
 import { EventTime } from "@/app/(app)/(main)/components/MainSchedule";
 
-const TermCell = tw.div`w-full h-full border border-stone-300 min-h-16 flex flex-col gap-1 pb-2 relative group/cell
+const TermCell = tw.div`w-full h-full border border-border min-h-16 flex flex-col gap-1 pb-2 relative group/cell
     ${({ $isWeekend }) => $isWeekend ? 'bg-blue-200/50' : ''}
     ${({ $isToday }) => $isToday ? 'bg-green-200/50' : ''}
-    ${({ $inTerm }) => $inTerm ? '' : 'bg-stone-200'}
+    ${({ $inTerm }) => $inTerm ? '' : 'bg-accent'}
     ${({ $inPast }) => $inPast ? 'stripes' : ''}
 `;
 
@@ -70,7 +70,7 @@ export default function Term() {
         <ScheduleSection>
             {weeks.map((week, i) => week.map((day, j) => (
                 <TermCell key={j} $inTerm={day.inTerm} $isWeekend={day.isWeekend} $isToday={day.isToday} $inPast={day.inPast}>
-                    <div className="text-xs text-stone-500">{day.date.toLocaleDateString('he-IL', { month: 'long', day: 'numeric' })}</div>
+                    <div className="text-xs text-muted-foreground">{day.date.toLocaleDateString('he-IL', { month: 'long', day: 'numeric' })}</div>
                     <div className="p-2">
                         {day.isFirstDayOfTerm && <div className="text-xs">היום הראשון של התקופה</div>}
                         {day.isLastDayOfTerm && <div className="text-xs">היום האחרון של התקופה</div>}
@@ -117,7 +117,7 @@ function TermEvent({ event, isDragging, onStartDrag, onEndDrag }) {
 
     return (
         <>
-            <div className={`mx-2 flex gap-1 items-center text-xs py-1 px-2 rounded-full bg-stone-100 border border-stone-300 cursor-pointer hover:bg-stone-200 transition-all z-10 ${isDragging ? 'opacity-50 -rotate-5 scale-105' : ''}`}
+            <div className={`mx-2 flex gap-1 items-center text-xs py-1 px-2 rounded-full bg-muted border border-border cursor-pointer hover:bg-accent transition-all z-10 ${isDragging ? 'opacity-50 -rotate-5 scale-105' : ''}`}
                 onMouseDown={() => setClicking(true)}
                 ref={baseRef}
                 onClick={open}

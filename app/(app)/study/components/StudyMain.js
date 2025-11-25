@@ -86,12 +86,12 @@ function StudyPathCard2({ path, ...props }) {
 			<div className="flex-1">
 				<div
 					style={{ backgroundImage: `url(${path ? (path.metadata?.image || '/images/study.png') : '/images/question.png'})` }}
-					className={`h-full bg-cover bg-center rounded-md border border-stone-200 transition-all duration-300`} />
+					className={`h-full bg-cover bg-center rounded-md border border-border transition-all duration-300`} />
 			</div>
 			<div className="flex flex-col gap-2 flex-1 justify-center">
 				<div className="text-lg font-bold">{path ? path.title : 'איזה תחום מענין אותי ללמוד?'}</div>
-				<div className="text-sm text-stone-500">{path ? path.description : 'מה בעצם אני רוצה ללמוד?'}</div>
-				{step && <div className="text-sm text-stone-500">{step.title}</div>}
+				<div className="text-sm text-muted-foreground">{path ? path.description : 'מה בעצם אני רוצה ללמוד?'}</div>
+				{step && <div className="text-sm text-muted-foreground">{step.title}</div>}
 			</div>
 		</div>
 	)

@@ -29,9 +29,9 @@ export default function VocationPage() {
 function NewJobCard() {
   const click = () => vocationActions.addJob();
   return (
-    <div className="w-full md:w-32 border border-stone-200 rounded-lg p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-green-100 group/new-job-card" onClick={click}>
-      <Plus className="w-4 h-4 group-hover/new-job-card:text-green-500 group-hover/new-job-card:scale-150 transition-all duration-200 group-hover/new-job-card:rotate-90" />
-      <span className="text-center text-sm text-stone-700 group-hover/new-job-card:text-green-500 transition-all duration-200 group-hover/new-job-card:font-bold">
+    <div className="w-full md:w-32 border border-border rounded-lg p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-primary/10 group/new-job-card" onClick={click}>
+      <Plus className="w-4 h-4 group-hover/new-job-card:text-primary group-hover/new-job-card:scale-150 transition-all duration-200 group-hover/new-job-card:rotate-90" />
+      <span className="text-center text-sm text-foreground group-hover/new-job-card:text-primary transition-all duration-200 group-hover/new-job-card:font-bold">
         מקום עבודה חדש
       </span>
     </div>
@@ -52,7 +52,7 @@ function JobCard({ job }) {
       <div className="flex flex-col gap-4 md:gap-8">
         <div className="flex flex-col gap-1">
           <Edittable value={job.place_of_work} onFinish={updatePlaceOfWork} className="w-full md:w-64" placeholder="מקום העבודה" />
-          <Edittable value={job.position} onFinish={updatePosition} className="w-full md:w-64 text-sm text-stone-700" placeholder="תפקיד" />
+          <Edittable value={job.position} onFinish={updatePosition} className="w-full md:w-64 text-sm text-foreground" placeholder="תפקיד" />
         </div>
         <div className="flex gap-4 overflow-x-auto">
           <table className="w-full">
@@ -60,12 +60,12 @@ function JobCard({ job }) {
             <tbody>
               {job.work_hours.map((hour, index) => (
                 <tr key={index}>
-                  <Cell><Edittable value={hour.year} onFinish={value => updateWorkHours(job.work_hours.map((h, i) => i === index ? { ...h, year: value } : h))} className="w-12 md:w-16" /></Cell>
-                  <Cell><Edittable value={hour.month} onFinish={value => updateWorkHours(job.work_hours.map((h, i) => i === index ? { ...h, month: value } : h))} className="w-12 md:w-16" /></Cell>
-                  <Cell><Edittable value={hour.hours} onFinish={value => updateWorkHours(job.work_hours.map((h, i) => i === index ? { ...h, hours: value } : h))} className="w-12 md:w-16" /></Cell>
+                  <Cell><Edittable value={hour.year} placeholder="שנה" onFinish={value => updateWorkHours(job.work_hours.map((h, i) => i === index ? { ...h, year: value } : h))} className="w-12 md:w-16" /></Cell>
+                  <Cell><Edittable value={hour.month} placeholder="חודש" onFinish={value => updateWorkHours(job.work_hours.map((h, i) => i === index ? { ...h, month: value } : h))} className="w-12 md:w-16" /></Cell>
+                  <Cell><Edittable value={hour.hours} placeholder="שעות " onFinish={value => updateWorkHours(job.work_hours.map((h, i) => i === index ? { ...h, hours: value } : h))} className="w-12 md:w-16" /></Cell>
                 </tr>
               ))}
-              <div className="flex gap-1 items-center text-xs cursor-pointer bg-stone-100 hover:bg-green-100 rounded-md p-1 mt-2"
+              <div className="flex gap-1 items-center text-xs cursor-pointer bg-muted hover:bg-primary/10 rounded-md p-1 mt-2"
                 onClick={() => updateWorkHours([...(job.work_hours || []), { year: new Date().getFullYear(), month: new Date().getMonth() + 1, hours: '?' }])} >
                 <Plus className="w-4 h-4" /> חודש נוסף
               </div>

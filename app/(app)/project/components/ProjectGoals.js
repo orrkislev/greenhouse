@@ -92,11 +92,11 @@ function FocusedGoal({ index }) {
 
     return (
         <>
-            <div ref={ref} className="rounded-lg flex gap-2 p-2 bg-white border border-stone-300 flex-1 group relative hover:bg-stone-200 transition-all duration-200 cursor-pointer" onClick={() => setIsFocused(true)}>
+            <div ref={ref} className="rounded-lg flex gap-2 p-2 bg-white border border-border flex-1 group relative hover:bg-accent transition-all duration-200 cursor-pointer" onClick={() => setIsFocused(true)}>
                 <div className="p-1">{goalIcons[index]}</div>
                 <div className="flex-1 flex flex-col gap-1">
-                    <div className="text-stone-600 text-sm whitespace-pre-wrap leading-relaxed">{goal.title}</div>
-                    <div className="text-stone-500 text-xs whitespace-pre-wrap leading-relaxed">{goal.description}</div>
+                    <div className="text-muted-foreground text-sm whitespace-pre-wrap leading-relaxed">{goal.title}</div>
+                    <div className="text-muted-foreground text-xs whitespace-pre-wrap leading-relaxed">{goal.description}</div>
                 </div>
 
                 {/* <button className="absolute opacity-0 group-hover:opacity-50 hover:opacity-100 transition-opacity cursor-pointer left-2 top-2"
@@ -118,16 +118,16 @@ function FocusedGoal({ index }) {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ duration: 0.2, ease: 'easeOut' }}
-                            style={boxStyle} className="rounded-lg flex gap-2 p-2 border border-stone-300 gap-2 flex-1 bg-white pointer-events-auto"
+                            style={boxStyle} className="rounded-lg flex gap-2 p-2 border border-border gap-2 flex-1 bg-white pointer-events-auto"
                             onClick={e => e.stopPropagation()}>
 
                             <div className="p-1">{goalIcons[index]}</div>
                             <div className="flex-1 flex flex-col gap-2">
-                                <div className="text-stone-700 text-sm">
+                                <div className="text-foreground text-sm">
                                     <SmartTextArea value={goal.title} onChange={e => updateContent("title", e.target.value)} />
                                 </div>
                                 <div className="w-full h-px bg-stone-300" />
-                                <div className="text-stone-500 text-sm">
+                                <div className="text-muted-foreground text-sm">
                                     <SmartTextArea value={goal.description} onChange={e => updateContent("description", e.target.value)} />
                                 </div>
                             </div>
@@ -157,7 +157,7 @@ function FocusedGoal({ index }) {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -20 }}
                                     transition={{ duration: 0.2, ease: "easeOut", delay: index * 0.1 }}
-                                    className="px-4 py-1 bg-white border border-stone-300 flex gap-2 group w-full text-xs"
+                                    className="px-4 py-1 bg-white border border-border flex gap-2 group w-full text-xs"
                                 >
                                     <SmartTextArea
                                         value={question}
@@ -167,7 +167,7 @@ function FocusedGoal({ index }) {
                                         onClick={() => removeQuestion(index)}
                                         className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer "
                                     >
-                                        <X className="w-4 h-4 text-red-500" />
+                                        <X className="w-4 h-4 text-destructive" />
                                     </button>
                                 </motion.div>
                             ))}

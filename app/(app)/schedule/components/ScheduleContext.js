@@ -56,7 +56,7 @@ function StudyGroupsMessage() {
             <div className="flex justify-between items-center">
                 <h3 className="font-semibold">קבוצות למידה</h3>
                 {isAdmin() && (
-                    <button className="text-sm text-gray-500 text-xs flex items-center gap-1 rounded-full p-1 cursor-pointer hover:bg-gray-200" onClick={clickEditSave}>
+                    <button className="text-sm text-muted-foreground text-xs flex items-center gap-1 rounded-full p-1 cursor-pointer hover:bg-accent" onClick={clickEditSave}>
                         {editMode ? <Save className="w-6 h-6 text-green-800" /> : <Pencil className="w-4 h-4" />}
                     </button>
                 )}
@@ -68,24 +68,24 @@ function StudyGroupsMessage() {
                         {days[dayIndex].map(({ group, index }) => (
                             <div key={index} className="py-2">
                                 {editMode ? (
-                                    <div className="flex flex-col gap-1 border border-gray-300 rounded-md p-2">
+                                    <div className="flex flex-col gap-1 border border-border rounded-md p-2">
                                         <input name="title" type="text" value={group.title} onChange={(e) => editGroupTitle(index, e.target.value)} className="font-semibold" />
-                                        <input name="content" type="text" value={group.content} onChange={(e) => editGroupContent(index, e.target.value)} className="text-sm text-gray-500" />
+                                        <input name="content" type="text" value={group.content} onChange={(e) => editGroupContent(index, e.target.value)} className="text-sm text-muted-foreground" />
                                         <div className="flex justify-between">
                                             <select name="day" value={group.day} onChange={(e) => editGroupDay(index, e.target.value)}>
                                                 {daysOfWeek.map((day, dayIndex) => (
                                                     <option key={dayIndex} value={dayIndex}>יום {day}</option>
                                                 ))}
                                             </select>
-                                            <button className="text-sm text-gray-500 rounded-full p-1 cursor-pointer hover:bg-gray-200 text-red-700" onClick={() => removeGroup(index)}>
+                                            <button className="text-sm text-muted-foreground rounded-full p-1 cursor-pointer hover:bg-accent text-red-700" onClick={() => removeGroup(index)}>
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </div>
                                 ) : (
                                     <>
-                                        <div className="text-sm text-gray-500 font-semibold">{group.title}</div>
-                                        <div className="text-xs text-gray-500">{group.content}</div>
+                                        <div className="text-sm text-muted-foreground font-semibold">{group.title}</div>
+                                        <div className="text-xs text-muted-foreground">{group.content}</div>
                                     </>
                                 )}
                             </div>
@@ -95,7 +95,7 @@ function StudyGroupsMessage() {
                 ))}
             </div>
             {editMode && (
-                <button className="text-gray-500 p-1 rounded-full cursor-pointer hover:bg-gray-200 flex justify-center items-center" onClick={addGroup}>
+                <button className="text-muted-foreground p-1 rounded-full cursor-pointer hover:bg-accent flex justify-center items-center" onClick={addGroup}>
                     <Plus className="w-4 h-4" />
                 </button>
             )}

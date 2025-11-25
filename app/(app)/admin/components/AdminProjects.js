@@ -118,11 +118,11 @@ export default function AdminProjects() {
                             <Cell>{student.major}</Cell>
                             <Cell>
                                 {student.project ? (
-                                    <div className="bg-blue-500 rounded-sm hover:bg-blue-500 text-white hover:text-blue-200 hover:cursor-pointer hover:underline transition-all duration-200 px-2 py-1"
+                                    <div className="bg-secondary/100 rounded-sm hover:bg-secondary/100 text-white hover:text-blue-200 hover:cursor-pointer hover:underline transition-all duration-200 px-2 py-1"
                                         onClick={() => clickOnProject(student.id)}>
                                         {student.project.title}
                                     </div>
-                                ) : (<span className="text-stone-500">אין פרויקט</span>
+                                ) : (<span className="text-muted-foreground">אין פרויקט</span>
                                 )}
                             </Cell>
                             <DetailCell text={student.project?.metadata?.questions?.map(q => q.title + ': ' + q.value).join('\n')} />
@@ -131,7 +131,7 @@ export default function AdminProjects() {
                                     <select
                                         value={student.project?.master?.id || ''}
                                         onChange={e => selectMaster(student.id, student.project.id, e.target.value)}
-                                        className="bg-white border border-stone-300 rounded-md p-1"
+                                        className="bg-white border border-border rounded-md p-1"
                                     >
                                         <option value="">בחר מנחה</option>
                                         {staff.sort((a, b) => a.first_name.localeCompare(b.first_name)).map(mentor => (

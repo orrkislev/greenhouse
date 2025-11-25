@@ -66,9 +66,9 @@ function GroupTask({ group, task }) {
     const students = group.members ? group.members.filter(member => member.role === 'student') : []
 
     return (
-        <div className="flex flex-col gap-1 group border-b border-stone-200 pb-2">
+        <div className="flex flex-col gap-1 group border-b border-border pb-2">
             <div className="flex justify-between">
-                <div className="text-stone-700 hover:underline decoration-dashed cursor-pointer" onClick={() => setOpen(true)}>{task.title}</div>
+                <div className="text-foreground hover:underline decoration-dashed cursor-pointer" onClick={() => setOpen(true)}>{task.title}</div>
             </div>
 
             <div className='flex justify-between'>

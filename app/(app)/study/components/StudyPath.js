@@ -51,7 +51,7 @@ function PathBG({ path }) {
 
     return (
         <div className="flex flex-col">
-            <div className="overflow-hidden relative border border-stone-200 w-full aspect-[5/1] rounded-b-xl bg-cover bg-center flex items-center justify-center" style={{ backgroundImage: imgUrl }} >
+            <div className="overflow-hidden relative border border-border w-full aspect-[5/1] rounded-b-xl bg-cover bg-center flex items-center justify-center" style={{ backgroundImage: imgUrl }} >
                 {isOwner && (
                     <Menu className='absolute top-4 left-4 bg-white'>
                         <MenuList>
@@ -66,7 +66,7 @@ function PathBG({ path }) {
                         onEdit={(title) => studyActions.updatePath(path.id, { ...path, title })} editable={isOwner} />
                 </div>
             </div>
-            <SmartText className="text-xl text-stone-500" text={path.description}
+            <SmartText className="text-xl text-muted-foreground" text={path.description}
                 onEdit={(description) => studyActions.updatePath(path.id, { ...path, description })} editable={isOwner} />
         </div >
     )
@@ -89,7 +89,7 @@ function Vocabulary({ path }) {
             </Button>
             <div className="flex gap-2 flex-wrap">
                 {path.vocabulary.map((word, index) => (
-                    <div key={index} className="flex items-center justify-between gap-2 bg-stone-200 px-2 py-1 rounded-full text-xs hover:bg-stone-300 transition-colors">
+                    <div key={index} className="flex items-center justify-between gap-2 bg-accent px-2 py-1 rounded-full text-xs hover:bg-accent transition-colors">
                         <div contentEditable={true} suppressContentEditableWarning onBlur={(e) => updateWord(index, e.target.innerText)} className="w-full outline-none min-w-2">
                             {word}
                         </div>

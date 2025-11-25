@@ -16,7 +16,7 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="he" className={notoSansHebrew.variable}>
-      <body className={`${notoSansHebrew.className} antialiased rtl min-h-screen bg-stone-50`} >
+      <body className={`${notoSansHebrew.className} antialiased rtl min-h-screen bg-stone-50 w-screen h-screen overflow-hidden relative`} >
         {children}
       </body>
     </html>

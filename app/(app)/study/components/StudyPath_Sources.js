@@ -22,13 +22,13 @@ export default function StudyPath_Sources({ path }) {
                     מקור מידע חדש
                 </Button>
                 {path.sources && path.sources.map((source, sourceIndex) => (
-                    <div key={sourceIndex} className="flex items-center bg-white border border-stone-300 rounded-md p-2 group/source ">
+                    <div key={sourceIndex} className="flex items-center bg-white border border-border rounded-md p-2 group/source ">
                         <SmartText text={source}
                             onEdit={(text) => studyActions.updateSource(path.id, sourceIndex, text)}
                             withIcon={false}
-                            className="text-sm text-stone-500"
+                            className="text-sm text-muted-foreground"
                         />
-                        <Trash2 className="mr-2 h-4 cursor-pointer text-stone-500 w-0 group-hover/source:w-4 opacity-0 group-hover/source:opacity-100 hover:bg-stone-300/50 transition-all rounded-full" onClick={() => studyActions.deleteSource(path.id, sourceIndex)} />
+                        <Trash2 className="mr-2 h-4 cursor-pointer text-muted-foreground w-0 group-hover/source:w-4 opacity-0 group-hover/source:opacity-100 hover:bg-accent/50 transition-all rounded-full" onClick={() => studyActions.deleteSource(path.id, sourceIndex)} />
                     </div>
                 ))}
             </div>
@@ -72,7 +72,7 @@ function StudyPath_Sources_English({ path }) {
 function EnglishSource({ source, isSelected, onSelect }) {
 
     return (
-        <div className={`relative flex gap-2 pr-4 items-center bg-stone-200 text-stone-600 rounded-full p-2 hover:bg-stone-600 hover:text-white transition-all duration-200 cursor-pointer ${isSelected ? 'bg-stone-600 text-white' : ''}`}
+        <div className={`relative flex gap-2 pr-4 items-center bg-accent text-muted-foreground rounded-full p-2 hover:bg-stone-600 hover:text-white transition-all duration-200 cursor-pointer ${isSelected ? 'bg-stone-600 text-white' : ''}`}
             onClick={onSelect}>
 
             {source.icon && <Icon icon={source.icon} className="w-4 h-4" />}
@@ -126,13 +126,13 @@ function EnglishSourceContent({ path, source, sourceIndex, isOwner }) {
                 <>
                     <div className="flex flex-col gap-2">
                         <div className="flex gap-2 items-center">
-                            {icon && <Icon icon={icon} className="w-10 h-10 text-stone-500" />}
+                            {icon && <Icon icon={icon} className="w-10 h-10 text-muted-foreground" />}
                             <div className="text-lg font-semibold">{title}</div>
                         </div>
-                        <div className="text-sm text-stone-500">{description}</div>
+                        <div className="text-sm text-muted-foreground">{description}</div>
                         {url.length > 0 && (
                             <Link href={url.startsWith('http') ? url : `https://${url}`} target="_blank">
-                                <Button className="p-1 bg-stone-200 text-sm text-stone-500 underline decoration-none cursor-pointer hover:text-blue-500 transition-all duration-200 flex gap-2 items-center">
+                                <Button className="p-1 bg-accent text-sm text-muted-foreground underline decoration-none cursor-pointer hover:text-secondary transition-all duration-200 flex gap-2 items-center">
                                     <ExternalLink className="w-4 h-4" />
                                     {url.length > 20 ? url.slice(0, 20) + '...' : url}
                                 </Button>

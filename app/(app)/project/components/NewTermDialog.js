@@ -10,7 +10,7 @@ export default function NewTermDialog() {
     return (
         <div className='flex flex-col items-center justify-center h-screen'>
             <h1 className='text-2xl font-bold mb-4'> החלה תקופת {term?.name || ''}</h1>
-            <p className='text-stone-600 mb-8'>האם ברצונך להמשיך את הפרויקט הנוכחי או להתחיל פרויקט חדש?</p>
+            <p className='text-muted-foreground mb-8'>האם ברצונך להמשיך את הפרויקט הנוכחי או להתחיל פרויקט חדש?</p>
             <div className='flex gap-4'>
                 <Button onClick={async () => {
                     await projectActions.continueProject();

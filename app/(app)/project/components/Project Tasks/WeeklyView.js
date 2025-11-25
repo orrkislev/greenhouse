@@ -58,7 +58,7 @@ export default function WeeklyView() {
                 <>
                     <div className="absolute top-0 left-0 right-0 h-32 bg-linear-to-t from-transparent to-white" />
                     <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-b from-transparent to-white" />
-                    <ArrowDownToLine className="w-8 h-8 border border-stone-200 absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 text-stone-400 bg-white p-1 rounded-full hover:bg-stone-100  hover:scale-110 cursor-pointer transition-all" onClick={() => setFullView(true)} />
+                    <ArrowDownToLine className="w-8 h-8 border border-border absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 text-stone-400 bg-white p-1 rounded-full hover:bg-muted  hover:scale-110 cursor-pointer transition-all" onClick={() => setFullView(true)} />
                 </>
             )}
         </div>
@@ -67,8 +67,8 @@ export default function WeeklyView() {
 
 
 const WeekRowDiv = tw.div`
-    flex gap-4 divide-x divide-stone-200 py-2 transition-colors ${({ $dragOver }) => $dragOver ? 'bg-stone-50' : ''}
-    ${({ $isCurrent }) => $isCurrent ? 'bg-stone-100 border border-stone-200' : ''}
+    flex gap-4 divide-x divide-stone-200 py-2 transition-colors ${({ $dragOver }) => $dragOver ? 'bg-muted' : ''}
+    ${({ $isCurrent }) => $isCurrent ? 'bg-muted border border-border' : ''}
 `
 
 function WeekRow({ week, weekIndex, onTaskMove, isDragging, setIsDragging }) {
@@ -201,14 +201,14 @@ function DraggableTask({ task, taskIndex, weekNumber, onTaskMove, setIsDragging 
                 className={`relative flex items-center justify-between p-2 gap-4 border rounded-lg select-none transition-all ${dragState === 'dragging'
                     ? 'opacity-50 transform rotate-2 shadow-lg'
                     : dragState === 'over'
-                        ? 'border-blue-300 bg-stone-50'
-                        : 'hover:bg-stone-50 border-stone-200'
+                        ? 'border-secondary bg-muted'
+                        : 'hover:bg-muted border-border'
                     }
                 ${task.completed ? 'opacity-50 line-through bg-emerald-100 hover:bg-emerald-100' : ''}
                 `}>
                 <div
                     ref={gripRef}
-                    className="flex items-center gap-2 text-stone-400 cursor-move hover:text-stone-600 transition-colors p-1 rounded"
+                    className="flex items-center gap-2 text-stone-400 cursor-move hover:text-muted-foreground transition-colors p-1 rounded"
                 >
                     {!task.completed && <Grip className="w-4 h-4" />}
                 </div>
@@ -217,12 +217,12 @@ function DraggableTask({ task, taskIndex, weekNumber, onTaskMove, setIsDragging 
                 )}
                 <div className="flex-1 hover:underline decoration-dashed cursor-pointer" onClick={() => setOpenTaskModal(true)}>
                     <div className="font-medium">{task.title}</div>
-                    <div className="text-sm text-stone-600">{task.description}</div>
+                    <div className="text-sm text-muted-foreground">{task.description}</div>
 
                 </div>
                 {task.url && (
                     <Link href={task.url.startsWith('http') ? task.url : `https://${task.url}`} target="_blank">
-                        <Button className="p-1 bg-stone-200 text-sm text-stone-500 underline decoration-none cursor-pointer hover:text-blue-500 transition-all duration-200 flex gap-2 items-center">
+                        <Button className="p-1 bg-accent text-sm text-muted-foreground underline decoration-none cursor-pointer hover:text-secondary transition-all duration-200 flex gap-2 items-center">
                             <ExternalLink className="w-4 h-4" />
                         </Button>
                     </Link>
@@ -241,7 +241,7 @@ const dateLabel = (date) => date.toLocaleDateString('he-IL', { day: 'numeric' })
 // Simple drop indicator component
 const DropIndicator = ({ edge, gap }) => (
     <div
-        className={`absolute top-0 bottom-0 h-0.5 bg-stone-500 z-10 ${edge === 'right' ? '-right-1' : '-left-1'}`}
+        className={`absolute top-0 bottom-0 h-0.5 bg-muted0 z-10 ${edge === 'right' ? '-right-1' : '-left-1'}`}
         style={{ margin: gap || '2px' }}
     />
 );

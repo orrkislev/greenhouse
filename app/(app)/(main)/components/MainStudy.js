@@ -28,12 +28,12 @@ export default function MainStudy() {
                 <div className="flex-1 flex items-center justify-center">
                     <div
                         style={{ backgroundImage: `url(${path ? (path.metadata?.image || '/images/study.png') : '/images/question.png'})` }}
-                        className={` w-[80%] h-[80%] bg-cover bg-center rounded-md border border-stone-200 ${pathIndex % 2 == 0 ? 'rotate-2' : '-rotate-2'} transition-all duration-300`} />
+                        className={` w-[80%] h-[80%] bg-cover bg-center rounded-md border border-border ${pathIndex % 2 == 0 ? 'rotate-2' : '-rotate-2'} transition-all duration-300`} />
                 </div>
                 <div className="flex-1 flex flex-col gap-2 justify-center">
                     <div className="text-lg font-bold">{path ? path.title : 'איזה תחום מענין אותי ללמוד?'}</div>
-                    <div className="text-sm text-stone-500">{path ? path.description : 'מה בעצם אני רוצה ללמוד?'}</div>
-                    <div className="text-sm text-stone-500">{step ? step.title : 'מה הדבר הראשון שאני אלמד?'}</div>
+                    <div className="text-sm text-muted-foreground">{path ? path.description : 'מה בעצם אני רוצה ללמוד?'}</div>
+                    <div className="text-sm text-muted-foreground">{step ? step.title : 'מה הדבר הראשון שאני אלמד?'}</div>
                 </div>
 
             </div>

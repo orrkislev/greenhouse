@@ -27,7 +27,7 @@ export default function StaffStudents() {
             {mentorships.length ? (
                 <Staff_Students_List students={mentorships.map(m => m.student)} context={'master'} />
             ) : (
-                <div className="text-center text-stone-500 py-12">
+                <div className="text-center text-muted-foreground py-12">
                     אין לך חניכים בליווי אישי...
                 </div>
             )}
@@ -48,7 +48,7 @@ export function AllStudentPicker({ unavailableStudents = [], onSelect }) {
 
     return (
         <>
-            <div className="text-stone-500" ref={baseRef}>
+            <div className="text-muted-foreground" ref={baseRef}>
                 <Button onClick={open}>
                     <Plus className="w-4 h-4" /> חניכים נוספים
                 </Button>

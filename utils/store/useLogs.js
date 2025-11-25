@@ -12,21 +12,19 @@ export const [useLogsData, logsActions] = createStore((set, get, withUser, withL
             .order('created_at', { ascending: false }).limit(20);
         if (error) throw error;
         for (const log of data) {
+            console.log(log)
             if (log.context_table && log.context_id) {
-                const { data: context, error: contextError } = await supabase.from(log.context_table).select('id, title').eq('id', log.context_id).single();
-                if (contextError) throw contextError;
-                log.context = context;
+                const { data: context } = await supabase.from(log.context_table).select('id, title').eq('id', log.context_id).single();
+                if (context) log.context = context;
             }
             if (log.user_id !== user.id) {
-                const { data: user, error: userError } = await supabase.from('users').select('id, first_name, last_name, avatar_url').eq('id', log.user_id).single();
-                if (userError) throw userError;
-                log.user = user;
+                const { data: user } = await supabase.from('users').select('id, first_name, last_name, avatar_url').eq('id', log.user_id).single();
+                if (user) log.user = user;
             } else log.user = user;
             if (log.mentor_id) {
                 if (log.mentor_id !== user.id) {
-                    const { data: mentor, error: mentorError } = await supabase.from('users').select('id, first_name, last_name, avatar_url').eq('id', log.mentor_id).single();
-                    if (mentorError) throw mentorError;
-                    log.mentor = mentor;
+                    const { data: mentor } = await supabase.from('users').select('id, first_name, last_name, avatar_url').eq('id', log.mentor_id).single();
+                    if (mentor) log.mentor = mentor;
                 } else log.mentor = user;
             }
         }

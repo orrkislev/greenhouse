@@ -11,7 +11,7 @@ import Avatar from "./Avatar";
 import { useStudyPaths } from "@/utils/store/useStudy";
 import { useState } from "react";
 
-const SideBarDiv = tw`flex flex-col border-l border-stone-400 bg-stone-200 -my-6 py-4
+const SideBarDiv = tw`flex flex-col border-l border-pastel-6/50 bg-pastel-5/10 -my-6 py-4
 md:flex md:flex-col
 hidden
 `
@@ -147,7 +147,7 @@ function SideBarItem({ href, Icon, label, active, disabled, small = false, child
                         initial={{ x: '-100%' }}
                         animate={{ x: 0, transition: { duration: .2, ease: 'circInOut' } }}
                         exit={{ x: '-100%', transition: { duration: .2, ease: 'circInOut' } }}
-                        className="w-full h-full rounded-r-full absolute left-0 z-1 -translate-x-px border-r border-y border-stone-400 bg-stone-50"
+                        className="w-full h-full rounded-r-full absolute left-0 z-1 -translate-x-px border-r border-y border-pastel-6/50 bg-white"
                     />
                 )}
             </AnimatePresence>
@@ -191,9 +191,8 @@ function TopBarIconItem({ href, Icon, active, title }) {
     return (
         <Link
             href={href}
-            className={`flex items-center justify-center p-2 rounded-lg transition-colors relative ${
-                active ? 'bg-stone-50 text-stone-900' : 'text-stone-600 hover:bg-stone-300 hover:text-stone-900'
-            }`}
+            className={`flex items-center justify-center p-2 rounded-lg transition-colors relative ${active ? 'bg-stone-50 text-stone-900' : 'text-stone-600 hover:bg-stone-300 hover:text-stone-900'
+                }`}
             title={title}
         >
             {active && (

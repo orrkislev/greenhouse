@@ -9,7 +9,7 @@ import { eventsActions, useWeekEvents } from "@/utils/store/useEvents";
 const EmptySlot = tw`min-h-8 z-1
     flex items-center justify-center text-xs
     bg-[#F3C5C599] hover:bg-[#F3C5C5]
-    text-transparent hover:text-stone-800
+    text-transparent hover:text-foreground
     cursor-pointer transition-all
 `;
 

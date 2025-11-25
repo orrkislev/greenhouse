@@ -56,13 +56,13 @@ function JournalNew({ isOpen, setIsOpen, showArchive = true }) {
     }
 
     return (
-        <div className="flex flex-col gap-4 relative p-4">
+        <div className="flex flex-col gap-4 relative p-4 w-2xl">
             {isOpen && <IconButton icon={X} onClick={() => setIsOpen(false)} className="absolute top-2 left-2 z-10" />}
 
             <div className="flex items-start justify-between mb-4 flex-shrink-0 relative">
                 <div>
-                    <h2 className="text-2xl tracking-tight text-stone-700 mb-2">השורה התחתונה</h2>
-                    <p className="text-sm text-stone-700/70 flex items-center gap-2">
+                    <h2 className="text-2xl tracking-tight text-foreground mb-2">השורה התחתונה</h2>
+                    <p className="text-sm text-foreground/70 flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
                         {new Date().toLocaleDateString("he-IL", {
                             weekday: "long",
@@ -93,7 +93,7 @@ function JournalNew({ isOpen, setIsOpen, showArchive = true }) {
             </div>
 
             <textarea placeholder="סיכום הפגישה..."
-                className="w-full min-h-[50px] p-4 bg-secondary/50 border border-border rounded-md resize-none outline-none placeholder:text-stone-700/70"
+                className="w-full min-h-[50px] p-4 bg-muted border border-border rounded-md resize-none outline-none placeholder:text-foreground/70"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
             />

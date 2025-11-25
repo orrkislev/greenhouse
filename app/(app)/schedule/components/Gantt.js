@@ -4,7 +4,7 @@ import { useTime } from "@/utils/store/useTime";
 import { ScheduleSection } from "./Layout";
 import { ganttActions, useGantt } from "@/utils/store/useGantt";
 
-const GanttDay = tw`flex flex-col items-center justify-center text-stone-800 text-xs p-2
+const GanttDay = tw`flex flex-col items-center justify-center text-foreground text-xs p-2
     gap-2 divide-y divide-black/10 z-[10]
     bg-[#D5D2FD]
     `;
@@ -23,7 +23,7 @@ export default function Gantt() {
             {week.map((date, index) => (
                 <GanttDay key={`empty-${index}`} className={`pointer-events-none col-${index + 1}`}>
                     {ganttActions.getGanttForDay(date).map((event, i) => (
-                        <div key={i} className="text-xs text-stone-700 text-center">
+                        <div key={i} className="text-xs text-foreground text-center">
                             {event}
                         </div>
                     ))}

@@ -65,8 +65,8 @@ export default function AdminStaff() {
     ];
 
     return (
-        <div className='flex gap-4 border border-stone-200 p-4'>
-            <table className="text-left text-xs border-collapse border-stone-200 border">
+        <div className='flex gap-4 border border-border p-4'>
+            <table className="text-left text-xs border-collapse border-border border">
                 <TableHeader headers={headers} />
                 <tbody>
                     {staffData.map((staff, index) => (
@@ -80,7 +80,7 @@ export default function AdminStaff() {
                                 </Cell>
                             ) : (
                                 <Cell>
-                                    <span className='text-stone-500 underline hover:text-stone-800 cursor-pointer' onClick={() => userActions.switchToStudent(staff.id, 'admin')}>
+                                    <span className='text-muted-foreground underline hover:text-foreground cursor-pointer' onClick={() => userActions.switchToStudent(staff.id, 'admin')}>
                                         {staff.username}
                                     </span>
                                 </Cell>
@@ -96,7 +96,7 @@ export default function AdminStaff() {
                                 />
                             </Cell>
                             <Cell><Checkbox value={staff.is_admin} onChange={(value) => updateStaffData(staff.id, 'is_admin', value)} /></Cell>
-                            <Cell><button className="p-1 bg-red-500 my-1 rounded text-white text-xs hover:bg-red-600 flex items-center gap-2" onClick={() => deleteStaff(staff)}><UserRoundX className="w-4 h-4" /></button></Cell>
+                            <Cell><button className="p-1 bg-destructive my-1 rounded text-white text-xs hover:bg-red-600 flex items-center gap-2" onClick={() => deleteStaff(staff)}><UserRoundX className="w-4 h-4" /></button></Cell>
                         </tr>
                     ))}
                     <tr>

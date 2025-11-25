@@ -34,7 +34,7 @@ export default function ProjectLibrary() {
     }
 
     return (
-        <div className='w-full h-[50vh] bg-red-500'>
+        <div className='w-full h-[50vh] bg-destructive'>
             <Tldraw components={components}>
                 <SaveLogic />
             </Tldraw>

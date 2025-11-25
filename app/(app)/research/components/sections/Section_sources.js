@@ -52,17 +52,17 @@ function Source({ source, index, updateSource, removeSource }) {
 
     return (
         <>
-            <div className="flex justify-between group/source transition-all h-[fit-content] border-b border-stone-300 items-center rtl">
+            <div className="flex justify-between group/source transition-all h-[fit-content] border-b border-border items-center rtl">
                 {isOpen ? (
                     <div>
-                        <TextInput onChange={(value) => updateTitle(value)} value={source.title} className="w-full p-1 hover:bg-stone-100 rounded-md w-full" />
-                        <TextInput onChange={(value) => updateUrl(value)} value={url} className="w-full p-1 hover:bg-stone-100 rounded-md w-full font-mono text-xs text-stone-500 mx-2 -mt-2" />
+                        <TextInput onChange={(value) => updateTitle(value)} value={source.title} className="w-full p-1 hover:bg-muted rounded-md w-full" />
+                        <TextInput onChange={(value) => updateUrl(value)} value={url} className="w-full p-1 hover:bg-muted rounded-md w-full font-mono text-xs text-muted-foreground mx-2 -mt-2" />
                     </div>
                 ) : (
                     <>
                         {url ? (
                             <Link href={url} target="_blank">
-                                <div className="flex items-center gap-1 w-full outline-none p-1 underline cursor-pointer hover:text-blue-500 transition-all duration-200"> 
+                                <div className="flex items-center gap-1 w-full outline-none p-1 underline cursor-pointer hover:text-secondary transition-all duration-200"> 
                                     <ExternalLink className="w-4 h-4" />
                                     {source.title} 
                                 </div>
@@ -73,8 +73,8 @@ function Source({ source, index, updateSource, removeSource }) {
                     </>
                 )}
                 <div className="flex">
-                    {isOpen ? <IconButton icon={Trash2} onClick={() => removeSource(index)} className="p-2 hover:bg-stone-100 rounded-full opacity-0 group-hover/source:opacity-100 transition-opacity" /> : null}
-                    <IconButton icon={isOpen ? ChevronUp : ChevronDown} onClick={() => setIsOpen(!isOpen)} className="p-2 hover:bg-stone-100 rounded-full opacity-0 group-hover/source:opacity-100 transition-opacity" />
+                    {isOpen ? <IconButton icon={Trash2} onClick={() => removeSource(index)} className="p-2 hover:bg-muted rounded-full opacity-0 group-hover/source:opacity-100 transition-opacity" /> : null}
+                    <IconButton icon={isOpen ? ChevronUp : ChevronDown} onClick={() => setIsOpen(!isOpen)} className="p-2 hover:bg-muted rounded-full opacity-0 group-hover/source:opacity-100 transition-opacity" />
                 </div>
             </div>
         </>

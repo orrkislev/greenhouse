@@ -21,6 +21,7 @@ export default function Journal() {
     const [filterTags, setFilterTags] = useState([])
     const [filterInput, setFilterInput] = useState('')
 
+    console.log({ logs })
     if (logs.length === 0) return null;
 
     const handleAddFilter = (e) => {
@@ -58,7 +59,7 @@ export default function Journal() {
     })
 
     return (
-        <div className="flex flex-col gap-2 pt-4 p-3">
+        <div className="flex flex-col gap-2 pt-4 p-3 w-4xl">
             <div className="text-sm font-medium flex items-center gap-2">
                 <NotebookText className="w-4 h-4" />
                 ארכיון
@@ -70,17 +71,17 @@ export default function Journal() {
                     onChange={(e) => setFilterInput(e.target.value)}
                     onKeyDown={handleAddFilter}
                     placeholder="הקלד לסינון ולחץ Enter"
-                    className="w-fit min-w-48 px-3 py-2 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
+                    className="w-fit min-w-48 px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
                 />
                 {filterTags.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                         {filterTags.map(tag => (
                             <div
                                 key={tag}
-                                className="inline-flex items-center gap-1 px-2 py-1 bg-stone-200 rounded-md text-sm"
+                                className="inline-flex items-center gap-1 px-2 py-1 bg-accent rounded-md text-sm"
                             >
                                 <span>{tag}</span>
-                                <IconButton icon={X} onClick={() => removeFilter(tag)} small={true} className="text-stone-600 hover:text-stone-900 font-bold" />
+                                <IconButton icon={X} onClick={() => removeFilter(tag)} small={true} className="text-muted-foreground hover:text-stone-900 font-bold" />
                             </div>
                         ))}
                     </div>
@@ -91,7 +92,7 @@ export default function Journal() {
                 {filteredLogs
                     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                     .map(log => (
-                        <div key={log.id} className='flex justify-between items-center hover:bg-stone-100 group/log'>
+                        <div key={log.id} className='flex justify-between items-center hover:bg-muted group/log'>
                             <div className='py-[3px] flex items-center gap-2'>
                                 {log.user.id !== user.id && (
                                     <Avatar user={log.user} />
@@ -104,24 +105,24 @@ export default function Journal() {
                             </div>
                             <div className="flex items-center gap-2">
                                 {log.context && (
-                                    <span className='text-xs text-stone-500 rounded-full bg-stone-200 px-2 py-1 group-hover/log:bg-stone-300'
+                                    <span className='text-xs text-muted-foreground rounded-full bg-accent px-2 py-1 group-hover/log:bg-stone-300'
                                         onClick={() => setFilterTags([...filterTags, table_names[log.context_table], log.context.title])}
                                     >
                                         {table_names[log.context_table]} {log.context.title}
                                     </span>
                                 )}
                                 {log.mentor && (
-                                    <span className='text-xs text-stone-500 rounded-full bg-stone-200 px-2 py-1 group-hover/log:bg-stone-300'>
+                                    <span className='text-xs text-muted-foreground rounded-full bg-accent px-2 py-1 group-hover/log:bg-stone-300'>
                                         {log.mentor.first_name} {log.mentor.last_name}
                                     </span>
                                 )}
-                                <IconButton icon={Trash2} onClick={() => logsActions.deleteLog(log.id)} className="opacity-0 group-hover/log:opacity-100 transition-opacity duration-500 text-stone-700" />
+                                <IconButton icon={Trash2} onClick={() => logsActions.deleteLog(log.id)} className="opacity-0 group-hover/log:opacity-100 transition-opacity duration-500 text-foreground" />
                             </div>
                         </div>
                     ))}
                 {logs.length % 20 === 0 && (
                     <div className="flex justify-center items-center h-10">
-                        <IconButton icon={ArrowDownFromLineIcon} onClick={() => logsActions.loadMoreLogs()} className="text-stone-700" />
+                        <IconButton icon={ArrowDownFromLineIcon} onClick={() => logsActions.loadMoreLogs()} className="text-foreground" />
                     </div>
                 )}
             </div>
@@ -131,9 +132,9 @@ export default function Journal() {
 
 function JournalDate({ date }) {
     return (
-        <div className='p-1 flex items-center justify-center rounded-sm bg-stone-100 gap-1 group-hover/log:bg-stone-300'>
-            <div className='text-sm text-stone-500 font-medium'>{new Date(date).toLocaleString('he-IL', { weekday: 'long' }).replace('יום ', '')}</div>
-            <div className='text-xs text-stone-500 mt-[1px]'>{new Date(date).toLocaleString('he-IL', { month: 'short', day: 'numeric' })}</div>
+        <div className='p-1 flex items-center justify-center rounded-sm bg-muted gap-1 group-hover/log:bg-stone-300'>
+            <div className='text-sm text-muted-foreground font-medium'>{new Date(date).toLocaleString('he-IL', { weekday: 'long' }).replace('יום ', '')}</div>
+            <div className='text-xs text-muted-foreground mt-[1px]'>{new Date(date).toLocaleString('he-IL', { month: 'short', day: 'numeric' })}</div>
         </div>
     )
 }

@@ -32,9 +32,9 @@ export default function Section_Questions({ section }) {
             <div className="flex flex-col justify-between gap-8">
                 <div className="flex flex-col flex-1 overflow-y-auto">
                     {questions.map((question, index) => (
-                        <div key={index} className="flex justify-between group/question border-b border-stone-300 items-center">
+                        <div key={index} className="flex justify-between group/question border-b border-border items-center">
                             <TextInput onChange={(value) => updateQuestion(index, value)} value={question} className="w-full" />
-                            <IconButton icon={Trash2} onClick={() => removeQuestion(index)} className="p-2 hover:bg-stone-100 rounded-full opacity-0 group-hover/question:opacity-100 transition-opacity" />
+                            <IconButton icon={Trash2} onClick={() => removeQuestion(index)} className="p-2 hover:bg-muted rounded-full opacity-0 group-hover/question:opacity-100 transition-opacity" />
                         </div>
                     ))}
                     <div className="group/new-question p-2 cursor-pointer" onClick={addQuestion}>

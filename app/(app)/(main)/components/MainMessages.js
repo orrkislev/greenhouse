@@ -15,7 +15,7 @@ export default function MainMessages() {
     return (
         // <Card>
         <div className="col-start-2 row-start-1 col-span-2 row-span-2 flex items-center justify-center">
-            <div className={`text-sm text-stone-700 w-full p-4 text-center`} dangerouslySetInnerHTML={{ __html: schoolMessage }} />
+            <div className={`text-sm text-foreground w-full p-4 text-center`} dangerouslySetInnerHTML={{ __html: schoolMessage }} />
         </div>
         // </Card>
     )

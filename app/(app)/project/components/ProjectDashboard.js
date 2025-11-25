@@ -40,7 +40,7 @@ function ProjectImage() {
     , [img]);
 
     return (
-        <div className="relative w-full aspect-[20/3] bg-stone-300 bg-cover bg-center bg-no-repeat border-b border-stone-200" style={{ backgroundImage: imgUrl }}>
+        <div className="relative w-full aspect-[20/3] bg-stone-300 bg-cover bg-center bg-no-repeat border-b border-border" style={{ backgroundImage: imgUrl }}>
             <Menu className="absolute left-4 top-4 bg-white">
                 <MenuList>
                     <MenuItem title="סגירת הפרויקט" icon={Trash2} onClick={() => projectActions.closeProject()} />

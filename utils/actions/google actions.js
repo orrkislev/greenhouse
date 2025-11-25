@@ -100,7 +100,6 @@ export async function getLatestVideoFromPlaylist(playlistId) {
 
 
 export async function createGoogleDoc({ refreshToken, name, title, subtitle }) {
-  console.log('createGoogleDoc');
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET
@@ -151,6 +150,37 @@ export async function createGoogleDoc({ refreshToken, name, title, subtitle }) {
   });
 
   console.log('docId', docId);
+
+  // 5. Share it with staff@chamama.org
+  await docs.documents.batchUpdate({
+    documentId: docId,
+    requestBody: {
+      requests: [
+        {
+          updateDocumentProperties: {
+            documentProperties: {
+              title: name,
+              revisionHistoryDurationLimit: {
+                seconds: 60,
+                nanos: 0
+              }
+            }
+          }
+        }
+      ]
+    }
+  });
+  const drive = google.drive({ version: 'v3', auth: oauth2Client });
+  await drive.permissions.create({
+    fileId: docId,
+    requestBody: {
+      role: 'reader',
+      type: 'user',
+      emailAddress: 'staff@chamama.org'
+    },
+    sendNotificationEmail: false,
+  });
+
 
   return `https://docs.google.com/document/d/${docId}/edit`;
 }

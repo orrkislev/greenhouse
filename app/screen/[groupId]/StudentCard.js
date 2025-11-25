@@ -38,11 +38,11 @@ export default function StudentCard({ student, viewMode }) {
         return (
             <div
                 ref={cardRef}
-                className="bg-white rounded p-2 border border-gray-200 animate-pulse break-inside-avoid">
+                className="bg-card rounded p-2 border border-border animate-pulse break-inside-avoid">
                 <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                    <div className="w-8 h-8 bg-muted rounded-full"></div>
                     <div className="flex-1">
-                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-4 bg-muted rounded w-3/4"></div>
                     </div>
                 </div>
             </div>
@@ -56,13 +56,13 @@ export default function StudentCard({ student, viewMode }) {
     return (
         <div
             ref={cardRef}
-            className="bg-white rounded p-3 border border-gray-200 flex flex-col gap-2 break-inside-avoid"
+            className="bg-card rounded p-3 border border-border flex flex-col gap-2 break-inside-avoid"
         >
             {/* Student Header */}
-            <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
+            <div className="flex items-center gap-2 pb-2 border-b border-border">
                 <Avatar user={student} className="w-8 h-8" hoverScale={false} />
                 <div>
-                    <h3 className="text-sm font-bold text-gray-800">
+                    <h3 className="text-sm font-bold text-foreground">
                         {student.first_name} {student.last_name}
                     </h3>
                 </div>
@@ -76,18 +76,18 @@ export default function StudentCard({ student, viewMode }) {
                             {allEvents.map((event, idx) => (
                                 <div key={event.id || idx} className="text-xs">
                                     <div className="flex items-center gap-1">
-                                        <span className="text-stone-700 font-medium">{event.start.split(':').slice(0, 2).join(':')}</span>
+                                        <span className="text-foreground font-medium">{event.start.split(':').slice(0, 2).join(':')}</span>
                                         {(event.other_participants && event.other_participants.length > 0) ?
-                                            <span className="text-gray-700">{event.other_participants[0].first_name} {event.other_participants[0].last_name}</span>
+                                            <span className="text-foreground">{event.other_participants[0].first_name} {event.other_participants[0].last_name}</span>
                                             :
-                                            <span className="text-gray-700">{event.title}</span>
+                                            <span className="text-foreground">{event.title}</span>
                                         }
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <div className="text-xs text-gray-400">אין אירועים היום</div>
+                        <div className="text-xs text-muted-foreground">אין אירועים היום</div>
                     )}
                 </>
             )}
@@ -95,9 +95,9 @@ export default function StudentCard({ student, viewMode }) {
             {viewMode === 'project' && (
                 <>
                     {data.project ? (
-                        <div className="text-xs font-bold text-gray-800">{data.project.title}</div>
+                        <div className="text-xs font-bold text-foreground">{data.project.title}</div>
                     ) : (
-                        <div className="text-xs text-gray-400">אין פרויקט</div>
+                        <div className="text-xs text-muted-foreground">אין פרויקט</div>
                     )}
                 </>
             )}
@@ -106,18 +106,18 @@ export default function StudentCard({ student, viewMode }) {
                 <>
                     {data.research ? (
                         <>
-                            <div className="text-xs font-bold text-gray-800">{data.research.title}</div>
-                            <div className="flex gap-2 text-xs text-gray-800 flex-wrap">
-                                {data.research.sections.questions && <div className="px-2 py-1 bg-gray-100 rounded-md">{data.research.sections.questions.length} שאלות</div>}
-                                {data.research.sections.sources && <div className="px-2 py-1 bg-gray-100 rounded-md">{data.research.sections.sources.length} מקורות</div>}
-                                {data.research.sections.quotes && <div className="px-2 py-1 bg-gray-100 rounded-md">{data.research.sections.quotes.length} ציטוטים</div>}
-                                {data.research.sections.summary && <div className="px-2 py-1 bg-gray-100 rounded-md">{data.research.sections.summary.length} סיכום</div>}
-                                {data.research.sections.masters && <div className="px-2 py-1 bg-gray-100 rounded-md">{data.research.sections.masters.length} אנשים</div>}
-                                {data.research.sections.vocabulary && <div className="px-2 py-1 bg-gray-100 rounded-md">{data.research.sections.vocabulary.length} מושגים</div>}
+                            <div className="text-xs font-bold text-foreground">{data.research.title}</div>
+                            <div className="flex gap-2 text-xs text-foreground flex-wrap">
+                                {data.research.sections.questions && <div className="px-2 py-1 bg-muted rounded-md">{data.research.sections.questions.length} שאלות</div>}
+                                {data.research.sections.sources && <div className="px-2 py-1 bg-muted rounded-md">{data.research.sections.sources.length} מקורות</div>}
+                                {data.research.sections.quotes && <div className="px-2 py-1 bg-muted rounded-md">{data.research.sections.quotes.length} ציטוטים</div>}
+                                {data.research.sections.summary && <div className="px-2 py-1 bg-muted rounded-md">{data.research.sections.summary.length} סיכום</div>}
+                                {data.research.sections.masters && <div className="px-2 py-1 bg-muted rounded-md">{data.research.sections.masters.length} אנשים</div>}
+                                {data.research.sections.vocabulary && <div className="px-2 py-1 bg-muted rounded-md">{data.research.sections.vocabulary.length} מושגים</div>}
                             </div>
                         </>
                     ) : (
-                        <div className="text-xs text-gray-400">אין חקר</div>
+                        <div className="text-xs text-muted-foreground">אין חקר</div>
                     )}
                 </>
             )}

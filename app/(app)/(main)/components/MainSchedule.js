@@ -53,17 +53,17 @@ export default function MainSchedule() {
                     </div>
                 ))}
                 {todayEvents.length > 0 ? todayEvents.map(event => (
-                    <div key={event.id} className={`flex gap-3 items-center  ${nextEvent?.id === event.id ? 'bg-stone-300 rounded-[8px] border-2 border-stone-300' : ''}`}>
+                    <div key={event.id} className={`flex gap-3 items-center  ${nextEvent?.id === event.id ? 'bg-accent rounded-[8px] border-2 border-border' : ''}`}>
                         <EventTime time={event.start} />
                         <div className="text-sm font-bold flex items-center gap-1">
                             {event.title}
-                            {event.group && <div className="text-xs font-normal text-stone-500">(ב{event.group})</div>}
+                            {event.group && <div className="text-xs font-normal text-muted-foreground">(ב{event.group})</div>}
                         </div>
                     </div>
                 )) : (
                     <div className="flex flex-col items-center justify-center h-full">
                         <Image src="/images/no_events.png" alt="empty" width={200} height={200} className="w-[70%] object-cover" />
-                        <div className="text-xs text-stone-500">אין אירועים היום</div>
+                        <div className="text-xs text-muted-foreground">אין אירועים היום</div>
                     </div>
                 )}
             </div>
@@ -83,5 +83,5 @@ export function EventTime({ time }) {
     startH = startH.toString().padStart(2, '0');
     startM = startM.toString().padStart(2, '0');
     const text = startH == 13 ? 'ערב' : `${startH}:${startM}`;
-    return <div className="p-1 bg-stone-100 rounded-[6px] text-xs">{text}</div>
+    return <div className="p-1 bg-muted rounded-[6px] text-xs">{text}</div>
 }

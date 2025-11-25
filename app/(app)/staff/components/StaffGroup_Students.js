@@ -95,17 +95,17 @@ function SelectedStudentCard({ student, context, group }) {
     }
 
     return (
-        <motion.div key={student.id} 
-            initial={{ opacity: 0, y: -10, scale: 0.98 }} 
-            animate={{ opacity: 1, y: 0, scale: 1 }} 
-            transition={{ duration: 0.3, ease: 'easeInOut' }} 
-            className="p-4 md:p-6 border border-stone-200 flex flex-col gap-4 md:gap-6 justify-between">
+        <motion.div key={student.id}
+            initial={{ opacity: 0, y: -10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="bg-muted p-4 md:p-6 border border-border flex flex-col gap-4 md:gap-6 justify-between">
 
             <div className="flex items-center gap-2">
                 <Avatar user={data} className="w-12 h-12 md:w-16 md:h-16" />
                 <div>
                     <div className="font-bold text-sm md:text-base">{data.first_name} {data.last_name}</div>
-                    <div className="text-xs text-stone-500">
+                    <div className="text-xs text-muted-foreground">
                         {context === 'class' ? groups.find(g => g.id === data.major)?.name : groups.find(g => g.id === data.class)?.name}
                     </div>
                 </div>
@@ -113,7 +113,7 @@ function SelectedStudentCard({ student, context, group }) {
             <WithLabel label="פרויקט">
                 {data.project ? (
                     <div className="text-xs">{data.project.title}</div>
-                ) : <div className="text-xs text-stone-500">אין פרויקט </div>}
+                ) : <div className="text-xs text-muted-foreground">אין פרויקט </div>}
             </WithLabel>
             <WithLabel label="לוז היום">
                 {data.events && data.events.length > 0 ? data.events.map(event => (
@@ -121,7 +121,7 @@ function SelectedStudentCard({ student, context, group }) {
                         <div className="text-xs">ב{event.start}</div>
                         <div className="text-sm font-bold">{event.title}</div>
                     </div>
-                )) : <div className="text-xs text-stone-500">אין אירועים היום</div>}
+                )) : <div className="text-xs text-muted-foreground">אין אירועים היום</div>}
                 {groups.filter(g => groupUtils.isMember(g, data)).map(group => (
                     <div key={group.id} className="flex gap-3 items-center">
                         <div className="text-sm font-semibold">ב{group.name}</div>
@@ -130,7 +130,7 @@ function SelectedStudentCard({ student, context, group }) {
                                 <div className="text-xs">ב{event.start}</div>
                                 <div className="text-sm">{event.title}</div>
                             </div>
-                        )) : <div className="text-xs text-stone-500">אין אירועים היום</div>}
+                        )) : <div className="text-xs text-muted-foreground">אין אירועים היום</div>}
                     </div>
                 ))}
             </WithLabel>
@@ -165,7 +165,7 @@ function SelectedStudentCard_Meeting({ student }) {
         <WithLabel label="פגישה קבועה" icon={Calendar}>
             <Button onClick={open} ref={baseRef}>
                 {meeting && <div className="text-xs">ימי {daysOfWeek[meeting.day_of_the_week - 1]} בשעה {meeting.start.split(':')[0]}:{meeting.start.split(':')[1]}</div>}
-                {!meeting && <div className="text-xs text-stone-500">אין פגישה קבועה</div>}
+                {!meeting && <div className="text-xs text-muted-foreground">אין פגישה קבועה</div>}
                 <Pencil className="w-4 h-4" />
             </Button>
             <Popper>

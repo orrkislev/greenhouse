@@ -33,7 +33,7 @@ export default function StaffGroup_Meetings({ group }) {
             {/* Mobile view - single column */}
             <div className="md:hidden flex flex-col gap-4">
                 <div>
-                    <div className="bg-stone-100 px-2 py-1 text-sm font-semibold mb-2">
+                    <div className="bg-muted px-2 py-1 text-sm font-semibold mb-2">
                         חניכים ללא שיחה מתוכננת
                     </div>
                     <div className="flex flex-col gap-2">
@@ -44,7 +44,7 @@ export default function StaffGroup_Meetings({ group }) {
                 </div>
                 {daysOfWeek.map((day, index) => (
                     <div key={day}>
-                        <div className="bg-stone-100 px-2 py-1 text-sm font-semibold mb-2">
+                        <div className="bg-muted px-2 py-1 text-sm font-semibold mb-2">
                             יום {day}
                         </div>
                         <div className="flex flex-col gap-2">
@@ -59,11 +59,11 @@ export default function StaffGroup_Meetings({ group }) {
             {/* Desktop view - grid */}
             <div className="hidden md:block">
                 <ScheduleSection withLabel={false}>
-                    <div className="bg-stone-100 px-2 py-1 text-sm">
+                    <div className="bg-muted px-2 py-1 text-sm">
                         חניכים ללא שיחה מתוכננת
                     </div>
                     {daysOfWeek.map((day, index) => (
-                        <div key={day} className="bg-stone-100 text-sm flex items-center justify-center">
+                        <div key={day} className="bg-muted text-sm flex items-center justify-center">
                             {day}
                         </div>
                     ))}
@@ -76,7 +76,7 @@ export default function StaffGroup_Meetings({ group }) {
                     </div>
 
                     {daysOfWeek.map((day, index) => (
-                        <div key={day} className="bg-stone-100 flex flex-col gap-2">
+                        <div key={day} className="bg-muted flex flex-col gap-2">
                             {studentsWithMeetings.filter(s => s.meeting?.day_of_the_week === index + 1).map(student => (
                                 <StudentMeetingSlot key={student.id} student={student} meeting={student.meeting} />
                             ))}
@@ -95,13 +95,13 @@ function StudentMeetingSlot({ student, meeting }) {
 
     return (
         <>
-            <div className="bg-stone-200 px-2 py-1 border border-stone-300 flex gap-2 text-sm cursor-pointer hover:bg-stone-300 transition-colors"
+            <div className="bg-accent px-2 py-1 border border-border flex gap-2 text-sm cursor-pointer hover:bg-accent transition-colors"
                 onClick={open}
                 ref={baseRef}
             >
                 <span className="">{student.first_name} {student.last_name}</span>
                 {meeting && (
-                    <span className="text-stone-600">
+                    <span className="text-muted-foreground">
                         {displayTime(meeting.start)} - {displayTime(meeting.end)}
                     </span>
                 )}
@@ -137,15 +137,15 @@ export function EditMeeting({ student, meeting, onClose }) {
             <h4 className="font-bold text-base md:text-lg">שיחה עם {student.first_name}</h4>
             {!meeting && (
                 <>
-                    <p className="text-sm text-stone-600">אין שיחה מתוכננת כרגע.</p>
-                    <p className="text-sm text-stone-600">ניתן לתאם שיחה חדשה עם החניך.</p>
+                    <p className="text-sm text-muted-foreground">אין שיחה מתוכננת כרגע.</p>
+                    <p className="text-sm text-muted-foreground">ניתן לתאם שיחה חדשה עם החניך.</p>
                 </>
             )}
             <TimeRange
                 defaultValue={time}
                 onUpdate={(newTime) => setTime(newTime)}
             />
-            <select value={day} onChange={(e) => setDay(Number(e.target.value))} className="border border-stone-300 rounded px-2 py-1 w-full text-sm md:text-base">
+            <select value={day} onChange={(e) => setDay(Number(e.target.value))} className="border border-border rounded px-2 py-1 w-full text-sm md:text-base">
                 {daysOfWeek.map((day, index) => (
                     <option key={day} value={index + 1}>{day}</option>
                 ))}
