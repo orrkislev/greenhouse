@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import { prepareEmail, preparePassword } from '@/utils/firebase/auth';
+import { prepareEmail, preparePassword } from '@/utils/actions/auth';
 import { resizeImage } from '@/utils/actions/storage actions';
 import { resetPin } from '../actions/admin actions';
 import { supabase } from '../supabase/client';

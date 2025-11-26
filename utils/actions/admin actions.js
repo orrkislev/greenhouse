@@ -1,5 +1,5 @@
 'use server';
-import { prepareEmail, preparePassword } from '@/utils/firebase/auth';
+import { prepareEmail, preparePassword } from '@/utils/actions/auth';
 import { getSupabaseAdminClient } from '../supabase/server';
 
 const supabase = getSupabaseAdminClient();

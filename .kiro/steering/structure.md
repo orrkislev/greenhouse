@@ -27,7 +27,6 @@
 ├── utils/                # Utility functions and configurations
 │   ├── actions/          # Server actions and API calls
 │   ├── constants/        # App constants and enums
-│   ├── firebase/         # Firebase configuration and helpers
 │   ├── supabase/         # Supabase client, server, and utilities
 │   ├── store/           # Zustand store definitions
 │   │   └── utils/       # Store utility functions
@@ -39,7 +38,6 @@
 
 ### Database Architecture
 - **Primary Database**: Supabase (PostgreSQL) for main application data
-- **Secondary Database**: Firebase for legacy features and file storage
 - **Real-time Features**: Supabase subscriptions for live updates
 - **Authentication**: Supabase Auth with Google OAuth integration
 

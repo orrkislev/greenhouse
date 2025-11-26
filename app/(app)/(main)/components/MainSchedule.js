@@ -1,7 +1,6 @@
 import { useTodayEvents } from "@/utils/store/useEvents";
 import { useGoogleCalendarEventsToday } from "@/utils/store/useGoogleCalendar";
 import { groupsActions, useUserGroups } from "@/utils/store/useGroups";
-import { useNotes } from "@/utils/store/useNotes"
 import { useTime } from "@/utils/store/useTime";
 import { useEffect } from "react";
 import Box2 from "@/components/Box2";

@@ -1,14 +1,10 @@
 'use client'
 
-import { DashboardLayout, DashboardPanel, DashboardPanelButton, DashboardMain, DashboardTitle } from "@/components/DashboardLayout"
-import { studyActions, useStudyPaths } from "@/utils/store/useStudy"
+import { useStudyPaths } from "@/utils/store/useStudy"
 import StudyMain from "./components/StudyMain"
 import StudyPath from "./components/StudyPath"
-import { tw } from "@/utils/tw"
 import ContextBar, { PageMain } from "@/components/ContextBar"
-import { newPathData } from "./components/example study paths"
 import { useSearchParams } from "next/navigation"
-import Link from "next/link"
 import StudyContext from "./components/StudyContext"
 
 export default function LearnPage() {
@@ -20,8 +16,8 @@ export default function LearnPage() {
 
     return (
         <>
-        <PageMain className="pt-0">
-            {/* <DashboardLayout> */}
+            <PageMain className="pt-0">
+                {/* <DashboardLayout> */}
                 {/* <DashboardTitle>מסלולי למידה שלי</DashboardTitle>
                 {selectedPath && (
                     <DashboardPanel>
@@ -41,13 +37,13 @@ export default function LearnPage() {
                     </DashboardPanel>
                 )} */}
                 {/* <DashboardMain> */}
-                    {selectedPath ? <StudyPath path={selectedPath} /> : <StudyMain />}
+                {selectedPath ? <StudyPath path={selectedPath} /> : <StudyMain />}
                 {/* </DashboardMain> */}
-            {/* </DashboardLayout> */}
-        </PageMain>
-        <ContextBar>
-            <StudyContext />
-        </ContextBar>
+                {/* </DashboardLayout> */}
+            </PageMain>
+            <ContextBar>
+                <StudyContext />
+            </ContextBar>
         </>
     )
 }

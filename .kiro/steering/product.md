@@ -19,7 +19,7 @@ A comprehensive Hebrew-language educational platform for "תיכון החממה"
 - Google Calendar integration for scheduling
 - Rich text editing and document management
 - Staff impersonation system for student support
-- Multi-database architecture (Firebase + Supabase)
+- Multi-database architecture (Supabase)
 - Real-time collaboration and updates
 - Mobile-responsive design with RTL support
 

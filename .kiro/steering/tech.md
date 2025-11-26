@@ -7,8 +7,6 @@
 
 ## Database & Backend
 - **Supabase** - Primary database with PostgreSQL, real-time subscriptions, and auth
-- **Firebase 11.8.1** - Secondary database and file storage
-- **Firebase Admin 13.4.0** - Server-side Firebase operations
 - **Google APIs 153.0.0** - Calendar, Drive, and Docs integration
 
 ## Styling & UI
@@ -52,10 +50,9 @@ npm run lint         # Run ESLint
 ```
 
 ## Architecture Notes
-- **Dual Database**: Supabase as primary, Firebase for legacy features
+- **Single Database**: Supabase as primary
 - **Real-time Updates**: Supabase subscriptions for live data
 - **Authentication**: Supabase Auth with Google OAuth integration
-- **File Storage**: Firebase Storage for images and documents
 - **API Integration**: Google Calendar, Drive, and Docs APIs
 - **Turbopack**: Enabled for faster development builds
 - **shadcn/ui**: Component system with New York style and stone base color

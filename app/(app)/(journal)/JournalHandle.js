@@ -1,13 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { BookOpen, NotebookTabs, Archive } from "lucide-react"
+import { BookOpen, Archive } from "lucide-react"
 import { useUser } from "@/utils/store/useUser"
 import JournalNew from "./JournalNew"
 import Journal from "./Journal"
 import { tw } from "@/utils/tw"
 import { useNewLog } from "@/utils/store/useLogs"
-import Button from "@/components/Button"
 
 const InnerTab = tw.div`flex items-center gap-2 p-2 rounded-md cursor-pointer transition-all duration-300
 ${props => props.$isActive ? 'bg-secondary-200' : 'bg-secondary-50 border border-secondary-200'}

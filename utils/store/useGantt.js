@@ -1,8 +1,6 @@
 import { getGanttEventsWithDateRange } from "@/utils/actions/gantt actions";
 import { format } from "date-fns";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { create } from "zustand";
-import { db } from "@/utils/firebase/firebase";
 import { supabase } from "../supabase/client";
 
 const toKey = (date) => {
@@ -17,12 +15,12 @@ export const useGantt = create((set, get) => ({
 
     // ------------------------------
     loadSchoolMessage: async () => {
-        const {data, error} = await supabase.from('misc').select('data').eq('name', 'school_message').single();
+        const { data, error } = await supabase.from('misc').select('data').eq('name', 'school_message').single();
         if (error) throw error;
         set({ schoolMessage: data.data.text });
     },
     loadStudyGroups: async () => {
-        const {data, error} = await supabase.from('misc').select('data').eq('name', 'study_groups').single();
+        const { data, error } = await supabase.from('misc').select('data').eq('name', 'study_groups').single();
         if (error) throw error;
         set({ studyGroups: data.data.study_groups || [] });
     },

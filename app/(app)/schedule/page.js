@@ -8,7 +8,6 @@ import { useState } from "react";
 import GroupSchedules from "./components/GroupSchedule/GroupSchedules";
 import Meetings from "./components/meetings/Meetings";
 import GoogleCalendar from "./components/Google/GoogleCalendar";
-import Notes from "./components/notes/Notes";
 import Term from "./components/term/Term";
 import ContextBar, { PageMain } from "@/components/ContextBar";
 import { DashboardLayout, DashboardPanel, DashboardPanelButton, DashboardTitle } from "@/components/DashboardLayout";
@@ -34,7 +33,6 @@ export default function SchedulePage() {
 
                         {view === 'week' && (
                             <>
-                                {/* <Notes /> */}
                                 <Meetings />
                                 <Events />
                                 <GoogleCalendar />
