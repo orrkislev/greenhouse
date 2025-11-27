@@ -46,7 +46,7 @@ export default function JournalHandle() {
             />
 
             <div
-                className={`fixed max-h-[70vh] md:max-h-[70vh] left-1/2 -translate-x-1/2 w-full transition-all duration-700 z-50 ${isOpen
+                className={`fixed max-h-[70vh] md:max-h-[70vh] left-1/2 -translate-x-1/2 w-fit transition-all duration-700 z-50 ${isOpen
                     ? "top-[10%] md:top-[50%] md:-translate-y-[20vh] ease-[cubic-bezier(0.34,1.56,0.64,1)]"
                     : isHovered
                         ? `translate-y-[calc(100%-10vh)] ease-out delay-50 ${originalUser ? 'bottom-16' : 'bottom-0'}`
