@@ -63,7 +63,7 @@ export const useTime = create(subscribeWithSelector((set, get) => {
 (async () => {
     const { data, error } = await supabase.from('current_term').select();
     if (error) throw error;
-    useTime.setState({ currTerm: data[0] });
+    useTime.setState({ currTerm: data[0] || { id: '', name: 'בין הזמנים' } });
 })();
 
 export const timeActions = Object.fromEntries(

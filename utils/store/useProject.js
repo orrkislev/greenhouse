@@ -28,14 +28,18 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             get().loadProject();
         },
 
-        loadProjectTerms: async () => {
+        getProjectTerms: async (projectID) => {
             const { data, error } = await supabase.rpc('get_linked_items', {
                 p_table_name: 'projects',
-                p_item_id: get().project.id,
+                p_item_id: projectID,
                 p_target_types: ['terms']
             })
             if (error) throw error;
-            set({ project: { ...get().project, terms: data.map(item => item.data) } });
+            return data.map(item => item.data);
+        },
+        loadProjectTerms: async () => {
+            const terms = await get().getProjectTerms(get().project.id);
+            set({ project: { ...get().project, terms: terms } });
         },
 
         loadProjectMasters: async () => {
@@ -240,5 +244,5 @@ export const projectUtils = {
             id: project.id,
             title: project.title,
         }
-    }
+    },
 }

@@ -1,11 +1,12 @@
 import Button from "@/components/Button";
+import Tooltip from "@/components/ToolTip";
 import WithLabel from "@/components/WithLabel";
 import { projectActions, useProject, useProjectData } from "@/utils/store/useProject";
 import { timeActions, useTime } from "@/utils/store/useTime";
 import { tw } from "@/utils/tw";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function ProjectContext() {
     const project = useProject();
@@ -43,17 +44,36 @@ export default function ProjectContext() {
 }
 
 const ProjectDiv = tw.div`
-    flex gap-2
-    text-sm text-muted-foreground mr-2 p-1 hover:bg-muted hover:text-foreground rounded-md cursor-pointer transition-colors
-    ${props => props.$isActive && 'bg-muted0 text-white'}
+    flex flex-col
+    text-sm text-sl mr-2 p-1 hover:bg-muted hover:text-foreground rounded-md cursor-pointer transition-colors
+    ${props => props.$isActive && 'bg-slate-300 text-slate-900'}
 `
 
 function OtherProjects() {
-    const currProject = useProjectData((state) => state.project);
     const allProjects = useProjectData((state) => state.allProjects);
 
     useEffect(() => {
         projectActions.loadAllProjects();
+    }, [])
+
+    return (
+        <div>
+            <div className='w-full h-px bg-stone-300 mb-2'></div>
+            <div className="text-sm text-foreground mb-4">כל הפרויקטים שלי</div>
+            {allProjects.map(project => (
+                <SingleProject key={project.id} project={project} />
+            ))}
+        </div>
+    )
+}
+
+function SingleProject({ project }) {
+    const currProject = useProjectData((state) => state.project);
+    const currTerm = useTime((state) => state.currTerm);
+    const [terms, setTerms] = useState([]);
+
+    useEffect(() => {
+        projectActions.getProjectTerms(project.id).then(setTerms);
     }, [])
 
     const clickOnProject = (project) => {
@@ -65,15 +85,22 @@ function OtherProjects() {
         }
     }
 
+    let needsReview = false;
+    if (terms.length > 0) {
+        if (!terms.some(term => term.id === currTerm.id)) {
+            if (!project.metadata?.review) needsReview = true;
+            else if (!project.metadata.review.summary) needsReview = true;
+        }
+    }
+
     return (
-        <div>
-            <div className='w-full h-px bg-stone-300 mb-2'></div>
-            <div className="text-sm text-foreground mb-4">כל הפרויקטים שלי</div>
-            {allProjects.map(project => (
-                <ProjectDiv key={project.id} onClick={() => clickOnProject(project)} $isActive={project.id === currProject?.id}>
-                    {project.title}
-                </ProjectDiv>
-            ))}
-        </div>
+        <ProjectDiv onClick={() => clickOnProject(project)} $isActive={project.id === currProject?.id}>
+            <div className='flex items-center gap-2'>
+                {project.title}
+                {needsReview && <div className="w-3 h-3 rounded-full bg-destructive"></div>}
+            </div>
+            {terms.length > 0 && <div className="text-xs text-muted-foreground">תקופת {terms[0].name}</div>}
+            {needsReview && <Tooltip side="right">נדרש משוב</Tooltip>}
+        </ProjectDiv>
     )
 }

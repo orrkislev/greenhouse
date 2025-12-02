@@ -86,3 +86,15 @@ export const [useResearchData, researchActions] = createStore((set, get, withUse
 
 export const useResearch = createDataLoadingHook(useResearchData, 'research', 'loadResearch');
 export const useAllResearch = createDataLoadingHook(useResearchData, 'allResearch', 'loadAllResearch');
+
+export const researchUtils = {
+    getNeedReview: (research) => {
+        const terms = useTime.getState().terms
+        const researchCreatedDate = new Date(research.created_at)
+        const term = terms.find(term => new Date(term.start) <= researchCreatedDate && new Date(term.end) >= researchCreatedDate)
+        if (!term) return false
+        const currTerm = useTime.getState().currTerm
+        if (term.id === currTerm.id) return false
+        return !research.metadata?.review
+    }
+}

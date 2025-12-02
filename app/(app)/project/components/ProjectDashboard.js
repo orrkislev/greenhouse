@@ -3,10 +3,13 @@ import ProjectGoals from "./ProjectGoals";
 import ProjectLibrary from "./ProjectLibrary";
 import ProjectInfo from "./ProjectInfo";
 import SmartText from "@/components/SmartText";
-import { Image, Trash2 } from "lucide-react";
+import { Image, Loader, Trash2 } from "lucide-react";
 import ProjectTasks from "./Project Tasks/ProjectTasks";
 import Menu, { MenuList, MenuItem } from "@/components/Menu";
 import { useMemo, useRef } from "react";
+import { useTime } from "@/utils/store/useTime";
+import Box2 from "@/components/Box2";
+import { ProjectReview } from "./ProjectReview";
 
 
 export default function ProjectDashboard() {
@@ -15,6 +18,8 @@ export default function ProjectDashboard() {
             <ProjectImage />
             <ProjectName />
             <ProjectInfo />
+
+            <ProjectReview />
 
             <ProjectGoals />
             <ProjectTasks />
@@ -37,7 +42,7 @@ function ProjectImage() {
 
     const imgUrl = useMemo(() =>
         img ? 'url(' + img + ')' : 'url(/images/fun.png)'
-    , [img]);
+        , [img]);
 
     return (
         <div className="relative w-full aspect-[20/3] bg-stone-300 bg-cover bg-center bg-no-repeat border-b border-border" style={{ backgroundImage: imgUrl }}>
