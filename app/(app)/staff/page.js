@@ -40,7 +40,7 @@ export default function StaffPage() {
                     <Plus className="w-4 h-4" />
                 </DashboardPanelButton>
             </DashboardPanel>
-            <DashboardMain>
+            <DashboardMain className='p-4'>
                 {activeTab === 'students' && <StaffStudents students={students} />}
                 {activeTab === 'admin' && <Staff_Admin />}
                 {selectedGroup && <StaffGroup group={selectedGroup} />}

@@ -10,7 +10,7 @@ import Meetings from "./components/meetings/Meetings";
 import GoogleCalendar from "./components/Google/GoogleCalendar";
 import Term from "./components/term/Term";
 import ContextBar, { PageMain } from "@/components/ContextBar";
-import { DashboardLayout, DashboardPanel, DashboardPanelButton, DashboardTitle } from "@/components/DashboardLayout";
+import { DashboardLayout, DashboardMain, DashboardPanel, DashboardPanelButton, DashboardTitle } from "@/components/DashboardLayout";
 import ScheduleContext from "./components/ScheduleContext";
 
 const ScheduleOuter = tw`w-full h-full pr-2 md:pr-16 pt-4 md:pt-8`;
@@ -20,13 +20,12 @@ export default function SchedulePage() {
 
     return (
         <>
-            <PageMain className='select-none'>
-                <DashboardLayout>
-                    <DashboardTitle>לוח זמנים</DashboardTitle>
-                    <DashboardPanel>
-                        <DashboardPanelButton onClick={() => setView('week')} $active={view === 'week'}>שבוע</DashboardPanelButton>
-                        <DashboardPanelButton onClick={() => setView('semester')} $active={view === 'semester'}>תקופה</DashboardPanelButton>
-                    </DashboardPanel>
+            <DashboardLayout>
+                <DashboardPanel>
+                    <DashboardPanelButton onClick={() => setView('week')} $active={view === 'week'}>שבוע</DashboardPanelButton>
+                    <DashboardPanelButton onClick={() => setView('semester')} $active={view === 'semester'}>תקופה</DashboardPanelButton>
+                </DashboardPanel>
+                <DashboardMain className='p-4 pr-1'>
                     <ScheduleOuter>
 
                         <ScheduleTop view={view} />
@@ -46,8 +45,8 @@ export default function SchedulePage() {
                             </>
                         )}
                     </ScheduleOuter>
-                </DashboardLayout>
-            </PageMain>
+                </DashboardMain>
+            </DashboardLayout>
             <ContextBar>
                 <ScheduleContext />
             </ContextBar>

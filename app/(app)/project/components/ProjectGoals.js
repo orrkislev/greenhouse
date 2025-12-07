@@ -98,11 +98,6 @@ function FocusedGoal({ index }) {
                     <div className="text-muted-foreground text-sm whitespace-pre-wrap leading-relaxed">{goal.title}</div>
                     <div className="text-muted-foreground text-xs whitespace-pre-wrap leading-relaxed">{goal.description}</div>
                 </div>
-
-                {/* <button className="absolute opacity-0 group-hover:opacity-50 hover:opacity-100 transition-opacity cursor-pointer left-2 top-2"
-                    onClick={() => setIsFocused(true)}>
-                    <Pencil className="w-4 h-4" />
-                </button> */}
             </div>
             <AnimatePresence>
                 {isFocused && ref.current && (
@@ -160,8 +155,8 @@ function FocusedGoal({ index }) {
                                     className="px-4 py-1 bg-white border border-border flex gap-2 group w-full text-xs"
                                 >
                                     <SmartTextArea
-                                        value={question}
-                                        onChange={(e) => updateQuestion(index, e.target.value)}
+                                        defaultValue={question}
+                                        onBlur={(e) => updateQuestion(index, e.target.value)}
                                     />
                                     <button
                                         onClick={() => removeQuestion(index)}
@@ -177,9 +172,10 @@ function FocusedGoal({ index }) {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
                                 transition={{ duration: 0.2, ease: "easeOut", delay: (goal.leadingQuestions.length + 1) * 0.1 }}
-                                className="text-center text-white font-semibold hover:bg-white hover:text-black transition-colors"
+                                className="text-center text-white font-semibold hover:bg-white hover:text-black transition-colors cursor-pointer"
+                                onClick={newQuestion}
                             >
-                                <button onClick={newQuestion}>+</button>
+                                <button >+</button>
                             </motion.div>
                         </motion.div>
 

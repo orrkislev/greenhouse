@@ -1,11 +1,9 @@
 import Button from "@/components/Button";
 import Tooltip from "@/components/ToolTip";
-import WithLabel from "@/components/WithLabel";
 import { projectActions, useProject, useProjectData } from "@/utils/store/useProject";
-import { timeActions, useTime } from "@/utils/store/useTime";
+import { useTime } from "@/utils/store/useTime";
 import { tw } from "@/utils/tw";
 import { ChevronLeft } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function ProjectContext() {
@@ -13,24 +11,6 @@ export default function ProjectContext() {
 
     return (
         <div className="flex flex-col gap-4">
-            {project && (
-                <div className="flex-1 flex gap-3 flex-col">
-                    <div className="p-4 flex flex-col gap-4 border border-border text-sm text-muted-foreground">
-                        {project.metadata.questions && project.metadata.questions.map((question, index) => (
-                            <WithLabel key={index} label={question.title}>
-                                <div className="text-sm text-muted-foreground">{question.value}</div>
-                            </WithLabel>
-                        ))}
-                    </div>
-
-                    {/* Research topics */}
-                    <Link href={`/research`} className="p-3 flex items-center justify-between border border-border hover:bg-accent transition-colors">
-                        <span className="text-sm text-foreground">החקר שלי</span>
-                        <ChevronLeft className="w-4 h-4 text-stone-400 cursor-pointer" />
-                    </Link>
-                </div>
-            )}
-
             <OtherProjects />
 
             {project && project.terms && !project.terms.some(term => term.id === useTime.getState().currTerm.id) && (

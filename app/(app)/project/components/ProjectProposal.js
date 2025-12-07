@@ -54,7 +54,7 @@ export default function ProjectProposal() {
     return (
         <div className='rtl'>
             <div className="max-w-6xl mx-auto space-y-6">
-                <div>
+                {/* <div>
                     <div className="font-semibold text-lg mb-2">שם הפרויקט</div>
                     <input
                         type="text"
@@ -64,7 +64,7 @@ export default function ProjectProposal() {
                         dir="rtl"
                         className="bg-white w-full border border-border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
-                </div>
+                </div> */}
 
                 <div className="flex gap-6 w-full">
                     <div className="flex flex-1 gap-6">
@@ -84,7 +84,7 @@ export default function ProjectProposal() {
                         'יש להשלים לפחות שלוש שאלות כדי להמשיך לפרויקט'
                     }
                 </div>
-                {filledThreeQuestions && isStaff() && (
+                {/* {filledThreeQuestions && isStaff() && (
                     <div className="flex justify-center mt-4">
                         <Button data-role="edit"
                             onClick={async () => {
@@ -95,7 +95,7 @@ export default function ProjectProposal() {
                             I AM MY OWN MASTER <Cat className="w-4 h-4" />
                         </Button>
                     </div>
-                )}
+                )} */}
             </div>
 
         </div>

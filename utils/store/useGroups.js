@@ -3,7 +3,7 @@ import { useUser } from "@/utils/store/useUser";
 import { useTime } from "@/utils/store/useTime";
 import { supabase } from "../supabase/client";
 import { makeLink, prepareForGroupsTable } from "../supabase/utils";
-import { addDays, format, isSameDay } from "date-fns";
+import { addDays, format } from "date-fns";
 import { createDataLoadingHook } from "./utils/createStore";
 
 export const [useGroups, groupsActions] = createStore((set, get, withUser, withLoadingCheck) => ({

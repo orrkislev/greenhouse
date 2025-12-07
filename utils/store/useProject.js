@@ -4,6 +4,7 @@ import { makeLink, prepareForProjectsTable } from "../supabase/utils";
 import { supabase } from "../supabase/client";
 import { resizeImage } from "../actions/storage actions";
 import { newLogActions } from "./useLogs";
+import { debounce } from "lodash";
 
 
 export const [useProjectData, projectActions] = createStore((set, get, withUser, withLoadingCheck) => {
@@ -78,9 +79,8 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             newLogActions.add(`התחלתי פרויקט חדש בתקופת ${useTime.getState().currTerm.name}. `);
         }),
         updateProject: async (updates) => {
-            const { error } = await supabase.from('projects').update(prepareForProjectsTable(updates)).eq('id', get().project.id);
-            if (error) throw error;
             set((state) => ({ project: { ...state.project, ...updates } }));
+            get().updateOnSupabase();
         },
 
         closeProject: async () => {
@@ -92,6 +92,13 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             newLogActions.add(`סגרתי את הפרויקט ${project.title}. `)
         },
 
+        updateOnSupabase: debounce(async () => {
+            const { project } = get();
+            if (!project) return;
+            const { error } = await supabase.from('projects').update(prepareForProjectsTable(project)).eq('id', project.id);
+            if (error) throw error;
+        }, 1000),
+
 
         // ------------------------------
         // ------ Project Goals ---------
@@ -100,8 +107,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             const metadata = { ...get().project.metadata };
             Object.assign(metadata, updates);
             set((state) => ({ project: { ...state.project, metadata: metadata } }));
-            const { error } = await supabase.from('projects').update({ metadata: metadata }).eq('id', get().project.id);
-            if (error) throw error;
+            get().updateOnSupabase();
         },
 
         // ------------------------------

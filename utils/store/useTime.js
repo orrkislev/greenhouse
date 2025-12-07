@@ -60,10 +60,11 @@ export const useTime = create(subscribeWithSelector((set, get) => {
     };
 }));
 
+export const BETWEEN_TERMS = { id: '', name: 'בין הזמנים' };
 (async () => {
     const { data, error } = await supabase.from('current_term').select();
     if (error) throw error;
-    useTime.setState({ currTerm: data[0] || { id: '', name: 'בין הזמנים' } });
+    useTime.setState({ currTerm: data[0] || BETWEEN_TERMS });
 })();
 
 export const timeActions = Object.fromEntries(

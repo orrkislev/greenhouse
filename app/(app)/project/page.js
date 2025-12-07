@@ -2,30 +2,47 @@
 
 import { useProject } from "@/utils/store/useProject";
 import NewProjectDialog from "./components/NewProjectDialog";
-// import NewTermDialog from "./components/NewTermDialog";
 import ProjectProposal from "./components/ProjectProposal";
-import ProjectDashboard from "./components/ProjectDashboard";
+import ProjectDashboard, { ProjectImage, ProjectName } from "./components/ProjectDashboard";
 import ContextBar, { PageMain } from "@/components/ContextBar";
 import ProjectContext from "./components/ProjectContext";
+import { DashboardLayout, DashboardMain, DashboardPanel, DashboardPanelButton } from "@/components/DashboardLayout";
+import { ProjectReview } from "./components/ProjectReview";
+import { useState } from "react";
 
-export default function ProjectPage() {
+export default function ProjectPage2() {
     const project = useProject();
-
-    let mainContent = null;
-    if (!project) mainContent = <NewProjectDialog />;
-    // else if (project.isOld) mainContent = <NewTermDialog />;
-    else if (project.status === 'draft') mainContent = <ProjectProposal />;
-    else mainContent = <ProjectDashboard />;
+    const [view, setView] = useState(project?.status === 'draft' ? 'proposal' : 'dashboard');
 
     return (
         <>
-            <PageMain className="pt-0">
-                {mainContent}
-            </PageMain>
+            {project ? (
+                <DashboardLayout>
+                    <DashboardPanel>
+                        <DashboardPanelButton onClick={() => setView('proposal')} $active={view === 'proposal'}>הצהרת כוונות</DashboardPanelButton>
+                        <DashboardPanelButton onClick={() => setView('dashboard')} $active={view === 'dashboard'}>ניהול הפרויקט</DashboardPanelButton>
+                        <DashboardPanelButton onClick={() => setView('review')} $active={view === 'review'}>משוב ורפלקציה</DashboardPanelButton>
+                    </DashboardPanel>
+                    <DashboardMain>
+                        <div className="gap-3 flex flex-col">
+                            <ProjectImage />
+                            <div className='flex flex-col gap-3 px-4'>
+                                <ProjectName />
+                                {view === 'proposal' && <ProjectProposal />}
+                                {view === 'dashboard' && <ProjectDashboard />}
+                                {view === 'review' && <ProjectReview />}
+                            </div>
+                        </div>
+                    </DashboardMain>
+                </DashboardLayout>
+            ) : (
+                <PageMain>
+                    <NewProjectDialog />
+                </PageMain>
+            )}
             <ContextBar name="" initialOpen={false}>
                 <ProjectContext />
             </ContextBar>
         </>
     )
-
 }

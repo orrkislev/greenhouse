@@ -1,43 +1,202 @@
 'use client';
-import { useState } from "react";
-import WithLabel from "@/components/WithLabel";
-import { Loader, MessageSquare } from "lucide-react";
+import { useEffect, useState } from "react";
+import { BookOpen, Brain, Clock, FileText, Handshake, Heart, Pencil, Presentation, Save, Shield, Telescope } from "lucide-react";
 import Box2 from "@/components/Box2";
-import { useUser } from "@/utils/store/useUser";
 import Button from "@/components/Button";
+import GooeySlider from "@/components/GooeySlider";
 
 const { useProjectData, projectActions } = require("@/utils/store/useProject");
 const { useTime } = require("@/utils/store/useTime");
 
-const STATUS_OPTIONS = ["לא בוצע", "בוצע חלקית", "בוצע", "בוצע מעולה"];
-
-const PARAMETERS = [
-    { id: "goals", label: "מטרות", description: "הגדרת יעדים ומטרות לפרויקט" },
-    { id: "presentation", label: "הצגה", description: "אופן הצגת הדברים והעמידה מול קהל" },
-    { id: "planning", label: "תכנון", description: "בניית לוח זמנים וארגון המשימות" },
-    { id: "showcase", label: "תערוכה", description: "הנראות הויזואלית והאסתטיקה" },
-    { id: "execution", label: "ביצוע", description: "איכות התוצר הסופי והגימור" },
-];
+const sections = [
+    {
+        "sectionName": "אופי הפרויקט",
+        "icon": Brain,
+        "color": "#005f73",
+        "parameters": [
+            {
+                "id": "project_type",
+                "value1": "ניסוי / אקספלורציה",
+                "value2": "פרויקט מקצועי ומלוטש",
+                "midValues": ["התנסות", "חובבני", "מעמיק", "מקצועי"]
+            },
+            {
+                "id": "focus",
+                "value1": "התמקדות בתהליך",
+                "value2": "התמקדות בתוצאה",
+                "midValues": []
+            },
+            {
+                "id": "connection_type",
+                "value1": "נבחר כאתגר אינטלקטואלי",
+                "value2": "חיבור רגשי / אישי עמוק",
+                "midValues": []
+            }
+        ]
+    },
+    {
+        "sectionName": "הגדרת יעדים",
+        "icon": Telescope,
+        "color": "#0a9396",
+        "parameters": [
+            {
+                "id": "goal_clarity",
+                "value1": "התגבש תוך כדי תנועה",
+                "value2": "יעד מוגדר וברור מראש",
+                "midValues": ["אלתור", "כיוון כללי", "יעד ברור", "תוכנית מפורטת"]
+            }
+        ]
+    },
+    {
+        "sectionName": "תכנון",
+        "icon": Pencil,
+        "color": "#94d2bd",
+        "parameters": [
+            {
+                "id": "planning_scope",
+                "value1": "ראיית מאקרו (חזון)",
+                "value2": "ירידה לפרטים ודקויות",
+                "midValues": []
+            },
+            {
+                "id": "planning_approach",
+                "value1": "אינטואיטיבי (תחושת בטן)",
+                "value2": "שיטתי / מבוסס מחקר",
+                "midValues": ["אינטואיציה", "היברידי", "מתודי", "מחקרי"]
+            }
+        ]
+    },
+    {
+        "sectionName": "ניהול זמן",
+        "icon": Clock,
+        "color": "#31572c",
+        "parameters": [
+            {
+                "id": "time_management",
+                "value1": "ספרינטים ברגע האחרון",
+                "value2": "עבודה עקבית ומדודה",
+                "midValues": ["קראנצ'", "בגלים", "קבוע למדי", "משמעתי"]
+            }
+        ]
+    },
+    {
+        "sectionName": "מוטיבציה",
+        "icon": Heart,
+        "color": "#ee9b00",
+        "parameters": [
+            {
+                "id": "motivation_source",
+                "value1": "משמעת עצמית (צריך לעשות)",
+                "value2": "תשוקה והנאה (רוצה לעשות)",
+                "midValues": ["חובה", "משמעת", "עניין", "תשוקה"]
+            },
+            {
+                "id": "reward_type",
+                "value1": "תגמול חיצוני (ציון/פידבק)",
+                "value2": "סיפוק פנימי וסקרנות",
+                "midValues": []
+            }
+        ]
+    },
+    {
+        "sectionName": "התמודדות עם אתגרים",
+        "icon": Shield,
+        "color": "#ca6702",
+        "parameters": [
+            {
+                "id": "problem_solving",
+                "value1": "פתרון עצמאי (\"ראש בקיר\")",
+                "value2": "התייעצות ושיתוף פעולה",
+                "midValues": ["לבד", "נקודתי", "שיתופי", "צוותי"]
+            },
+            {
+                "id": "obstacle_response",
+                "value1": "עקיפת המכשול / שינוי כיוון",
+                "value2": "התעקשות על הפתרון המקורי",
+                "midValues": ["פיבוט", "גמיש", "עקבי", "מתמיד"]
+            }
+        ]
+    },
+    {
+        "sectionName": "ליווי והנחייה",
+        "icon": Handshake,
+        "color": "#bb3e03",
+        "parameters": [
+            {
+                "id": "mentorship",
+                "value1": "עבודה עצמאית לחלוטין",
+                "value2": "עבודה עם מנטור/מורה באופן קבוע",
+                "midValues": ["עצמאי", "נקודות ייעוץ", "ליווי חלקי", "הנחיה קבועה"]
+            }
+        ]
+    },
+    {
+        "sectionName": "למידה וביצוע",
+        "icon": BookOpen,
+        "color": "#ae2012",
+        "parameters": [
+            {
+                "id": "learning_style",
+                "value1": "למידה תוך כדי ניסוי (Hands-on)",
+                "value2": "למידה תיאורטית מעמיקה",
+                "midValues": ["ניסוי וטעייה", "מעשי", "מאוזן", "תיאורטי"]
+            },
+            {
+                "id": "quality_approach",
+                "value1": "\"Done is better than perfect\"",
+                "value2": "פרפקציוניזם וליטוש",
+                "midValues": ["MVP", "פונקציונלי", "מלוטש", "מושלם"]
+            }
+        ]
+    },
+    {
+        "sectionName": "הצגה ותיעוד",
+        "icon": Presentation,
+        "color": "#ae2012",
+        "parameters": [
+            {
+                "id": "presentation_effort",
+                "value1": "הצגה מינימלית",
+                "value2": "הצגה מעוצבת ומפורטת",
+                "midValues": ["בסיסי", "פשוט", "מעוצב", "מקצועי"]
+            },
+            {
+                "id": "documentation_type",
+                "value1": "תיעוד התהליך והקשיים",
+                "value2": "הצגת התוצר המוגמר בלבד",
+                "midValues": []
+            }
+        ]
+    }
+]
 
 export function ProjectReview() {
     const project = useProjectData(state => state.project);
-    const currTerm = useTime(state => state.currTerm);
 
-    const [formData, setFormData] = useState(project.metadata?.review ||
-        PARAMETERS.reduce((acc, param) => ({
+    const [formData, setFormData] = useState(project?.metadata?.review ||
+        sections.reduce((acc, section) => ({
             ...acc,
-            [param.id]: { student: "", staff: "", note: "" }
+            [section.sectionName]: section.parameters.reduce((acc, param) => ({
+                ...acc,
+                [param.id]: 50,
+            }), {})
         }), { summary: "" })
     );
+
     const [madeChanges, setMadeChanges] = useState(false);
 
-    if (project.terms?.some(term => term.id === currTerm.id)) return null;
+    useEffect(() => {
+        if (!formData) return;
+        projectActions.updateMetadata({ review: formData });
+    }, [formData])
 
-    const handleParameterChange = (paramId, value) => {
-        console.log(paramId, value);
+    const handleParameterChange = (sectionName, paramId, value) => {
         setFormData(prev => ({
             ...prev,
-            [paramId]: value
+            [sectionName]: {
+                ...prev[sectionName],
+                [paramId]: value
+            }
         }));
         setMadeChanges(true);
     };
@@ -53,98 +212,43 @@ export function ProjectReview() {
     };
 
     return (
-        <Box2 label="משוב" LabelIcon={Loader}>
-            <div className="flex flex-col gap-4 p-4">
-                <div className="border border-stone-300 rounded overflow-hidden">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="bg-stone-200 border-b border-stone-300">
-                                <th />
-                                <th className="text-right text-xs font-semibold py-2">חניכ.ה</th>
-                                <th className="text-right text-xs font-semibold">מנחה</th>
-                                <th className="text-right text-xs font-semibold">הערות</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {PARAMETERS.map(param => (
-                                <ParameterInput key={param.id} value={formData[param.id]} onChange={val => handleParameterChange(param.id, val)} parameter={param} />
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+        <div className="flex flex-col gap-4 p-4 divide-y divide-stone-300/50 mb-16">
+            {sections.map(section => (
+                <Box2 key={section.sectionName} label={section.sectionName} LabelIcon={section.icon}>
+                    <div className='flex flex-col gap-4 divide-y divide-stone-300/50'>
+                        {section.parameters.map(param => (
+                            <div key={param.id} className='pr-8 pb-2'>
+                                <GooeySlider
+                                    min={0}
+                                    max={100}
+                                    value={formData[section.sectionName][param.id]}
+                                    onChange={(value) => handleParameterChange(section.sectionName, param.id, value)}
+                                    labelLeft={param.value1}
+                                    labelRight={param.value2}
+                                    midValues={param.midValues}
+                                    color={section.color} />
+                            </div>
+                        ))}
+                    </div>
+                </Box2>
+            ))}
 
-                <WithLabel label="סיכום משותף" className="w-full">
-                    <textarea
-                        value={formData.summary}
-                        onChange={(e) => handleSummaryChange(e.target.value)}
-                        placeholder=" סיכום כללי של הפרויקט"
-                        rows={3}
-                        className="w-full px-3 py-2 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                    />
-                </WithLabel>
-
-                <div>
-                    <Button data-role="save" onClick={handleSave} disabled={!madeChanges} className={`disabled:opacity-50 ${!madeChanges ? "opacity-50" : ""}`}>
-                        שמור
-                    </Button>
-                </div>
-            </div>
-        </Box2>
-    );
-}
-
-
-function ParameterInput({ parameter, value, onChange }) {
-    const originalUser = useUser((state) => state.originalUser)
-
-    const handleChange = (type, val) => {
-        const newValue = { ...value };
-        newValue[type] = val;
-        onChange(newValue);
-    }
-
-    return (
-        <tr className="border-b border-stone-200/80">
-            <td className='flex flex-col p-2'>
-                <div className="text-xs font-semibold">{parameter.label}</div>
-                <span className="text-xs text-muted-foreground">{parameter.description}</span>
-            </td>
-            <td>
-                <select
-
-                    value={value.student}
-                    onChange={(e) => handleChange("student", e.target.value)}
-                    className="border border-border rounded-sm text-sm focus:outline-none"
-                >
-                    <option value="">בחר</option>
-                    {STATUS_OPTIONS.map(option => (
-                        <option key={option} value={option}>{option}</option>
-                    ))}
-                </select>
-            </td>
-            <td>
-                <select
-                    disabled={!originalUser}
-                    value={value.staff}
-                    onChange={(e) => handleChange("staff", e.target.value)}
-                    className={`border border-border rounded-sm text-sm focus:outline-none ${!originalUser ? "opacity-50" : ""}`}
-                >
-                    <option value="">בחר</option>
-                    {STATUS_OPTIONS.map(option => (
-                        <option key={option} value={option}>{option}</option>
-                    ))}
-                </select>
-            </td>
-            <td>
-                <input
-                    disabled={!originalUser}
-                    type="text"
-                    value={value.note}
-                    onChange={(e) => handleChange("note", e.target.value)}
-                    placeholder="הערה קצרה"
-                    className="flex-1 text-xs bg-white border-none"
+            <Box2 label="סיכום משותף" LabelIcon={FileText}>
+                <textarea
+                    value={formData.summary}
+                    onChange={(e) => handleSummaryChange(e.target.value)}
+                    placeholder=" סיכום כללי של הפרויקט"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                 />
-            </td>
-        </tr>
+            </Box2>
+
+            <div className="flex justify-center">
+                <Button data-role="save" onClick={handleSave} disabled={!madeChanges} className={`px-8 py-2 disabled:opacity-50 ${!madeChanges ? "opacity-50" : ""}`}>
+                    <Save className="w-4 h-4" />
+                    שמור
+                </Button>
+            </div>
+        </div>
     );
 }

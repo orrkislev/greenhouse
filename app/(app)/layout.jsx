@@ -15,7 +15,7 @@ export default function RootLayout({ children }) {
 			{/* Desktop: flex row with sidebar, Mobile: flex col with top bar */}
 			<div className="flex flex-col md:flex-row h-screen overflow-hidden">
 				<SideBar />
-				<div className={`relative flex-1 flex flex-col md:flex-row justify-between md:justify-center overflow-y-auto md:overflow-y-hidden ${originalUser ? 'pb-24 md:pb-16' : 'pb-20 md:pb-8'}`}>
+				<div className={`bg-gradient-to-l from-white to-10% to-transparent relative flex-1 flex flex-col md:flex-row justify-between md:justify-center overflow-y-auto md:overflow-y-hidden`}>
 					{children}
 					<JournalHandle />
 					<SwitchBackPanel />

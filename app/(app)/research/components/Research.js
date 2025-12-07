@@ -43,7 +43,6 @@ export default function Research() {
                 </div>
             </div>
 
-            {researchUtils.getNeedReview(research) && <ResearchReview />}
 
             <div className="flex flex-col md:grid md:grid-cols-3 gap-2 auto-rows-fr">
                 <Section_Questions />
@@ -56,45 +55,5 @@ export default function Research() {
                 {/* <Box2 label="שלוש נקודות מבט" LabelIcon={Eye} className="row-span-3 col-span-2"></Box2> */}
             </div>
         </div>
-    )
-}
-
-
-function ResearchReview() {
-    const research = useResearchData(state => state.research)
-    const [reviewStudent, setReviewStudent] = useState(research.metadata?.review?.student || '')
-    const [reviewStaff, setReviewStaff] = useState(research.metadata?.review?.staff || '')
-    const [reviewSummary, setReviewSummary] = useState(research.metadata?.review?.summary || '')
-
-    const madeChanges = reviewStudent !== research.metadata?.review?.student || reviewStaff !== research.metadata?.review?.staff || reviewSummary !== research.metadata?.review?.summary
-    const isStaff = useUser(state => state.originalUser)
-
-    const saveReview = () => {
-        researchActions.updateResearch({
-            metadata: {
-                review: {
-                    student: reviewStudent,
-                    staff: reviewStaff,
-                    summary: reviewSummary
-                }
-            }
-        })
-    }
-
-    return (
-        <Box2 label="משוב" LabelIcon={Clock} className="">
-            <div className='flex gap-4 w-full justify-between'>
-                <WithLabel label="מה החניכ.ה אומר.ת" className='flex-1'>
-                    <textarea rows={2} className="w-full p-2 border border-border rounded-sm text-sm" value={reviewStudent} onChange={(e) => setReviewStudent(e.target.value)} />
-                </WithLabel>
-                <WithLabel label="מה המנחה אומר.ת" className='flex-1'>
-                    <textarea disabled={!isStaff} rows={2} className="w-full p-2 border border-border rounded-sm text-sm" value={reviewStaff} onChange={(e) => setReviewStaff(e.target.value)} />
-                </WithLabel>
-            </div>
-            <WithLabel label="סיכום משותף" className='flex-1'>
-                <textarea disabled={!isStaff} rows={2} className="w-full p-2 border border-border rounded-sm text-sm" value={reviewSummary} onChange={(e) => setReviewSummary(e.target.value)} />
-            </WithLabel>
-            <Button data-role="save" disabled={!madeChanges} onClick={saveReview}>שמירה</Button>
-        </Box2>
     )
 }

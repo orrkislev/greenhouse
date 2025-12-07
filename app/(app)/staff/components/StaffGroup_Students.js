@@ -6,7 +6,7 @@ import { eventsActions } from "@/utils/store/useEvents";
 import { groupsActions, groupUtils, useGroups } from "@/utils/store/useGroups";
 import { daysOfWeek, useTime } from "@/utils/store/useTime";
 import Button from "@/components/Button";
-import { UserRoundX, VenetianMask, Calendar, Pencil, FileText } from "lucide-react";
+import { UserRoundX, VenetianMask, Calendar, Pencil } from "lucide-react";
 import { mentorshipsActions } from "@/utils/store/useMentorships";
 import WithLabel from "@/components/WithLabel";
 import usePopper from "@/components/Popper";
@@ -64,6 +64,7 @@ export function Staff_Students_List({ students, context, group }) {
         </div>
     )
 }
+
 
 function SelectedStudentCard({ student, context, group }) {
     const [data, setData] = useState(null)
@@ -153,7 +154,6 @@ function SelectedStudentCard({ student, context, group }) {
         </motion.div>
     )
 }
-
 
 function SelectedStudentCard_Meeting({ student }) {
     const { open, close, Popper, baseRef } = usePopper();

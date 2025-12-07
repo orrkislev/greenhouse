@@ -1,7 +1,7 @@
 'use client';
 
 import ContextBar, { PageMain } from "@/components/ContextBar";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { researchActions, researchUtils, useAllResearch, useResearch, useResearchData } from "@/utils/store/useResearch";
 import { useRouter, useSearchParams } from "next/navigation";
 import { tw } from "@/utils/tw";
@@ -11,8 +11,11 @@ import Button, { IconButton } from "@/components/Button";
 import { Plus, Trash2 } from "lucide-react";
 import { timeActions, useTime } from "@/utils/store/useTime";
 import Tooltip from "@/components/ToolTip";
+import { DashboardLayout, DashboardMain, DashboardPanel, DashboardPanelButton } from "@/components/DashboardLayout";
+import { ResearchReview } from "./components/ResearchReview";
 
 export default function ResearchPage() {
+  const [view, setView] = useState('research')
   const searchParams = useSearchParams()
   const research = useResearch()
 
@@ -23,11 +26,22 @@ export default function ResearchPage() {
 
   return (
     <>
-      <PageMain>
-        {!research ? <NoResearch /> : <Research />}
-      </PageMain>
+      {research ? (
+        <DashboardLayout>
+          <DashboardPanel>
+            <DashboardPanelButton onClick={() => setView('research')} $active={view === 'research'}>חקר</DashboardPanelButton>
+            <DashboardPanelButton onClick={() => setView('review')} $active={view === 'review'}>משוב ורפלקציה</DashboardPanelButton>
+          </DashboardPanel>
+          <DashboardMain className="p-4">
+            {view === 'research' && <Research />}
+            {view === 'review' && <ResearchReview />}
+          </DashboardMain>
+        </DashboardLayout>
+      ) : (
+        <NoResearch />
+      )}
 
-      <ContextBar>
+      <ContextBar initialOpen={false}>
         <ResearchList />
         <div className="flex justify-center items-center mt-8">
           <Button data-role="new" onClick={researchActions.newResearch}>
