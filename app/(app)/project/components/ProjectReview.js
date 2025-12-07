@@ -1,9 +1,11 @@
 'use client';
 import { useEffect, useState } from "react";
-import { BookOpen, Brain, Clock, FileText, Handshake, Heart, Pencil, Presentation, Save, Shield, Telescope } from "lucide-react";
+import { BookOpen, Brain, Check, CheckCircle, Circle, CircleOff, Clock, FileText, Handshake, Heart, Pencil, Presentation, Save, Shield, Telescope } from "lucide-react";
 import Box2 from "@/components/Box2";
-import Button from "@/components/Button";
+import Button, { IconButton } from "@/components/Button";
 import GooeySlider from "@/components/GooeySlider";
+import WithLabel from "@/components/WithLabel";
+import Image from "next/image";
 
 const { useProjectData, projectActions } = require("@/utils/store/useProject");
 const { useTime } = require("@/utils/store/useTime");
@@ -38,6 +40,7 @@ const sections = [
         "sectionName": "הגדרת יעדים",
         "icon": Telescope,
         "color": "#0a9396",
+        "withOverview": true,
         "parameters": [
             {
                 "id": "goal_clarity",
@@ -51,6 +54,7 @@ const sections = [
         "sectionName": "תכנון",
         "icon": Pencil,
         "color": "#94d2bd",
+        "withOverview": true,
         "parameters": [
             {
                 "id": "planning_scope",
@@ -134,6 +138,7 @@ const sections = [
         "sectionName": "למידה וביצוע",
         "icon": BookOpen,
         "color": "#ae2012",
+        "withOverview": true,
         "parameters": [
             {
                 "id": "learning_style",
@@ -143,8 +148,8 @@ const sections = [
             },
             {
                 "id": "quality_approach",
-                "value1": "\"Done is better than perfect\"",
-                "value2": "פרפקציוניזם וליטוש",
+                "value1": "המינימום הנדרש",
+                "value2": "הכי טוב שלי",
                 "midValues": ["MVP", "פונקציונלי", "מלוטש", "מושלם"]
             }
         ]
@@ -153,6 +158,7 @@ const sections = [
         "sectionName": "הצגה ותיעוד",
         "icon": Presentation,
         "color": "#ae2012",
+        "withOverview": true,
         "parameters": [
             {
                 "id": "presentation_effort",
@@ -179,10 +185,9 @@ export function ProjectReview() {
             [section.sectionName]: section.parameters.reduce((acc, param) => ({
                 ...acc,
                 [param.id]: 50,
-            }), {})
+            }), { 'overview': 50 })
         }), { summary: "" })
     );
-
     const [madeChanges, setMadeChanges] = useState(false);
 
     useEffect(() => {
@@ -200,9 +205,8 @@ export function ProjectReview() {
         }));
         setMadeChanges(true);
     };
-
-    const handleSummaryChange = (value) => {
-        setFormData(prev => ({ ...prev, summary: value }));
+    const handleTextChange = (sectionName, value) => {
+        setFormData(prev => ({ ...prev, [sectionName]: value }));
         setMadeChanges(true);
     };
 
@@ -217,11 +221,18 @@ export function ProjectReview() {
                 <Box2 key={section.sectionName} label={section.sectionName} LabelIcon={section.icon}>
                     <div className='flex flex-col gap-4 divide-y divide-stone-300/50'>
                         {section.parameters.map(param => (
-                            <div key={param.id} className='pr-8 pb-2'>
+                            <div key={param.id} className={`flex gap-2 pr-8 pb-2 ${formData[section.sectionName][param.id] >= 0 ? '' : 'opacity-50'}`}>
+                                <div className=''>
+                                    {formData[section.sectionName][param.id] != undefined ? (
+                                        <IconButton icon={Circle} onClick={() => handleParameterChange(section.sectionName, param.id, undefined)} />
+                                    ) : (
+                                        <IconButton icon={CircleOff} onClick={() => handleParameterChange(section.sectionName, param.id, 50)} />
+                                    )}
+                                </div>
                                 <GooeySlider
                                     min={0}
                                     max={100}
-                                    value={formData[section.sectionName][param.id]}
+                                    value={formData[section.sectionName][param.id] || 50}
                                     onChange={(value) => handleParameterChange(section.sectionName, param.id, value)}
                                     labelLeft={param.value1}
                                     labelRight={param.value2}
@@ -230,17 +241,50 @@ export function ProjectReview() {
                             </div>
                         ))}
                     </div>
+                    {section.withOverview && (
+                        <div className='pr-8 bg-secondary-200/50 rounded-full pt-4 relative'>
+                            <div className='absolute right-6 top-3/7 -translate-y-1/2'>
+                                בכללי
+                                <div className='text-xs text-muted-foreground'>
+                                    (זה הולך לתעודות הערכה של המחצית)
+                                </div>
+                            </div>
+                            <GooeySlider
+                                min={0}
+                                max={100}
+                                value={formData[section.sectionName].overview || 50}
+                                onChange={(value) => handleParameterChange(section.sectionName, 'overview', value)}
+                                labelRight="בוצע מעולה"
+                                labelLeft="לא בוצע"
+                                color={section.color} />
+                        </div>
+                    )}
                 </Box2>
             ))}
 
             <Box2 label="סיכום משותף" LabelIcon={FileText}>
-                <textarea
-                    value={formData.summary}
-                    onChange={(e) => handleSummaryChange(e.target.value)}
-                    placeholder=" סיכום כללי של הפרויקט"
-                    rows={3}
-                    className="w-full px-3 py-2 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                />
+                <div className="flex">
+                    <div className="flex-3 flex flex-col gap-2">
+                        <textarea
+                            value={formData.summary}
+                            onChange={(e) => handleTextChange('summary', e.target.value)}
+                            placeholder=" סיכום כללי של הפרויקט"
+                            rows={5}
+                            className="w-full px-3 py-2 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        />
+
+                        <WithLabel label="יעדים להמשך">
+                            <textarea
+                                value={formData.next_steps}
+                                onChange={(e) => handleTextChange('next_steps', e.target.value)}
+                                placeholder="בפעם הבאה חשוב לי..."
+                                rows={3}
+                                className="w-full px-3 py-2 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                            />
+                        </WithLabel>
+                    </div>
+                    <Image src='/images/conversation.png' alt="conversation" className="flex-1" width={200} height={200} />
+                </div>
             </Box2>
 
             <div className="flex justify-center">

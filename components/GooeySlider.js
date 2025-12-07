@@ -86,7 +86,7 @@ const GooeySlider = ({
   return (
     <div className="w-full flex items-start justify-center gap-4 select-none relative font-sans">
       {/* Left Label */}
-      <div className="flex-1 text-slate-600 font-medium text-sm tracking-wide min-w-[2rem] text-left ">
+      <div className={`flex-1 text-slate-600 font-medium text-sm tracking-wide min-w-[2rem] text-left ${midValues.length > 0 ? '' : 'mt-2'}`}>
         {labelLeft}
       </div>
 
@@ -183,7 +183,7 @@ const GooeySlider = ({
       </div>
 
       {/* Right Label */}
-      <div className="flex-1 text-slate-600 font-medium text-sm tracking-wide min-w-[2rem] text-right">
+      <div className={`flex-1 text-slate-600 font-medium text-sm tracking-wide min-w-[2rem] text-right ${midValues.length > 0 ? '' : 'mt-2'}`}>
         {labelRight}
       </div>
 

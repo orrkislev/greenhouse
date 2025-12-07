@@ -1,12 +1,13 @@
 'use client';
 import { useEffect, useState } from "react";
 import WithLabel from "@/components/WithLabel";
-import { Brain, FileText, HandCoins, Heart, Loader, Microscope, Pin, Save, Search, Sparkles } from "lucide-react";
+import { Brain, FileText, HandCoins, Heart, Circle, CircleOff, Microscope, Pin, Save, Search, Sparkles } from "lucide-react";
 import Box2 from "@/components/Box2";
-import Button from "@/components/Button";
+import Button, { IconButton } from "@/components/Button";
 import GooeySlider from "@/components/GooeySlider";
 import { researchActions, useResearchData } from "@/utils/store/useResearch";
 import { useTime } from "@/utils/store/useTime";
+import Image from "next/image";
 
 const sections = [
     {
@@ -153,7 +154,7 @@ const sections = [
         "parameters": [
             {
                 "id": "personal_value",
-                "value1": "עבודה לציון בלבד",
+                "value1": "עבודה כי זה נדרש",
                 "value2": "עבודה בעלת משמעות אישית",
                 "midValues": ["לציון", "חובה", "ערך", "משמעותי"]
             },
@@ -169,7 +170,6 @@ const sections = [
 
 export function ResearchReview() {
     const research = useResearchData(state => state.research);
-    const currTerm = useTime(state => state.currTerm);
 
     const [formData, setFormData] = useState(research?.metadata?.review ||
         sections.reduce((acc, section) => ({
@@ -177,15 +177,15 @@ export function ResearchReview() {
             [section.sectionName]: section.parameters.reduce((acc, param) => ({
                 ...acc,
                 [param.id]: 50,
-            }), {})
-        }), { summary: "" })
+            }), { 'overview': 50 })
+        }), { summary: "", next_steps: "" })
     );
     const [madeChanges, setMadeChanges] = useState(false);
 
-    useEffect(()=>{
+    useEffect(() => {
         if (!formData) return;
         researchActions.updateResearch({ metadata: { review: formData } });
-    },[formData])
+    }, [formData])
 
     const handleParameterChange = (sectionName, paramId, value) => {
         setFormData(prev => ({
@@ -197,9 +197,8 @@ export function ResearchReview() {
         }));
         setMadeChanges(true);
     };
-
-    const handleSummaryChange = (value) => {
-        setFormData(prev => ({ ...prev, summary: value }));
+    const handleTextChange = (sectionName, value) => {
+        setFormData(prev => ({ ...prev, [sectionName]: value }));
         setMadeChanges(true);
     };
 
@@ -214,11 +213,18 @@ export function ResearchReview() {
                 <Box2 key={section.sectionName} label={section.sectionName} LabelIcon={section.icon}>
                     <div className='flex flex-col gap-4 divide-y divide-stone-300/50'>
                         {section.parameters.map(param => (
-                            <div key={param.id} className='pr-8 pb-2'>
+                            <div key={param.id} className={`flex gap-2 pr-8 pb-2 ${formData[section.sectionName][param.id] >= 0 ? '' : 'opacity-50'}`}>
+                                <div>
+                                    {formData[section.sectionName][param.id] != undefined ? (
+                                        <IconButton icon={Circle} onClick={() => handleParameterChange(section.sectionName, param.id, undefined)} />
+                                    ) : (
+                                        <IconButton icon={CircleOff} onClick={() => handleParameterChange(section.sectionName, param.id, 50)} />
+                                    )}
+                                </div>
                                 <GooeySlider
                                     min={0}
                                     max={100}
-                                    value={formData[section.sectionName][param.id]}
+                                    value={formData[section.sectionName][param.id] || 50}
                                     onChange={(value) => handleParameterChange(section.sectionName, param.id, value)}
                                     labelLeft={param.value1}
                                     labelRight={param.value2}
@@ -227,18 +233,53 @@ export function ResearchReview() {
                             </div>
                         ))}
                     </div>
+                    {section.withOverview && (
+                        <div className='pr-8 bg-secondary-200/50 rounded-full pt-4 relative'>
+                            <div className='absolute right-6 top-3/7 -translate-y-1/2'>
+                                בכללי
+                                <div className='text-xs text-muted-foreground'>
+                                    (זה הולך לתעודות הערכה של המחצית)
+                                </div>
+                            </div>
+                            <GooeySlider
+                                min={0}
+                                max={100}
+                                value={formData[section.sectionName].overview || 50}
+                                onChange={(value) => handleParameterChange(section.sectionName, 'overview', value)}
+                                labelRight="בוצע מעולה"
+                                labelLeft="לא בוצע"
+                                color={section.color} />
+                        </div>
+                    )}
                 </Box2>
             ))}
 
+
             <Box2 label="סיכום משותף" LabelIcon={FileText}>
-                <textarea
-                    value={formData.summary}
-                    onChange={(e) => handleSummaryChange(e.target.value)}
-                    placeholder=" סיכום כללי של הפרויקט"
-                    rows={3}
-                    className="w-full px-3 py-2 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                />
+                <div className="flex">
+                    <div className="flex-3 flex flex-col gap-2">
+                        <textarea
+                            value={formData.summary}
+                            onChange={(e) => handleTextChange('summary', e.target.value)}
+                            placeholder=" סיכום כללי של הפרויקט"
+                            rows={5}
+                            className="w-full px-3 py-2 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        />
+
+                        <WithLabel label="יעדים להמשך">
+                            <textarea
+                                value={formData.next_steps}
+                                onChange={(e) => handleTextChange('next_steps', e.target.value)}
+                                placeholder="בפעם הבאה חשוב לי..."
+                                rows={3}
+                                className="w-full px-3 py-2 border border-stone-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                            />
+                        </WithLabel>
+                    </div>
+                    <Image src='/images/conversation.png' alt="conversation" className="flex-1" width={200} height={200} />
+                </div>
             </Box2>
+
 
             <div className="flex justify-center">
                 <Button data-role="save" onClick={handleSave} disabled={!madeChanges} className={`px-8 py-2 disabled:opacity-50 ${!madeChanges ? "opacity-50" : ""}`}>
