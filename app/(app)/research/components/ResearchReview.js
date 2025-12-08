@@ -88,12 +88,6 @@ const sections = [
                 "value1": "הבנה שטחית של הנושא",
                 "value2": "הבנה עמוקה של הנושא",
                 "midValues": ["שטחי", "בסיסי", "טוב", "עמוק"]
-            },
-            {
-                "id": "perspective_change",
-                "value1": "לא שיניתי דעה / תפיסה",
-                "value2": "המחקר שינה את דעתי",
-                "midValues": []
             }
         ]
     },
@@ -151,6 +145,7 @@ const sections = [
         "sectionName": "ערך אישי",
         "icon": HandCoins,
         "color": "#ca6702",
+        "withOverview": true,
         "parameters": [
             {
                 "id": "personal_value",
