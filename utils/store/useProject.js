@@ -12,7 +12,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
         project: null,
 
         setProject: (project) => set({ project }),
-        loadProject: withLoadingCheck(async (user) => {
+        loadProject: withUser(async (user) => {
             set({ project: null, tasks: [] });
             const { data, error } = await supabase.rpc('get_student_current_term_project', {
                 p_student_id: user.id

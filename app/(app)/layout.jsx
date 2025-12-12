@@ -6,6 +6,7 @@ import SwitchBackPanel from "./staff/components/SwitchBackPanel";
 import { useUser } from "@/utils/store/useUser";
 import JournalHandle from "./(journal)/JournalHandle";
 import { BGGrads } from "@/components/ContextBar";
+import Hannukah from "@/components/Hannukah";
 
 export default function RootLayout({ children }) {
 	const originalUser = useUser(state => state.originalUser);
@@ -21,6 +22,7 @@ export default function RootLayout({ children }) {
 					<SwitchBackPanel />
 				</div>
 			</div>
+			<Hannukah />
 		</WithAuth>
 	);
 }
