@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
 					<SwitchBackPanel />
 				</div>
 			</div>
-			<Hannukah />
+			{/* <Hannukah /> */}
 		</WithAuth>
 	);
 }
