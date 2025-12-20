@@ -91,7 +91,7 @@ function SelectedStudentCard({ student, context, group }) {
         if (context === 'club') {
             groupsActions.removeMember(group.id, data.id);
         } else {
-            mentorshipsActions.deleteMentorship(data);
+            mentorshipsActions.deactivateMentorship(data);
         }
     }
 
