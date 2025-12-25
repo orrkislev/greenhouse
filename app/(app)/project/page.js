@@ -8,11 +8,17 @@ import ContextBar, { PageMain } from "@/components/ContextBar";
 import ProjectContext from "./components/ProjectContext";
 import { DashboardLayout, DashboardMain, DashboardPanel, DashboardPanelButton } from "@/components/DashboardLayout";
 import { ProjectReview } from "./components/ProjectReview";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function ProjectPage2() {
     const project = useProject();
-    const [view, setView] = useState(project?.status === 'draft' ? 'proposal' : 'dashboard');
+    const [view, setView] = useState('dashboard');
+
+    useEffect(() => {
+        if (project?.status === 'draft') {
+            setView('proposal');
+        }
+    }, [project?.status]);
 
     return (
         <>

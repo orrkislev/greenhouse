@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import QuestionCard from "./QuestionCard";
-import { projectActions, useProject } from "@/utils/store/useProject";
+import { projectActions, useProjectData } from "@/utils/store/useProject";
 import { isStaff, useUser } from "@/utils/store/useUser";
 import { adminActions } from "@/utils/store/useAdmin";
 import Button from "@/components/Button";
@@ -26,7 +26,7 @@ const QUESTIONS = [
 
 export default function ProjectProposal() {
     const user = useUser(state => state.user)
-    const project = useProject();
+    const project = useProjectData(state => state.project);
     const [questions, setQuestions] = useState(QUESTIONS);
 
 
