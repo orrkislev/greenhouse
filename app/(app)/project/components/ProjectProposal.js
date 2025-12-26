@@ -31,7 +31,7 @@ export default function ProjectProposal() {
 
 
     useEffect(() => {
-        if (project && project.metadata.questions) {
+        if (project && project.metadata?.questions) {
             setQuestions(project.metadata.questions)
         }
     }, [project]);

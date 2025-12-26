@@ -64,7 +64,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             const { data: projectData, error: projectError } = await supabase.from('projects').insert({
                 student_id: user.id,
                 status: 'draft',
-                title: `הפרויקט המגניב של ${user.first_name}`,
+                title: `הפרויקט של ${user.first_name} צריך כותרת`,
             }).select().single();
             if (projectError) throw projectError;
             set({ project: projectData });
