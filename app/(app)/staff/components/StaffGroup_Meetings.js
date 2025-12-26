@@ -3,13 +3,14 @@ import { ScheduleSection } from "@/app/(app)/schedule/components/Layout";
 import Button from "@/components/Button";
 import TimeRange from "@/components/TimeRange";
 import { meetingsActions, meetingUtils, useMeetings } from "@/utils/store/useMeetings";
-import { CalendarCheck, Trash2 } from "lucide-react";
+import { CalendarCheck, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import usePopper from "@/components/Popper";
 
 const daysOfWeek = ['א', 'ב', 'ג', 'ד', 'ה'];
 
 export default function StaffGroup_Meetings({ group }) {
+    const [isCollapsed, setIsCollapsed] = useState(true);
     const meetings = useMeetings();
 
     if (!group.members) return null;
@@ -27,11 +28,16 @@ export default function StaffGroup_Meetings({ group }) {
     studentsWithoutMeetings.sort((a, b) => a.first_name.localeCompare(b.first_name));
 
     return (
-        <div className={`p-2 md:p-4 border-t`}>
-            <h4 className={`font-bold text-base md:text-lg mb-2`}>שיחות אישיות</h4>
+        <div className={`p-2 md:p-4 border-y`}>
+            <div className="flex items-center gap-4" onClick={() => setIsCollapsed(!isCollapsed)}>
+                <h4 className={`font-bold text-base md:text-lg`}>שיחות אישיות</h4>
+                {isCollapsed ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+            </div>
 
-            {/* Mobile view - single column */}
-            <div className="md:hidden flex flex-col gap-4">
+            {!isCollapsed && (
+                <>
+                    {/* Mobile view - single column */}
+                    <div className="md:hidden flex flex-col gap-4">
                 <div>
                     <div className="bg-muted px-2 py-1 text-sm font-semibold mb-2">
                         חניכים ללא שיחה מתוכננת
@@ -84,6 +90,8 @@ export default function StaffGroup_Meetings({ group }) {
                     ))}
                 </ScheduleSection>
             </div>
+                </>
+            )}
         </div>
     );
 }

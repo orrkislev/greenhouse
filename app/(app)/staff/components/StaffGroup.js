@@ -7,11 +7,11 @@ import { groupsActions } from "@/utils/store/useGroups";
 import StaffGroup_Meetings from "./StaffGroup_Meetings";
 import Box2 from "@/components/Box2";
 import { Banana, Check, Plus, Trash2 } from "lucide-react";
-import { AvatarGroup } from "@/components/Avatar";
 import 'react-quill-new/dist/quill.snow.css';
 import MessageEditor from "./MessageEditor";
 import GroupTaskModal from "@/components/GroupTaskModal";
 import Menu, { MenuItem, MenuList } from "@/components/Menu";
+import StaffGroup_Evaluations from "./StaffGroup_Evaluations";
 
 
 
@@ -30,6 +30,8 @@ export default function StaffGroup({ group }) {
             </div>
             <StaffGroup_Students group={group} />
             {group.type === 'class' && <StaffGroup_Meetings group={group} />}
+
+            <StaffGroup_Evaluations group={group} />
 
             {group.type === 'club' && (
                 <Menu className="absolute top-0 left-0">
