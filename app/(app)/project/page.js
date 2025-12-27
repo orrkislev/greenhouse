@@ -46,7 +46,7 @@ export default function ProjectPage2() {
                     <NewProjectDialog />
                 </PageMain>
             )}
-            <ContextBar name="" initialOpen={view === 'proposal'}>
+            <ContextBar name="" initialOpen={!project}>
                 <ProjectContext />
             </ContextBar>
         </>

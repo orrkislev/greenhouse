@@ -55,11 +55,19 @@ export default function AdminStaff() {
         }
     }
 
+    const pronounsOptions = [
+        { value: '', label: '-' },
+        { value: 'he', label: 'הוא' },
+        { value: 'she', label: 'היא' },
+        { value: 'they', label: 'הם' },
+    ];
+
     const headers = [
         { key: 'id', label: '', sortable: false },
         { key: 'username', label: 'שם משתמש', sortable: false },
         { key: 'first_name', label: 'שם פרטי', sortable: true },
         { key: 'last_name', label: 'שם משפחה', sortable: true },
+        { key: 'pronouns', label: 'כינוי', sortable: false },
         { key: 'admin', label: 'ניהול', sortable: false },
         { key: 'delete', label: '', sortable: false },
     ];
@@ -94,6 +102,13 @@ export default function AdminStaff() {
                                 <input type="text" defaultValue={staff.last_name} placeholder="שם משפחה" className="border-none outline-none p-0 m-0"
                                     onChange={(e) => updateStaffData(staff.id, 'last_name', e.target.value)}
                                 />
+                            </Cell>
+                            <Cell>
+                                <select value={staff.profile?.pronouns || ''} onChange={(e) => updateStaffData(staff.id, 'profile', { ...staff.profile, pronouns: e.target.value })}>
+                                    {pronounsOptions.map(option => (
+                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                    ))}
+                                </select>
                             </Cell>
                             <Cell><Checkbox value={staff.is_admin} onChange={(value) => updateStaffData(staff.id, 'is_admin', value)} /></Cell>
                             <Cell><button className="p-1 bg-destructive my-1 rounded text-white text-xs hover:bg-red-600 flex items-center gap-2" onClick={() => deleteStaff(staff)}><UserRoundX className="w-4 h-4" /></button></Cell>

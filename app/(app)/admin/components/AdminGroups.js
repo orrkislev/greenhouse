@@ -174,11 +174,19 @@ function GroupStudents({ group }) {
         }
     }
 
+    const pronounsOptions = [
+        { value: '', label: '-' },
+        { value: 'he', label: 'הוא' },
+        { value: 'she', label: 'היא' },
+        { value: 'they', label: 'הם' },
+    ];
+
     const headers = [
         { key: 'id', label: '', sortable: false },
         { key: 'username', label: 'שם משתמש', sortable: false },
         { key: 'first_name', label: 'שם פרטי', sortable: true },
         { key: 'last_name', label: 'שם משפחה', sortable: true },
+        { key: 'pronouns', label: 'כינוי', sortable: false },
         { key: 'major', label: 'מגמה', sortable: true },
         { key: 'delete', label: '', sortable: false },
     ];
@@ -216,6 +224,13 @@ function GroupStudents({ group }) {
                                     <input type="text" defaultValue={student.last_name} placeholder="שם משפחה" className="border-none outline-none p-0 m-0"
                                         onChange={(e) => updateStudentData(student.id, 'last_name', e.target.value)}
                                     />
+                                </Cell>
+                                <Cell>
+                                    <select value={student.profile?.pronouns || ''} onChange={(e) => updateStudentData(student.id, 'profile', { ...student.profile, pronouns: e.target.value })}>
+                                        {pronounsOptions.map(option => (
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        ))}
+                                    </select>
                                 </Cell>
                                 <Cell>
                                     <select value={student.major || student.groups?.find(groupId => majors.find(major => major.id === groupId))} onChange={(e) => updateStudentData(student.id, 'major', e.target.value)}>

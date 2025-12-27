@@ -31,6 +31,7 @@ export const useAdmin = create((set, get) => ({
                 username,
                 role,
                 is_admin,
+                profile,
                 groups:users_groups!left (
                     group_id
                 )

@@ -20,9 +20,11 @@ export default function NewProjectDialog() {
         await projectActions.createProject();
     };
 
-    const onContinue = async () => {
-        await projectActions.continueProject(allProjects.find(project => project.terms.some(term => term.id === term.id))?.id);
-    };
+    // const onContinue = async (projectId) => {
+        // await projectActions.continueProject(projectId);
+    // };
+
+    // const lastProject =allProjects.length > 0 ? allProjects.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0] : null;
 
     return (
         <div className='flex flex-col items-center justify-center h-screen'>
@@ -33,12 +35,12 @@ export default function NewProjectDialog() {
                     <Plus className="w-4 h-4 group-hover/new-project:rotate-90 transition-transform duration-200" />
                     פרויקט חדש
                 </Button>
-                {allProjects.length > 0 && (
-                    <Button data-role="edit" onClick={onContinue} className="text-lg group/new-project">
+                {/* {lastProject && (
+                    <Button data-role="edit" onClick={() => onContinue(lastProject.id)} className="text-lg group/new-project">
                         <Fish className="w-4 h-4 group-hover/new-project:rotate-180 transition-transform duration-200" />
-                        המשך פרויקט {allProjects.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]?.title}
+                        המשך פרויקט {lastProject?.title}
                     </Button>
-                )}
+                )} */}
             </div>
             <Image src="/no_project.png" alt="Project" width={600} height={600} className="mt-4" priority={true} />
         </div>

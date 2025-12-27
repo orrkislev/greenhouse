@@ -2,7 +2,7 @@
 
 import { isAdmin, isStaff, userActions, useUser } from "@/utils/store/useUser";
 import { tw } from "@/utils/tw";
-import { BookOpen, Briefcase, Calendar, Snail, UsersRound, TreePalm, Skull, Brain, LogOut, ChevronsLeft, Menu, X } from "lucide-react";
+import { BookOpen, Briefcase, Calendar, Snail, UsersRound, TreePalm, Skull, Brain, LogOut, ChevronsLeft, Menu, X, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -48,6 +48,7 @@ export default function SideBar() {
                 </Link>
 
                 <TopBarContent>
+                    <TopBarWrappedButton active={pathname === '/wrapped'} />
                     <TopBarIconItem href="/" Icon={TreePalm} active={pathname === '/'} title="בית" />
                     <TopBarIconItem href="/schedule" Icon={Calendar} active={pathname === '/schedule'} title="לוח זמנים" />
                     <TopBarIconItem href="/study" Icon={BookOpen} active={pathname === '/study'} title="למידה" />
@@ -95,6 +96,9 @@ export default function SideBar() {
 
                 <Separator className='w-full' />
                 <SideBarContent>
+                    {/* 2025 Wrapped */}
+                    <WrappedButton active={pathname === '/wrapped'} />
+
                     {/* Home */}
                     <SideBarItem href="/" Icon={TreePalm} label="בית" active={pathname === '/'} />
 
@@ -203,6 +207,85 @@ function TopBarIconItem({ href, Icon, active, title }) {
                 />
             )}
             <Icon className="w-5 h-5 relative z-10" />
+        </Link>
+    )
+}
+
+function WrappedButton({ active }) {
+    return (
+        <Link href="/wrapped" className="block mb-2">
+            <motion.div
+                className="relative overflow-hidden rounded-xl mx-2 p-2 cursor-pointer"
+                style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #ffd93d 100%)',
+                    backgroundSize: '200% 200%',
+                }}
+                animate={{
+                    backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                }}
+                transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: 'linear',
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+            >
+                <div className="flex items-center justify-center gap-2 text-white font-bold text-sm rtl">
+                    <motion.div
+                        animate={{ rotate: [0, 15, -15, 0] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                    >
+                        <Sparkles className="w-4 h-4" />
+                    </motion.div>
+                    <span>2025 Wrapped</span>
+                    <motion.div
+                        animate={{ rotate: [0, -15, 15, 0] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                    >
+                        <Sparkles className="w-4 h-4" />
+                    </motion.div>
+                </div>
+                {/* Shimmer effect */}
+                <motion.div
+                    className="absolute inset-0 opacity-30"
+                    style={{
+                        background: 'linear-gradient(90deg, transparent, white, transparent)',
+                    }}
+                    animate={{ x: ['-100%', '200%'] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1 }}
+                />
+            </motion.div>
+        </Link>
+    )
+}
+
+function TopBarWrappedButton({ active }) {
+    return (
+        <Link href="/wrapped" title="2025 Wrapped">
+            <motion.div
+                className="flex items-center justify-center p-2 rounded-lg relative overflow-hidden"
+                style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+                    backgroundSize: '200% 200%',
+                }}
+                animate={{
+                    backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                }}
+                transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: 'linear',
+                }}
+                whileTap={{ scale: 0.95 }}
+            >
+                <motion.div
+                    animate={{ rotate: [0, 15, -15, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                    <Sparkles className="w-5 h-5 text-white" />
+                </motion.div>
+            </motion.div>
         </Link>
     )
 }
