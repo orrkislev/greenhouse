@@ -5,6 +5,7 @@ import { supabase } from "../supabase/client";
 import { resizeImage } from "../actions/storage actions";
 import { newLogActions } from "./useLogs";
 import { debounce } from "lodash";
+import { format } from "date-fns";
 
 
 export const [useProjectData, projectActions] = createStore((set, get, withUser, withLoadingCheck) => {
@@ -71,7 +72,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
 
             makeLink('projects', projectData.id, 'terms', useTime.getState().currTerm.id);
 
-            projectTasksActions.addTaskToProject({
+            get().addTaskToProject({
                 title: 'למלא הצהרת כוונות',
                 description: 'זה חשוב',
             }, projectData.id);
@@ -140,10 +141,9 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
 
         // ------------------------------
         getProjectForStudent: async (studentId) => {
-            const { data, error } = await supabase.from('projects').select('*')
-                .eq('student_id', studentId)
-                .order('created_at', { ascending: false })
-                .single();
+            const { data, error } = await supabase.rpc('get_student_current_term_project', {
+                p_student_id: studentId
+            })
             if (error) throw error;
             return data;
         },
