@@ -129,7 +129,7 @@ export const isStaff = () => {
 }
 export const isAdmin = () => {
 	const user = useUser.getState().user;
-	return user && user.is_admin;
+	return user && user.role == 'staff' &&  user.is_admin;
 }
 
 export const userActions = Object.fromEntries(
