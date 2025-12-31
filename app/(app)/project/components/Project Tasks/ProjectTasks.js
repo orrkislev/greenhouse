@@ -14,7 +14,7 @@ const NewTaskButton = tw`px-4 py-1 bg-primary text-white hover:bg-primary/80 tra
 
 export default function ProjectTasks() {
     const project = useProjectData(state => state.project)
-    const taskStyle = useProjectData(state => state.project.metadata.taskStyle)
+    const taskStyle = useProjectData(state => state.project?.metadata?.taskStyle)
     const [isOpen, setIsOpen] = useState(false)
 
     const ViewComponent = taskStyle ? views[taskStyle].component : views.list.component
@@ -64,7 +64,7 @@ const views = {
 }
 
 function ViewSelector() {
-    const taskStyle = useProjectData(state => state.project.metadata.taskStyle)
+    const taskStyle = useProjectData(state => state.project?.metadata?.taskStyle)
 
     const selectView = (newView) => {
         projectActions.updateMetadata({ taskStyle: newView })

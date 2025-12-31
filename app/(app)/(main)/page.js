@@ -9,6 +9,7 @@ import MainStudy from "./components/MainStudy"
 import MainResearch from "./components/MainResearch"
 import MainVocation from "./components/MainVocation"
 import MainNews from "./components/MainNews"
+import { AuthGoogleListener } from "../schedule/components/Google/AuthGoogleCalendar"
 
 export default function MainPage() {
 
@@ -26,6 +27,7 @@ export default function MainPage() {
                     <MainVocation />
                 </div>
             </PageMain>
+            <AuthGoogleListener />
         </div>
     )
 }

@@ -33,8 +33,6 @@ export function AuthGoogleListener() {
     const router = useRouter();
     const code = searchParams.get('code');
 
-    console.log('found google code!', code);
-
     if (code) {
         (async () => {
             const origin = window.location.origin;
