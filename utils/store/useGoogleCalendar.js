@@ -9,7 +9,7 @@ export const [useGoogleCalendar, googleCalendarActions] = createStore((set, get,
 
     getTodayEvents: withLoadingCheck(async (user) => {
         set({ events: [], loadedRanges: [] });
-        
+
         if (!user.googleRefreshToken) return;
         const day = format(new Date(), 'yyyy-MM-dd');
         const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
@@ -43,19 +43,27 @@ export const useGoogleCalendarEventsToday = createDataLoadingHook(useGoogleCalen
 export const useGoogleCalendarEventsWeek = createDataLoadingHook(useGoogleCalendar, 'events', 'getWeeksEvents');
 
 const formatEvent = (event) => {
-    return {
-        ...event,
-        start: new Date(event.start.dateTime).toLocaleString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        }),
-        end: new Date(event.end.dateTime).toLocaleString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        }),
-        date: format(new Date(event.start.dateTime), 'yyyy-MM-dd'),
-        title: event.summary
+    try {
+        const startDate = event.start.dateTime || event.start.date;
+        const endDate = event.end.dateTime || event.end.date;
+
+        return {
+            ...event,
+            start: new Date(startDate).toLocaleString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            }),
+            end: new Date(endDate).toLocaleString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            }),
+            date: format(new Date(startDate), 'yyyy-MM-dd'),
+            title: event.summary
+        }
+    } catch (e) {
+        console.error("Failed to format event:", event, e);
+        return event;
     }
 }
