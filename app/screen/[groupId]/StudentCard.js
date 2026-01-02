@@ -1,55 +1,13 @@
-import { useEffect, useState, useRef } from "react";
+'use client'
+
+import { useRef } from "react";
 import Avatar from "@/components/Avatar";
-import { eventsActions } from "@/utils/store/useEvents";
-import { projectActions } from "@/utils/store/useProject";
-import { groupsActions, groupUtils } from "@/utils/store/useGroups";
-import { researchActions } from "@/utils/store/useResearch";
-import { format } from 'date-fns';
 
 export default function StudentCard({ student, viewMode }) {
-    const [data, setData] = useState({ ...student });
-    const [loadedViews, setLoadedViews] = useState(new Set());
     const cardRef = useRef(null);
-    const today = format(new Date(), 'yyyy-MM-dd');
 
-    useEffect(() => {
-        // Only load data if we haven't loaded it for this view yet
-        if (loadedViews.has(viewMode)) return;
-
-        (async () => {
-            if (viewMode === 'events' && !data.events) {
-                const events = await eventsActions.getTodaysEventsForUser(student.id);
-                groupUtils.getUserGroupIds(student).forEach(groupId => groupsActions.loadGroupEvents(groupId, today, today));
-                setData(prev => ({ ...prev, events }));
-                setLoadedViews(prev => new Set([...prev, 'events']));
-            } else if (viewMode === 'project' && !data.project) {
-                const project = await projectActions.getProjectForStudent(student.id);
-                setData(prev => ({ ...prev, project }));
-                setLoadedViews(prev => new Set([...prev, 'project']));
-            } else if (viewMode === 'research' && !data.research) {
-                const research = await researchActions.getStudentLatestResearch(student.id);
-                setData(prev => ({ ...prev, research }));
-                setLoadedViews(prev => new Set([...prev, 'research']));
-            }
-        })()
-    }, [viewMode, student.id, today, loadedViews, data.events, data.project])
-
-    if (!data) {
-        return (
-            <div
-                ref={cardRef}
-                className="bg-card rounded p-2 border border-border animate-pulse break-inside-avoid">
-                <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 bg-muted rounded-full"></div>
-                    <div className="flex-1">
-                        <div className="h-4 bg-muted rounded w-3/4"></div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    const { scheduledEvents = [], meetings = [] } = data.events || {};
+    // Data is now passed from server via props
+    const { scheduledEvents = [], meetings = [] } = student.events || {};
     const allEvents = [...scheduledEvents, ...meetings].sort((a, b) => a.start.localeCompare(b.start));
 
     return (
@@ -93,8 +51,8 @@ export default function StudentCard({ student, viewMode }) {
 
             {viewMode === 'project' && (
                 <>
-                    {data.project ? (
-                        <div className="text-xs font-bold text-foreground">{data.project.title}</div>
+                    {student.project ? (
+                        <div className="text-xs font-bold text-foreground">{student.project.title}</div>
                     ) : (
                         <div className="text-xs text-muted-foreground">אין פרויקט</div>
                     )}
@@ -103,16 +61,16 @@ export default function StudentCard({ student, viewMode }) {
 
             {viewMode === 'research' && (
                 <>
-                    {data.research ? (
+                    {student.research ? (
                         <>
-                            <div className="text-xs font-bold text-foreground">{data.research.title}</div>
+                            <div className="text-xs font-bold text-foreground">{student.research.title}</div>
                             <div className="flex gap-2 text-xs text-foreground flex-wrap">
-                                {data.research.sections.questions && <div className="px-2 py-1 bg-muted rounded-md">{data.research.sections.questions.length} שאלות</div>}
-                                {data.research.sections.sources && <div className="px-2 py-1 bg-muted rounded-md">{data.research.sections.sources.length} מקורות</div>}
-                                {data.research.sections.quotes && <div className="px-2 py-1 bg-muted rounded-md">{data.research.sections.quotes.length} ציטוטים</div>}
-                                {data.research.sections.summary && <div className="px-2 py-1 bg-muted rounded-md">{data.research.sections.summary.length} סיכום</div>}
-                                {data.research.sections.masters && <div className="px-2 py-1 bg-muted rounded-md">{data.research.sections.masters.length} אנשים</div>}
-                                {data.research.sections.vocabulary && <div className="px-2 py-1 bg-muted rounded-md">{data.research.sections.vocabulary.length} מושגים</div>}
+                                {student.research.sections?.questions && <div className="px-2 py-1 bg-muted rounded-md">{student.research.sections.questions.length} שאלות</div>}
+                                {student.research.sections?.sources && <div className="px-2 py-1 bg-muted rounded-md">{student.research.sections.sources.length} מקורות</div>}
+                                {student.research.sections?.quotes && <div className="px-2 py-1 bg-muted rounded-md">{student.research.sections.quotes.length} ציטוטים</div>}
+                                {student.research.sections?.summary && <div className="px-2 py-1 bg-muted rounded-md">{student.research.sections.summary.length} סיכום</div>}
+                                {student.research.sections?.masters && <div className="px-2 py-1 bg-muted rounded-md">{student.research.sections.masters.length} אנשים</div>}
+                                {student.research.sections?.vocabulary && <div className="px-2 py-1 bg-muted rounded-md">{student.research.sections.vocabulary.length} מושגים</div>}
                             </div>
                         </>
                     ) : (
