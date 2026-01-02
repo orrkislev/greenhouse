@@ -5,16 +5,26 @@ import { getSupabaseAdminClient, getSupabaseServerClient } from '../supabase/ser
 const supabase = getSupabaseAdminClient();
 
 export const createUser = async (username, first_name, last_name) => {
+    // Only allow admins to create users
+    const serverClient = await getSupabaseServerClient();
+    const { data: { user: callingUser } } = await serverClient.auth.getUser();
+    if (!callingUser) throw new Error('Not authenticated');
+    const { data: callerData } = await supabase.from('users').select('is_admin').eq('id', callingUser.id).single();
+    if (!callerData?.is_admin) throw new Error('Not authorized');
+
+    // Check if username already exists
     const userSnapshot = await supabase.from('users').select('*').eq('username', username).single();
     if (userSnapshot.data) {
         throw new Error("Username already exists. Please choose a different username.");
     }
 
+    // Check if username is valid
     const usernameRegex = /^[A-Za-z][A-Za-z0-9._-]*$/;
     if (!usernameRegex.test(username)) {
         throw new Error("Username must start with a letter and contain only English letters, numbers, dots, underscores, or hyphens.");
     }
 
+    // Create user
     const email = prepareEmail(username);
     const password = preparePassword('0000');
     const { data: userRecord, error: userError } = await supabase.auth.admin.createUser({ email, password, email_confirm: true });
@@ -38,21 +48,12 @@ export const createUser = async (username, first_name, last_name) => {
 }
 
 export const resetPin = async (userId, newPin = '0000') => {
-    // Get the calling user's session to verify authorization
     const serverClient = await getSupabaseServerClient();
     const { data: { user: callingUser } } = await serverClient.auth.getUser();
+    if (!callingUser) throw new Error('Not authenticated');
+    const { data: callerData } = await supabase.from('users').select('role, is_admin').eq('id', callingUser.id).single();
 
-    if (!callingUser) {
-        throw new Error('Not authenticated');
-    }
-
-    // Only allow users to reset their own PIN, OR admins to reset anyone's
-    const { data: callerData } = await supabase.from('users')
-        .select('role, is_admin')
-        .eq('id', callingUser.id)
-        .single();
-
-    const isStaff = callerData?.role === 'staff' && callerData?.is_admin;
+    const isStaff = callerData?.role === 'staff';
     const isSelf = callingUser.id === userId;
 
     if (!isSelf && !isStaff) {
@@ -66,5 +67,13 @@ export const resetPin = async (userId, newPin = '0000') => {
 }
 
 export const deleteUser = async (userId) => {
+    // Only allow admins to delete users
+    const serverClient = await getSupabaseServerClient();
+    const { data: { user: callingUser } } = await serverClient.auth.getUser();
+    if (!callingUser) throw new Error('Not authenticated');
+    const { data: callerData } = await supabase.from('users').select('is_admin').eq('id', callingUser.id).single();
+    if (!callerData?.is_admin) throw new Error('Not authorized');
+
+    // Delete user
     await supabase.auth.admin.deleteUser(userId);
 }
