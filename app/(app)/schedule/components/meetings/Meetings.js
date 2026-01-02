@@ -2,7 +2,6 @@ import { tw } from "@/utils/tw";
 import { getTimeString, useTime } from "@/utils/store/useTime";
 import { useMeetings } from "@/utils/store/useMeetings";
 import { ScheduleSection } from "../Layout";
-import { useUser } from "@/utils/store/useUser";
 
 const MeetingContainer = tw`flex flex-col items-center justify-center text-foreground text-xs p-2
     gap-2 divide-y divide-black/10 z-[10]
@@ -14,7 +13,8 @@ export default function Meetings() {
     const meetings = useMeetings();
 
     const getOtherParticipant = (meeting) => {
-        return meeting.other_participants[0].first_name + ' ' + meeting.other_participants[0].last_name;
+        if (!meeting.other_participants || meeting.other_participants.length === 0) return null;
+        return meeting.other_participants[0]?.first_name + ' ' + meeting.other_participants[0]?.last_name;
     }
 
     return (

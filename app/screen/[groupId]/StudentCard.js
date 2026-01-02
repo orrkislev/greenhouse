@@ -50,7 +50,6 @@ export default function StudentCard({ student, viewMode }) {
     }
 
     const { scheduledEvents = [], meetings = [] } = data.events || {};
-    console.log(meetings);
     const allEvents = [...scheduledEvents, ...meetings].sort((a, b) => a.start.localeCompare(b.start));
 
     return (

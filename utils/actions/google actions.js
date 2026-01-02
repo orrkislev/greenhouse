@@ -149,8 +149,6 @@ export async function createGoogleDoc({ refreshToken, name, title, subtitle }) {
     }
   });
 
-  console.log('docId', docId);
-
   // 5. Share it with staff@chamama.org
   await docs.documents.batchUpdate({
     documentId: docId,

@@ -47,7 +47,7 @@ export const [useWrapped, wrappedActions] = createStore((set, get, withUser) => 
                 .gte('created_at', year2025Start),
 
             // Get class members (to find staff mentors)
-            supabase.rpc('mentors_by_user', {
+            supabase.rpc('get_user_groups', {
                 p_user_id: user.id
             }),
         ]);
@@ -57,8 +57,7 @@ export const [useWrapped, wrappedActions] = createStore((set, get, withUser) => 
         const tasks = tasksResult.data || [];
         const studyPaths = studyPathsResult.data || [];
         const research = researchResult.data || [];
-        const classMembers = classMembersResult.data || [];
-        console.log({classMembersResult});
+        const classMembers = classMembersResult.data.filter(g => g.type === 'class')[0]?.mentors || [];
 
         // Calculate stats
         const completedTasks = tasks.filter(t => t.status === 'completed');

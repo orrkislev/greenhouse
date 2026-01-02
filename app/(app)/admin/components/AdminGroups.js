@@ -121,7 +121,7 @@ function GroupStudents({ group }) {
     const [madeChanges, setMadeChanges] = useState(false);
 
     useEffect(() => {
-        setStudentsData(allMembers.filter(member => member.role === 'student' && member.groups?.includes(group.id)));
+        setStudentsData(allMembers.filter(member => member.role === 'student' && member.groups?.includes(group.id)).sort((a, b) => a.first_name.localeCompare(b.first_name)));
     }, [allMembers])
 
     const addStudent = () => {
@@ -198,7 +198,6 @@ function GroupStudents({ group }) {
                 <TableHeader headers={headers} />
                 <tbody>
                     {studentsData
-                        .sort((a, b) => a.first_name.localeCompare(b.first_name))
                         .sort((a, b) => a.isNew ? 1 : b.isNew ? -1 : 0)
                         .map((student, index) => (
                             <tr key={student.id + index} className="border-b border-border">

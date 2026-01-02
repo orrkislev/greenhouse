@@ -5,6 +5,7 @@ import { useUser } from "./useUser";
 import { makeLink, prepareForStudyPathsTable, prepareForTasksTable, unLink } from "../supabase/utils";
 import { resizeImage } from "../actions/storage actions";
 import { newLogActions } from "./useLogs";
+import { toastsActions } from "./useToasts";
 
 export const EnglishPathID = 'd5b55c53-5f6b-4832-97cf-3fbb99037218';
 
@@ -15,7 +16,7 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
     loadPaths: withLoadingCheck(async (user) => {
         set({ paths: [] });
         const { data, error } = await supabase.from('study_paths').select('*').eq('student_id', user.id);
-        if (error) throw error;
+        if (error) toastsActions.addFromError(error)
 
         for (const path of data) {
             const { data: stepsData, error: stepsError } = await supabase.rpc('get_linked_items', {
@@ -23,7 +24,7 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
                 p_item_id: path.id,
                 p_target_types: ['tasks']
             });
-            if (stepsError) throw stepsError;
+            if (stepsError) toastsActions.addFromError(stepsError)
             path.steps = stepsData ? stepsData.map(t => t.data) : [];
         }
 
@@ -33,7 +34,7 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
             if (englishPath) {
                 data.push(englishPath);
                 const { data: stepsData, error: stepsError } = await supabase.from('tasks').select('*').eq('student_id', user.id).eq('metadata->>english', 'true');
-                if (stepsError) throw stepsError;
+                if (stepsError) toastsActions.addFromError(stepsError)
                 englishPath.steps = stepsData
             }
         }
@@ -47,7 +48,7 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
             student_id: useUser.getState().user.id,
             status: 'active',
         }).select().single();
-        if (pathError) throw pathError;
+        if (pathError) toastsActions.addFromError(pathError)
 
         const { data: stepData, error: stepError } = await supabase.from('tasks').insert(prepareForTasksTable({
             title: 'מה הדבר הראשון שאלמד בנושא הזה',
@@ -55,7 +56,7 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
             student_id: useUser.getState().user.id,
             position: 0,
         })).select().single();
-        if (stepError) throw stepError;
+        if (stepError) toastsActions.addFromError(stepError)
 
         await makeLink('tasks', stepData.id, 'study_paths', pathData.id);
 
@@ -64,8 +65,10 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
         newLogActions.add(`התחלתי תחום למידה חדש.`);
     },
     deletePath: async (pathId) => {
+        const path = get().paths.find(path => path.id === pathId)
+        if (!path) return;
         const { error } = await supabase.from('study_paths').delete().eq('id', pathId);
-        if (error) throw error;
+        if (error) toastsActions.addFromError(error)
         set({ paths: get().paths.filter(path => path.id !== pathId) })
         newLogActions.add(`מחקתי את תחום הלמידה ${path.title}.`);
     },
@@ -86,7 +89,7 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
         step.student_id = useUser.getState().user.id
         if (path.id === EnglishPathID) step.metadata = { ...step.metadata, english: true }
         const { data, error } = await supabase.from('tasks').insert(prepareForTasksTable(step)).select().single();
-        if (error) throw error;
+        if (error) toastsActions.addFromError(error)
         await get().linkStepToPath(data, pathId);
         newLogActions.add(`הוספתי שלב לתחום הלמידה ${path.title}.`);
     },
@@ -108,14 +111,14 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
         Object.assign(step, stepData)
         step.updated_at = new Date().toISOString()
         const { error } = await supabase.from('tasks').update(prepareForTasksTable(stepData)).eq('id', stepId);
-        if (error) throw error;
+        if (error) toastsActions.addFromError(error)
     },
     deleteStep: async (pathId, subjectId, stepId) => {
         const path = get().paths.find(path => path.id === pathId)
         set(state => ({ paths: state.paths.map(path => path.id === pathId ? path : path) }))
         path.steps = path.steps.filter(step => step.id !== stepId)
         const { error } = await supabase.from('tasks').delete().eq('id', stepId);
-        if (error) throw error;
+        if (error) toastsActions.addFromError(error)
     },
 
     // ------------------------------
@@ -169,21 +172,21 @@ export const [useStudy, studyActions] = createStore((set, get, withUser, withLoa
         const { error } = await supabase.storage.from('images').upload(url, blob, {
             upsert: true,
         });
-        if (error) throw error;
+        if (error) toastsActions.addFromError(error)
         const { data: downloadData, error: downloadError } = await supabase.storage.from('images').getPublicUrl(url);
-        if (downloadError) throw downloadError;
+        if (downloadError) toastsActions.addFromError(downloadError)
         await get().updatePathMetadata(pathId, { image: downloadData.publicUrl });
     }),
 
     // ------------------------------
     loadSideContext: async () => {
         const { data, error } = await supabase.from('misc').select('data').eq('name', 'studySideContext').single();
-        if (error) throw error;
+        if (error) toastsActions.addFromError(error)
         set({ sideContext: data.data.data });
     },
     saveSideContext: async (sideContext) => {
         const { error } = await supabase.from('misc').update({ data: { 'data': sideContext } }).eq('name', 'studySideContext');
-        if (error) throw error;
+        if (error) toastsActions.addFromError(error)
         set({ sideContext });
     }
 }));

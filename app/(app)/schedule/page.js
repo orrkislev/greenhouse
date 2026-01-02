@@ -9,7 +9,7 @@ import GroupSchedules from "./components/GroupSchedule/GroupSchedules";
 import Meetings from "./components/meetings/Meetings";
 import GoogleCalendar from "./components/Google/GoogleCalendar";
 import Term from "./components/term/Term";
-import ContextBar, { PageMain } from "@/components/ContextBar";
+import ContextBar from "@/components/ContextBar";
 import { DashboardLayout, DashboardMain, DashboardPanel, DashboardPanelButton, DashboardTitle } from "@/components/DashboardLayout";
 import ScheduleContext from "./components/ScheduleContext";
 

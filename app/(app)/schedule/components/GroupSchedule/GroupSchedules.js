@@ -7,12 +7,13 @@ import { isStaff } from "@/utils/store/useUser";
 
 export default function GroupSchedules() {
     const groups = useUserGroups();
+    const week = useTime(state => state.week);
 
     const groupIds = groups.map(g => g.id).join(',');
 
     useEffect(() => {
         groupsActions.loadWeekEvents();
-    }, [groupIds]);
+    }, [groupIds, week]);
 
     return groups.map(group => <GroupSchedule key={group.id} group={group} />)
 }

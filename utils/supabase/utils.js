@@ -1,4 +1,5 @@
 import { supabase } from "./client";
+import { toastsActions } from "../store/useToasts";
 
 function buildSafeUpdates(updates, allowedKeys) {
     const safe = {};
@@ -39,7 +40,7 @@ export const unLink = async (a_table, a_id, b_table, b_id) => {
             `and(a_table.eq.${a_table},a_id.eq.${a_id},b_table.eq.${b_table},b_id.eq.${b_id})`,
             `and(a_table.eq.${b_table},a_id.eq.${b_id},b_table.eq.${a_table},b_id.eq.${a_id})`,
         ].join(','))
-    if (linkError) throw linkError;
+    if (linkError) toastsActions.addFromError(linkError);
     return data;
 }
 
@@ -54,10 +55,10 @@ export const makeLink = async (a_table, a_id, b_table, b_id) => {
             ].join(',')
         );
 
-    if (linkError) throw linkError;
-    if (data && data.length > 0) return;
+    if (linkError) toastsActions.addFromError(linkError);
+    if (data && data.length > 0) return data;
 
     const { error: insertError } = await supabase.from('links').insert({ a_table, a_id, b_table, b_id });
-    if (insertError) throw insertError;
-    return
+    if (insertError) toastsActions.addFromError(insertError);
+    return data;
 }

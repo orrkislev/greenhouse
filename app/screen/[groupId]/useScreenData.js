@@ -23,7 +23,7 @@ export function useScreenData(groupId, includeStaff = false) {
                 // Fetch all users in the group
                 const { data: usersGroupsData, error: usersGroupsError } = await supabase
                     .from('users_groups')
-                    .select('users( id, first_name, last_name, username, avatar_url, role )')
+                    .select('users( id, first_name, last_name, username, role ), user_profiles( avatar_url )')
                     .eq('group_id', groupId);
 
                 if (usersGroupsError) throw usersGroupsError;

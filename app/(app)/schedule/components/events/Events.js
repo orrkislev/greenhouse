@@ -27,7 +27,6 @@ const newEventTitles = [
 export default function Events() {
     const week = useTime(state => state.week);
     const allEvents = useWeekEvents();
-    console.log('allEvents', allEvents);
     const [draggingId, setDraggingId] = useState(null);
     const [resizingId, setResizingId] = useState(null);
 

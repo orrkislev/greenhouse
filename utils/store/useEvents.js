@@ -38,7 +38,7 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
         }),
         loadTermEvents: withUser(async (user) => {
             const term = useTime.getState().currTerm
-            if (!term || !term.start || !term.end) return console.error('Term not found');
+            if (!term || !term.start || !term.end) return;
             await get().loadEvents(user, term.start, term.end);
         }),
 

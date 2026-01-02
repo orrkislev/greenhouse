@@ -30,9 +30,9 @@ function JournalNew({ isOpen, setIsOpen, showArchive = true }) {
         setText(logText)
     }, [logText])
 
-    useEffect(() => {
-        adminActions.loadData();
-    }, [])
+    // useEffect(() => {
+    //     adminActions.loadData();
+    // }, [])
 
     useEffect(() => {
         setSelectedStaff(originalUser ? originalUser.user : null)

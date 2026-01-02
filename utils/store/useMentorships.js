@@ -11,10 +11,10 @@ export const [useMentorships, mentorshipsActions] = createStore((set, get, withU
         let query = supabase.from('mentorships')
             .select(`*, 
                 student:users!mentorships_student_id_fkey (
-                    id, first_name, last_name, username, avatar_url, role
+                    id, first_name, last_name, username, role, user_profiles( avatar_url )
                 ),
                 mentor:users!mentorships_mentor_id_fkey (
-                    id, first_name, last_name, username, avatar_url, role
+                    id, first_name, last_name, username, role, user_profiles( avatar_url )
                 )`)
         if (user.role === 'student') query = query.eq('student_id', user.id);
         else query = query.eq('mentor_id', user.id);

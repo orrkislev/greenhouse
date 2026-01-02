@@ -1,6 +1,6 @@
 'use server';
 import { prepareEmail, preparePassword } from '@/utils/actions/auth';
-import { getSupabaseAdminClient } from '../supabase/server';
+import { getSupabaseAdminClient, getSupabaseServerClient } from '../supabase/server';
 
 const supabase = getSupabaseAdminClient();
 
@@ -38,6 +38,27 @@ export const createUser = async (username, first_name, last_name) => {
 }
 
 export const resetPin = async (userId, newPin = '0000') => {
+    // Get the calling user's session to verify authorization
+    const serverClient = await getSupabaseServerClient();
+    const { data: { user: callingUser } } = await serverClient.auth.getUser();
+
+    if (!callingUser) {
+        throw new Error('Not authenticated');
+    }
+
+    // Only allow users to reset their own PIN, OR admins to reset anyone's
+    const { data: callerData } = await supabase.from('users')
+        .select('role, is_admin')
+        .eq('id', callingUser.id)
+        .single();
+
+    const isStaff = callerData?.role === 'staff' && callerData?.is_admin;
+    const isSelf = callingUser.id === userId;
+
+    if (!isSelf && !isStaff) {
+        throw new Error('Not authorized to reset this PIN');
+    }
+
     const password = preparePassword(newPin);
     return await supabase.auth.admin.updateUserById(userId, {
         password,

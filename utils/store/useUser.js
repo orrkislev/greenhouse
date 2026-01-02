@@ -30,15 +30,21 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 			if (data) await get().getUserData(data.user.id);
 		},
 		getUserData: async (userId) => {
-			const { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
-			if (error) set({ error });
-			else set({ user: data });
+			const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+			const { data: { user } } = await supabase.auth.getUser();
 
-			if (!data.googleRefreshToken) {
-				const { data: { session } } = await supabase.auth.getSession();
-				if (session?.provider_refresh_token) {
-					await get().updateUserData({ googleRefreshToken: session.provider_refresh_token });
-				}
+			const { data: { session } } = await supabase.auth.getSession();
+
+			const { data, error } = await supabase.from('users').select(`
+				*,
+				user_profiles(
+					*
+				)
+				`).eq('id', userId).single();
+			if (error) set({ error });
+			else {
+				const newData = { ...data, ...data.user_profiles }
+				set({ user: newData });
 			}
 		},
 		updateUserData: async (updates) => {
@@ -129,7 +135,7 @@ export const isStaff = () => {
 }
 export const isAdmin = () => {
 	const user = useUser.getState().user;
-	return user && user.role == 'staff' &&  user.is_admin;
+	return user && user.role == 'staff' && user.is_admin;
 }
 
 export const userActions = Object.fromEntries(

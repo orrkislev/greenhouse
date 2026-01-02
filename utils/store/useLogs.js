@@ -12,18 +12,17 @@ export const [useLogsData, logsActions] = createStore((set, get, withUser, withL
             .order('created_at', { ascending: false }).limit(20);
         if (error) throw error;
         for (const log of data) {
-            console.log(log)
             if (log.context_table && log.context_id) {
                 const { data: context } = await supabase.from(log.context_table).select('id, title').eq('id', log.context_id).single();
                 if (context) log.context = context;
             }
             if (log.user_id !== user.id) {
-                const { data: user } = await supabase.from('users').select('id, first_name, last_name, avatar_url').eq('id', log.user_id).single();
+                const { data: user } = await supabase.from('users').select('id, first_name, last_name, role, user_profiles( avatar_url )').eq('id', log.user_id).single();
                 if (user) log.user = user;
             } else log.user = user;
             if (log.mentor_id) {
                 if (log.mentor_id !== user.id) {
-                    const { data: mentor } = await supabase.from('users').select('id, first_name, last_name, avatar_url').eq('id', log.mentor_id).single();
+                    const { data: mentor } = await supabase.from('users').select('id, first_name, last_name, role, user_profiles( avatar_url )').eq('id', log.mentor_id).single();
                     if (mentor) log.mentor = mentor;
                 } else log.mentor = user;
             }
@@ -43,7 +42,7 @@ export const [useLogsData, logsActions] = createStore((set, get, withUser, withL
                 log.context = context;
             }
             if (log.mentor_id) {
-                const { data: mentor, error: mentorError } = await supabase.from('users').select('id, first_name, last_name, avatar_url').eq('id', log.mentor_id).single();
+                const { data: mentor, error: mentorError } = await supabase.from('users').select('id, first_name, last_name, role, user_profiles( avatar_url )').eq('id', log.mentor_id).single();
                 if (mentorError) throw mentorError;
                 log.mentor = mentor;
             }

@@ -1,5 +1,5 @@
 import { tw } from "@/utils/tw";
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import ListView from "./ListView";
 import { CalendarDays, BetweenHorizonalEnd, TableOfContents, Plus, ListCheck } from "lucide-react";
 import WeeklyView from "./WeeklyView";
@@ -16,6 +16,10 @@ export default function ProjectTasks() {
     const project = useProjectData(state => state.project)
     const taskStyle = useProjectData(state => state.project?.metadata?.taskStyle)
     const [isOpen, setIsOpen] = useState(false)
+
+    useEffect(()=>{
+        projectActions.loadTasks();
+    }, [project?.id])
 
     const ViewComponent = taskStyle ? views[taskStyle].component : views.list.component
 
