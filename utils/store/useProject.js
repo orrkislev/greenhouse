@@ -16,38 +16,27 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
         setProject: (project) => set({ project }),
         loadProject: withUser(async (user) => {
             set({ project: null, tasks: [] });
-            const { data, error } = await supabase.rpc('get_student_current_term_project', {
-                p_student_id: user.id
-            })
+            const currTerm = useTime.getState().currTerm;
+            if (!currTerm) return;
+            const { data, error } = await supabase.from('projects').select(`
+                *, 
+                master:staff_public!master(first_name, last_name, avatar_url)
+            `).eq('student_id', user.id).contains('term', [currTerm.id]).single();
             if (error) toastsActions.addFromError(error)
             if (data) set({ project: data })
         }),
+        loadProjectById: async (projectId) => {
+            const { data, error } = await supabase.from('projects').select(`
+                *, 
+                master:staff_public!master(first_name, last_name, avatar_url)
+            `).eq('id', projectId).single();
+            if (error) toastsActions.addFromError(error)
+            if (data) set({ project: data })
+        },
         continueProject: async (projectId) => {
-            const { error } = await makeLink('projects', projectId, 'terms', useTime.getState().currTerm.id);
-            if (error) toastsActions.addFromError(error)
-            get().loadProject();
-        },
-
-        getProjectTerms: async (projectID) => {
-            const { data, error } = await supabase.rpc('get_linked_items', {
-                p_table_name: 'projects',
-                p_item_id: projectID,
-                p_target_types: ['terms']
-            })
-            if (error) toastsActions.addFromError(error)
-            return data.map(item => item.data);
-        },
-        loadProjectTerms: async () => {
-            const terms = await get().getProjectTerms(get().project.id);
-            set({ project: { ...get().project, terms: terms } });
-        },
-
-        loadProjectMasters: async () => {
-            const { data, error } = await supabase.rpc('project_get_master', {
-                p_project_id: get().project.id,
-            })
-            if (error) toastsActions.addFromError(error)
-            set({ project: { ...get().project, master: data } });
+            const newTerm = useTime.getState().currTerm.id;
+            if (newTerm) { }
+            // TODO: add the term to the project
         },
 
         // ------------------------------
@@ -58,11 +47,10 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
                 student_id: user.id,
                 status: 'draft',
                 title: `הפרויקט של ${user.first_name} צריך כותרת`,
+                term: [useTime.getState().currTerm.id],
             }).select().single();
             if (projectError) toastsActions.addFromError(projectError)
             set({ project: projectData });
-
-            makeLink('projects', projectData.id, 'terms', useTime.getState().currTerm.id);
 
             get().addTaskToProject({
                 title: 'למלא הצהרת כוונות',
@@ -108,7 +96,11 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
         // ------------------------------
         allProjects: [],
         loadAllProjects: withUser(async (user) => {
-            const { data, error } = await supabase.from('projects').select('*').eq('student_id', user.id);
+            const { data, error } = await supabase.from('projects').select(`
+                    *,
+                    master:staff_public!master(first_name, last_name, avatar_url)
+                `).eq('student_id', user.id);
+            console.log(data);
             if (error) toastsActions.addFromError(error)
             set({ allProjects: data });
         }),
@@ -133,9 +125,9 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
 
         // ------------------------------
         getProjectForStudent: async (studentId) => {
-            const { data, error } = await supabase.rpc('get_student_current_term_project', {
-                p_student_id: studentId
-            })
+            const currTerm = useTime.getState().currTerm;
+            if (!currTerm) return null;
+            const { data, error } = await supabase.from('projects').select('*').eq('student_id', studentId).contains('term', [currTerm.id]).single();
             if (error) toastsActions.addFromError(error)
             return data;
         },
@@ -147,7 +139,6 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
         tasks: [],
         view: 'list',
         loadTasks: async () => {
-            console.log('loadTasks', useProjectData.getState().project.id);
             set({ tasks: [] });
             if (!useProjectData.getState().project) return;
             const { data, error } = await supabase.rpc('get_linked_items', {
@@ -155,7 +146,6 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
                 p_item_id: useProjectData.getState().project.id,
                 p_target_types: ['tasks']
             })
-            console.log('loadTasks', { data, error });
             if (error) toastsActions.addFromError(error)
             const tasks = data.map(item => item.data).filter(task => task)
             tasks.forEach(task => task.context = projectUtils.getContext(task.project_id));

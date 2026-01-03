@@ -57,6 +57,7 @@ export const useTime = create(subscribeWithSelector((set, get) => {
             const newTerms = get().terms.map(term => term.id === termId ? { ...term, ...updates } : term);
             set({ terms: newTerms });
         },
+
     };
 }));
 

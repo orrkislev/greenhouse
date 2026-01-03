@@ -82,7 +82,7 @@ function SelectedStudentCard({ student, context, group }) {
     }, [student, today])
 
     const goToStudent = async (student) => {
-        await userActions.switchToStudent(student.id, 'staff');
+        await userActions.switchToStudent(student.id);
     }
 
     if (!data) return null;

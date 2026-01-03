@@ -47,7 +47,7 @@ function createStyledElement(elementType) {
 }
 
 const elementTypes = [
-  'div', 'span', 'button', 'a', 'p', 'section', 'article', 'h1', 'form', 'input', 'textarea'
+  'div', 'span', 'button', 'a', 'p', 'section', 'article', 'h1', 'form', 'input', 'textarea', 'table', 'tbody', 'thead', 'tr', 'th', 'td',
   // Add more as needed
 ];
 

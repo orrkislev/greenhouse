@@ -40,11 +40,10 @@ export default function AdminProjects() {
         return allMembers.filter(member => member.role === 'student').map(student => {
             const group = classes.find(g => student.groups.includes(g.id))?.name;
             const major = majors.find(m => student.groups.includes(m.id))?.name;
-            const master = student.project?.master?.first_name;
             return {
                 ...student,
                 name: student.first_name + ' ' + student.last_name,
-                group, major, master
+                group, major
             }
         });
     }, [allMembers, classes, majors]);
@@ -71,7 +70,7 @@ export default function AdminProjects() {
 
 
     const clickOnProject = async (studentId) => {
-        await userActions.switchToStudent(studentId, window.location.pathname);
+        await userActions.switchToStudent(studentId);
         setTimeout(() => { router.push('/project'); }, 200);
     }
 

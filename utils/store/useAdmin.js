@@ -6,6 +6,7 @@ import { projectActions } from "./useProject";
 import { createDataLoadingHook } from "./utils/createStore";
 import { format } from "date-fns";
 import { toastsActions } from "./useToasts";
+import { useTime } from "./useTime";
 
 
 export const useAdmin = create((set, get) => ({
@@ -132,20 +133,13 @@ export const useAdmin = create((set, get) => ({
     loadProjects: async () => {
         const allMembers = get().allMembers;
         if (allMembers.some(member => member.project)) return;
-        const { data, error: getProjectsError } = await supabase.rpc('get_projects_in_current_term');
+        const currTerm = useTime.getState().currTerm;
+        if (!currTerm) return;
+        const { data, error: getProjectsError } = await supabase.from('projects').select(`
+            *,
+            master:staff_public!master(id:user_id,first_name, last_name, avatar_url)
+            `).contains('term', [currTerm.id]);
         if (getProjectsError) toastsActions.addFromError(getProjectsError)
-        for (const project of data) {
-            const { data: masters, error: getMastersError } = await supabase.rpc('get_linked_items', {
-                p_table_name: 'projects',
-                p_item_id: project.id,
-                p_target_types: ['mentorships']
-            })
-            if (getMastersError) toastsActions.addFromError(getMastersError)
-            if (masters.length > 0) {
-                const master = get().allMembers.find(s => masters.some(m => m.data?.mentor_id === s.id));
-                project.master = get().allMembers.find(s => masters.some(m => m.data?.mentor_id === s.id));
-            }
-        }
         const newAllMembers = allMembers.map(member => {
             const project = data.find(p => p.student_id === member.id);
             const res = { ...member }
@@ -155,14 +149,7 @@ export const useAdmin = create((set, get) => ({
         set({ allMembers: newAllMembers });
     },
     assignMasterToProject: async (studentId, projectId, masterId) => {
-        const { data: mentorship, error: mentorshipError } = await supabase.from('mentorships')
-            .upsert({ mentor_id: masterId, student_id: studentId }, { onConflict: 'mentor_id,student_id' })
-            .select().single();
-        if (mentorshipError) toastsActions.addFromError(mentorshipError)
-
-        await makeLink('mentorships', mentorship.id, 'projects', projectId);
-
-        const { error: projectError } = await supabase.from('projects').update({ status: 'active' }).eq('id', projectId);
+        const { error: projectError } = await supabase.from('projects').update({ status: 'active', master: masterId }).eq('id', projectId);
         if (projectError) toastsActions.addFromError(projectError)
 
         let master = get().allMembers.find(member => member.id === masterId);

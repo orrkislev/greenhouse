@@ -11,11 +11,18 @@ import Section_quotes from "./sections/Section_Quotes";
 import Section_vocabulary from "./sections/Section_vocabulary";
 import Section_summary from "./sections/Section_summary";
 import Section_masters from "./sections/Section_masters";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Research() {
     const user = useUser(state => state.user)
+    const searchParams = useSearchParams();
     const research = useResearchData(state => state.research)
+    const researchId = searchParams.get('id');
+
+    useEffect(() => {
+        if (researchId) researchActions.loadResearchById(researchId);
+    }, [researchId]);
 
     const clickCreateDoc = async () => {
         researchActions.createGoogleDoc();

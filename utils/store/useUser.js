@@ -30,11 +30,7 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 			if (data) await get().getUserData(data.user.id);
 		},
 		getUserData: async (userId) => {
-			const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-			const { data: { user } } = await supabase.auth.getUser();
-
-			const { data: { session } } = await supabase.auth.getSession();
-
+			await supabase.auth.refreshSession();
 			const { data, error } = await supabase.from('users').select(`
 				*,
 				user_profiles(
@@ -47,10 +43,11 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 				set({ user: newData });
 			}
 		},
-		updateUserData: async (updates) => {
-			const { error } = await supabase.from('users').update(updates).eq('id', get().user.id);
+		updateUserProfile: async (updates) => {
+			const user = get().user;
+			const { error } = await supabase.from('user_profiles').update(updates).eq('user_id', user.id);
 			if (error) set({ error });
-			else set((state) => ({ user: { ...state.user, ...updates } }));
+			else set({ user: { ...user, ...updates } });
 		},
 		signInWithGoogle: async () => {
 			await supabase.auth.signInWithOAuth({
@@ -75,8 +72,8 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 		// ----------------------------------------------------
 		// ------------ Staff Switching User ------------------
 		// ----------------------------------------------------
-		switchToStudent: async (studentId, currUrl) => {
-			currUrl = window.location.pathname + window.location.search;
+		switchToStudent: async (studentId, targetUrl = '/') => {
+			const currUrl = window.location.pathname + window.location.search;
 			const user = get().user;
 			if (!user || !isStaff()) {
 				throw new Error("User does not have permission to switch to student.");
@@ -89,7 +86,7 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 			if (error) set({ error });
 			else set({ user: data });
 
-			redirect('/')
+			redirect(targetUrl);
 		},
 		switchBackToOriginal: async () => {
 			const originalUser = get().originalUser;
@@ -116,7 +113,7 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 			if (error) throw error;
 			const { data, error: downloadError } = await supabase.storage.from('images').getPublicUrl(`${user.id}.png`);
 			if (downloadError) throw downloadError;
-			await get().updateUserData({ avatar_url: data.publicUrl });
+			await get().updateUserProfile({ avatar_url: data.publicUrl });
 		},
 
 		// ----------------------------------------------------

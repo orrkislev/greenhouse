@@ -1,6 +1,6 @@
 'use client'
 
-import { useProject } from "@/utils/store/useProject";
+import { projectActions, useProject } from "@/utils/store/useProject";
 import NewProjectDialog from "./components/NewProjectDialog";
 import ProjectProposal from "./components/ProjectProposal";
 import ProjectDashboard, { ProjectImage, ProjectName } from "./components/ProjectDashboard";
@@ -9,16 +9,26 @@ import ProjectContext from "./components/ProjectContext";
 import { DashboardLayout, DashboardMain, DashboardPanel, DashboardPanelButton } from "@/components/DashboardLayout";
 import { ProjectReview } from "./components/ProjectReview";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function ProjectPage2() {
+    const searchParams = useSearchParams();
     const project = useProject();
-    const [view, setView] = useState('dashboard');
+    const projectId = searchParams.get('id');
+    const viewParam = searchParams.get('view');
+    const [view, setView] = useState(viewParam || 'dashboard');
 
     useEffect(() => {
-        if (project?.status === 'draft') {
-            setView('proposal');
-        }
-    }, [project?.status]);
+        if (viewParam) setView(viewParam);
+    }, [viewParam]);
+
+    useEffect(() => {
+        if (projectId) projectActions.loadProjectById(projectId);
+    }, [projectId]);
+
+    // useEffect(() => {
+    //     if (project?.status === 'draft') setView('proposal');
+    // }, [project?.status]);
 
     return (
         <>

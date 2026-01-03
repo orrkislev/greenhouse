@@ -1,6 +1,6 @@
 import { projectActions, useProjectData } from "@/utils/store/useProject";
 import Avatar from "@/components/Avatar";
-import { daysOfWeek, useTime } from "@/utils/store/useTime";
+import { daysOfWeek, timeActions, useTime } from "@/utils/store/useTime";
 import { useMeetings } from "@/utils/store/useMeetings";
 import { CalendarFold } from "lucide-react";
 import { useEffect } from "react";
@@ -8,23 +8,24 @@ import { useEffect } from "react";
 export default function ProjectInfo() {
   const project = useProjectData(state => state.project);
   const meetings = useMeetings()
+  const terms = useTime(state => state.terms)
 
   useEffect(() => {
-    projectActions.loadProjectTerms();
-    projectActions.loadProjectMasters();
+    timeActions.loadTerms();
   }, []);
 
+  const getTermName = (termId) => terms.find(term => term.id === termId)?.name
   const meeting = meetings.find(m => m.other_participants?.[0]?.id === project.master?.id);
 
   return (
     <div className="flex gap-3">
       <div className="flex-1">
-        {project.terms && (
+        {project.term && (
           <div>
-            {project.terms.length == 1 ? (
-              <h3 className="text-center text-foreground font-medium">פרויקט בתקופת {project.terms[0].name}</h3>
+            {project.term.length == 1 ? (
+              <h3 className="text-center text-foreground font-medium">פרויקט בתקופת {getTermName(project.term[0])}</h3>
             ) : (
-              <h3 className="text-center text-foreground font-medium">פרויקט בתקופות {project.terms.map(term => term.name).join(', ')}</h3>
+              <h3 className="text-center text-foreground font-medium">פרויקט בתקופות {project.term.map(term => getTermName(term)).join(', ')}</h3>
             )}
           </div>
         )}

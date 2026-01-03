@@ -17,12 +17,17 @@ import { ResearchReview } from "./components/ResearchReview";
 export default function ResearchPage() {
   const [view, setView] = useState('research')
   const searchParams = useSearchParams()
+  const researchId = searchParams.get('id');
+  const viewParam = searchParams.get('view');
   const research = useResearch()
 
   useEffect(() => {
-    const id = searchParams.get('id')
-    if (id) researchActions.setResearchById(id)
-  }, [searchParams])
+    if (researchId) researchActions.setResearchById(researchId)
+  }, [researchId])
+
+  useEffect(() => {
+    if (viewParam) setView(viewParam);
+  }, [viewParam]);
 
   return (
     <>
@@ -38,10 +43,12 @@ export default function ResearchPage() {
           </DashboardMain>
         </DashboardLayout>
       ) : (
-        <NoResearch />
+        <PageMain>
+          <NoResearch />
+        </PageMain>
       )}
 
-      <ContextBar initialOpen={false}>
+      <ContextBar initialOpen={true}>
         <ResearchList />
         <div className="flex justify-center items-center mt-8">
           <Button data-role="new" onClick={researchActions.newResearch}>
@@ -65,32 +72,19 @@ function ResearchList() {
   const router = useRouter()
   const research = useResearchData(state => state.research)
   const terms = useTime(state => state.terms)
-  const currTerm = useTime(state => state.currTerm)
 
   useEffect(() => {
     timeActions.loadTerms();
   }, [])
 
-  const clickResearch = (researchId) => {
-    router.push(`/research?id=${researchId}`)
-  }
-
-  const removeResearch = (researchId) => {
-    researchActions.deleteResearch(researchId)
-  }
+  const clickResearch = (researchId) => router.push(`/research?id=${researchId}`)
+  const removeResearch = (researchId) => researchActions.deleteResearch(researchId)
+  const getTermName = (termId) => terms.find(term => term.id === termId)?.name
 
   const selectedResearchId = research?.id
 
-  const getTerm = (research) => {
-    const researchCreatedDate = new Date(research.created_at)
-    const term = terms.find(term => new Date(term.start) <= researchCreatedDate && new Date(term.end) >= researchCreatedDate)
-    if (!term) return researchCreatedDate.toLocaleDateString()
-    return term
-  }
-
   const researches = []
   allResearch.forEach(research => {
-    const term = getTerm(research)
     const needReview = researchUtils.getNeedReview(research)
 
     researches.push(
@@ -99,9 +93,9 @@ function ResearchList() {
           <div className='flex gap-2 items-center'>
             {research.title}
             {needReview && <span className="w-2 h-2 bg-danger-text rounded-full" />}</div>
-          {term && <span className="ml-2 text-xs">תקופת {term.name}</span>}
+          {research.term && <span className="ml-2 text-xs">בתקופת {getTermName(research.term[0])}</span>}
         </div>
-        <IconButton icon={Trash2} onClick={() => removeResearch(research.id)} className="p-2 hover:bg-muted rounded-full opacity-0 group-hover/research-row:opacity-100 transition-opacity hover:bg-accent hover:text-foreground" />
+        <IconButton icon={Trash2} onClick={(e) => { e.stopPropagation(); removeResearch(research.id) }} className="p-2 hover:bg-muted rounded-full opacity-0 group-hover/research-row:opacity-100 transition-opacity hover:bg-accent hover:text-foreground" />
         {needReview && <Tooltip side="right">זקוק למשוב</Tooltip>}
       </ResearchRow >
     )

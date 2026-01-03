@@ -3,6 +3,7 @@ import { createGoogleDoc } from "../actions/google actions";
 import { useTime } from "./useTime";
 import { supabase } from "../supabase/client";
 import { debounce } from "lodash";
+import { toastsActions } from "./useToasts";
 
 export const [useResearchData, researchActions] = createStore((set, get, withUser, withLoadingCheck) => ({
     research: null,
@@ -10,18 +11,25 @@ export const [useResearchData, researchActions] = createStore((set, get, withUse
 
     loadResearch: withLoadingCheck(async (user) => {
         set({ research: null });
-        // const { data, error } = await supabase.rpc('get_student_current_term_research', { p_student_id: user.id });
+        const currTerm = useTime.getState().currTerm;
+        if (!currTerm) return;
         const { data, error } = await supabase.from('research').select('*')
-            .eq('student_id', user.id).eq('status', 'active')
+            .eq('student_id', user.id)
+            .contains('term', [currTerm.id])
+            .order('created_at', { ascending: false })
             .single();
-        if (error) throw error;
+        if (error) toastsActions.addFromError(error);
         if (data) set({ research: data });
     }),
+    loadResearchById: async (researchId) => {
+        const { data, error } = await supabase.from('research').select('*').eq('id', researchId).single();
+        if (error) toastsActions.addFromError(error);
+        if (data) set({ research: data });
+    },
     loadAllResearch: withUser(async (user) => {
         const { data, error } = await supabase.from('research').select('*').eq('student_id', user.id);
-        if (error) throw error;
-        const latestResearch = data.filter(research => research.status === 'active').sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        set({ allResearch: data, research: latestResearch[0] });
+        if (error) toastsActions.addFromError(error);
+        set({ allResearch: data });
     }),
     setResearchById: async (researchId) => {
         const research = get().allResearch.find(research => research.id === researchId);
@@ -33,15 +41,16 @@ export const [useResearchData, researchActions] = createStore((set, get, withUse
         const { research } = get();
         if (!research) return;
         const { error } = await supabase.from('research').update(research).eq('id', research.id);
-        if (error) throw error;
+        if (error) toastsActions.addFromError(error);
     }, 1000),
 
     newResearch: withUser(async (user) => {
         const { data, error } = await supabase.from('research').insert({
             student_id: user.id,
             title: 'חקר חדש',
+            term: [useTime.getState().currTerm.id],
         }).select().single();
-        if (error) throw error;
+        if (error) toastsActions.addFromError(error);
         set({ research: data, allResearch: [...get().allResearch, data] });
     }),
     updateResearch: async (updates) => {
@@ -51,7 +60,7 @@ export const [useResearchData, researchActions] = createStore((set, get, withUse
     },
     deleteResearch: async (researchId) => {
         const { error } = await supabase.from('research').delete().eq('id', researchId);
-        if (error) throw error;
+        if (error) toastsActions.addFromError(error);
         set({ research: null, allResearch: get().allResearch.filter(research => research.id !== researchId) });
     },
 
@@ -79,7 +88,7 @@ export const [useResearchData, researchActions] = createStore((set, get, withUse
 
     getStudentLatestResearch: async (studentId) => {
         const { data, error } = await supabase.from('research').select('*').eq('student_id', studentId).eq('status', 'active').single();
-        if (error) throw error;
+        if (error) toastsActions.addFromError(error);
         return data;
     },
 }));

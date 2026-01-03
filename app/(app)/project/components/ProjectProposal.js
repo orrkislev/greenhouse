@@ -84,18 +84,6 @@ export default function ProjectProposal() {
                         'יש להשלים לפחות שלוש שאלות כדי להמשיך לפרויקט'
                     }
                 </div>
-                {/* {filledThreeQuestions && isStaff() && (
-                    <div className="flex justify-center mt-4">
-                        <Button data-role="edit"
-                            onClick={async () => {
-                                await adminActions.assignMasterToProject(user.id, project.id, user.id)
-                                await projectActions.updateProject({ status: 'active' })
-                            }}
-                        >
-                            I AM MY OWN MASTER <Cat className="w-4 h-4" />
-                        </Button>
-                    </div>
-                )} */}
             </div>
 
         </div>

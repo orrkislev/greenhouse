@@ -7,7 +7,6 @@ export default async function ScreenPage({ params }) {
     const { data, error } = await supabase.rpc('group_full_state', {
         p_group_id: groupId,
     });
-    console.log(data);
 
     if (error) {
         console.error('Error fetching group full state:', error);

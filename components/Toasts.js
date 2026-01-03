@@ -8,7 +8,7 @@ import { useState } from "react";
 export default function Toasts() {
     const toasts = useToasts((state) => state.toasts);
     return (
-        <div className="fixed top-2 left-2 p-4 flex flex-col gap-1 z-999">
+        <div className="fixed top-2 left-2 flex flex-col gap-1 z-999">
             {toasts.map((toast, index) => (
                 <Toast key={toast.id + index} toast={toast} />
             ))}
