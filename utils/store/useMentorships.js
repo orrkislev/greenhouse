@@ -1,9 +1,11 @@
 import { useUser } from "@/utils/store/useUser";
 import { supabase } from "../supabase/client";
 import { createStore } from "./utils/createStore";
+import { toastsActions } from "./useToasts";
 
 export const [useMentorships, mentorshipsActions] = createStore((set, get, withUser, withLoadingCheck) => ({
     mentorships: [],
+    projectMentorships: [],
     allStudents: [],
 
     getMentorships: withLoadingCheck(async (user) => {
@@ -19,14 +21,24 @@ export const [useMentorships, mentorshipsActions] = createStore((set, get, withU
         if (user.role === 'student') query = query.eq('student_id', user.id);
         else query = query.eq('mentor_id', user.id);
         query = query.eq('is_active', true);
-        const { data, error } = await query;
-        if (error) throw error;
-        set({ mentorships: data });
+        const { data: mentorships, error: mentorshipsError  } = await query;
+        if (mentorshipsError) toastsActions.addFromError(mentorshipsError);
+        set({ mentorships: mentorships });
+
+        const { data, error } = await supabase.from('projects').select(`
+            *,
+            student:users!projects_student_id_fkey (
+                id, first_name, last_name, username, role, user_profiles( avatar_url )
+            ),
+            master:staff_public!master(id:user_id,first_name, last_name, avatar_url)
+            `).eq('master', user.id);
+        if (error) toastsActions.addFromError(error);
+        set({ projectMentorships: data });
     }),
 
     getAllStudents: async () => {
         if (get().allStudents.length > 0) return;
-        const students = await supabase.from('users').select('*').eq('role', 'student');
+        const students = await supabase.from('users').select('id, first_name, last_name').eq('role', 'student');
         set({ allStudents: students.data });
     },
 

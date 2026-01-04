@@ -1,67 +1,129 @@
 'use client'
 
 import { mentorshipsActions, useMentorships } from "@/utils/store/useMentorships";
-import { Plus } from "lucide-react";
+import { Book, Plus } from "lucide-react";
 import { useEffect } from "react";
 import { Staff_Students_List } from "./StaffGroup_Students";
 import Button from "@/components/Button";
-import WithLabel from "@/components/WithLabel";
-import { adminActions, useAdmin } from "@/utils/store/useAdmin";
-import { groupsActions } from "@/utils/store/useGroups";
 import usePopper from "@/components/Popper";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { timeActions, useTime } from "@/utils/store/useTime";
+import WithLabel from "@/components/WithLabel";
+import { userActions } from "@/utils/store/useUser";
+import Avatar from "@/components/Avatar";
 
 export default function StaffStudents() {
     const mentorships = useMentorships(state => state.mentorships);
+    const projectMentorships = useMentorships(state => state.projectMentorships);
+    const terms = useTime(state => state.terms);
 
     useEffect(() => {
         mentorshipsActions.getMentorships();
+        timeActions.loadTerms();
     }, []);
 
     const onSelect = (student) => {
         mentorshipsActions.createMentorship(student, 'הנחייה חדשה');
     }
 
+    const projectsByTerm = projectMentorships.reduce((acc, project) => {
+        const term = terms.find(term => term.id === project.term?.[0])?.name || 'אחרת'
+        if (!acc[term]) acc[term] = [];
+        acc[term].push(project);
+        return acc;
+    }, {});
+
+    const goToProject = (project) => {
+        userActions.switchToStudent(project.student.id, '/project?id=' + project.id);
+    }
+    const goToStudent = (student) => {
+        userActions.switchToStudent(student.id);
+    }
+
     return (
         <div className="flex flex-col gap-4">
-            {mentorships.length ? (
-                <Staff_Students_List students={mentorships.map(m => m.student)} context={'master'} />
-            ) : (
-                <div className="text-center text-muted-foreground py-12">
-                    אין לך חניכים בליווי אישי...
-                </div>
-            )}
 
-            <AllStudentPicker onSelect={onSelect} />
+            <div className="flex flex-col gap-4">
+                <WithLabel label="חניכים בליווי אישי">
+                    <div className="flex gap-2 flex-wrap">
+                        {mentorships.length ? (
+                            <>
+                                {mentorships.map(m => (
+                                    <div key={m.student.id} className="flex flex-col gap-1 bg-muted p-2 rounded-md border border-border cursor-pointer hover:bg-primary-100 transition-colors hover:border-primary-200"
+                                        onClick={() => goToStudent(m.student)}
+                                    >
+                                        <Avatar user={m.student} />
+                                        <div className="text-xs text-muted-foreground">{m.student.first_name} {m.student.last_name}</div>
+                                    </div>
+                                ))}
+                            </>
+                            // <Staff_Students_List students={mentorships.map(m => m.student)} context={'master'} />
+                        ) : (
+                            <div className="text-center text-muted-foreground py-12">
+                                אין לך חניכים בליווי אישי...
+                            </div>
+                        )}
+                    </div>
+                    <AllStudentPicker onSelect={onSelect} />
+                </WithLabel>
+
+                <div className="h-px border-b border-stone-300 w-full border-dashed my-4" />
+
+
+                {projectMentorships.length > 0 ? (
+                    <>
+                        {Object.keys(projectsByTerm).map(term => (
+                            <WithLabel key={term} label={`פרויקטים בתקופת ה${term}`}>
+                                <div className="flex gap-2 flex-wrap">
+                                    {projectsByTerm[term].map(project => (
+                                        <div key={project.id} className="flex flex-col gap-1 bg-muted p-2 rounded-md border border-border cursor-pointer hover:bg-primary-100 transition-colors hover:border-primary-200"
+                                            onClick={() => goToProject(project)}
+                                        >
+                                            <div className="text-sm">{project.title}</div>
+                                            <div className="text-xs text-muted-foreground">{project.student.first_name} {project.student.last_name}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </WithLabel>
+                        ))}
+                    </>
+                ) : (
+                    <div className="text-center text-muted-foreground py-12">
+                        אין לך חניכים בליווי פרויקט...
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
 
 export function AllStudentPicker({ unavailableStudents = [], onSelect }) {
-    const classes = useAdmin(state => state.classes);
-    const allMembers = useAdmin(state => state.allMembers);
-    const {open, close, Popper, baseRef} = usePopper();
+    const allStudents = useMentorships(state => state.allStudents);
+    const { open, Popper, baseRef } = usePopper({
+        onOpen: async () => {
+            await mentorshipsActions.getAllStudents();
+        }
+    });
 
-    const availableStudents = allMembers
-        .filter(student => !unavailableStudents.some(s => s.student_id === student.id))
-        .filter(student => student.role === 'student');
+    // Filter out students who are already in mentorships
+    const unavailableIds = unavailableStudents.map(s => s.id);
+    const availableStudents = allStudents.filter(student => !unavailableIds.includes(student.id));
 
     return (
         <>
-            <div className="text-muted-foreground" ref={baseRef}>
-                <Button onClick={open}>
-                    <Plus className="w-4 h-4" /> חניכים נוספים
-                </Button>
-            </div>
+            <Button onClick={open} ref={baseRef} className='mt-4'>
+                <Plus className="w-4 h-4" /> חניכים נוספים
+            </Button>
 
             <Popper>
                 <Command>
                     <CommandInput placeholder="חפש חניכים" />
                     <CommandList>
-                        <CommandEmpty>בחר חניכים</CommandEmpty>
-                        {classes.map(group => (
-                            <CommandGroup key={group.id} heading={group.name}>
-                                {availableStudents.filter(student => student.groups.includes(group.id)).map(student => (
+                        {availableStudents.length === 0 ? (
+                            <CommandEmpty>טוען חניכים...</CommandEmpty>
+                        ) : (
+                            <CommandGroup>
+                                {availableStudents.map(student => (
                                     <CommandItem key={student.id}
                                         onSelect={_ => onSelect(student)}
                                         value={student.first_name + ' ' + student.last_name}>
@@ -69,7 +131,7 @@ export function AllStudentPicker({ unavailableStudents = [], onSelect }) {
                                     </CommandItem>
                                 ))}
                             </CommandGroup>
-                            ))}
+                        )}
                     </CommandList>
                 </Command>
             </Popper>
