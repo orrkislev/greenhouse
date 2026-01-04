@@ -66,7 +66,7 @@ export function Staff_Students_List({ students, context, group }) {
 }
 
 
-function SelectedStudentCard({ student, context, group }) {
+export function SelectedStudentCard({ student, context, group }) {
     const [data, setData] = useState(null)
     const groups = useGroups(state => state.groups);
     const today = useTime(state => state.today);

@@ -2,8 +2,8 @@
 
 import { mentorshipsActions, useMentorships } from "@/utils/store/useMentorships";
 import { Book, Plus } from "lucide-react";
-import { useEffect } from "react";
-import { Staff_Students_List } from "./StaffGroup_Students";
+import { useEffect, useState } from "react";
+import { SelectedStudentCard, Staff_Students_List } from "./StaffGroup_Students";
 import Button from "@/components/Button";
 import usePopper from "@/components/Popper";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -16,6 +16,7 @@ export default function StaffStudents() {
     const mentorships = useMentorships(state => state.mentorships);
     const projectMentorships = useMentorships(state => state.projectMentorships);
     const terms = useTime(state => state.terms);
+    const [selectedStudent, setSelectedStudent] = useState(null);
 
     useEffect(() => {
         mentorshipsActions.getMentorships();
@@ -34,64 +35,69 @@ export default function StaffStudents() {
     }, {});
 
     const goToProject = (project) => {
-        userActions.switchToStudent(project.student.id, '/project?id=' + project.id);
+        setSelectedStudent(project.student);
+        // userActions.switchToStudent(project.student.id, '/project?id=' + project.id);
     }
     const goToStudent = (student) => {
-        userActions.switchToStudent(student.id);
+        setSelectedStudent(student);
+        // userActions.switchToStudent(student.id);
     }
 
     return (
         <div className="flex flex-col gap-4">
+            <div className="flex gap-4">
+                {selectedStudent != null && <SelectedStudentCard student={selectedStudent} />}
 
-            <div className="flex flex-col gap-4">
-                <WithLabel label="חניכים בליווי אישי">
-                    <div className="flex gap-2 flex-wrap">
-                        {mentorships.length ? (
-                            <>
-                                {mentorships.map(m => (
-                                    <div key={m.student.id} className="flex flex-col gap-1 bg-muted p-2 rounded-md border border-border cursor-pointer hover:bg-primary-100 transition-colors hover:border-primary-200"
-                                        onClick={() => goToStudent(m.student)}
-                                    >
-                                        <Avatar user={m.student} />
-                                        <div className="text-xs text-muted-foreground">{m.student.first_name} {m.student.last_name}</div>
-                                    </div>
-                                ))}
-                            </>
-                            // <Staff_Students_List students={mentorships.map(m => m.student)} context={'master'} />
-                        ) : (
-                            <div className="text-center text-muted-foreground py-12">
-                                אין לך חניכים בליווי אישי...
-                            </div>
-                        )}
-                    </div>
-                    <AllStudentPicker onSelect={onSelect} />
-                </WithLabel>
-
-                <div className="h-px border-b border-stone-300 w-full border-dashed my-4" />
-
-
-                {projectMentorships.length > 0 ? (
-                    <>
-                        {Object.keys(projectsByTerm).map(term => (
-                            <WithLabel key={term} label={`פרויקטים בתקופת ה${term}`}>
-                                <div className="flex gap-2 flex-wrap">
-                                    {projectsByTerm[term].map(project => (
-                                        <div key={project.id} className="flex flex-col gap-1 bg-muted p-2 rounded-md border border-border cursor-pointer hover:bg-primary-100 transition-colors hover:border-primary-200"
-                                            onClick={() => goToProject(project)}
+                <div className="flex flex-col gap-4">
+                    <WithLabel label="חניכים בליווי אישי">
+                        <div className="flex gap-2 flex-wrap">
+                            {mentorships.length ? (
+                                <>
+                                    {mentorships.map(m => (
+                                        <div key={m.student.id} className="flex flex-col gap-1 bg-muted p-2 rounded-md border border-border cursor-pointer hover:bg-primary-100 transition-colors hover:border-primary-200"
+                                            onClick={() => goToStudent(m.student)}
                                         >
-                                            <div className="text-sm">{project.title}</div>
-                                            <div className="text-xs text-muted-foreground">{project.student.first_name} {project.student.last_name}</div>
+                                            <Avatar user={m.student} />
+                                            <div className="text-xs text-muted-foreground">{m.student.first_name} {m.student.last_name}</div>
                                         </div>
                                     ))}
+                                </>
+                                // <Staff_Students_List students={mentorships.map(m => m.student)} context={'master'} />
+                            ) : (
+                                <div className="text-center text-muted-foreground py-12">
+                                    אין לך חניכים בליווי אישי...
                                 </div>
-                            </WithLabel>
-                        ))}
-                    </>
-                ) : (
-                    <div className="text-center text-muted-foreground py-12">
-                        אין לך חניכים בליווי פרויקט...
-                    </div>
-                )}
+                            )}
+                        </div>
+                        <AllStudentPicker onSelect={onSelect} />
+                    </WithLabel>
+
+                    <div className="h-px border-b border-stone-300 w-full border-dashed my-4" />
+
+
+                    {projectMentorships.length > 0 ? (
+                        <>
+                            {Object.keys(projectsByTerm).map(term => (
+                                <WithLabel key={term} label={`פרויקטים בתקופת ה${term}`}>
+                                    <div className="flex gap-2 flex-wrap">
+                                        {projectsByTerm[term].map(project => (
+                                            <div key={project.id} className="flex flex-col gap-1 bg-muted p-2 rounded-md border border-border cursor-pointer hover:bg-primary-100 transition-colors hover:border-primary-200"
+                                                onClick={() => goToProject(project)}
+                                            >
+                                                <div className="text-sm">{project.title}</div>
+                                                <div className="text-xs text-muted-foreground">{project.student.first_name} {project.student.last_name}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </WithLabel>
+                            ))}
+                        </>
+                    ) : (
+                        <div className="text-center text-muted-foreground py-12">
+                            אין לך חניכים בליווי פרויקט...
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
