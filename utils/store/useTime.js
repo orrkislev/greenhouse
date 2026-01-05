@@ -76,13 +76,15 @@ export const timeActions = Object.fromEntries(
 
 
 // ---------- utility functions -----------
-export function getTermWeeks(term) {
-    const startDate = new Date(term.start);
-    const endDate = new Date(term.end);
+export function getTermWeeks(termIds) {
+    const terms = termIds.map(id => useTime.getState().terms.find(term => term.id === id));
+    const startDate = new Date(terms[0].start);
+    const endDate = new Date(terms[terms.length - 1].end);
     const firstSunday = new Date(startDate);
     firstSunday.setDate(firstSunday.getDate() - firstSunday.getDay());
     const lastSaturday = new Date(endDate);
     lastSaturday.setDate(lastSaturday.getDate() + (6 - lastSaturday.getDay()));
+    console.log(firstSunday, lastSaturday);
     const termWeeks = [];
     let weekStart = new Date(firstSunday);
     while (weekStart <= lastSaturday) {

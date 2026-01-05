@@ -100,7 +100,6 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
                     *,
                     master:staff_public!master(first_name, last_name, avatar_url)
                 `).eq('student_id', user.id);
-            console.log(data);
             if (error) toastsActions.addFromError(error)
             set({ allProjects: data });
         }),

@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useState, useRef, useEffect } from "react"
+import { createPortal } from "react-dom"
 
 export default function usePopper(props = {onOpen: () => {}, onClose: () => {}}) {
     const [isOpen, setIsOpen] = useState(false)
@@ -45,7 +46,7 @@ export default function usePopper(props = {onOpen: () => {}, onClose: () => {}})
             }
         }, [popperRef])
 
-        return ( 
+        return createPortal(
             <AnimatePresence >
                 {isOpen && (
                     <motion.div
@@ -71,7 +72,8 @@ export default function usePopper(props = {onOpen: () => {}, onClose: () => {}})
                         </motion.div>
                     </motion.div>
                 )}
-            </AnimatePresence>
+            </AnimatePresence>,
+            document.body
         )
     }
 

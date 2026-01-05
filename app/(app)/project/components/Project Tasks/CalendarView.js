@@ -1,6 +1,6 @@
 import { tw } from "@/utils/tw";
 import { ganttActions, useGantt } from "@/utils/store/useGantt";
-import { useTime } from "@/utils/store/useTime";
+import { timeActions, useTime } from "@/utils/store/useTime";
 import { endOfWeek, format, startOfWeek, add, subWeeks } from "date-fns";
 import { Trash, Grip, ArrowDownToLine, ExternalLink } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -21,20 +21,18 @@ const CalendarCell = tw`p-2 flex flex-col gap-1 transition-all duration-200 bord
 
 
 export default function CalendarView() {
-    const currTerm = useTime((state) => state.currTerm);
-    const gantt = useGantt((state) => state.gantt);
     const [fullView, setFullView] = useState(true);
     const tasks = useProjectData((state) => state.tasks);
+    const project = useProjectData((state) => state.project);
+    const terms = useTime((state) => state.terms);
 
-    useEffect(() => {
-        if (!currTerm) return;
-        ganttActions.fetchGanttEvents(currTerm.start, currTerm.end);
-    }, [currTerm]);
+    useEffect(()=>{
+        timeActions.loadTerms();
+    },[])
 
-    if (!currTerm) return;
 
-    const termStart = new Date(currTerm.start);
-    const termEnd = new Date(currTerm.end);
+    const termStart = new Date(terms.find(term => term.id === project.term[0]).start);
+    const termEnd = new Date(terms.find(term => term.id === project.term[project.term.length - 1]).end);
 
     const firstSunday = startOfWeek(termStart, { weekStartsOn: 0 });
     const lastSaturday = endOfWeek(termEnd, { weekStartsOn: 6 });

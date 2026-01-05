@@ -1,4 +1,4 @@
-import { getTermWeeks, useTime } from "@/utils/store/useTime";
+import { getTermWeeks, timeActions, useTime } from "@/utils/store/useTime";
 import { format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
@@ -14,12 +14,17 @@ import Button from "@/components/Button";
 export default function WeeklyView() {
     const [fullView, setFullView] = useState(true);
     const tasks = useProjectData((state) => state.tasks);
-    const currTerm = useTime((state) => state.currTerm);
     const [isDragging, setIsDragging] = useState(false);
+    const project = useProjectData((state) => state.project);
+    const terms = useTime((state) => state.terms);
 
-    if (!currTerm) return null;
+    useEffect(()=>{
+        timeActions.loadTerms();
+    },[])
 
-    const termWeeks = getTermWeeks(currTerm);
+    if (!project || !terms) return null;
+
+    const termWeeks = getTermWeeks(project.term);
 
 
     // ---- Filter tasks for each week

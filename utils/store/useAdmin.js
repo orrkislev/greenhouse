@@ -7,7 +7,7 @@ import { createDataLoadingHook } from "./utils/createStore";
 import { format } from "date-fns";
 import { toastsActions } from "./useToasts";
 import { useTime } from "./useTime";
-
+import { isAdmin } from "./useUser";
 
 export const useAdmin = create((set, get) => ({
     classes: [],
@@ -20,6 +20,7 @@ export const useAdmin = create((set, get) => ({
     // -------------------------------------
 
     loadData: async () => {
+        if (!isAdmin()) return;
         if (get().allMembers.length > 0) return;
 
         const { data: classes, error: allClassesError } = await supabase.from('groups').select('*').eq('type', 'class');
@@ -39,13 +40,14 @@ export const useAdmin = create((set, get) => ({
                 groups:users_groups!left (
                     group_id
                 )
-            `);
+            `).eq('active', true);
         if (allMembersError) toastsActions.addFromError(allMembersError)
         allMembers.forEach(member => member.groups = member.groups.map(g => g.group_id));
         set({ classes, majors, allMembers });
     },
 
     loadStaff: async () => {
+        if (!isAdmin()) return;
         if (get().staff.length > 0) return;
         const { data, error } = await supabase.from('users').select('*').eq('role', 'staff');
         if (error) toastsActions.addFromError(error)
@@ -56,6 +58,7 @@ export const useAdmin = create((set, get) => ({
     // Users
     // ------------------------------
     createMember: async (memberData) => {
+        if (!isAdmin()) return;
         const newID = await createUser(memberData.username, memberData.first_name, memberData.last_name);
         if (!newID) {
             toastsActions.addToast({ message: 'Failed to create user', type: 'error' });
@@ -70,6 +73,7 @@ export const useAdmin = create((set, get) => ({
         return newID;
     },
     updateMember: async (memberId, updates) => {
+        if (!isAdmin()) return;
         const cleanedUpdates = prepareForUsersTable(updates);
         const { error: updateError } = await supabase.from('users').update(cleanedUpdates).eq('id', memberId);
         if (updateError) toastsActions.addFromError(updateError)
@@ -78,10 +82,13 @@ export const useAdmin = create((set, get) => ({
         }));
     },
     deleteMember: async (member) => {
+        if (!isAdmin()) return;
         const { error: deleteError } = await deleteUser(member.id);
         if (deleteError) toastsActions.addFromError(deleteError)
-        const { error: deleteUserError } = await supabase.from('users').delete().eq('id', member.id);
+        const { error: deleteUserError } = await supabase.from('users').update({active: false}).eq('id', member.id);
         if (deleteUserError) toastsActions.addFromError(deleteUserError)
+        const { error: deleteGroupsError } = await supabase.from('users_groups').delete().eq('user_id', member.id);
+        if (deleteGroupsError) toastsActions.addFromError(deleteGroupsError)
         set(state => ({
             allMembers: state.allMembers.filter(m => m.id !== member.id)
         }));
@@ -91,6 +98,7 @@ export const useAdmin = create((set, get) => ({
     // Groups
     // ------------------------------
     addUserToGroup: async (groupId, userId) => {
+        if (!isAdmin()) return;
         const { error: insertError } = await supabase.from('users_groups').insert({ user_id: userId, group_id: groupId });
         if (insertError) toastsActions.addFromError(insertError)
         set(state => ({
@@ -98,6 +106,7 @@ export const useAdmin = create((set, get) => ({
         }));
     },
     removeUserFromGroup: async (groupId, userId) => {
+        if (!isAdmin()) return;
         const { error: deleteError } = await supabase.from('users_groups').delete().eq('user_id', userId).eq('group_id', groupId);
         if (deleteError) toastsActions.addFromError(deleteError)
         set(state => ({
@@ -105,6 +114,7 @@ export const useAdmin = create((set, get) => ({
         }));
     },
     createGroup: async (name, type) => {
+        if (!isAdmin()) return;
         const groupData = { name, type };
         const { data: newGroupData, error: insertError } = await supabase.from('groups').insert(prepareForGroupsTable(groupData)).select().single();
         if (insertError) toastsActions.addFromError(insertError)
@@ -112,12 +122,14 @@ export const useAdmin = create((set, get) => ({
         if (type === 'major') set(state => ({ majors: [...state.majors, newGroupData] }));
     },
     updateGroup: async (groupId, updates) => {
+        if (!isAdmin()) return;
         const { data, error: updateError } = await supabase.from('groups').update(prepareForGroupsTable(updates)).eq('id', groupId).select();
         if (updateError) toastsActions.addFromError(updateError)
         if (data.type === 'class') set(state => ({ classes: state.classes.map(group => group.id === groupId ? { ...group, ...updates } : group) }));
         if (data.type === 'major') set(state => ({ majors: state.majors.map(major => major.id === groupId ? { ...major, ...updates } : major) }));
     },
     deleteGroup: async (groupId) => {
+        if (!isAdmin()) return;
         const currentClass = get().classes.find(group => group.id === groupId);
         const currentMajor = get().majors.find(major => major.id === groupId);
         const { error: deleteError } = await supabase.from('groups').delete().eq('id', groupId);
@@ -131,6 +143,7 @@ export const useAdmin = create((set, get) => ({
     // Projects
     // ------------------------------
     loadProjects: async () => {
+        if (!isAdmin()) return;
         const allMembers = get().allMembers;
         if (allMembers.some(member => member.project)) return;
         const currTerm = useTime.getState().currTerm;
@@ -149,6 +162,7 @@ export const useAdmin = create((set, get) => ({
         set({ allMembers: newAllMembers });
     },
     assignMasterToProject: async (studentId, projectId, masterId) => {
+        if (!isAdmin()) return;
         const { error: projectError } = await supabase.from('projects').update({ status: 'active', master: masterId }).eq('id', projectId);
         if (projectError) toastsActions.addFromError(projectError)
 
@@ -182,11 +196,13 @@ export const useAdmin = create((set, get) => ({
     // ------------------------------
     message: '',
     loadMessage: async () => {
+        if (!isAdmin()) return;
         const { data, error } = await supabase.from('misc').select('data').eq('name', 'school_message').single();
         if (error) toastsActions.addFromError(error)
         set({ message: data.data.text });
     },
     updateMessage: async (text) => {
+        if (!isAdmin()) return;
         set({ message: text });
         const { error: updateError } = await supabase.from('misc').update({ data: { text } }).eq('name', 'school_message');
         if (updateError) toastsActions.addFromError(updateError)

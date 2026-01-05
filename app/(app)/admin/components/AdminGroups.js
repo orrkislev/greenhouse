@@ -9,6 +9,7 @@ const SpecialButton = tw`p-4 border border-border rounded-md flex items-center g
 
 export default function AdminGroups() {
     const groups = useAdmin(state => state.classes);
+    const allMembers = useAdmin(state => state.allMembers);
 
     useEffect(() => {
         adminActions.loadData();
@@ -16,8 +17,25 @@ export default function AdminGroups() {
 
     const createGroup = () => adminActions.createGroup('קבוצה חדשה', 'class');
 
+
+    const studentsWithoutClass = allMembers.filter(member => member.role === 'student' && !member.groups.some(g => groups.find(group => group.id === g)?.type === 'class'));
+
     return (
         <div className="flex flex-col gap-4">
+            {studentsWithoutClass.length > 0 && (
+                <div className="p-4 border border-border flex gap-4">
+                    <div>
+                        <h3 className="text-sm">תלמידים ללא קבוצה</h3>
+                        {studentsWithoutClass.map(student => (
+                            <div key={student.id} className="flex justify-between gap-2 items-center text-sm text-blue-800 px-2 rounded-full group relative border border-secondary">
+                                <span>{student.first_name} {student.last_name}</span>
+                                <XIcon className="w-4 h-4 opacity-30 group-hover:opacity-100 cursor-pointer"
+                                    onClick={() => adminActions.removeUserFromGroup(student.id)} />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
             {groups.map(group => (
                 <div key={group.id} className="p-4 border border-border flex gap-4">
                     <div>

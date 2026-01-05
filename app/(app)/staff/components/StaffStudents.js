@@ -1,9 +1,9 @@
 'use client'
 
 import { mentorshipsActions, useMentorships } from "@/utils/store/useMentorships";
-import { Book, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { SelectedStudentCard, Staff_Students_List } from "./StaffGroup_Students";
+import { SelectedStudentCard } from "./StaffGroup_Students";
 import Button from "@/components/Button";
 import usePopper from "@/components/Popper";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";

@@ -5,11 +5,11 @@ export const [useMeetingsData, meetingsActions] = createStore((set, get, withUse
     return {
         meetings: [],
 
-        loadTodayMeetings: withLoadingCheck(async (user) => {
+        loadTodayMeetings: withUser(async (user) => {
             await get().loadMeetings(user, true);
         }),
 
-        loadMeetings: withLoadingCheck(async (user, isToday) => {
+        loadMeetings: withUser(async (user, isToday) => {
             set({ meetings: [] });
             const obj = { p_user_id: user.id };
             if (isToday) obj.p_day_of_week = new Date().getDay() + 1;
