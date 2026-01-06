@@ -3,7 +3,7 @@ import { getTimeString, useTime } from "@/utils/store/useTime";
 import { useMeetings, meetingsActions } from "@/utils/store/useMeetings";
 import { ScheduleSection } from "../Layout";
 import { isStaff, userActions } from "@/utils/store/useUser";
-import Button, { IconButton } from "@/components/Button";
+import Button from "@/components/Button";
 import { CalendarCheck, Edit2, UserRound } from "lucide-react";
 import usePopper from "@/components/Popper";
 import TimeRange from "@/components/TimeRange";
@@ -28,7 +28,7 @@ export default function Meetings() {
                     {meetings.filter(meeting => meeting.day_of_the_week === index + 1).map((meeting) => (
                         <Meeting key={meeting.id} meeting={meeting} />
                     ))}
-                    {isStaff() && <NewMeetingButton meetings={meetings} />}
+                    {isStaff() && <NewMeetingButton dayOfWeek={index + 1} />}
                 </MeetingContainer>
             ))}
         </ScheduleSection>
@@ -127,7 +127,7 @@ function EditMeeting({ meeting, student, onClose }) {
     )
 }
 
-function NewMeetingButton({ meetings }) {
+function NewMeetingButton({ dayOfWeek }) {
     const { open, close, Popper, baseRef } = usePopper({
         onOpen: async () => {
             await mentorshipsActions.getAllStudents();
@@ -140,25 +140,17 @@ function NewMeetingButton({ meetings }) {
                 +
             </div>
             <Popper>
-                <NewMeetingForm meetings={meetings} onClose={close} />
+                <NewMeetingForm onClose={close} dayOfWeek={dayOfWeek} />
             </Popper>
         </>
     )
 }
 
-function NewMeetingForm({ meetings, onClose }) {
+function NewMeetingForm({ onClose, dayOfWeek }) {
     const allStudents = useMentorships(state => state.allStudents);
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [time, setTime] = useState({ start: '09:30', end: '10:00' });
-    const [day, setDay] = useState(1);
-
-    // Filter out students who already have meetings
-    const studentsWithMeetings = new Set(
-        meetings
-            .flatMap(m => m.other_participants || [])
-            .map(p => p.id)
-    );
-    const availableStudents = allStudents.filter(s => !studentsWithMeetings.has(s.id));
+    const [day, setDay] = useState(dayOfWeek);
 
     const onSave = () => {
         if (!selectedStudent) return;
@@ -181,11 +173,11 @@ function NewMeetingForm({ meetings, onClose }) {
                 <Command>
                     <CommandInput placeholder="חפש חניך..." />
                     <CommandList>
-                        {availableStudents.length === 0 ? (
+                        {allStudents.length === 0 ? (
                             <CommandEmpty>טוען חניכים...</CommandEmpty>
                         ) : (
                             <CommandGroup>
-                                {availableStudents.map(student => (
+                                {allStudents.map(student => (
                                     <CommandItem
                                         key={student.id}
                                         onSelect={() => setSelectedStudent(student)}

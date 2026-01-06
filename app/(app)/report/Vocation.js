@@ -2,50 +2,31 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useUser } from '@/utils/store/useUser'
 import Button from '@/components/Button'
-import Box2 from '@/components/Box2'
-import WithLabel from '@/components/WithLabel'
+import SmartText from '@/components/SmartText'
+import { motion, AnimatePresence } from 'motion/react'
 import { Briefcase, BriefcaseBusiness, Earth } from 'lucide-react'
 
-export default function Vocation({ data, onSave }) {
+export default function Vocation({ vocation, onSave }) {
     const originalUser = useUser(state => state.originalUser);
-    const [employmentQuestion, setEmploymentQuestion] = useState(data?.vocation?.employmentQuestion || '');
-    const [employmentAnswer, setEmploymentAnswer] = useState(data?.vocation?.employmentAnswer || '');
-    const [volunteeringQuestion, setVolunteeringQuestion] = useState(data?.vocation?.volunteeringQuestion || '');
-    const [volunteeringAnswer, setVolunteeringAnswer] = useState(data?.vocation?.volunteeringAnswer || '');
+    const [employmentQuestion, setEmploymentQuestion] = useState(vocation?.employmentQuestion || '');
+    const [employmentAnswer, setEmploymentAnswer] = useState(vocation?.employmentAnswer || '');
+    const [volunteeringQuestion, setVolunteeringQuestion] = useState(vocation?.volunteeringQuestion || '');
+    const [volunteeringAnswer, setVolunteeringAnswer] = useState(vocation?.volunteeringAnswer || '');
 
     useEffect(() => {
-        setEmploymentQuestion(data?.vocation?.employmentQuestion || '');
-        setEmploymentAnswer(data?.vocation?.employmentAnswer || '');
-        setVolunteeringQuestion(data?.vocation?.volunteeringQuestion || '');
-        setVolunteeringAnswer(data?.vocation?.volunteeringAnswer || '');
-    }, [data]);
+        setEmploymentQuestion(vocation?.employmentQuestion || '');
+        setEmploymentAnswer(vocation?.employmentAnswer || '');
+        setVolunteeringQuestion(vocation?.volunteeringQuestion || '');
+        setVolunteeringAnswer(vocation?.volunteeringAnswer || '');
+    }, [vocation]);
 
     const shouldSave = useMemo(() => {
         if (employmentQuestion.trim() === '' && employmentAnswer.trim() === '' && volunteeringQuestion.trim() === '' && volunteeringAnswer.trim() === '') return false;
-        return employmentQuestion.trim() !== data?.vocation?.employmentQuestion?.trim() || employmentAnswer.trim() !== data?.vocation?.employmentAnswer?.trim() || volunteeringQuestion.trim() !== data?.vocation?.volunteeringQuestion?.trim() || volunteeringAnswer.trim() !== data?.vocation?.volunteeringAnswer?.trim();
-    }, [employmentQuestion, employmentAnswer, volunteeringQuestion, volunteeringAnswer, data?.vocation?.employmentQuestion, data?.vocation?.employmentAnswer, data?.vocation?.volunteeringQuestion, data?.vocation?.volunteeringAnswer]);
+        return employmentQuestion.trim() !== vocation?.employmentQuestion?.trim() || employmentAnswer.trim() !== vocation?.employmentAnswer?.trim() || volunteeringQuestion.trim() !== vocation?.volunteeringQuestion?.trim() || volunteeringAnswer.trim() !== vocation?.volunteeringAnswer?.trim();
+    }, [employmentQuestion, employmentAnswer, volunteeringQuestion, volunteeringAnswer, vocation?.employmentQuestion, vocation?.employmentAnswer, vocation?.volunteeringQuestion, vocation?.volunteeringAnswer]);
 
     return (
         <>
-            {originalUser && (
-                <Box2 label="יזמות מקיימת" LabelIcon={Earth}>
-                    <WithLabel label="שאלת תעסוקה" Icon={Briefcase} className="mb-2">
-                        <input type="text" defaultValue={employmentQuestion} onChange={e => setEmploymentQuestion(e.target.value)} placeholder="שאלת תעסוקה" className='w-full bg-white border border-border rounded-lg p-2' />
-                    </WithLabel>
-                    <WithLabel label="תשובה" Icon={BriefcaseBusiness} className="mb-2">
-                        <textarea rows={4} defaultValue={employmentAnswer} onChange={e => setEmploymentAnswer(e.target.value)} placeholder="תשובה" className="w-full bg-white border border-border rounded-lg p-2" />
-                    </WithLabel>
-
-                    <WithLabel label="שאלת התנדבות" Icon={Earth} className="mb-2">
-                        <input type="text" defaultValue={volunteeringQuestion} onChange={e => setVolunteeringQuestion(e.target.value)} placeholder="שאלת התנדבות" className='w-full bg-white border border-border rounded-lg p-2' />
-                    </WithLabel>
-                    <WithLabel label="תשובה" Icon={Earth} className="mb-2">
-                        <textarea rows={4} defaultValue={volunteeringAnswer} onChange={e => setVolunteeringAnswer(e.target.value)} placeholder="תשובה" className="w-full bg-white border border-border rounded-lg p-2" />
-                    </WithLabel>
-                    <Button data-role="save" onClick={() => onSave({ employmentQuestion, employmentAnswer, volunteeringQuestion, volunteeringAnswer })} disabled={!shouldSave} className="mt-2">שמירה</Button>
-                </Box2>
-            )}
-
             <div className='mt-4 border-2 border-black bg-white rounded-lg flex overflow-hidden aspect-9/2'>
                 <div className='bg-black p-1 flex items-center justify-center'>
                     <div className='text-white rotate-90 text-2xl font-bold'>
@@ -53,16 +34,74 @@ export default function Vocation({ data, onSave }) {
                     </div>
                 </div>
                 <div className='flex gap-4 flex-1'>
-                    <div className='flex-1 p-4'>
-                        <div className='font-bold text-gray-600'>{data?.vocation?.employmentQuestion}</div>
-                        <div className='text-gray-600'>{data?.vocation?.employmentAnswer}</div>
+                    <div className='flex-1 p-4 flex flex-col gap-2'>
+                        <SmartText
+                            text={employmentQuestion}
+                            onEdit={(newText) => setEmploymentQuestion(newText)}
+                            editable={!!originalUser}
+                            withIcon={true}
+                            className='font-bold text-gray-600'
+                            placeholder="שאלת תעסוקה"
+                        />
+                        <SmartText
+                            text={employmentAnswer}
+                            onEdit={(newText) => setEmploymentAnswer(newText)}
+                            editable={!!originalUser}
+                            withIcon={true}
+                            className='text-gray-600'
+                            placeholder="תשובת תעסוקה"
+                        />
                     </div>
-                    <div className='flex-1 p-4'>
-                        <div className='font-bold text-gray-600'>{data?.vocation?.volunteeringQuestion}</div>
-                        <div className='text-gray-600'>{data?.vocation?.volunteeringAnswer}</div>
+                    <div className='flex-1 p-4 flex flex-col gap-2'>
+                        <SmartText
+                            text={volunteeringQuestion}
+                            onEdit={(newText) => setVolunteeringQuestion(newText)}
+                            editable={!!originalUser}
+                            withIcon={true}
+                            className='font-bold text-gray-600'
+                            placeholder="שאלת התנדבות"
+                        />
+                        <SmartText
+                            text={volunteeringAnswer}
+                            onEdit={(newText) => setVolunteeringAnswer(newText)}
+                            editable={!!originalUser}
+                            withIcon={true}
+                            className='text-gray-600'
+                            placeholder="תשובת התנדבות"
+                        />
                     </div>
                 </div>
             </div>
+
+            <AnimatePresence>
+                {originalUser && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{
+                            opacity: shouldSave ? 1 : 0.5,
+                            y: shouldSave ? 0 : -10,
+                            scale: shouldSave ? 1 : 0.95
+                        }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 20,
+                            duration: 0.3
+                        }}
+                        className="mt-4 flex justify-center"
+                    >
+                        <Button
+                            data-role="save"
+                            onClick={() => onSave({ employmentQuestion, employmentAnswer, volunteeringQuestion, volunteeringAnswer })}
+                            disabled={!shouldSave}
+                            className={shouldSave ? "shadow-lg" : ""}
+                        >
+                            שמירה
+                        </Button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </>
     )
 }

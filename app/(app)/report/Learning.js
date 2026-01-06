@@ -2,10 +2,11 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useUser } from '@/utils/store/useUser'
 import Button from '@/components/Button'
-import Box2 from '@/components/Box2'
-import { Heart } from 'lucide-react'
+import SmartText from '@/components/SmartText'
+import { motion, AnimatePresence } from 'motion/react'
+import { X } from 'lucide-react'
 
-export default function Learning({ data, onSave }) {
+export default function Learning({ learning, onSave }) {
     const originalUser = useUser(state => state.originalUser);
 
     const defaultTopics = [
@@ -15,15 +16,19 @@ export default function Learning({ data, onSave }) {
         { name: '', learnings: ['', '', ''], howLearned: '' }
     ];
 
-    const [topics, setTopics] = useState(data?.learning?.topics || defaultTopics);
-    const [question, setQuestion] = useState(data?.learning?.question || '');
-    const [answer, setAnswer] = useState(data?.learning?.answer || '');
+    const [topics, setTopics] = useState(learning?.topics || defaultTopics);
+    const [question, setQuestion] = useState(learning?.question || '');
+    const [answer, setAnswer] = useState(learning?.answer || '');
+    const [visibleTopicsCount, setVisibleTopicsCount] = useState(2); // English + 1 topic
 
     useEffect(() => {
-        setTopics(data?.learning?.topics || defaultTopics);
-        setQuestion(data?.learning?.question || '');
-        setAnswer(data?.learning?.answer || '');
-    }, [data]);
+        setTopics(learning?.topics || defaultTopics);
+        setQuestion(learning?.question || '');
+        setAnswer(learning?.answer || '');
+        // Calculate how many topics have content
+        const filledTopics = (learning?.topics || defaultTopics).filter(t => t.name).length;
+        setVisibleTopicsCount(Math.max(2, filledTopics));
+    }, [learning]);
 
     const updateTopic = (index, field, value) => {
         const newTopics = [...topics];
@@ -37,82 +42,26 @@ export default function Learning({ data, onSave }) {
         setTopics(newTopics);
     };
 
+    const removeTopic = (topicIndex) => {
+        if (topicIndex === 0) return; // Can't remove English topic
+        const newTopics = [...topics];
+        newTopics[topicIndex] = { name: '', learnings: ['', '', ''], howLearned: '' };
+        setTopics(newTopics);
+        // Adjust visible count if we cleared a visible topic
+        const filledTopics = newTopics.filter(t => t.name).length;
+        setVisibleTopicsCount(Math.max(2, filledTopics));
+    };
+
     const shouldSave = useMemo(() => {
         return JSON.stringify({ topics, question, answer }) !== JSON.stringify({
-            topics: data?.learning?.topics || defaultTopics,
-            question: data?.learning?.question || '',
-            answer: data?.learning?.answer || ''
+            topics: learning?.topics || defaultTopics,
+            question: learning?.question || '',
+            answer: learning?.answer || ''
         });
-    }, [topics, question, answer, data]);
+    }, [topics, question, answer, learning?.topics, learning?.question, learning?.answer]);
 
     return (
         <>
-            {originalUser && (
-                <Box2 label="למידה" LabelIcon={Heart}>
-                    <div className="space-y-3">
-                        {topics.map((topic, topicIndex) => (
-                            <div key={topicIndex} className="border border-border rounded-2xl p-3 bg-gray-50">
-                                <input
-                                    type="text"
-                                    value={topic.name}
-                                    onChange={e => updateTopic(topicIndex, 'name', e.target.value)}
-                                    placeholder={topicIndex === 0 ? 'אנגלית' : `נושא ${topicIndex}`}
-                                    disabled={topicIndex === 0}
-                                    className='w-full bg-white border border-border rounded-full px-3 py-1 text-center text-sm font-medium mb-2 disabled:bg-gray-200'
-                                />
-
-                                <div className="grid grid-cols-3 gap-2 mb-2">
-                                    {topic.learnings.map((learning, learningIndex) => (
-                                        <input
-                                            key={learningIndex}
-                                            type="text"
-                                            value={learning}
-                                            onChange={e => updateLearning(topicIndex, learningIndex, e.target.value)}
-                                            placeholder={`דבר ${['ראשון', 'שני', 'שלישי'][learningIndex]}`}
-                                            className='bg-white border border-border rounded-full px-3 py-1 text-xs text-center'
-                                        />
-                                    ))}
-                                </div>
-
-                                <textarea
-                                    rows={1}
-                                    value={topic.howLearned}
-                                    onChange={e => updateTopic(topicIndex, 'howLearned', e.target.value)}
-                                    placeholder="איך למדתי"
-                                    className="w-full bg-white border border-border rounded-full px-3 py-1 text-xs resize-none"
-                                />
-                            </div>
-                        ))}
-
-                        <div className="border-t pt-3 mt-3">
-                            <input
-                                type="text"
-                                value={question}
-                                onChange={e => setQuestion(e.target.value)}
-                                placeholder="שאלה"
-                                className='w-full bg-white border border-border rounded-lg px-3 py-2 text-sm mb-2'
-                            />
-                            <textarea
-                                rows={3}
-                                value={answer}
-                                onChange={e => setAnswer(e.target.value)}
-                                placeholder="תשובה"
-                                className="w-full bg-white border border-border rounded-lg px-3 py-2 text-sm resize-none"
-                            />
-                        </div>
-                    </div>
-
-                    <Button
-                        data-role="save"
-                        onClick={() => onSave({ topics, question, answer })}
-                        disabled={!shouldSave}
-                        className="mt-3"
-                    >
-                        שמירה
-                    </Button>
-                </Box2>
-            )}
-
             <div className='mt-4 border-2 border-gray-400 bg-white rounded-2xl flex overflow-hidden'>
                 <div className='bg-gray-400 p-2 flex items-center justify-center min-w-[60px]'>
                     <div className='text-white rotate-90 text-3xl font-bold whitespace-nowrap'>
@@ -126,40 +75,136 @@ export default function Learning({ data, onSave }) {
                                 <th className='font-bold'>נושא הלמידה</th>
                                 <th className='font-bold'>מה למדתי</th>
                                 <th className='font-bold'>איך למדתי</th>
+                                {originalUser && <th className='w-8'></th>}
                             </tr>
                         </thead>
                         <tbody>
-                            {data?.learning?.topics?.filter(t => t.name).map((topic, index) => (
-                                <tr key={index} className='border-b border-dashed border-gray-400'>
-                                    <td className='font-bold'>{topic.name}</td>
-                                    <td className='text-right'>
-                                        <ol className='list-decimal list-inside text-sm space-y-1'>
-                                            {topic.learnings.filter(l => l).map((learning, i) => (
-                                                <li key={i}>{learning}</li>
-                                            ))}
-                                        </ol>
-                                    </td>
-                                    <td className='text-right text-sm text-gray-700'>
-                                        {topic.howLearned}
+                            {topics.slice(0, originalUser ? visibleTopicsCount : topics.length).filter(t => originalUser || t.name).map((topic) => {
+                                const topicIndex = topics.indexOf(topic);
+                                return (
+                                    <tr key={topicIndex} className='border-b border-dashed border-gray-400'>
+                                        <td className='font-bold p-2'>
+                                            <SmartText
+                                                text={topic.name}
+                                                onEdit={(newText) => updateTopic(topicIndex, 'name', newText)}
+                                                editable={!!originalUser && topicIndex !== 0}
+                                                withIcon={true}
+                                                className='font-bold'
+                                                placeholder={topicIndex === 0 ? 'אנגלית' : `נושא ${topicIndex + 1}`}
+                                            />
+                                        </td>
+                                        <td className='text-right p-2'>
+                                            <ol className='list-disc text-sm space-y-1'>
+                                                {topic.learnings.map((learning, learningIndex) => (
+                                                    <li key={learningIndex}>
+                                                        <SmartText
+                                                            text={learning}
+                                                            onEdit={(newText) => updateLearning(topicIndex, learningIndex, newText)}
+                                                            editable={!!originalUser}
+                                                            withIcon={false}
+                                                            className='text-sm inline'
+                                                            placeholder={`דבר ${['ראשון', 'שני', 'שלישי'][learningIndex]}`}
+                                                        />
+                                                    </li>
+                                                ))}
+                                            </ol>
+                                        </td>
+                                        <td className='text-right text-sm text-gray-700 p-2'>
+                                            <SmartText
+                                                text={topic.howLearned}
+                                                onEdit={(newText) => updateTopic(topicIndex, 'howLearned', newText)}
+                                                editable={!!originalUser}
+                                                withIcon={false}
+                                                className='text-sm'
+                                                placeholder="איך למדתי"
+                                            />
+                                        </td>
+                                        {originalUser && (
+                                            <td className='p-2 text-center'>
+                                                {topicIndex !== 0 && (
+                                                    <button
+                                                        onClick={() => removeTopic(topicIndex)}
+                                                        className='text-gray-400 hover:text-red-500 transition-colors p-1'
+                                                        title="הסר נושא"
+                                                    >
+                                                        <X className='w-4 h-4' />
+                                                    </button>
+                                                )}
+                                            </td>
+                                        )}
+                                    </tr>
+                                );
+                            })}
+                            {originalUser && visibleTopicsCount < 4 && (
+                                <tr>
+                                    <td colSpan={4} className='p-2 text-center'>
+                                        <button
+                                            onClick={() => setVisibleTopicsCount(prev => Math.min(4, prev + 1))}
+                                            className='text-gray-400 hover:text-gray-600 transition-colors text-2xl font-bold w-full py-2'
+                                        >
+                                            +
+                                        </button>
                                     </td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
 
                     {/* Question/Answer Section */}
-                    {data?.learning?.question && (
-                        <div className="mt-6 pt-4 border-t-2 border-dashed border-gray-400">
-                            <div className='text-right mb-2'>
-                                <span className='font-bold text-lg'>{data?.learning?.question}</span>
-                            </div>
-                            <div className='text-right text-gray-700'>
-                                {data?.learning?.answer}
-                            </div>
+                    <div className="mt-6 pt-4 border-t-2 border-dashed border-gray-400">
+                        <div className='text-right mb-2'>
+                            <SmartText
+                                text={question}
+                                onEdit={(newText) => setQuestion(newText)}
+                                editable={!!originalUser}
+                                withIcon={true}
+                                className='font-bold text-lg'
+                                placeholder="שאלה"
+                            />
                         </div>
-                    )}
+                        <div className='text-right text-gray-700'>
+                            <SmartText
+                                text={answer}
+                                onEdit={(newText) => setAnswer(newText)}
+                                editable={!!originalUser}
+                                withIcon={true}
+                                className='text-gray-700'
+                                placeholder="תשובה"
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <AnimatePresence>
+                {originalUser && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{
+                            opacity: shouldSave ? 1 : 0.5,
+                            y: shouldSave ? 0 : -10,
+                            scale: shouldSave ? 1 : 0.95
+                        }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 20,
+                            duration: 0.3
+                        }}
+                        className="mt-4 flex justify-center"
+                    >
+                        <Button
+                            data-role="save"
+                            onClick={() => onSave({ topics, question, answer })}
+                            disabled={!shouldSave}
+                            className={shouldSave ? "shadow-lg" : ""}
+                        >
+                            שמירה
+                        </Button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </>
     )
 }

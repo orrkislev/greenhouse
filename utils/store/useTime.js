@@ -77,7 +77,8 @@ export const timeActions = Object.fromEntries(
 
 // ---------- utility functions -----------
 export function getTermWeeks(termIds) {
-    const terms = termIds.map(id => useTime.getState().terms.find(term => term.id === id));
+    const terms = termIds.map(id => useTime.getState().terms.find(term => term.id === id)).filter(t => t);
+    if (terms.length === 0) return [];
     const startDate = new Date(terms[0].start);
     const endDate = new Date(terms[terms.length - 1].end);
     const firstSunday = new Date(startDate);

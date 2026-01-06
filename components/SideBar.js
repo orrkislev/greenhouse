@@ -2,7 +2,7 @@
 
 import { isAdmin, isStaff, userActions, useUser } from "@/utils/store/useUser";
 import { tw } from "@/utils/tw";
-import { BookOpen, Briefcase, Calendar, Snail, UsersRound, TreePalm, Skull, Brain, LogOut, ChevronsLeft, Menu, X, Sparkles } from "lucide-react";
+import { BookOpen, Briefcase, Calendar, Snail, UsersRound, TreePalm, Skull, Brain, LogOut, ChevronsLeft, Menu, X, Sparkles, Cat } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -101,6 +101,8 @@ export default function SideBar() {
 
                     {/* Home */}
                     <SideBarItem href="/" Icon={TreePalm} label="בית" active={pathname === '/'} />
+
+                    <SideBarItem href="/report" Icon={Cat} label="תעודות" active={pathname === '/report'} />
 
                     {/* Schedule */}
                     <SideBarItem href="/schedule" Icon={Calendar} label="לוח זמנים" active={pathname === '/schedule'} />

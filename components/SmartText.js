@@ -4,12 +4,12 @@ import { Pencil, Trash2 } from "lucide-react";
 import SmartTextArea from "@/components/SmartTextArea";
 
 
-export default function SmartText({ text, className, onEdit, withIcon = true, onRemove, editable = true }) {
+export default function SmartText({ text, className, onEdit, withIcon = true, onRemove, editable = true, placeholder }) {
     const [isEditing, setIsEditing] = useState(false);
     const [lastValue, setLastValue] = useState(text);
     const [value, setValue] = useState(text);
 
-    if (!onEdit || !editable) return <SmartLabel text={text} className={className} />
+    if (!onEdit || !editable) return <SmartLabel text={text} className={className} placeholder={placeholder} />
 
     const startEditing = (e) => {
         e.stopPropagation();
@@ -30,12 +30,12 @@ export default function SmartText({ text, className, onEdit, withIcon = true, on
     }
 
     if (isEditing) {
-        return <SmartTextArea value={value} onChange={onChange} onBlur={onFinish} autoFocus={true} className={className} />
+        return <SmartTextArea value={value} onChange={onChange} onBlur={onFinish} autoFocus={true} className={className} placeholder={placeholder} />
     }
 
     return (
         <div className="flex gap-4 group items-center">
-            <SmartLabel text={text || ''} className={className} onClick={editable ? startEditing : undefined} />
+            <SmartLabel text={text || ''} className={className} onClick={editable ? startEditing : undefined} placeholder={placeholder} />
             {withIcon && <Pencil className="w-4 h-4 cursor-pointer opacity-0 group-hover:opacity-50 hover:opacity-100 transition-all"
                 onClick={startEditing}
             />}
@@ -47,11 +47,19 @@ export default function SmartText({ text, className, onEdit, withIcon = true, on
 }
 
 
-function SmartLabel({ text, className, onClick }) {
-    className += ' cursor-text hover:underline'
-    const isLink = text.includes("http") || text.includes("www.");
-    if (isLink) return <LinkText text={text} className={className} />
-    return <span className={className} onClick={onClick}>{text}</span>
+function SmartLabel({ text, className, onClick, placeholder }) {
+    const hasText = text && text.trim().length > 0;
+    const displayText = hasText ? text : placeholder;
+    const displayClassName = hasText
+        ? `${className} cursor-text hover:underline`
+        : `${className} cursor-text hover:underline text-gray-400 italic`;
+
+    if (hasText) {
+        const isLink = text.includes("http") || text.includes("www.");
+        if (isLink) return <LinkText text={text} className={displayClassName} />
+    }
+
+    return <span className={displayClassName} onClick={onClick}>{displayText}</span>
 }
 
 

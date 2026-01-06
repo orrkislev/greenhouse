@@ -6,15 +6,15 @@ import { useState, useRef, useEffect } from 'react'
 import { useUser } from '@/utils/store/useUser'
 import { toastsActions } from '@/utils/store/useToasts'
 
-export default function Ikigai({ data, onSave }) {
+export default function Ikigai({ ikigai, onSave }) {
     const originalUser = useUser(state => state.originalUser)
-    const [markers, setMarkers] = useState(data?.ikigai?.markers || [])
+    const [markers, setMarkers] = useState(ikigai?.markers || [])
     const [editingId, setEditingId] = useState(null)
     const containerRef = useRef(null)
 
     useEffect(() => {
-        setMarkers(data?.ikigai?.markers || [])
-    }, [data])
+        setMarkers(ikigai?.markers || [])
+    }, [ikigai])
 
     const handleAddMarker = (e) => {
         if (e.target.tagName === 'INPUT' || e.target.closest('.marker')) return

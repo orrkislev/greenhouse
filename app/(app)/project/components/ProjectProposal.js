@@ -54,17 +54,6 @@ export default function ProjectProposal() {
     return (
         <div className='rtl'>
             <div className="max-w-6xl mx-auto space-y-6">
-                {/* <div>
-                    <div className="font-semibold text-lg mb-2">שם הפרויקט</div>
-                    <input
-                        type="text"
-                        defaultValue={project.title || ''}
-                        onBlur={(e) => projectActions.updateProject({ title: e.target.value })}
-                        placeholder={project.title}
-                        dir="rtl"
-                        className="bg-white w-full border border-border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    />
-                </div> */}
 
                 <div className="flex gap-6 w-full">
                     <div className="flex flex-1 gap-6">
@@ -77,12 +66,6 @@ export default function ProjectProposal() {
                             />
                         ))}
                     </div>
-                </div>
-                <div className="text-muted-foreground text-sm mt-4 text-center">
-                    {filledThreeQuestions ?
-                        'מעולה! עכשיו מחכים לשיבוץ המנחה שלך כדי להמשיך לפרויקט' :
-                        'יש להשלים לפחות שלוש שאלות כדי להמשיך לפרויקט'
-                    }
                 </div>
             </div>
 
