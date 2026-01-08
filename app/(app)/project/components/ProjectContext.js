@@ -68,7 +68,7 @@ function SingleProject({ project }) {
     if (project.term.length > 0) {
         if (!project.term.some(term => term === currTerm.id)) {
             if (!project.metadata?.review) needsReview = true;
-            else if (!project.metadata.review.summary) needsReview = true;
+            else if (!project.metadata?.review?.summary) needsReview = true;
         }
     }
 

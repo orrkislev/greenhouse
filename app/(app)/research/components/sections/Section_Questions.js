@@ -10,7 +10,7 @@ export default function Section_Questions({ section }) {
 
     if (!research) return null;
 
-    const questions = research.sections.questions || [];
+    const questions = research?.sections?.questions || [];
 
     const addQuestion = () => {
         const newQuestions = [...questions, ''];

@@ -31,8 +31,8 @@ export default function CalendarView() {
     },[])
 
 
-    const termStart = new Date(terms.find(term => term.id === project.term[0]).start);
-    const termEnd = new Date(terms.find(term => term.id === project.term[project.term.length - 1]).end);
+    const termStart = new Date(terms.find(term => term.id === project.term[0])?.start);
+    const termEnd = new Date(terms.find(term => term.id === project.term[project.term.length - 1])?.end);
 
     const firstSunday = startOfWeek(termStart, { weekStartsOn: 0 });
     const lastSaturday = endOfWeek(termEnd, { weekStartsOn: 6 });

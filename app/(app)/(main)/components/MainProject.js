@@ -50,7 +50,7 @@ export default function MainProject() {
 function Tasks() {
     const tasks = useProjectData((state) => state.tasks);
 
-    if (tasks?.length === 0) {
+    if (!tasks?.length) {
         return <div className='text-muted-foreground text-center p-4'>אין משימות</div>;
     }
 

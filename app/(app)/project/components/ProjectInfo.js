@@ -38,7 +38,7 @@ export default function ProjectInfo() {
           <div className="flex items-center justify-center flex-col" >
             <div className="flex items-center gap-2">
               <Avatar user={project.master} />
-              <h3 className="text-center text-foreground font-medium">המאסטר שלי - {project.master.first_name} {project.master.last_name}</h3>
+              <h3 className="text-center text-foreground font-medium">המאסטר שלי - {project.master?.first_name} {project.master?.last_name}</h3>
             </div>
             <div className="flex gap-2">
               <CalendarFold className="w-4 h-4" />

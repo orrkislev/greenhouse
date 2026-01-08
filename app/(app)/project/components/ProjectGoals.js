@@ -64,7 +64,7 @@ function FocusedGoal({ index }) {
 
     const closeAndSave = () => {
         setIsFocused(false);
-        const newGoals = useProjectData.getState().project.metadata.goals || InitialGoals;
+        const newGoals = useProjectData.getState().project?.metadata?.goals || InitialGoals;
         newGoals[index] = goal;
         projectActions.updateMetadata({ goals: newGoals });
     }

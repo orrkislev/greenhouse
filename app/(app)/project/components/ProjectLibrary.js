@@ -48,7 +48,7 @@ function SaveLogic() {
 
     useEffect(()=>{
         if (!editor) return
-        if (!project.metadata.tldraw) return
+        if (!project.metadata?.tldraw) return
         loadSnapshot(editor.store, project.metadata.tldraw)
     }, [project, editor])
 

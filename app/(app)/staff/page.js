@@ -24,7 +24,7 @@ export default function StaffPage() {
         if (tabFromUrl) {
             setActiveTab(tabFromUrl);
         } else if (groups.length > 0) {
-            setActiveTab(groups[0].id);
+            setActiveTab(groups[0]?.id);
         }
     }, [groups.length, searchParams]);
 

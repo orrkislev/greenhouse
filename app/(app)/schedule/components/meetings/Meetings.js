@@ -37,7 +37,7 @@ export default function Meetings() {
 
 const getOtherParticipant = (meeting) => {
     if (!meeting.other_participants || meeting.other_participants.length === 0) return null;
-    return meeting.other_participants[0];
+    return meeting.other_participants?.[0];
 }
 
 function Meeting({ meeting }) {

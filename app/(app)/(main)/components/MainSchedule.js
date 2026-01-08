@@ -45,7 +45,7 @@ export default function MainSchedule() {
                     <div key={meeting.id} className="flex gap-3 items-center">
                         <EventTime time={meeting.start} />
                         <div className="text-sm font-bold flex items-center gap-1">
-                            {meeting.other_participants[0].first_name} {meeting.other_participants[0].last_name}
+                            {meeting.other_participants?.length > 0 ? `${meeting.other_participants[0]?.first_name} ${meeting.other_participants[0]?.last_name}` : meeting.title}
                         </div>
                     </div>
                 ))}
