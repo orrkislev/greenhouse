@@ -5,6 +5,7 @@ import { resizeImage } from '@/utils/actions/storage actions';
 import { resetPin } from '../actions/admin actions';
 import { supabase } from '../supabase/client';
 import { redirect } from 'next/navigation';
+import { toastsActions } from './useToasts';
 
 
 export const useUser = create(subscribeWithSelector((set, get) => {
@@ -45,8 +46,8 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 		},
 		updateUserProfile: async (updates) => {
 			const user = get().user;
-			const { error } = await supabase.from('user_profiles').update(updates).eq('user_id', user.id);
-			if (error) set({ error });
+			const { error } = await supabase.from('user_profiles').update(updates).eq('id', user.id);
+			if (error) toastsActions.addFromError(error)
 			else set({ user: { ...user, ...updates } });
 		},
 		signInWithGoogle: async () => {
@@ -67,6 +68,10 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 					},
 				},
 			});
+		},
+		updatePortfolioUrl: async (portfolioUrl) => {
+			console.log('updatePortfolioUrl', portfolioUrl)
+			await get().updateUserProfile({ portfolio_url: portfolioUrl })
 		},
 
 		// ----------------------------------------------------

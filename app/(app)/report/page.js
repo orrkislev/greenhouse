@@ -13,6 +13,7 @@ import Vocation from "./Vocation";
 import Term from "./Term";
 import FinalProject from "./FinalProject";
 import PersonalGoals from "./PersonalGoals";
+import Portfolio from "./Portfolio";
 import { useUserGroups } from "@/utils/store/useGroups";
 
 export default function ReportPage() {
@@ -47,6 +48,8 @@ export default function ReportPage() {
         <DashboardLayout>
             <DashboardPanel>
                 <DashboardPanelButton onClick={() => setView('ikigai')} $active={view === 'ikigai'}>איקיגאי</DashboardPanelButton>
+                <DashboardPanelButton onClick={() => setView('portfolio')} $active={view === 'portfolio'}>פורטפוליו</DashboardPanelButton>
+
                 <DashboardPanelButton onClick={() => setView('liba')} $active={view === 'liba'}>ליבה</DashboardPanelButton>
                 {(userClass?.description == '1' || userClass?.description == '2') && (
                     <>
@@ -73,6 +76,7 @@ export default function ReportPage() {
                     {view === 'vocation' && <Vocation vocation={data?.vocation} onSave={data => handleSave('vocation', data)} />}
                     {view === 'finalProject' && <FinalProject finalProject={data?.special} onSave={data => handleSave('finalProject', data)} />}
                     {view === 'personalGoals' && <PersonalGoals personalGoals={data?.special} onSave={data => handleSave('personalGoals', data)} />}
+                    {view === 'portfolio' && <Portfolio portfolio={data?.portfolio_url} />}
                 </div>
             </DashboardMain>
         </DashboardLayout>

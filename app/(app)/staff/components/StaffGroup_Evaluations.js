@@ -53,7 +53,7 @@ export default function StaffGroup_Evaluations({ group }) {
         userActions.switchToStudent(student.id, '/report?view=' + section);
     }
 
-    const titles = ['שם', 'ממני אליך', 'איקיגאי', 'ליבה', 'פרויקט סתו', 'חקר סתו', 'פרויקט חורף', 'חקר חורף', 'למידה', 'יזמות מקיימת'];
+    const titles = ['שם', 'ממני אליך', 'איקיגאי', 'פורטפוליו', 'ליבה', 'פרויקט סתו', 'חקר סתו', 'פרויקט חורף', 'חקר חורף', 'למידה', 'יזמות מקיימת'];
     return (
         <div className="flex flex-col gap-2 border border-border p-4 sticky top-0">
             <h4 className="text-lg font-bold">הערכות</h4>
@@ -76,6 +76,8 @@ export default function StaffGroup_Evaluations({ group }) {
                                 onClick={() => openMentorsField(student)} />
                             <Cell $good={student.report?.ikigai}
                                 onClick={() => goToReport(student, 'ikigai')} />
+                            <Cell $good={student.report?.portfolio_url}
+                                onClick={() => goToReport(student, 'portfolio')} />
                             <Cell $good={student.report?.liba?.answer}
                                 onClick={() => goToReport(student, 'liba')} />
                             <Cell $good={student.report?.autumn_project?.summary?.length > 10} $bad={!student.report?.autumn_project}
