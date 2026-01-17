@@ -29,6 +29,7 @@ const config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        "libertinus-serif": "var(--font-libertinus-serif)",
         primary: {
           DEFAULT: "var(--primary)",
           foreground: "var(--primary-foreground)",

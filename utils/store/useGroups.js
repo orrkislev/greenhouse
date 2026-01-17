@@ -26,6 +26,12 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
         if (error) toastsActions.addFromError(error)
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...group, ...updates } : g) }));
     },
+    loadGroup: async (groupId) => {
+        if (get().groups.find(g => g.id === groupId)) return;
+        const { data, error } = await supabase.from('groups').select('*').eq('id', groupId).single();
+        if (error) toastsActions.addFromError(error)
+        set((state) => ({ groups: [...state.groups, data] }));
+    },
 
     // ----------- Group Members Management -----------
     // ------------------------------------------------
@@ -142,8 +148,9 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
 
         const { data, error } = await supabase
             .from('users_groups')
-            .select('users( id, first_name, last_name, username, role, user_profiles( avatar_url ) )')
+            .select('users( id, first_name, last_name, username, role, active, user_profiles( avatar_url ) )')
             .eq('group_id', group.id)
+            .eq('users.active', true)
         if (error) toastsActions.addFromError(error)
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, members: data.map(d => d.users) } : g) }));
     },

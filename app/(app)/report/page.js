@@ -74,8 +74,8 @@ export default function ReportPage() {
                     {view === 'winter' && <Term project={data?.winter_project} research={data?.winter_research} term='חורף' />}
                     {view === 'learning' && <Learning learning={data?.learning} onSave={data => handleSave('learning', data)} />}
                     {view === 'vocation' && <Vocation vocation={data?.vocation} onSave={data => handleSave('vocation', data)} />}
-                    {view === 'finalProject' && <FinalProject finalProject={data?.special} onSave={data => handleSave('finalProject', data)} />}
-                    {view === 'personalGoals' && <PersonalGoals personalGoals={data?.special} onSave={data => handleSave('personalGoals', data)} />}
+                    {view === 'finalProject' && <FinalProject finalProject={data?.special} onSave={data => handleSave('special', data)} />}
+                    {view === 'personalGoals' && <PersonalGoals personalGoals={data?.special} onSave={data => handleSave('special', data)} />}
                     {view === 'portfolio' && <Portfolio portfolio={data?.portfolio_url} />}
                 </div>
             </DashboardMain>
