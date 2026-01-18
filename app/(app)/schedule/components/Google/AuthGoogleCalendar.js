@@ -1,4 +1,5 @@
 import Button from "@/components/Button";
+import { useEffect } from "react";
 import { getAuthUrl, getRefreshToken } from "@/utils/actions/google actions";
 import { userActions, useUser } from "@/utils/store/useUser";
 import { Icon } from "@iconify/react";
@@ -21,7 +22,7 @@ export default function AuthGoogleCalendar() {
     return (
         <Button onClick={clickAuth} className="justify-center">
             <Icon icon="devicon:google" className="w-4 h-4" />
-            חיבור חשבון גוגל 
+            חיבור חשבון גוגל
         </Button>
     );
 }
@@ -33,20 +34,22 @@ export function AuthGoogleListener() {
     const router = useRouter();
     const code = searchParams.get('code');
 
-    if (code) {
-        (async () => {
-            const origin = window.location.origin;
-            const token = await getRefreshToken(origin, code);
-            if (token) {
-                userActions.updateUserProfile({
-                    googleRefreshToken: token
-                })
-                const redirectUrl = localStorage.getItem('redirectUrl') || '/';
-                localStorage.removeItem('redirectUrl');
-                if (router) router.push(redirectUrl);
-            }
-        })();
-    }
+    useEffect(() => {
+        if (code) {
+            (async () => {
+                const origin = window.location.origin;
+                const token = await getRefreshToken(origin, code);
+                if (token) {
+                    userActions.updateUserProfile({
+                        googleRefreshToken: token
+                    })
+                    const redirectUrl = localStorage.getItem('redirectUrl') || '/';
+                    localStorage.removeItem('redirectUrl');
+                    if (router) router.push(redirectUrl);
+                }
+            })();
+        }
+    }, [code, router]);
 
     return null;
 }

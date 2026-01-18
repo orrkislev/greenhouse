@@ -71,7 +71,7 @@ function MainGroupTask({ group, task }) {
         groupsActions.toggleGroupTaskStatus(group, task);
     }
 
-    const students = group.members ? group.members.filter(member => member.role === 'student') : []
+    const students = group.members ? group.members.filter(member => member?.role === 'student') : []
     const completedStudents = task.completed || []
 
     return (
