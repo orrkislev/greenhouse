@@ -65,7 +65,7 @@ function GroupTasks({ group }) {
 function GroupTask({ group, task }) {
     const [open, setOpen] = useState(false)
 
-    const students = group.members ? group.members.filter(member => member.role === 'student') : []
+    const students = group.members ? group.members.filter(member => member?.role === 'student') : []
 
     return (
         <div className="flex flex-col gap-1 group border-b border-border pb-2">

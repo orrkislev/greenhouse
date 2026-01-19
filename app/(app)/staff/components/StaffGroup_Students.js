@@ -19,7 +19,7 @@ import { motion } from "motion/react";
 export default function StaffGroup_Students({ group }) {
     if (!group.members) return null;
 
-    const students = group.members.filter(member => member.role === 'student');
+    const students = group.members.filter(member => member?.role === 'student');
 
     const onSelect = (student) => {
         groupsActions.addMember(group.id, student);
