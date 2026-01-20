@@ -16,6 +16,8 @@ import PersonalGoals from "./PersonalGoals";
 import Portfolio from "./Portfolio";
 import { useUserGroups } from "@/utils/store/useGroups";
 
+export const ALLOW_STUDENT_EDIT = true;
+
 export default function ReportPage() {
     const searchParams = useSearchParams();
     const viewParam = searchParams.get('view');

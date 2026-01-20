@@ -5,6 +5,7 @@ import Button from '@/components/Button'
 import SmartText from '@/components/SmartText'
 import { motion, AnimatePresence } from 'motion/react'
 import { Briefcase, BriefcaseBusiness, Earth } from 'lucide-react'
+import { ALLOW_STUDENT_EDIT } from './page';
 
 export default function Vocation({ vocation, onSave }) {
     const originalUser = useUser(state => state.originalUser);
@@ -25,6 +26,8 @@ export default function Vocation({ vocation, onSave }) {
         return employmentQuestion.trim() !== vocation?.employmentQuestion?.trim() || employmentAnswer.trim() !== vocation?.employmentAnswer?.trim() || volunteeringQuestion.trim() !== vocation?.volunteeringQuestion?.trim() || volunteeringAnswer.trim() !== vocation?.volunteeringAnswer?.trim();
     }, [employmentQuestion, employmentAnswer, volunteeringQuestion, volunteeringAnswer, vocation?.employmentQuestion, vocation?.employmentAnswer, vocation?.volunteeringQuestion, vocation?.volunteeringAnswer]);
 
+    const canEdit = ALLOW_STUDENT_EDIT || !!originalUser;
+
     return (
         <>
             <div className='mt-4 border-2 border-black bg-white rounded-lg flex overflow-hidden aspect-9/2'>
@@ -38,7 +41,7 @@ export default function Vocation({ vocation, onSave }) {
                         <SmartText
                             text={employmentQuestion}
                             onEdit={(newText) => setEmploymentQuestion(newText)}
-                            editable={!!originalUser}
+                            editable={canEdit}
                             withIcon={true}
                             className='font-bold text-gray-600'
                             placeholder="שאלת תעסוקה"
@@ -46,7 +49,7 @@ export default function Vocation({ vocation, onSave }) {
                         <SmartText
                             text={employmentAnswer}
                             onEdit={(newText) => setEmploymentAnswer(newText)}
-                            editable={!!originalUser}
+                            editable={canEdit}
                             withIcon={true}
                             className='text-gray-600'
                             placeholder="תשובת תעסוקה"
@@ -56,7 +59,7 @@ export default function Vocation({ vocation, onSave }) {
                         <SmartText
                             text={volunteeringQuestion}
                             onEdit={(newText) => setVolunteeringQuestion(newText)}
-                            editable={!!originalUser}
+                            editable={canEdit}
                             withIcon={true}
                             className='font-bold text-gray-600'
                             placeholder="שאלת התנדבות"
@@ -64,7 +67,7 @@ export default function Vocation({ vocation, onSave }) {
                         <SmartText
                             text={volunteeringAnswer}
                             onEdit={(newText) => setVolunteeringAnswer(newText)}
-                            editable={!!originalUser}
+                            editable={canEdit}
                             withIcon={true}
                             className='text-gray-600'
                             placeholder="תשובת התנדבות"
@@ -74,7 +77,7 @@ export default function Vocation({ vocation, onSave }) {
             </div>
 
             <AnimatePresence>
-                {originalUser && (
+                {canEdit && (
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{

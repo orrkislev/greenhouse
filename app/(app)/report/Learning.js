@@ -1,14 +1,15 @@
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useUser } from '@/utils/store/useUser'
 import Button from '@/components/Button'
 import SmartText from '@/components/SmartText'
 import { motion, AnimatePresence } from 'motion/react'
 import { X } from 'lucide-react'
+import { ALLOW_STUDENT_EDIT } from './page';
 
 export default function Learning({ learning, onSave }) {
     const originalUser = useUser(state => state.originalUser);
-
+    const [madeChanges, setMadeChanges] = useState(false);
     const defaultTopics = [
         { name: 'אנגלית', learnings: ['', '', ''], howLearned: '' },
         { name: '', learnings: ['', '', ''], howLearned: '' },
@@ -34,12 +35,14 @@ export default function Learning({ learning, onSave }) {
         const newTopics = [...topics];
         newTopics[index] = { ...newTopics[index], [field]: value };
         setTopics(newTopics);
+        setMadeChanges(true);
     };
 
     const updateLearning = (topicIndex, learningIndex, value) => {
         const newTopics = [...topics];
         newTopics[topicIndex].learnings[learningIndex] = value;
         setTopics(newTopics);
+        setMadeChanges(true);
     };
 
     const removeTopic = (topicIndex) => {
@@ -50,6 +53,7 @@ export default function Learning({ learning, onSave }) {
         // Adjust visible count if we cleared a visible topic
         const filledTopics = newTopics.filter(t => t.name).length;
         setVisibleTopicsCount(Math.max(2, filledTopics));
+        setMadeChanges(true);
     };
 
     // const shouldSave = useMemo(() => {
@@ -59,7 +63,9 @@ export default function Learning({ learning, onSave }) {
     //         answer: learning?.answer || ''
     //     });
     // }, [topics, question, answer, learning?.topics, learning?.question, learning?.answer]);
-    const shouldSave = true;
+    const shouldSave = madeChanges;
+
+    const canEdit = ALLOW_STUDENT_EDIT || !!originalUser;
 
     return (
         <>
@@ -76,11 +82,11 @@ export default function Learning({ learning, onSave }) {
                                 <th className='font-bold'>נושא הלמידה</th>
                                 <th className='font-bold'>מה למדתי</th>
                                 <th className='font-bold'>איך למדתי</th>
-                                {originalUser && <th className='w-8'></th>}
+                                {canEdit && <th className='w-8'></th>}
                             </tr>
                         </thead>
                         <tbody>
-                            {topics.slice(0, originalUser ? visibleTopicsCount : topics.length).filter(t => originalUser || t.name).map((topic) => {
+                            {topics.slice(0, canEdit ? visibleTopicsCount : topics.length).filter(t => canEdit || t.name).map((topic) => {
                                 const topicIndex = topics.indexOf(topic);
                                 return (
                                     <tr key={topicIndex} className='border-b border-dashed border-gray-400'>
@@ -88,7 +94,7 @@ export default function Learning({ learning, onSave }) {
                                             <SmartText
                                                 text={topic.name}
                                                 onEdit={(newText) => updateTopic(topicIndex, 'name', newText)}
-                                                editable={!!originalUser && topicIndex !== 0}
+                                                editable={canEdit && topicIndex !== 0}
                                                 withIcon={true}
                                                 className='font-bold'
                                                 placeholder={topicIndex === 0 ? 'אנגלית' : `נושא ${topicIndex + 1}`}
@@ -101,7 +107,7 @@ export default function Learning({ learning, onSave }) {
                                                         <SmartText
                                                             text={learning}
                                                             onEdit={(newText) => updateLearning(topicIndex, learningIndex, newText)}
-                                                            editable={!!originalUser}
+                                                            editable={canEdit}
                                                             withIcon={false}
                                                             className='text-sm inline'
                                                             placeholder={`דבר ${['ראשון', 'שני', 'שלישי'][learningIndex]}`}
@@ -114,13 +120,13 @@ export default function Learning({ learning, onSave }) {
                                             <SmartText
                                                 text={topic.howLearned}
                                                 onEdit={(newText) => updateTopic(topicIndex, 'howLearned', newText)}
-                                                editable={!!originalUser}
+                                                editable={canEdit}
                                                 withIcon={false}
                                                 className='text-sm'
                                                 placeholder="איך למדתי"
                                             />
                                         </td>
-                                        {originalUser && (
+                                        {canEdit && (
                                             <td className='p-2 text-center'>
                                                 {topicIndex !== 0 && (
                                                     <button
@@ -136,7 +142,7 @@ export default function Learning({ learning, onSave }) {
                                     </tr>
                                 );
                             })}
-                            {originalUser && visibleTopicsCount < 4 && (
+                            {canEdit && visibleTopicsCount < 4 && (
                                 <tr>
                                     <td colSpan={4} className='p-2 text-center'>
                                         <button
@@ -157,7 +163,7 @@ export default function Learning({ learning, onSave }) {
                             <SmartText
                                 text={question}
                                 onEdit={(newText) => setQuestion(newText)}
-                                editable={!!originalUser}
+                                editable={canEdit}
                                 withIcon={true}
                                 className='font-bold text-lg'
                                 placeholder="שאלה"
@@ -167,7 +173,7 @@ export default function Learning({ learning, onSave }) {
                             <SmartText
                                 text={answer}
                                 onEdit={(newText) => setAnswer(newText)}
-                                editable={!!originalUser}
+                                editable={canEdit}
                                 withIcon={true}
                                 className='text-gray-700'
                                 placeholder="תשובה"
@@ -178,7 +184,7 @@ export default function Learning({ learning, onSave }) {
             </div>
 
             <AnimatePresence>
-                {originalUser && (
+                {canEdit && (
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{
@@ -197,7 +203,10 @@ export default function Learning({ learning, onSave }) {
                     >
                         <Button
                             data-role="save"
-                            onClick={() => onSave({ topics, question, answer })}
+                            onClick={() => {
+                                onSave({ topics, question, answer });
+                                setMadeChanges(false);
+                            }}
                             disabled={!shouldSave}
                             className={shouldSave ? "shadow-lg" : ""}
                         >

@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "motion/react";
 import RadarChart from "@/components/RadarChart";
 import { useUser } from "@/utils/store/useUser";
 import Box2 from "@/components/Box2";
+import { ALLOW_STUDENT_EDIT } from './page';
 
 const { useProjectData } = require("@/utils/store/useProject");
 
@@ -248,9 +249,11 @@ export default function FinalProject({ finalProject, onSave }) {
         setMadeChanges(true);
     };
 
+    const canEdit = ALLOW_STUDENT_EDIT || !!originalUser;
+
     return (
         <>
-            {originalUser && showSliders && (
+            {canEdit && showSliders && (
                 <div className="flex flex-col gap-4 p-4 divide-y divide-stone-300/50 mb-4">
                     <div className="flex justify-between items-center">
                         <h3 className="text-lg font-bold">רפלקציה</h3>
@@ -291,7 +294,7 @@ export default function FinalProject({ finalProject, onSave }) {
                 </div>
             )}
 
-            {originalUser && !showSliders && (
+            {canEdit && !showSliders && (
                 <div className="flex justify-center mb-4">
                     <button
                         onClick={() => setShowSliders(true)}
@@ -337,14 +340,14 @@ export default function FinalProject({ finalProject, onSave }) {
                             <SmartText
                                 text={formData?.reflections_project}
                                 onEdit={(newText) => handleTextChange('reflections_project', newText)}
-                                editable={!!originalUser}
+                                editable={canEdit}
                                 withIcon={true}
                                 className="text-sm italic"
                                 placeholder="סיכום תהליך הפרויקט"
                             />
                         </div>
                         <div className="flex-1 flex items-center justify-center mt-8">
-                            <RadarChart data={formData?.radar || []} size={200} onEdit={originalUser ? handleRadarChange : undefined} />
+                            <RadarChart data={formData?.radar || []} size={200} onEdit={canEdit ? handleRadarChange : undefined} />
                         </div>
                     </div>
 
@@ -354,7 +357,7 @@ export default function FinalProject({ finalProject, onSave }) {
                             <SmartText
                                 text={formData?.reflections_research}
                                 onEdit={(newText) => handleTextChange('reflections_research', newText)}
-                                editable={!!originalUser}
+                                editable={canEdit}
                                 withIcon={true}
                                 className="text-sm italic"
                                 placeholder="סיכום תהליך החקר"
@@ -367,7 +370,7 @@ export default function FinalProject({ finalProject, onSave }) {
                         <SmartText
                             text={formData?.next_steps}
                             onEdit={(newText) => handleTextChange('next_steps', newText)}
-                            editable={!!originalUser}
+                            editable={canEdit}
                             withIcon={true}
                             className="text-sm italic text-muted-foreground"
                             placeholder="יעדים להמשך הפרויקט"
@@ -377,7 +380,7 @@ export default function FinalProject({ finalProject, onSave }) {
             </div>
 
             <AnimatePresence>
-                {originalUser && (
+                {canEdit && (
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{

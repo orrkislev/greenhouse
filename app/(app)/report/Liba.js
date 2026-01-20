@@ -5,6 +5,7 @@ import Button from '@/components/Button'
 import SmartText from '@/components/SmartText'
 import { motion, AnimatePresence } from 'motion/react'
 import { Heart, HeartHandshakeIcon, Target } from 'lucide-react'
+import { ALLOW_STUDENT_EDIT } from './page';
 
 export default function Liba({ liba, onSave }) {
     const originalUser = useUser(state => state.originalUser);
@@ -23,6 +24,7 @@ export default function Liba({ liba, onSave }) {
         return question.trim() !== liba?.question?.trim() || answer.trim() !== liba?.answer?.trim() || nextStep.trim() !== liba?.nextStep?.trim();
     }, [question, answer, nextStep, liba?.question, liba?.answer, liba?.nextStep]);
 
+    const canEdit = ALLOW_STUDENT_EDIT || !!originalUser;
 
     return (
         <>
@@ -37,7 +39,7 @@ export default function Liba({ liba, onSave }) {
                         <SmartText
                             text={question}
                             onEdit={(newText) => setQuestion(newText)}
-                            editable={!!originalUser}
+                            editable={canEdit}
                             withIcon={true}
                             className='font-bold text-gray-600'
                             placeholder="שאלת ליבה"
@@ -45,7 +47,7 @@ export default function Liba({ liba, onSave }) {
                         <SmartText
                             text={answer}
                             onEdit={(newText) => setAnswer(newText)}
-                            editable={!!originalUser}
+                            editable={canEdit}
                             withIcon={true}
                             className='text-gray-600'
                             placeholder="תשובת ליבה"
@@ -56,7 +58,7 @@ export default function Liba({ liba, onSave }) {
                         <SmartText
                             text={nextStep}
                             onEdit={(newText) => setNextStep(newText)}
-                            editable={!!originalUser}
+                            editable={canEdit}
                             withIcon={true}
                             className='text-gray-600'
                             placeholder="יעד להמשך"
@@ -66,7 +68,7 @@ export default function Liba({ liba, onSave }) {
             </div>
 
             <AnimatePresence>
-                {originalUser && (
+                {canEdit && (
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{

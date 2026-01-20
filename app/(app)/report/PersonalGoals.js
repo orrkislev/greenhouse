@@ -5,10 +5,10 @@ import Button from '@/components/Button'
 import Box2 from '@/components/Box2'
 import { Target } from 'lucide-react'
 import RadarChart from '@/components/RadarChart'
+import { ALLOW_STUDENT_EDIT } from './page';
 
 export default function PersonalGoals({ personalGoals, onSave }) {
     const originalUser = useUser(state => state.originalUser);
-
     const defaultGoals = {
         initialGoals: ['', '', ''],
         updatedGoals: ['', '', ''],
@@ -66,9 +66,11 @@ export default function PersonalGoals({ personalGoals, onSave }) {
         });
     }, [initialGoals, updatedGoals, mode, question, answer, radarData, summary, personalGoals]);
 
+    const canEdit = ALLOW_STUDENT_EDIT || !!originalUser;
+
     return (
         <>
-            {originalUser && (
+            {canEdit && (
                 <Box2 label="מטרות אישיות" LabelIcon={Target}>
                     <div className="space-y-4">
                         <div className="border border-border rounded-2xl p-4 bg-gray-50">
@@ -85,6 +87,7 @@ export default function PersonalGoals({ personalGoals, onSave }) {
                                             onChange={e => updateInitialGoal(index, e.target.value)}
                                             placeholder={`מטרה ${index + 1}`}
                                             className='w-full bg-white border border-border rounded-lg px-3 py-2 text-sm resize-none'
+                                            disabled={!canEdit}
                                         />
                                         <textarea
                                             rows={2}
@@ -92,6 +95,7 @@ export default function PersonalGoals({ personalGoals, onSave }) {
                                             onChange={e => updateUpdatedGoal(index, e.target.value)}
                                             placeholder={`מטרה ${index + 1}`}
                                             className='w-full bg-white border border-border rounded-lg px-3 py-2 text-sm resize-none'
+                                            disabled={!canEdit}
                                         />
                                     </div>
                                 ))}
@@ -101,7 +105,7 @@ export default function PersonalGoals({ personalGoals, onSave }) {
                         <div className="border-t pt-3 mt-3">
                             <div className="flex justify-center mb-4">
                                 <div className="inline-flex rounded-lg border border-border bg-gray-100 p-1">
-                                    <button
+                                    {canEdit && (<button
                                         onClick={() => setMode('questions')}
                                         className={`px-4 py-2 rounded-md text-sm transition-colors ${
                                             mode === 'questions'
@@ -111,6 +115,7 @@ export default function PersonalGoals({ personalGoals, onSave }) {
                                     >
                                         לא עשיתי פ.גמר
                                     </button>
+                                    )}
                                     <button
                                         onClick={() => setMode('radar')}
                                         className={`px-4 py-2 rounded-md text-sm transition-colors ${
@@ -132,6 +137,7 @@ export default function PersonalGoals({ personalGoals, onSave }) {
                                         onChange={e => setAnswer(e.target.value)}
                                         placeholder="תיאור של דברים שעשיתי"
                                         className="w-full bg-white border border-border rounded-lg px-3 py-2 text-sm resize-none"
+                                        disabled={!canEdit}
                                     />
                                 </>
                             ) : (
@@ -149,20 +155,21 @@ export default function PersonalGoals({ personalGoals, onSave }) {
                                         onChange={e => setSummary(e.target.value)}
                                         placeholder="סיכום משותף של הפרויקט"
                                         className="w-full bg-white border border-border rounded-lg px-3 py-2 text-sm resize-none"
+                                        disabled={!canEdit}
                                     />
                                 </>
                             )}
                         </div>
                     </div>
 
-                    <Button
+                    {canEdit && (<Button
                         data-role="save"
                         onClick={() => onSave({ initialGoals, updatedGoals, mode, question, answer, radarData, summary })}
                         disabled={!shouldSave}
                         className="mt-3"
                     >
                         שמירה
-                    </Button>
+                    </Button>)}
                 </Box2>
             )}
 

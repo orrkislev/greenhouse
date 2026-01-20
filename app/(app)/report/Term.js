@@ -15,7 +15,6 @@ export default function Term({ project, research, term }) {
         { subject: 'תכנון', value: project?.['הצגה ותיעוד'].overview || 50 },
     ];
 
-    console.log(project, research);
 
     return (
         <>
