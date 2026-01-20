@@ -52,13 +52,14 @@ export default function Learning({ learning, onSave }) {
         setVisibleTopicsCount(Math.max(2, filledTopics));
     };
 
-    const shouldSave = useMemo(() => {
-        return JSON.stringify({ topics, question, answer }) !== JSON.stringify({
-            topics: learning?.topics || defaultTopics,
-            question: learning?.question || '',
-            answer: learning?.answer || ''
-        });
-    }, [topics, question, answer, learning?.topics, learning?.question, learning?.answer]);
+    // const shouldSave = useMemo(() => {
+    //     return JSON.stringify({ topics, question, answer }) !== JSON.stringify({
+    //         topics: learning?.topics || defaultTopics,
+    //         question: learning?.question || '',
+    //         answer: learning?.answer || ''
+    //     });
+    // }, [topics, question, answer, learning?.topics, learning?.question, learning?.answer]);
+    const shouldSave = true;
 
     return (
         <>
