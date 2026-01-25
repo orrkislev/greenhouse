@@ -162,7 +162,7 @@ export default function Learning({ learning, onSave }) {
                         <div className='text-right mb-2'>
                             <SmartText
                                 text={question}
-                                onEdit={(newText) => setQuestion(newText)}
+                                onEdit={(newText) => { setQuestion(newText); setMadeChanges(true); }}
                                 editable={canEdit}
                                 withIcon={true}
                                 className='font-bold text-lg'
@@ -172,7 +172,7 @@ export default function Learning({ learning, onSave }) {
                         <div className='text-right text-gray-700'>
                             <SmartText
                                 text={answer}
-                                onEdit={(newText) => setAnswer(newText)}
+                                onEdit={(newText) => { setAnswer(newText); setMadeChanges(true); }}
                                 editable={canEdit}
                                 withIcon={true}
                                 className='text-gray-700'
