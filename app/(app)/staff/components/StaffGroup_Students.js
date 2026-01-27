@@ -46,7 +46,7 @@ export function Staff_Students_List({ students, context, group }) {
     return (
         <div className="flex flex-col md:block">
             <div className="md:float-right md:ml-4 mb-4 md:mb-0">
-                {selectedStudent != null && <SelectedStudentCard student={selectedStudent} context={context} group={group} />}
+                {selectedStudent != null && <SelectedStudentCard student={selectedStudent} context={context} group={group} onClose={() => setSelectedStudent(null)} />}
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -66,7 +66,7 @@ export function Staff_Students_List({ students, context, group }) {
 }
 
 
-export function SelectedStudentCard({ student, context, group }) {
+export function SelectedStudentCard({ student, context, group, onClose }) {
     const [data, setData] = useState(null)
     const groups = useGroups(state => state.groups);
     const today = useTime(state => state.today);
@@ -93,6 +93,7 @@ export function SelectedStudentCard({ student, context, group }) {
         } else {
             mentorshipsActions.deactivateMentorship(data);
         }
+        if (onClose) onClose();
     }
 
     return (

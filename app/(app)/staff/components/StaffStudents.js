@@ -46,7 +46,7 @@ export default function StaffStudents() {
     return (
         <div className="flex flex-col gap-4">
             <div className="flex gap-4">
-                {selectedStudent != null && <SelectedStudentCard student={selectedStudent} />}
+                {selectedStudent != null && <SelectedStudentCard student={selectedStudent} context="master" onClose={() => setSelectedStudent(null)} />}
 
                 <div className="flex flex-col gap-4">
                     <GoToAnyStudentPicker />
