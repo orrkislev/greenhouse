@@ -21,7 +21,7 @@ export const [useMentorships, mentorshipsActions] = createStore((set, get, withU
         if (user.role === 'student') query = query.eq('student_id', user.id);
         else query = query.eq('mentor_id', user.id);
         query = query.eq('is_active', true);
-        const { data: mentorships, error: mentorshipsError  } = await query;
+        const { data: mentorships, error: mentorshipsError } = await query;
         if (mentorshipsError) toastsActions.addFromError(mentorshipsError);
         set({ mentorships: mentorships });
 
@@ -46,7 +46,7 @@ export const [useMentorships, mentorshipsActions] = createStore((set, get, withU
         // this should either create a new mentorship (if it doesnt exists) or reactivate an existing one
         const user = useUser.getState().user;
         if (user.role === 'student') return;
-        const newMentorship = { mentor_id: user.id, student_id: student.id, subject };
+        const newMentorship = { mentor_id: user.id, student_id: student.id, subject: subject, is_active: true };
         set({ mentorships: [...get().mentorships, { ...newMentorship, student, mentor: user }] });
 
         await supabase.from('mentorships').upsert(newMentorship, {

@@ -22,12 +22,12 @@ export default function StaffGroup_Evaluations({ group }) {
         if (!group || !group.members) return;
         (async () => {
             const { data, error } = await supabase.from('report_cards_public').select('*')
-                .in('id', group.members.filter(member => member.role === 'student').map(member => member.id));
+                .in('id', group.members.filter(member => member?.role === 'student').map(member => member.id));
             if (error) toastsActions.addFromError(error);
             const { data: privateData, error: privateError } = await supabase.from('report_cards_private').select('id,mentors')
-                .in('id', group.members.filter(member => member.role === 'student').map(member => member.id));
+                .in('id', group.members.filter(member => member?.role === 'student').map(member => member.id));
             if (privateError) toastsActions.addFromError(privateError);
-            setData(group.members.filter(member => member.role === 'student').map(member => ({
+            setData(group.members.filter(member => member?.role === 'student').map(member => ({
                 ...member,
                 report: {
                     ...data.find(report => report.id === member.id),
