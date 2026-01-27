@@ -191,9 +191,23 @@ export function ProjectReview() {
     const [madeChanges, setMadeChanges] = useState(false);
 
     useEffect(() => {
-        if (!formData) return;
+        if (!project?.metadata?.review) {
+            setFormData(sections.reduce((acc, section) => ({
+                ...acc,
+                [section.sectionName]: section.parameters.reduce((acc, param) => ({
+                    ...acc,
+                    [param.id]: 50,
+                }), { 'overview': 50 })
+            }), { summary: "" }));
+        } else {
+            setFormData(project?.metadata?.review);
+        }
+    }, [project?.metadata?.review]);
+
+    useEffect(() => {
+        if (!formData || !madeChanges) return;
         projectActions.updateMetadata({ review: formData });
-    }, [formData])
+    }, [formData, madeChanges])
 
     const handleParameterChange = (sectionName, paramId, value) => {
         setFormData(prev => ({

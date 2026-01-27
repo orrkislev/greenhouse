@@ -38,8 +38,8 @@ export const [useMentorships, mentorshipsActions] = createStore((set, get, withU
 
     getAllStudents: async () => {
         if (get().allStudents.length > 0) return;
-        const students = await supabase.from('users').select('id, first_name, last_name').eq('role', 'student').eq('active', true);
-        set({ allStudents: students.data });
+        const { data } = await supabase.from('users').select('id, first_name, last_name').eq('role', 'student').eq('active', true);
+        set({ allStudents: data || [] });
     },
 
     createMentorship: async (student, subject) => {

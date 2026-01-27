@@ -20,12 +20,14 @@ export default function Learning({ learning, onSave }) {
     const [topics, setTopics] = useState(learning?.topics || defaultTopics);
     const [question, setQuestion] = useState(learning?.question || '');
     const [answer, setAnswer] = useState(learning?.answer || '');
+    const [englishMasterReview, setEnglishMasterReview] = useState(learning?.englishMasterReview || '');
     const [visibleTopicsCount, setVisibleTopicsCount] = useState(2); // English + 1 topic
 
     useEffect(() => {
         setTopics(learning?.topics || defaultTopics);
         setQuestion(learning?.question || '');
         setAnswer(learning?.answer || '');
+        setEnglishMasterReview(learning?.englishMasterReview || '');
         // Calculate how many topics have content
         const filledTopics = (learning?.topics || defaultTopics).filter(t => t.name).length;
         setVisibleTopicsCount(Math.max(2, filledTopics));
@@ -89,57 +91,76 @@ export default function Learning({ learning, onSave }) {
                             {topics.slice(0, canEdit ? visibleTopicsCount : topics.length).filter(t => canEdit || t.name).map((topic) => {
                                 const topicIndex = topics.indexOf(topic);
                                 return (
-                                    <tr key={topicIndex} className='border-b border-dashed border-gray-400'>
-                                        <td className='font-bold p-2'>
-                                            <SmartText
-                                                text={topic.name}
-                                                onEdit={(newText) => updateTopic(topicIndex, 'name', newText)}
-                                                editable={canEdit && topicIndex !== 0}
-                                                withIcon={true}
-                                                className='font-bold'
-                                                placeholder={topicIndex === 0 ? 'אנגלית' : `נושא ${topicIndex + 1}`}
-                                            />
-                                        </td>
-                                        <td className='text-right p-2'>
-                                            <ol className='list-disc text-sm space-y-1'>
-                                                {topic.learnings.map((learning, learningIndex) => (
-                                                    <li key={learningIndex}>
-                                                        <SmartText
-                                                            text={learning}
-                                                            onEdit={(newText) => updateLearning(topicIndex, learningIndex, newText)}
-                                                            editable={canEdit}
-                                                            withIcon={false}
-                                                            className='text-sm inline'
-                                                            placeholder={`דבר ${['ראשון', 'שני', 'שלישי'][learningIndex]}`}
-                                                        />
-                                                    </li>
-                                                ))}
-                                            </ol>
-                                        </td>
-                                        <td className='text-right text-sm text-gray-700 p-2'>
-                                            <SmartText
-                                                text={topic.howLearned}
-                                                onEdit={(newText) => updateTopic(topicIndex, 'howLearned', newText)}
-                                                editable={canEdit}
-                                                withIcon={false}
-                                                className='text-sm'
-                                                placeholder="איך למדתי"
-                                            />
-                                        </td>
-                                        {canEdit && (
-                                            <td className='p-2 text-center'>
-                                                {topicIndex !== 0 && (
-                                                    <button
-                                                        onClick={() => removeTopic(topicIndex)}
-                                                        className='text-gray-400 hover:text-red-500 transition-colors p-1'
-                                                        title="הסר נושא"
-                                                    >
-                                                        <X className='w-4 h-4' />
-                                                    </button>
-                                                )}
+                                    <>
+                                        <tr key={topicIndex} className='border-b border-dashed border-gray-400'>
+                                            <td className='font-bold p-2'>
+                                                <SmartText
+                                                    text={topic.name}
+                                                    onEdit={(newText) => updateTopic(topicIndex, 'name', newText)}
+                                                    editable={canEdit && topicIndex !== 0}
+                                                    withIcon={true}
+                                                    className='font-bold'
+                                                    placeholder={topicIndex === 0 ? 'אנגלית' : `נושא ${topicIndex + 1}`}
+                                                />
                                             </td>
+                                            <td className='text-right p-2'>
+                                                <ol className='list-disc text-sm space-y-1'>
+                                                    {topic.learnings.map((learning, learningIndex) => (
+                                                        <li key={learningIndex}>
+                                                            <SmartText
+                                                                text={learning}
+                                                                onEdit={(newText) => updateLearning(topicIndex, learningIndex, newText)}
+                                                                editable={canEdit}
+                                                                withIcon={false}
+                                                                className='text-sm inline'
+                                                                placeholder={`דבר ${['ראשון', 'שני', 'שלישי'][learningIndex]}`}
+                                                            />
+                                                        </li>
+                                                    ))}
+                                                </ol>
+                                            </td>
+                                            <td className='text-right text-sm text-gray-700 p-2'>
+                                                <SmartText
+                                                    text={topic.howLearned}
+                                                    onEdit={(newText) => updateTopic(topicIndex, 'howLearned', newText)}
+                                                    editable={canEdit}
+                                                    withIcon={false}
+                                                    className='text-sm'
+                                                    placeholder="איך למדתי"
+                                                />
+                                            </td>
+                                            {canEdit && (
+                                                <td className='p-2 text-center'>
+                                                    {topicIndex !== 0 && (
+                                                        <button
+                                                            onClick={() => removeTopic(topicIndex)}
+                                                            className='text-gray-400 hover:text-red-500 transition-colors p-1'
+                                                            title="הסר נושא"
+                                                        >
+                                                            <X className='w-4 h-4' />
+                                                        </button>
+                                                    )}
+                                                </td>
+                                            )}
+                                        </tr>
+                                        {topicIndex === 0 && (
+                                            <tr key="english-master-review" className='border-b border-dashed border-gray-400 bg-gray-50'>
+                                                <td className='font-bold p-2 text-gray-600'>
+                                                    משוב מאסטר אנגלית
+                                                </td>
+                                                <td colSpan={canEdit ? 3 : 2} className='text-right p-2'>
+                                                    <SmartText
+                                                        text={englishMasterReview}
+                                                        onEdit={(newText) => { setEnglishMasterReview(newText); setMadeChanges(true); }}
+                                                        editable={!!originalUser}
+                                                        withIcon={!!originalUser}
+                                                        className='text-sm'
+                                                        placeholder="משוב מאסטר אנגלית"
+                                                    />
+                                                </td>
+                                            </tr>
                                         )}
-                                    </tr>
+                                    </>
                                 );
                             })}
                             {canEdit && visibleTopicsCount < 4 && (
@@ -162,7 +183,7 @@ export default function Learning({ learning, onSave }) {
                         <div className='text-right mb-2'>
                             <SmartText
                                 text={question}
-                                onEdit={(newText) => setQuestion(newText)}
+                                onEdit={(newText) => { setQuestion(newText); setMadeChanges(true); }}
                                 editable={canEdit}
                                 withIcon={true}
                                 className='font-bold text-lg'
@@ -172,7 +193,7 @@ export default function Learning({ learning, onSave }) {
                         <div className='text-right text-gray-700'>
                             <SmartText
                                 text={answer}
-                                onEdit={(newText) => setAnswer(newText)}
+                                onEdit={(newText) => { setAnswer(newText); setMadeChanges(true); }}
                                 editable={canEdit}
                                 withIcon={true}
                                 className='text-gray-700'
@@ -204,7 +225,7 @@ export default function Learning({ learning, onSave }) {
                         <Button
                             data-role="save"
                             onClick={() => {
-                                onSave({ topics, question, answer });
+                                onSave({ topics, question, answer, englishMasterReview });
                                 setMadeChanges(false);
                             }}
                             disabled={!shouldSave}

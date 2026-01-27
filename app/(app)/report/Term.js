@@ -9,10 +9,10 @@ export default function Term({ project, research, term }) {
     if (!project || !research) return null;
 
     const data = [
-        { subject: 'הגדרת יעדים', value: project?.['הגדרת יעדים'].overview || 50 },
-        { subject: 'הצגה ותיעוד', value: project?.['תכנון'].overview || 50 },
-        { subject: 'למידה וביצוע', value: project?.['למידה וביצוע'].overview || 50 },
-        { subject: 'תכנון', value: project?.['הצגה ותיעוד'].overview || 50 },
+        { subject: 'הגדרת יעדים', value: project?.['הגדרת יעדים']?.overview || 50 },
+        { subject: 'הצגה ותיעוד', value: project?.['תכנון']?.overview || 50 },
+        { subject: 'למידה וביצוע', value: project?.['למידה וביצוע']?.overview || 50 },
+        { subject: 'תכנון', value: project?.['הצגה ותיעוד']?.overview || 50 },
     ];
 
 

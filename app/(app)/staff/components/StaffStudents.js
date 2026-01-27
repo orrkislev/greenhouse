@@ -1,7 +1,7 @@
 'use client'
 
 import { mentorshipsActions, useMentorships } from "@/utils/store/useMentorships";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SelectedStudentCard } from "./StaffGroup_Students";
 import Button from "@/components/Button";
@@ -9,8 +9,8 @@ import usePopper from "@/components/Popper";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { timeActions, useTime } from "@/utils/store/useTime";
 import WithLabel from "@/components/WithLabel";
-import { userActions } from "@/utils/store/useUser";
 import Avatar from "@/components/Avatar";
+import { userActions } from "@/utils/store/useUser";
 
 export default function StaffStudents() {
     const mentorships = useMentorships(state => state.mentorships);
@@ -49,6 +49,7 @@ export default function StaffStudents() {
                 {selectedStudent != null && <SelectedStudentCard student={selectedStudent} />}
 
                 <div className="flex flex-col gap-4">
+                    <GoToAnyStudentPicker />
                     <WithLabel label="חניכים בליווי אישי">
                         <div className="flex gap-2 flex-wrap">
                             {mentorships.length ? (
@@ -132,6 +133,51 @@ export function AllStudentPicker({ unavailableStudents = [], onSelect }) {
                                 {availableStudents.map(student => (
                                     <CommandItem key={student.id}
                                         onSelect={_ => onSelect(student)}
+                                        value={student.first_name + ' ' + student.last_name}>
+                                        {student.first_name} {student.last_name}
+                                    </CommandItem>
+                                ))}
+                            </CommandGroup>
+                        )}
+                    </CommandList>
+                </Command>
+            </Popper>
+        </>
+    );
+}
+
+export function GoToAnyStudentPicker() {
+    const allStudents = useMentorships(state => state.allStudents);
+    const { open, close, Popper, baseRef } = usePopper({
+        onOpen: async () => {
+            await mentorshipsActions.getAllStudents();
+        }
+    });
+
+    const handleSelect = (student) => {
+        close();
+        userActions.switchToStudent(student.id);
+    };
+
+    return (
+        <>
+            <Button onClick={open} ref={baseRef} variant="outline">
+                <div className="flex items-center gap-2">
+                    <Search className="w-4 h-4" /> חיפוש תלמיד להיות
+                </div>
+            </Button>
+
+            <Popper>
+                <Command>
+                    <CommandInput placeholder="חפש תלמיד..." />
+                    <CommandList>
+                        {allStudents.length === 0 ? (
+                            <CommandEmpty>טוען תלמידים...</CommandEmpty>
+                        ) : (
+                            <CommandGroup>
+                                {allStudents.sort((a, b) => a.first_name.localeCompare(b.first_name)).map(student => (
+                                    <CommandItem key={student.id}
+                                        onSelect={_ => handleSelect(student)}
                                         value={student.first_name + ' ' + student.last_name}>
                                         {student.first_name} {student.last_name}
                                     </CommandItem>
