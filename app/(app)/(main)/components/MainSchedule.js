@@ -29,10 +29,17 @@ export default function MainSchedule() {
     const todayEvents = [...(events[today] ?? [])];
     todayEvents.push(...googleCalendarEvents.filter(event => event.date === today));
     groups.forEach(group => group.events?.[today]?.forEach(event => todayEvents.push({ ...event, group: group.name })));
-    todayEvents.sort((a, b) => a.start.localeCompare(b.start));
 
-    const nextEvent = todayEvents.find(event => {
-        let eventDate = new Date(event.date);
+    // Combine meetings and events
+    const allEvents = [
+        ...todayEvents.map(e => ({ ...e, type: 'event' })),
+        ...meetings.map(m => ({ ...m, type: 'meeting' }))
+    ];
+
+    allEvents.sort((a, b) => a.start.localeCompare(b.start));
+
+    const nextEvent = allEvents.find(event => {
+        let eventDate = new Date(event.date || today); // Meetings might not have date prop explicitly needed if filtered by today hook, but assumed safe
         eventDate.setHours(event.start.split(':')[0], event.start.split(':')[1], 0, 0);
         return eventDate > new Date();
     })
@@ -41,20 +48,18 @@ export default function MainSchedule() {
         <Box2 label="מה יש לי היום" className="col-start-1 row-start-1 row-span-4 flex-1 relative" LabelIcon={Calendar}>
             <MainGreetings />
             <div className="flex flex-col gap-2 mt-2">
-                {meetings.map(meeting => (
-                    <div key={meeting.id} className="flex gap-3 items-center">
-                        <EventTime time={meeting.start} />
+                {allEvents.length > 0 ? allEvents.map(item => (
+                    <div key={item.id} className={`flex gap-3 items-center ${nextEvent?.id === item.id ? 'bg-accent rounded-[8px] border-2 border-border' : ''}`}>
+                        <EventTime time={item.start} />
                         <div className="text-sm font-bold flex items-center gap-1">
-                            {meeting.other_participants?.length > 0 ? `${meeting.other_participants[0]?.first_name} ${meeting.other_participants[0]?.last_name}` : meeting.title}
-                        </div>
-                    </div>
-                ))}
-                {todayEvents.length > 0 ? todayEvents.map(event => (
-                    <div key={event.id} className={`flex gap-3 items-center  ${nextEvent?.id === event.id ? 'bg-accent rounded-[8px] border-2 border-border' : ''}`}>
-                        <EventTime time={event.start} />
-                        <div className="text-sm font-bold flex items-center gap-1">
-                            {event.title}
-                            {event.group && <div className="text-xs font-normal text-muted-foreground">(ב{event.group})</div>}
+                            {item.type === 'meeting' ? (
+                                item.other_participants?.length > 0 ? `${item.other_participants[0]?.first_name} ${item.other_participants[0]?.last_name}` : item.title
+                            ) : (
+                                <>
+                                    {item.title}
+                                    {item.group && <div className="text-xs font-normal text-muted-foreground">(ב{item.group})</div>}
+                                </>
+                            )}
                         </div>
                     </div>
                 )) : (
