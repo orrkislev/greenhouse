@@ -187,14 +187,16 @@ export default function FinalProject({ finalProject, onSave }) {
     const originalUser = useUser(state => state.originalUser);
     const project = useProjectData(state => state.project);
 
-    const [formData, setFormData] = useState(finalProject ||
-        sections.reduce((acc, section) => ({
+    const [formData, setFormData] = useState(() => {
+        const defaultData = sections.reduce((acc, section) => ({
             ...acc,
             [section.sectionName]: section.parameters.reduce((acc, param) => ({
                 ...acc,
                 [param.id]: 50,
             }))
         }), {
+            project_title: project?.title || "",
+            master_name: project?.master?.first_name || "",
             reflections_project: "",
             reflections_research: "",
             next_steps: "",
@@ -205,14 +207,29 @@ export default function FinalProject({ finalProject, onSave }) {
                 { subject: 'ביצוע', value: 50 },
                 { subject: 'הצגה', value: 50 },
             ]
-        })
-    );
+        });
+
+        if (finalProject) {
+            return {
+                ...defaultData,
+                ...finalProject,
+                project_title: finalProject.project_title ?? project?.title ?? "",
+                master_name: finalProject.master_name ?? project?.master?.first_name ?? "",
+            };
+        }
+        return defaultData;
+    });
     const [madeChanges, setMadeChanges] = useState(false);
     const [showSliders, setShowSliders] = useState(false);
 
     useEffect(() => {
         if (finalProject) {
-            setFormData(finalProject);
+            setFormData(prev => ({
+                ...prev,
+                ...finalProject,
+                project_title: finalProject.project_title ?? project?.title ?? "",
+                master_name: finalProject.master_name ?? project?.master?.first_name ?? "",
+            }));
             // Check if sliders are mostly filled (more than 50% are not 50)
             const allValues = sections.flatMap(section =>
                 section.parameters.map(param => finalProject[section.sectionName]?.[param.id])
@@ -221,7 +238,7 @@ export default function FinalProject({ finalProject, onSave }) {
             const shouldHideSliders = allValues.length > 0 && (nonDefaultValues.length / allValues.length) > 0.5;
             setShowSliders(!shouldHideSliders);
         }
-    }, [finalProject]);
+    }, [finalProject, project]);
 
     const handleParameterChange = (sectionName, paramId, value) => {
         setFormData(prev => ({
@@ -317,21 +334,17 @@ export default function FinalProject({ finalProject, onSave }) {
                         <div className="flex-1 p-4 flex flex-col gap-2">
                             <div className="text-sm text-muted-foreground">פרויקט הגמר</div>
                             <SmartText
-                                text={project?.title}
-                                onEdit={(newText) => {
-                                    // TODO: Update project title in project store
-                                }}
-                                editable={false}
+                                text={formData?.project_title}
+                                onEdit={(newText) => handleTextChange('project_title', newText)}
+                                editable={canEdit}
                                 className="text-xl font-bold"
                                 placeholder="ללא כותרת"
                             />
                             <div className="text-sm text-muted-foreground mb-4">
                                 בליווי <SmartText
-                                    text={project?.master?.first_name}
-                                    onEdit={(newText) => {
-                                        // TODO: Update master name in project store
-                                    }}
-                                    editable={false}
+                                    text={formData?.master_name}
+                                    onEdit={(newText) => handleTextChange('master_name', newText)}
+                                    editable={canEdit}
                                     withIcon={false}
                                     className="text-sm text-muted-foreground inline"
                                     placeholder="ללא מנטור"

@@ -22,7 +22,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
                 *, 
                 master:staff_public!master(first_name, last_name, avatar_url)
             `).eq('student_id', user.id).contains('term', [currTerm.id]).single();
-            if (error) toastsActions.addFromError(error)
+            if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הפרויקט');
             if (data) set({ project: data })
         }),
         loadProjectById: async (projectId) => {
@@ -30,7 +30,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
                 *, 
                 master:staff_public!master(first_name, last_name, avatar_url)
             `).eq('id', projectId).single();
-            if (error) toastsActions.addFromError(error)
+            if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הפרויקט');
             if (data) set({ project: data })
         },
         continueProject: async (projectId) => {
@@ -49,7 +49,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
                 title: `הפרויקט של ${user.first_name} צריך כותרת`,
                 term: [useTime.getState().currTerm.id],
             }).select().single();
-            if (projectError) toastsActions.addFromError(projectError)
+            if (projectError) toastsActions.addFromError(projectError, 'שגיאה ביצירת הפרויקט');
             set({ project: projectData });
 
             get().addTaskToProject({
@@ -68,7 +68,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             const project = get().project;
             if (!project) return;
             const { error } = await supabase.from('projects').delete().eq('id', project.id);
-            if (error) toastsActions.addFromError(error)
+            if (error) toastsActions.addFromError(error, 'שגיאה בסגירת הפרויקט');
             set({ project: null });
             newLogActions.add(`סגרתי את הפרויקט ${project.title}. `)
         },
@@ -77,7 +77,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             const { project } = get();
             if (!project) return;
             const { error } = await supabase.from('projects').update(prepareForProjectsTable(project)).eq('id', project.id);
-            if (error) toastsActions.addFromError(error)
+            if (error) toastsActions.addFromError(error, 'שגיאה בעדכון הפרויקט');
         }, 1000),
 
 
@@ -100,7 +100,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
                     *,
                     master:staff_public!master(first_name, last_name, avatar_url)
                 `).eq('student_id', user.id);
-            if (error) toastsActions.addFromError(error)
+            if (error) toastsActions.addFromError(error, 'שגיאה בטעינת כל הפרויקטים');
             set({ allProjects: data });
         }),
 
@@ -114,9 +114,9 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             const { error } = await supabase.storage.from('images').upload(url, resizedBlob, {
                 upsert: true,
             });
-            if (error) toastsActions.addFromError(error)
+            if (error) toastsActions.addFromError(error, 'שגיאה בהעלאת תמונת הפרויקט');
             const { data, error: downloadError } = await supabase.storage.from('images').getPublicUrl(url);
-            if (downloadError) toastsActions.addFromError(downloadError)
+            if (downloadError) toastsActions.addFromError(downloadError, 'שגיאה בקבלת כתובת תמונת הפרויקט');
             await get().updateMetadata({ image: data.publicUrl });
         }),
 
@@ -126,8 +126,8 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
         getProjectForStudent: async (studentId) => {
             const currTerm = useTime.getState().currTerm;
             if (!currTerm) return null;
-            const { data, error } = await supabase.from('projects').select('*').eq('student_id', studentId).contains('term', [currTerm.id]).single();
-            if (error) toastsActions.addFromError(error)
+            const { data, error } = await supabase.from('projects').select('*').eq('student_id', studentId).contains('term', [currTerm.id]);
+            if (error) toastsActions.addFromError(error, 'שגיאה בטעינת פרויקט של תלמיד');
             return data;
         },
 
@@ -145,7 +145,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
                 p_item_id: useProjectData.getState().project.id,
                 p_target_types: ['tasks']
             })
-            if (error) toastsActions.addFromError(error)
+            if (error) toastsActions.addFromError(error, 'שגיאה בטעינת משימות הפרויקט');
             const tasks = data.map(item => item.data).filter(task => task)
             tasks.forEach(task => task.context = projectUtils.getContext(task.project_id));
             set({ tasks });
@@ -163,11 +163,11 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             updates.updated_at = new Date().toISOString()
             set({ tasks: get().tasks.map(task => task.id === taskId ? { ...task, ...updates } : task) });
             const { error } = await supabase.from('tasks').update(updates).eq('id', taskId);
-            if (error) toastsActions.addFromError(error)
+            if (error) toastsActions.addFromError(error, 'שגיאה בעדכון משימה');
         },
         deleteTask: async (taskId) => {
             const { error } = await supabase.from('tasks').delete().eq('id', taskId);
-            if (error) toastsActions.addFromError(error)
+            if (error) toastsActions.addFromError(error, 'שגיאה במחיקת משימה');
             set({ tasks: get().tasks.filter(task => task.id !== taskId) });
         },
 
@@ -194,7 +194,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             if (!task.status) task.status = 'todo';
             if (!task.student_id) task.student_id = useProjectData.getState().project.student_id;
             const { data, error } = await supabase.from('tasks').insert(task).select().single();
-            if (error) toastsActions.addFromError(error)
+            if (error) toastsActions.addFromError(error, 'שגיאה ביצירת משימה חדשה בפרויקט');
             await get().linkTaskToProject(data, projectId);
             newLogActions.add(`הוספתי משימה חדשה בפרויקט. `);
             set(state => ({ tasks: [...state.tasks, data] }));
@@ -210,7 +210,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             const projectId = useProjectData.getState().project?.id;
             if (!projectId) return;
             const { error } = await supabase.from('tasks').delete().eq('id', taskId);
-            if (error) toastsActions.addFromError(error)
+            if (error) toastsActions.addFromError(error, 'שגיאה במחיקת משימה');
             await unLink('tasks', taskId, 'projects', projectId);
             if (useProjectData.getState().project?.id === projectId) {
                 set({ tasks: get().tasks.filter(t => t.id !== taskId) });

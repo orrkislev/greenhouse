@@ -30,8 +30,8 @@ export default function ReportPage() {
     useEffect(() => {
         if (!userId) return;
         (async () => {
-            const { data, error } = await supabase.from('report_cards_public').select('*').eq('id', userId).single();
-            if (error) toastsActions.addFromError(error);
+            const { data, error } = await supabase.from('report_cards_public').select('*').eq('id', userId);
+            if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הדוח הציבורי');
             setData(data);
         })();
     }, [userId]);
@@ -41,9 +41,19 @@ export default function ReportPage() {
     }, [viewParam]);
 
     const handleSave = async (key, data) => {
-        const { error } = await supabase.from('report_cards_private').update({ [key]: data }).eq('id', userId).single();
-        if (error) toastsActions.addFromError(error);
+        if (!userId) {
+            toastsActions.addToast({ message: 'אנא המתן לטעינת המשתמש', type: 'error' });
+            return;
+        }
+
+        const { error } = await supabase.from('report_cards_private').update({ [key]: data }).eq('id', userId);
+        if (error) {
+            toastsActions.addFromError(error, 'שגיאה בשמירת הדוח');
+            return;
+        }
+
         setData(prev => ({ ...prev, [key]: data }));
+        toastsActions.addToast({ message: 'נשמר בהצלחה!', type: 'success' });
     }
 
     return (

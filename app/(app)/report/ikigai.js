@@ -60,7 +60,7 @@ export default function Ikigai({ ikigai, onSave }) {
         if (originalUser) onSave?.({ markers })
         else {
             const { error } = await supabase.rpc('update_student_ikigai', { new_ikigai: { markers } })
-            if (error) toastsActions.addFromError(error)
+            if (error) toastsActions.addFromError(error, 'שגיאה בשמירת איקיגאי')
         }
         setEditingId(null)
     }

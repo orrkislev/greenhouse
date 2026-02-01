@@ -563,3 +563,13 @@
     opacity: 1;
   }
 }
+
+.david-libre{
+  font-family: "David Libre", "David Libre Fallback", serif;
+}
+
+[data-report-page], [data-report-page] * {
+  outline-color: transparent !important;
+  /* If you see issues with other 'ring' properties, unset them here too */
+  --ring: 0 0% 0% !important; 
+}

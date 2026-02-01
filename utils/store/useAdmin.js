@@ -24,9 +24,9 @@ export const useAdmin = create((set, get) => ({
         if (get().allMembers.length > 0) return;
 
         const { data: classes, error: allClassesError } = await supabase.from('groups').select('*').eq('type', 'class');
-        if (allClassesError) toastsActions.addFromError(allClassesError)
+        if (allClassesError) toastsActions.addFromError(allClassesError, 'שגיאה בטעינת הכיתות')
         const { data: majors, error: allMajorsError } = await supabase.from('groups').select('*').eq('type', 'major');
-        if (allMajorsError) toastsActions.addFromError(allMajorsError)
+        if (allMajorsError) toastsActions.addFromError(allMajorsError, 'שגיאה בטעינת המסלולים')
         let { data: allMembers, error: allMembersError } = await supabase
             .from('users')
             .select(`
@@ -41,7 +41,7 @@ export const useAdmin = create((set, get) => ({
                     group_id
                 )
             `).eq('active', true);
-        if (allMembersError) toastsActions.addFromError(allMembersError)
+        if (allMembersError) toastsActions.addFromError(allMembersError, 'שגיאה בטעינת המשתמשים');
         allMembers.forEach(member => member.groups = member.groups.map(g => g.group_id));
         set({ classes, majors, allMembers });
     },
@@ -50,7 +50,7 @@ export const useAdmin = create((set, get) => ({
         if (!isAdmin()) return;
         if (get().staff.length > 0) return;
         const { data, error } = await supabase.from('users').select('*').eq('role', 'staff');
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הצוות');
         set({ staff: data });
     },
 
@@ -65,7 +65,7 @@ export const useAdmin = create((set, get) => ({
             return;
         }
         const { error: updateError } = await supabase.from('users').update(prepareForUsersTable(memberData)).eq('id', newID);
-        if (updateError) toastsActions.addFromError(updateError)
+        if (updateError) toastsActions.addFromError(updateError, 'שגיאה בעדכון המשתמש');
         const newMemberData = { ...memberData, id: newID, groups: memberData.groups || [] };
         set(state => ({
             allMembers: state.allMembers.concat(newMemberData)
@@ -76,7 +76,7 @@ export const useAdmin = create((set, get) => ({
         if (!isAdmin()) return;
         const cleanedUpdates = prepareForUsersTable(updates);
         const { error: updateError } = await supabase.from('users').update(cleanedUpdates).eq('id', memberId);
-        if (updateError) toastsActions.addFromError(updateError)
+        if (updateError) toastsActions.addFromError(updateError, 'שגיאה בעדכון המשתמש');
         set(state => ({
             allMembers: state.allMembers.map(member => member.id === memberId ? { ...member, ...updates } : member)
         }));
@@ -84,11 +84,11 @@ export const useAdmin = create((set, get) => ({
     deleteMember: async (member) => {
         if (!isAdmin()) return;
         const { error: deleteError } = await deleteUser(member.id);
-        if (deleteError) toastsActions.addFromError(deleteError)
+        if (deleteError) toastsActions.addFromError(deleteError, 'שגיאה במחיקת המשתמש');
         const { error: deleteUserError } = await supabase.from('users').update({active: false}).eq('id', member.id);
-        if (deleteUserError) toastsActions.addFromError(deleteUserError)
+        if (deleteUserError) toastsActions.addFromError(deleteUserError, 'שגיאה בעדכון המשתמש');
         const { error: deleteGroupsError } = await supabase.from('users_groups').delete().eq('user_id', member.id);
-        if (deleteGroupsError) toastsActions.addFromError(deleteGroupsError)
+        if (deleteGroupsError) toastsActions.addFromError(deleteGroupsError, 'שגיאה במחיקת המשתמש מהקבוצות');
         set(state => ({
             allMembers: state.allMembers.filter(m => m.id !== member.id)
         }));
@@ -100,7 +100,7 @@ export const useAdmin = create((set, get) => ({
     addUserToGroup: async (groupId, userId) => {
         if (!isAdmin()) return;
         const { error: insertError } = await supabase.from('users_groups').insert({ user_id: userId, group_id: groupId });
-        if (insertError) toastsActions.addFromError(insertError)
+        if (insertError) toastsActions.addFromError(insertError, 'שגיאה בהוספת משתמש לקבוצה');
         set(state => ({
             allMembers: state.allMembers.map(member => member.id === userId ? { ...member, groups: [...member.groups, groupId] } : member)
         }));
@@ -108,7 +108,7 @@ export const useAdmin = create((set, get) => ({
     removeUserFromGroup: async (groupId, userId) => {
         if (!isAdmin()) return;
         const { error: deleteError } = await supabase.from('users_groups').delete().eq('user_id', userId).eq('group_id', groupId);
-        if (deleteError) toastsActions.addFromError(deleteError)
+        if (deleteError) toastsActions.addFromError(deleteError, 'שגיאה בהסרת משתמש מהקבוצה');  
         set(state => ({
             allMembers: state.allMembers.map(member => member.id === userId ? { ...member, groups: member.groups.filter(g => g !== groupId) } : member)
         }));
@@ -117,14 +117,14 @@ export const useAdmin = create((set, get) => ({
         if (!isAdmin()) return;
         const groupData = { name, type };
         const { data: newGroupData, error: insertError } = await supabase.from('groups').insert(prepareForGroupsTable(groupData)).select().single();
-        if (insertError) toastsActions.addFromError(insertError)
+        if (insertError) toastsActions.addFromError(insertError, 'שגיאה ביצירת קבוצה');
         if (type === 'class') set(state => ({ classes: [...state.classes, newGroupData] }));
         if (type === 'major') set(state => ({ majors: [...state.majors, newGroupData] }));
     },
     updateGroup: async (groupId, updates) => {
         if (!isAdmin()) return;
         const { data, error: updateError } = await supabase.from('groups').update(prepareForGroupsTable(updates)).eq('id', groupId).select();
-        if (updateError) toastsActions.addFromError(updateError)
+        if (updateError) toastsActions.addFromError(updateError, 'שגיאה בעדכון קבוצה');
         if (data.type === 'class') set(state => ({ classes: state.classes.map(group => group.id === groupId ? { ...group, ...updates } : group) }));
         if (data.type === 'major') set(state => ({ majors: state.majors.map(major => major.id === groupId ? { ...major, ...updates } : major) }));
     },
@@ -133,7 +133,7 @@ export const useAdmin = create((set, get) => ({
         const currentClass = get().classes.find(group => group.id === groupId);
         const currentMajor = get().majors.find(major => major.id === groupId);
         const { error: deleteError } = await supabase.from('groups').delete().eq('id', groupId);
-        if (deleteError) toastsActions.addFromError(deleteError)
+        if (deleteError) toastsActions.addFromError(deleteError, 'שגיאה במחיקת קבוצה');
         if (currentClass) set(state => ({ classes: state.classes.filter(group => group.id !== groupId) }));
         if (currentMajor) set(state => ({ majors: state.majors.filter(major => major.id !== groupId) }));
     },
@@ -152,7 +152,7 @@ export const useAdmin = create((set, get) => ({
             *,
             master:staff_public!master(id:user_id,first_name, last_name, avatar_url)
             `).contains('term', [currTerm.id]);
-        if (getProjectsError) toastsActions.addFromError(getProjectsError)
+        if (getProjectsError) toastsActions.addFromError(getProjectsError, 'שגיאה בטעינת הפרויקטים');
         const newAllMembers = allMembers.map(member => {
             const project = data.find(p => p.student_id === member.id);
             const res = { ...member }
@@ -164,13 +164,13 @@ export const useAdmin = create((set, get) => ({
     assignMasterToProject: async (studentId, projectId, masterId) => {
         if (!isAdmin()) return;
         const { error: projectError } = await supabase.from('projects').update({ status: 'active', master: masterId }).eq('id', projectId);
-        if (projectError) toastsActions.addFromError(projectError)
+        if (projectError) toastsActions.addFromError(projectError, 'שגיאה בהקצאת מנחה לפרויקט');
 
         let master = get().allMembers.find(member => member.id === masterId);
         if (!master) master = get().allMembers.find(staff => staff.id === masterId);
         if (!master) {
             const { data: masterData, error: masterError } = await supabase.from('users').select('*').eq('id', masterId).single();
-            if (masterError) toastsActions.addFromError(masterError)
+            if (masterError) toastsActions.addFromError(masterError, 'שגיאה בטעינת נתוני המנחה');
             master = masterData;
         }
 
@@ -198,14 +198,14 @@ export const useAdmin = create((set, get) => ({
     loadMessage: async () => {
         if (!isAdmin()) return;
         const { data, error } = await supabase.from('misc').select('data').eq('name', 'school_message').single();
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה בטעינת ההודעה לבית הספר');
         set({ message: data.data.text });
     },
     updateMessage: async (text) => {
         if (!isAdmin()) return;
         set({ message: text });
         const { error: updateError } = await supabase.from('misc').update({ data: { text } }).eq('name', 'school_message');
-        if (updateError) toastsActions.addFromError(updateError)
+        if (updateError) toastsActions.addFromError(updateError, 'שגיאה בעדכון ההודעה לבית הספר');
     },
 }));
 

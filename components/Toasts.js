@@ -34,13 +34,23 @@ export default function Toasts() {
 function Toast({ toast }) {
     const [expanded, setExpanded] = useState(false);
     const message = expanded ? toast.message : toast.message.length > 30 ? toast.message.substring(0, 30) + '...' : toast.message;
+
+    const bgColor = {
+        success: 'bg-green-400',
+        error: 'bg-red-400',
+        alert: 'bg-blue-400',
+    }[toast.type] || 'bg-gray-400';
+
+    console.log(toast)
+
     return (
-        <div className='p-2 rounded-md text-xs bg-red-300 text-neutral-900 cursor-pointer toast flex justify-between gap-4 items-center text-left max-w-xs'
+        <div className={`p-2 rounded-md text-xs ${bgColor} text-neutral-900 cursor-pointer toast flex justify-between gap-4 items-center text-left max-w-xs`}
             onClick={() => setExpanded(!expanded)}
-        >
+        > 
+            {toast.context && <div className="text-xs text-neutral-900">{toast.context}</div>}
             {message}
             <X className="w-3 h-3" onClick={(e) => {
-                e.stopPropagation();
+                e.stopPropagation();    
                 toastsActions.removeToast(toast);
             }} />
         </div>

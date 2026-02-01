@@ -31,6 +31,7 @@
     "firebase-admin": "^13.4.0",
     "googleapis": "^153.0.0",
     "html2canvas": "^1.4.1",
+    "html2pdf.js": "^0.10.2",
     "input-otp": "^1.4.2",
     "jspdf": "^4.0.0",
     "lodash": "^4.17.21",

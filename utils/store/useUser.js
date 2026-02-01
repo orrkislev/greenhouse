@@ -47,7 +47,7 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 		updateUserProfile: async (updates) => {
 			const user = get().user;
 			const { error } = await supabase.from('user_profiles').update(updates).eq('id', user.id);
-			if (error) toastsActions.addFromError(error)
+			if (error) toastsActions.addFromError(error, 'שגיאה בעדכון פרטי המשתמש');
 			else set({ user: { ...user, ...updates } });
 		},
 		signInWithGoogle: async () => {
@@ -70,7 +70,6 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 			});
 		},
 		updatePortfolioUrl: async (portfolioUrl) => {
-			console.log('updatePortfolioUrl', portfolioUrl)
 			await get().updateUserProfile({ portfolio_url: portfolioUrl })
 		},
 

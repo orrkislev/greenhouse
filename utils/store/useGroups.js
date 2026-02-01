@@ -23,13 +23,13 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
     }),
     updateGroup: async (group, updates) => {
         const { error } = await supabase.from('groups').update(prepareForGroupsTable(updates)).eq('id', group.id);
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה בעדכון קבוצה');
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...group, ...updates } : g) }));
     },
     loadGroup: async (groupId) => {
         if (get().groups.find(g => g.id === groupId)) return;
         const { data, error } = await supabase.from('groups').select('*').eq('id', groupId).single();
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה בטעינת קבוצה')
         set((state) => ({ groups: [...state.groups, data] }));
     },
 
@@ -37,16 +37,16 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
     // ------------------------------------------------
     createGroup: async (name, type) => {
         const { data: groupData, error: groupError } = await supabase.from('groups').insert({ name, type }).select().single();
-        if (groupError) toastsActions.addFromError(groupError)
+        if (groupError) toastsActions.addFromError(groupError, 'שגיאה ביצירת קבוצה');
         const user = useUser.getState().user;
         const { data: membersData, error: membersError } = await supabase.from('users_groups').insert({ group_id: groupData.id, user_id: user.id });
-        if (membersError) toastsActions.addFromError(membersError)
+        if (membersError) toastsActions.addFromError(membersError, 'שגיאה בהוספת משתמש לקבוצה');
         groupData.members = [user];
         set({ groups: [...get().groups, groupData] });
     },
     deleteGroup: async (groupId) => {
         const { error } = await supabase.from('groups').delete().eq('id', groupId);
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה במחיקת קבוצה');
         set((state) => ({ groups: state.groups.filter(g => g.id !== groupId) }));
         await supabase.from('users_groups').delete().eq('group_id', groupId);
         await supabase.from('events').delete().eq('group_id', groupId);
@@ -55,12 +55,12 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
     addMember: async (groupId, user) => {
         set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, members: [...g.members, user] } : g) }));
         const { data, error } = await supabase.from('users_groups').insert({ group_id: groupId, user_id: user.id });
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה בהוספת משתמש לקבוצה');
     },
     removeMember: async (groupId, userId) => {
         set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, members: g.members.filter(m => m.id !== userId) } : g) }));
         const { error } = await supabase.from('users_groups').delete().eq('group_id', groupId).eq('user_id', userId);
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה בהסרת משתמש מהקבוצה');
     },
 
     // ----------- Group Events Management -----------
@@ -103,7 +103,7 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
 
         const obj = { p_group_id: groupId, p_start_date: start, p_end_date: end || start }
         const { data, error } = await supabase.rpc('get_group_events', obj)
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה בטעינת אירועים לקבוצה');
         date = new Date(start);
         while (date <= new Date(end)) {
             const dateStr = format(date, 'yyyy-MM-dd');
@@ -117,7 +117,7 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
     },
     createGroupEvent: async (groupId, obj) => {
         const { data, error } = await supabase.from('events').insert(obj).select().single();
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה ביצירת אירוע');
         const newEvents = { ...get().groups.find(g => g.id === groupId)?.events } || {}
         if (!newEvents[data.date]) newEvents[data.date] = [];
         newEvents[data.date].push(data);
@@ -130,7 +130,7 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
         set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: newEvents } : g) }));
 
         const { error } = await supabase.from('events').update(obj).eq('id', obj.id);
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה בעדכון אירוע');
     },
     removeGroupEvent: async (groupId, date, objId) => {
         const groupEvents = { ...get().groups.find(g => g.id === groupId)?.events } || {}
@@ -138,20 +138,20 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
         set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: groupEvents } : g) }));
 
         const { error } = await supabase.from('events').delete().eq('id', objId);
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה במחיקת אירוע');
     },
 
     // ----------- Group Students Management -----------
     // -------------------------------------------------
     loadClassMembers: async (group) => {
-        if (group.members) return;
+        if (!group || group.members) return;
 
         const { data, error } = await supabase
             .from('users_groups')
             .select('users( id, first_name, last_name, username, role, active, user_profiles( avatar_url ) )')
             .eq('group_id', group.id)
             .eq('users.active', true)
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה בטעינת חברי קבוצה');
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, members: data.map(d => d.users) } : g) }));
     },
 
@@ -164,12 +164,12 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
             p_group_id: groupId,
             p_user_id: user.id
         })
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה בטעינת משימות הקבוצה');
         set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, tasks: data } : g) }));
     },
     loadAllTaskAssignments: async (taskId) => {
         const { data, error } = await supabase.from('task_assignments').select('*').eq('task_id', taskId);
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הקצאות המשימה');
         set((state) => ({ groups: state.groups.map(g => ({ ...g, tasks: g.tasks ? g.tasks.map(t => t.id === taskId ? { ...t, assignments: data } : t) : [] })) }));
     },
     createGroupTask: async (group, text, description, due_date) => {
@@ -181,18 +181,18 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
             created_by: useUser.getState().user.id,
         }
         const { data, error } = await supabase.from('tasks').insert(task).select().single();
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה ביצירת משימה');
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: [...g.tasks, data] } : g) }));
         await makeLink('tasks', data.id, 'groups', group.id);
     },
     updateGroupTask: async (group, task, updates) => {
         const { error } = await supabase.from('tasks').update(updates).eq('id', task.id);
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה בעדכון משימה');
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: g.tasks.map(t => t.id === task.id ? { ...t, ...updates } : t) } : g) }));
     },
     deleteGroupTask: async (group, task) => {
         const { error } = await supabase.from('tasks').delete().eq('id', task.id);
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה במחיקת משימה');
         set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: g.tasks.filter(t => t.id !== task.id) } : g) }));
     },
     toggleGroupTaskStatus: withUser(async (user, group, task) => {
@@ -203,7 +203,7 @@ export const [useGroups, groupsActions] = createStore((set, get, withUser, withL
             { task_id: task.id, student_id: user.id, status: newStatus },
             { onConflict: 'task_id,student_id' }
         )
-        if (error) toastsActions.addFromError(error)
+        if (error) toastsActions.addFromError(error, 'שגיאה בעדכון סטטוס משימה '); 
     })
 }))
 

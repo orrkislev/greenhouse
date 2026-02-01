@@ -16,6 +16,9 @@ const config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        "david-libre": ["David Libre", "David Libre Fallback", "serif"],
+      },
       keyframes: {
         "caret-blink": {
           "0%,70%,100%": { opacity: "1" },
@@ -29,7 +32,7 @@ const config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        "libertinus-serif": "var(--font-libertinus-serif)",
+        "david-libre": "var(--font-david-libre)",
         primary: {
           DEFAULT: "var(--primary)",
           foreground: "var(--primary-foreground)",

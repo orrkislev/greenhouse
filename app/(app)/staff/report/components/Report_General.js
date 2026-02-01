@@ -96,8 +96,13 @@ function MiniIkigai({ ikigai }) {
                                     width="40"
                                     height="16"
                                     overflow="visible"
+                                    style={{ pointerEvents: 'auto' }}
                                 >
-                                    <div className="px-1 py-0.5 bg-white border border-gray-400 text-[7px] text-gray-700 whitespace-nowrap text-center">
+                                    <div
+                                        className="px-1 py-0.5 bg-white border border-gray-400 text-[7px] text-gray-700 whitespace-nowrap text-center outline-none focus:border-[#60a5fa]"
+                                        contentEditable
+                                        suppressContentEditableWarning
+                                    >
                                         {marker.label}
                                     </div>
                                 </foreignObject>
@@ -112,7 +117,7 @@ function MiniIkigai({ ikigai }) {
 
 export default function Report_General({ student }) {
     return (
-        <ReportPageSection title="מבט כללי" className="flex-2">
+        <ReportPageSection title="מבט כללי">
             <div className='w-full flex-1 h-full flex gap-4'>
                 <div className='flex-1 flex flex-col gap-2'>
                     <SectionSubtitle>איקיגאי</SectionSubtitle>

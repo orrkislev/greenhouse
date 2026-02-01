@@ -85,7 +85,6 @@ export function getTermWeeks(termIds) {
     firstSunday.setDate(firstSunday.getDate() - firstSunday.getDay());
     const lastSaturday = new Date(endDate);
     lastSaturday.setDate(lastSaturday.getDate() + (6 - lastSaturday.getDay()));
-    console.log(firstSunday, lastSaturday);
     const termWeeks = [];
     let weekStart = new Date(firstSunday);
     while (weekStart <= lastSaturday) {

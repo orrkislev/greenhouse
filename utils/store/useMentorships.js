@@ -21,8 +21,8 @@ export const [useMentorships, mentorshipsActions] = createStore((set, get, withU
         if (user.role === 'student') query = query.eq('student_id', user.id);
         else query = query.eq('mentor_id', user.id);
         query = query.eq('is_active', true);
-        const { data: mentorships, error: mentorshipsError } = await query;
-        if (mentorshipsError) toastsActions.addFromError(mentorshipsError);
+        const { data: mentorships, error: mentorshipsError  } = await query;
+        if (mentorshipsError) toastsActions.addFromError(mentorshipsError, 'שגיאה בטעינת המנטורשיפים');
         set({ mentorships: mentorships });
 
         const { data, error } = await supabase.from('projects').select(`
@@ -32,7 +32,7 @@ export const [useMentorships, mentorshipsActions] = createStore((set, get, withU
             ),
             master:staff_public!master(id:user_id,first_name, last_name, avatar_url)
             `).eq('master', user.id);
-        if (error) toastsActions.addFromError(error);
+        if (error) toastsActions.addFromError(error, 'שגיאה בטעינת המנטורשיפים');
         set({ projectMentorships: data });
     }),
 

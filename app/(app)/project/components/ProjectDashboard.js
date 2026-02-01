@@ -1,12 +1,15 @@
 import { projectActions, useProjectData } from "@/utils/store/useProject";
 import ProjectGoals from "./ProjectGoals";
-import ProjectLibrary from "./ProjectLibrary";
+import dynamic from "next/dynamic";
 import ProjectInfo from "./ProjectInfo";
 import SmartText from "@/components/SmartText";
 import { Image, Trash2 } from "lucide-react";
 import ProjectTasks from "./Project Tasks/ProjectTasks";
 import Menu, { MenuList, MenuItem } from "@/components/Menu";
 import { useMemo, useRef } from "react";
+
+// Dynamic import to prevent TLDraw CSS from loading globally
+const ProjectLibrary = dynamic(() => import("./ProjectLibrary"), { ssr: false });
 
 
 export default function ProjectDashboard() {

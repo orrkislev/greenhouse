@@ -98,7 +98,7 @@ function Final({ student }) {
                     <SectionText className="italic">{finalProject?.reflections_project || ""}</SectionText>
                 </div>
 
-                <div className="flex-1 flex flex-col gap-2 bg-gray-50 p-3 rounded">
+                <div className="flex-1 flex flex-col gap-2 bg-[#f9fafb] p-3 rounded">
                     <SectionSubtitle>צעדים הבאים</SectionSubtitle>
                     <SectionText className="italic text-muted-foreground">{finalProject?.next_steps || ""}</SectionText>
                 </div>
@@ -128,9 +128,9 @@ function PersonalGoals({ student }) {
                         {personalGoals?.initialGoals?.some(g => g) && (
                             <div className="flex-1">
                                 <SectionSubtitle>מטרות מתחילת השנה</SectionSubtitle>
-                                <ol className='list-decimal list-inside space-y-1'>
+                                <ol className='list-decimal list-inside space-y-1' contentEditable suppressContentEditableWarning>
                                     {personalGoals.initialGoals.filter(g => g).map((goal, index) => (
-                                        <li key={index}><SectionText className="inline">{goal}</SectionText></li>
+                                        <li key={index}>{goal}</li>
                                     ))}
                                 </ol>
                             </div>
@@ -140,9 +140,9 @@ function PersonalGoals({ student }) {
                         {personalGoals?.updatedGoals?.some(g => g) && (
                             <div className="flex-1">
                                 <SectionSubtitle>מטרות מעודכנות</SectionSubtitle>
-                                <ol className='list-decimal list-inside space-y-1'>
+                                <ol className='list-decimal list-inside space-y-1' contentEditable suppressContentEditableWarning>
                                     {personalGoals.updatedGoals.filter(g => g).map((goal, index) => (
-                                        <li key={index}><SectionText className="inline">{goal}</SectionText></li>
+                                        <li key={index}>{goal}</li>
                                     ))}
                                 </ol>
                             </div>

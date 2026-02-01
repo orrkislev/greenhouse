@@ -7,7 +7,7 @@ export default function Report_Learning({ student }) {
     const answer = learning?.answer;
 
     return (
-        <ReportPageSection title="למידה" className="flex-2">
+        <ReportPageSection title="למידה">
             <div className='h-full flex flex-col justify-between'>
                 <div>
                     <table className='w-full text-right'>
@@ -21,15 +21,15 @@ export default function Report_Learning({ student }) {
                         <tbody>
                             {topics.map((topic, index) => (
                                 <tr key={index} className='border-b border-dashed border-neutral-400'>
-                                    <td className='font-bold p-1 text-sm align-top'>{topic.name}</td>
-                                    <td className='p-1 align-top'>
+                                    <td className='font-bold p-1 text-sm align-top' contentEditable suppressContentEditableWarning>{topic.name}</td>
+                                    <td className='p-1 align-top' contentEditable suppressContentEditableWarning>
                                         <ul className='list-disc list-inside text-xs'>
                                             {topic.learnings?.filter(l => l).map((learning, i) => (
                                                 <li key={i}>{learning}</li>
                                             ))}
                                         </ul>
                                     </td>
-                                    <td className='text-xs text-neutral-700 p-1 align-top'>{topic.howLearned}</td>
+                                    <td className='text-xs text-neutral-700 p-1 align-top' contentEditable suppressContentEditableWarning>{topic.howLearned}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -38,8 +38,8 @@ export default function Report_Learning({ student }) {
 
                 {(question || answer) && (
                     <div className="mb-8">
-                        {question && <div className='font-bold text-sm'>{question}</div>}
-                        {answer && <div className='text-xs text-neutral-700 mt-1'>{answer}</div>}
+                        {question && <div className='font-bold text-sm' contentEditable suppressContentEditableWarning>{question}</div>}
+                        {answer && <div className='text-xs text-neutral-700 mt-1' contentEditable suppressContentEditableWarning>{answer}</div>}
                     </div>
                 )}
             </div>

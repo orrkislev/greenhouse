@@ -22,12 +22,12 @@ export default function StaffGroup_Evaluations({ group }) {
         if (!group || !group.members) return;
         (async () => {
             const { data, error } = await supabase.from('report_cards_public').select('*')
-                .in('id', group.members.filter(member => member?.role === 'student').map(member => member.id));
-            if (error) toastsActions.addFromError(error);
+                .in('id', group.members.filter(member => member.role === 'student').map(member => member.id));
+            if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הדוחות הציבוריים');
             const { data: privateData, error: privateError } = await supabase.from('report_cards_private').select('id,mentors')
-                .in('id', group.members.filter(member => member?.role === 'student').map(member => member.id));
-            if (privateError) toastsActions.addFromError(privateError);
-            setData(group.members.filter(member => member?.role === 'student').map(member => ({
+                .in('id', group.members.filter(member => member.role === 'student').map(member => member.id));
+            if (privateError) toastsActions.addFromError(privateError, 'שגיאה בטעינת הדוחות הפרטיים');
+            setData(group.members.filter(member => member.role === 'student').map(member => ({
                 ...member,
                 report: {
                     ...data.find(report => report.id === member.id),
@@ -156,7 +156,7 @@ function MentorsEditor({ student, closeModal }) {
             .from('report_cards_private')
             .update({ mentors: value })
             .eq('id', student.id);
-        if (error) toastsActions.addFromError(error);
+        if (error) toastsActions.addFromError(error, 'שגיאה בשמירת הממני אליך');
         setButtonText('רונן!');
         setTimeout(() => {
             closeModal();

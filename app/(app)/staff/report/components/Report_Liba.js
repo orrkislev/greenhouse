@@ -4,15 +4,15 @@ import { SectionText } from "./Layout";
 
 export default function Report_Liba({student}) {
     return (
-        <ReportPageSection title="ליבה" className="flex-1">
-            <div className='w-full flex-1 h-full flex gap-[4px]'>
+        <ReportPageSection title="ליבה">
+            <div className='w-full flex-1 h-full flex gap-[8px]'>
                 <div className='flex-1 flex flex-col gap-[4px]'>
-                    <SectionSubtitle>מה אתה חושב על הדברים?</SectionSubtitle>
-                    <SectionText>מה אתה חושב על הדברים?</SectionText>
+                    <SectionSubtitle className='h-12'>{student.student?.liba?.question}</SectionSubtitle>
+                    <SectionText>{student.student?.liba?.answer}</SectionText>
                 </div>
                 <div className='flex-1 flex flex-col gap-[4px]'>
-                    <SectionSubtitle>יעד להמשך</SectionSubtitle>
-                    <div>יעד להמשך</div>
+                    <SectionSubtitle className='h-12'>יעד להמשך</SectionSubtitle>
+                    <SectionText>{student.student?.liba?.nextStep}</SectionText>
                 </div>
             </div>
         </ReportPageSection>

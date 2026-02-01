@@ -18,17 +18,17 @@ export const [useResearchData, researchActions] = createStore((set, get, withUse
             .contains('term', [currTerm.id])
             .order('created_at', { ascending: false })
             .single();
-        if (error) toastsActions.addFromError(error);
+        if (error) toastsActions.addFromError(error, 'שגיאה בטעינת החקר הנוכחי');
         if (data) set({ research: data });
     }),
     loadResearchById: async (researchId) => {
         const { data, error } = await supabase.from('research').select('*').eq('id', researchId).single();
-        if (error) toastsActions.addFromError(error);
+        if (error) toastsActions.addFromError(error, 'שגיאה בטעינת חקר לפי מזהה');
         if (data) set({ research: data });
     },
     loadAllResearch: withUser(async (user) => {
         const { data, error } = await supabase.from('research').select('*').eq('student_id', user.id);
-        if (error) toastsActions.addFromError(error);
+        if (error) toastsActions.addFromError(error, 'שגיאה בטעינת כל המחקרים');
         set({ allResearch: data });
     }),
     setResearchById: async (researchId) => {
@@ -41,7 +41,7 @@ export const [useResearchData, researchActions] = createStore((set, get, withUse
         const { research } = get();
         if (!research) return;
         const { error } = await supabase.from('research').update(research).eq('id', research.id);
-        if (error) toastsActions.addFromError(error);
+        if (error) toastsActions.addFromError(error, 'שגיאה בעדכון החקר');
     }, 1000),
 
     newResearch: withUser(async (user) => {
@@ -50,7 +50,7 @@ export const [useResearchData, researchActions] = createStore((set, get, withUse
             title: 'חקר חדש',
             term: [useTime.getState().currTerm.id],
         }).select().single();
-        if (error) toastsActions.addFromError(error);
+        if (error) toastsActions.addFromError(error, 'שגיאה ביצירת חקר חדש');
         set({ research: data, allResearch: [...get().allResearch, data] });
     }),
     updateResearch: async (updates) => {
@@ -60,7 +60,7 @@ export const [useResearchData, researchActions] = createStore((set, get, withUse
     },
     deleteResearch: async (researchId) => {
         const { error } = await supabase.from('research').delete().eq('id', researchId);
-        if (error) toastsActions.addFromError(error);
+        if (error) toastsActions.addFromError(error, 'שגיאה במחיקת חקר');
         set({ research: null, allResearch: get().allResearch.filter(research => research.id !== researchId) });
     },
 
@@ -88,7 +88,7 @@ export const [useResearchData, researchActions] = createStore((set, get, withUse
 
     getStudentLatestResearch: async (studentId) => {
         const { data, error } = await supabase.from('research').select('*').eq('student_id', studentId).eq('status', 'active').single();
-        if (error) toastsActions.addFromError(error);
+        if (error) toastsActions.addFromError(error, 'שגיאה בטעינת החקר האחרון של התלמיד');
         return data;
     },
 }));
