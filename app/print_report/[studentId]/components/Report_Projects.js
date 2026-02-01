@@ -1,15 +1,15 @@
 import RadarChart from "@/components/RadarChart";
 import { ReportPageSection, SectionSubtitle, SectionText, SectionTitle } from "./Layout";
 
-export default function Report_Projects({ student, group }) {
+export default function Report_Projects({ student}) {
 
-    if (group.description === '1' || group.description === '2') {
+    if (student.year === '1' || student.year === '2') {
         return <Regular student={student} />;
     }
-    if (group.description === '3') {
+    if (student.year === '3') {
         return <Final student={student} />;
     }
-    if (group.description === '4') {
+    if (student.year === '4') {
         return <PersonalGoals student={student} />;
     }
 
@@ -50,10 +50,10 @@ function TermSection({ project, research, term }) {
 }
 
 function Regular({ student }) {
-    const autumnProject = student.student?.autumn_project;
-    const autumnResearch = student.student?.autumn_research;
-    const winterProject = student.student?.winter_project;
-    const winterResearch = student.student?.winter_research;
+    const autumnProject = student.autumn_project;
+    const autumnResearch = student.autumn_research;
+    const winterProject = student.winter_project;
+    const winterResearch = student.winter_research;
 
     return (
         <ReportPageSection title="פרויקטים" className="flex-1">
@@ -66,7 +66,7 @@ function Regular({ student }) {
 }
 
 function Final({ student }) {
-    const finalProject = student.student?.special;
+    const finalProject = student.special;
 
     const radarData = finalProject?.radar || [
         { subject: 'הצבת יעדים', value: 50 },
@@ -108,7 +108,7 @@ function Final({ student }) {
 }
 
 function PersonalGoals({ student }) {
-    const personalGoals = student.student?.special;
+    const personalGoals = student.special;
 
     const defaultRadarData = [
         { subject: 'תכנון', value: 50 },

@@ -21,17 +21,17 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
             const { data, error } = await supabase.from('projects').select(`
                 *, 
                 master:staff_public!master(first_name, last_name, avatar_url)
-            `).eq('student_id', user.id).contains('term', [currTerm.id]).single();
+            `).eq('student_id', user.id).contains('term', [currTerm.id]);
             if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הפרויקט');
-            if (data) set({ project: data })
+            if (data && data.length > 0) set({ project: data[0] })
         }),
         loadProjectById: async (projectId) => {
             const { data, error } = await supabase.from('projects').select(`
                 *, 
                 master:staff_public!master(first_name, last_name, avatar_url)
-            `).eq('id', projectId).single();
+            `).eq('id', projectId);
             if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הפרויקט');
-            if (data) set({ project: data })
+            if (data && data.length > 0) set({ project: data[0] })
         },
         continueProject: async (projectId) => {
             const newTerm = useTime.getState().currTerm.id;
@@ -140,9 +140,11 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
         loadTasks: async () => {
             set({ tasks: [] });
             if (!useProjectData.getState().project) return;
+            const project = useProjectData.getState().project;
+            if (!project) return;
             const { data, error } = await supabase.rpc('get_linked_items', {
-                p_table_name: 'projects',
                 p_item_id: useProjectData.getState().project.id,
+                p_table_name: 'projects',
                 p_target_types: ['tasks']
             })
             if (error) toastsActions.addFromError(error, 'שגיאה בטעינת משימות הפרויקט');

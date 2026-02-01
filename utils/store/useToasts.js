@@ -3,8 +3,8 @@ import { createStoreActions } from "./utils/createStore";
 
 export const useToasts = create((set, get) => ({
     toasts: [],
-    addToast: (toast, context = '') => {
-        toast.context =     
+    addToast: (toast, context) => {
+        if (!toast.context && context) toast.context = context;
         set({ toasts: [...get().toasts, toast] });
     },
     removeToast: (toast) => {

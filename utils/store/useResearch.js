@@ -17,9 +17,8 @@ export const [useResearchData, researchActions] = createStore((set, get, withUse
             .eq('student_id', user.id)
             .contains('term', [currTerm.id])
             .order('created_at', { ascending: false })
-            .single();
         if (error) toastsActions.addFromError(error, 'שגיאה בטעינת החקר הנוכחי');
-        if (data) set({ research: data });
+        if (data && data.length > 0)  set({ research: data[0] });
     }),
     loadResearchById: async (researchId) => {
         const { data, error } = await supabase.from('research').select('*').eq('id', researchId).single();

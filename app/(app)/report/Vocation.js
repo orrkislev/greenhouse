@@ -4,7 +4,6 @@ import { useUser } from '@/utils/store/useUser'
 import Button from '@/components/Button'
 import SmartText from '@/components/SmartText'
 import { motion, AnimatePresence } from 'motion/react'
-import { Briefcase, BriefcaseBusiness, Earth } from 'lucide-react'
 import { ALLOW_STUDENT_EDIT } from './page';
 
 export default function Vocation({ vocation, onSave }) {
@@ -38,6 +37,22 @@ export default function Vocation({ vocation, onSave }) {
                 </div>
                 <div className='flex gap-4 flex-1'>
                     <div className='flex-1 p-4 flex flex-col gap-2'>
+                        <div className='flex gap-8'>
+                            <SmartText
+                                text={vocation?.jobTitle || ''}
+                                onEdit={() => { }}
+                                editable={false}
+                                className='text-xl font-bold text-gray-800'
+                                placeholder="תפקיד"
+                            />
+                            <SmartText
+                                text={vocation?.hours ? `${vocation.hours} שעות` : ''}
+                                onEdit={() => { }}
+                                editable={false}
+                                className='text-lg text-gray-800'
+                                placeholder="שעות"
+                            />
+                        </div>
                         <SmartText
                             text={employmentQuestion}
                             onEdit={(newText) => setEmploymentQuestion(newText)}

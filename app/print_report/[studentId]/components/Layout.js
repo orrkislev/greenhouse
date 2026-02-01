@@ -6,12 +6,16 @@ import { forwardRef } from "react"
 
 export function ReportPage({ children }) {
     return (
-        <div data-report-page className="w-[595px] h-[842px] bg-white p-4 flex flex-col rounded-md shadow-md david-libre [&_*]:outline-none">
+        <div data-report-page className="w-[793px] h-[1122px] bg-white p-8 flex flex-col david-libre [&_*]:outline-none"
+        style={{
+            breakAfter: 'page',
+        }}
+        >
             <div className="flex items-center justify-between grayscale mb-6">
-                <img src="/images/report/chamama.png" alt="logo" className="h-8 " />
-                <img src="/images/report/haavoda.png" alt="logo" className="h-8" />
-                <img src="/images/report/hodHasharon.png" alt="logo" className="h-8" />
-                <img src="/images/report/amal.jpeg" alt="logo" className="h-8" />
+                <img src="/images/report/chamama.png" alt="logo" className="h-12 " />
+                <img src="/images/report/haavoda.png" alt="logo" className="h-12" />
+                <img src="/images/report/hodHasharon.png" alt="logo" className="h-12" />
+                <img src="/images/report/amal.jpeg" alt="logo" className="h-12" />
             </div>
             {children}
         </div>
@@ -20,7 +24,7 @@ export function ReportPage({ children }) {
 
 export function ReportPageSection({ title, children, className = '' }) {
     return (
-        <div className={`mt-3 border-2 border-neutral-400 bg-white rounded-[25px] overflow-hidden flex flex-1 min-h-0 ${className}`}>
+        <div className={`mt-4 border-2 border-neutral-400 bg-white rounded-[25px] overflow-hidden flex flex-1 min-h-0 ${className}`}>
             <div className='bg-neutral-400 p-1 flex items-center justify-center w-12 flex-shrink-0'>
                 <div className='text-white -rotate-90 text-4xl font-bold whitespace-nowrap font-sans tracking-narrow '
                     style={{
@@ -46,7 +50,7 @@ const yearMap = [
     'שנה רביעית',
 ]
 
-export function ReportTitle({student, group, major}) {
+export function ReportTitle({student}) {
     return (
         <div className='flex flex-col items-center justify-center'>
             <div className='text-lg text-center'>
@@ -59,12 +63,12 @@ export function ReportTitle({student, group, major}) {
                 <div className='text-sm'>
                     ת.ז. 200202927
                     <br />
-                    קבוצת {group.name}
+                    קבוצת {student.class}
                 </div>
                 <div className='text-sm text-left'>
-                    {yearMap[group.description]}
+                    {yearMap[student.year]}
                     <br />
-                    {student.student?.major ? `${student.student?.major} מגמת` : ''}
+                    {student?.major ? `מגמת ${student?.major}` : ''}
                 </div>
             </div>
         </div>
@@ -72,14 +76,14 @@ export function ReportTitle({student, group, major}) {
 }
 
 // frank rihl
-export const SectionTitle = tw`david-libre leading-none tracking-tight font-bold text-[15pt]`
+export const SectionTitle = tw`david-libre leading-none tracking-tight font-bold text-[18pt]`
 
 export const SectionSubtitle = forwardRef(({ children, className, ...props }, ref) => (
     <div
         ref={ref}
         contentEditable
         suppressContentEditableWarning
-        className={cn("david-libre leading-none tracking-tight font-bold text-[12pt] focus:bg-[#eff6ff] rounded px-0.5 -mx-0.5", className)}
+        className={cn("david-libre leading-none tracking-tight font-bold text-[14pt] focus:bg-[#eff6ff] rounded px-0.5 -mx-0.5", className)}
         style={{ outline: 'none' }}
         {...props}
     >
@@ -93,7 +97,7 @@ export const SectionText = forwardRef(({ children, className, ...props }, ref) =
         ref={ref}
         contentEditable
         suppressContentEditableWarning
-        className={cn("david-libre text-[10pt] focus:bg-[#eff6ff] rounded px-0.5 -mx-0.5", className)}
+        className={cn("david-libre text-[12pt] focus:bg-[#eff6ff] rounded px-0.5 -mx-0.5", className)}
         style={{ outline: 'none' }}
         {...props}
     >

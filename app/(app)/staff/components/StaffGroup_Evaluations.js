@@ -52,7 +52,7 @@ export default function StaffGroup_Evaluations({ group }) {
         userActions.switchToStudent(student.id, '/research?id=' + research.id + '&view=review');
     };
     const goToReport = (student, section) => userActions.switchToStudent(student.id, '/report?view=' + section);
-    const viewFullReport = (student) => router.push(`/staff/report?groupId=${group.id}&studentId=${student.id}`);
+    const viewFullReport = (student) => window.open(`/print_report/${student.id}`, "_blank", "noopener,noreferrer");
 
     let projectTitles = ['פרויקט סתו', 'חקר סתו', 'פרויקט חורף', 'חקר חורף'];
     if (group.description === '3') projectTitles = ['פרויקט גמר'];

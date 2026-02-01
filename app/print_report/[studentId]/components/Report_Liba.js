@@ -7,12 +7,12 @@ export default function Report_Liba({student}) {
         <ReportPageSection title="ליבה">
             <div className='w-full flex-1 h-full flex gap-[8px]'>
                 <div className='flex-1 flex flex-col gap-[4px]'>
-                    <SectionSubtitle className='h-12'>{student.student?.liba?.question}</SectionSubtitle>
-                    <SectionText>{student.student?.liba?.answer}</SectionText>
+                    <SectionSubtitle className='h-12'>{student.liba?.question}</SectionSubtitle>
+                    <SectionText>{student.liba?.answer}</SectionText>
                 </div>
                 <div className='flex-1 flex flex-col gap-[4px]'>
                     <SectionSubtitle className='h-12'>יעד להמשך</SectionSubtitle>
-                    <SectionText>{student.student?.liba?.nextStep}</SectionText>
+                    <SectionText>{student.liba?.nextStep}</SectionText>
                 </div>
             </div>
         </ReportPageSection>

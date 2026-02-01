@@ -44,7 +44,7 @@ export default function SideBar() {
             {/* Mobile Top Bar */}
             <TopBarDiv>
                 <Link href="/" className="w-12 h-12 flex items-center justify-center relative flex-shrink-0 hidden md:block">
-                    <Image src="/logo.png" alt="logo" fill={true} style={{ objectFit: 'contain' }} priority={true} sizes="48px" />
+                    <Image src="/logo.png" alt="logo" fill={true} style={{ objectFit: 'contain' }} priority={true} sizes="48px" as="image" />
                 </Link>
 
                 <TopBarContent>

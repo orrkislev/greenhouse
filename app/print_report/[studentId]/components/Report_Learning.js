@@ -1,7 +1,7 @@
-import { ReportPageSection } from "./Layout";
+import { ReportPageSection, SectionSubtitle, SectionText } from "./Layout";
 
 export default function Report_Learning({ student }) {
-    const learning = student.student?.learning;
+    const learning = student.learning;
     const topics = learning?.topics?.filter(t => t.name) || [];
     const question = learning?.question;
     const answer = learning?.answer;
@@ -38,8 +38,10 @@ export default function Report_Learning({ student }) {
 
                 {(question || answer) && (
                     <div className="mb-8">
-                        {question && <div className='font-bold text-sm' contentEditable suppressContentEditableWarning>{question}</div>}
-                        {answer && <div className='text-xs text-neutral-700 mt-1' contentEditable suppressContentEditableWarning>{answer}</div>}
+                        {/* {question && <div className='font-bold text-sm' contentEditable suppressContentEditableWarning>{question}</div>} */}
+                        <SectionSubtitle>{question}</SectionSubtitle>
+                        <SectionText>{answer}</SectionText>
+                        {/* {answer && <div className='text-xs text-neutral-700 mt-1' contentEditable suppressContentEditableWarning>{answer}</div>} */}
                     </div>
                 )}
             </div>
