@@ -22,21 +22,19 @@ export default function MainProject() {
                         <Tasks />
                     </>
                 ) : (
-                    <>
-                        <div className='flex flex-col items-center justify-center'>
-                            <Image src="/images/bored.png" alt="project" width={150} height={150} />
-                            <div className='text-muted-foreground text-center text-sm'>
-                                אין פרויקט פעיל
-                            </div>
+                    <div className='flex flex-col items-center justify-center'>
+                        <Image src="/images/bored.png" alt="project" width={150} height={150} />
+                        <div className='text-muted-foreground text-center text-sm'>
+                            אין פרויקט פעיל
                         </div>
-                        <Link href="/project" className="absolute bottom-2 left-2">
-                            <Button>
-                                <Bird className="w-4 h-4" />
-                                הפרויקט
-                            </Button>
-                        </Link>
-                    </>
+                    </div>
                 )}
+                <Link href="/project" className="absolute bottom-2 left-2">
+                    <Button>
+                        <Bird className="w-4 h-4" />
+                        הפרויקט
+                    </Button>
+                </Link>
             </div>
         </Box2>
     );

@@ -117,7 +117,7 @@ export default function EnglishReportPage() {
                                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                 }`}
                             >
-                                כל הכיתות
+                                כל הקבוצות
                             </button>
                             {classes.map(cls => (
                                 <button
@@ -129,7 +129,7 @@ export default function EnglishReportPage() {
                                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
                                 >
-                                    כיתה {cls}
+                                    {cls}
                                 </button>
                             ))}
                         </div>

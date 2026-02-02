@@ -20,7 +20,7 @@ export async function generateImage(subject, style) {
         body: JSON.stringify({ prompt })
     };
 
-    const res = await fetch(url, options)
+    const res = await fetch(url, { ...options, cache: 'no-store' })
     const json = await res.json();
     const binary = atob(json.image);
     const len = binary.length;

@@ -77,7 +77,7 @@ export default function Vocation({ vocation, onSave }) {
                             editable={canEdit}
                             withIcon={true}
                             className='font-bold text-gray-600'
-                            placeholder="שאלת התנדבות"
+                            placeholder="שאלת מעורבות קהילתית"
                         />
                         <SmartText
                             text={volunteeringAnswer}
@@ -85,7 +85,7 @@ export default function Vocation({ vocation, onSave }) {
                             editable={canEdit}
                             withIcon={true}
                             className='text-gray-600'
-                            placeholder="תשובת התנדבות"
+                            placeholder="תשובת מעורבות קהילתית"
                         />
                     </div>
                 </div>

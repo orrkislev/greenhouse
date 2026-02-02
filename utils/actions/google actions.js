@@ -69,7 +69,7 @@ export async function getLatestVideoFromPlaylist(playlistId) {
 
   // First, get the total number of videos
   const firstUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=1&key=${apiKey}`;
-  const firstResponse = await fetch(firstUrl);
+  const firstResponse = await fetch(firstUrl, { cache: 'no-store' });
   const firstData = await firstResponse.json();
   const totalVideos = firstData.pageInfo.totalResults;
 
@@ -82,7 +82,7 @@ export async function getLatestVideoFromPlaylist(playlistId) {
   let data;
 
   do {
-    const response = await fetch(url + (nextPageToken ? `&pageToken=${nextPageToken}` : ''));
+    const response = await fetch(url + (nextPageToken ? `&pageToken=${nextPageToken}` : ''), { cache: 'no-store' });
     data = await response.json();
     pageCount++;
     nextPageToken = data.nextPageToken;

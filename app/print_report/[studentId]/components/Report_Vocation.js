@@ -21,7 +21,7 @@ export default function Report_Vocation({ student }) {
                     )}
                 </div>
                 <div className='flex-1 flex flex-col gap-1'>
-                    <SectionTitle>התנדבות</SectionTitle>
+                    <SectionTitle>מעורבות קהילתית</SectionTitle>
                     {vocation?.volunteeringQuestion && (
                         <SectionSubtitle>{vocation?.volunteeringQuestion}</SectionSubtitle>
                     )}

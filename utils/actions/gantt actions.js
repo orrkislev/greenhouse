@@ -17,7 +17,7 @@ export async function getGanttEvents(startDate, endDate) {
         `singleEvents=true&` +
         `orderBy=startTime`;
     try {
-        const response = await fetch(url);
+        const response = await fetch(url, { cache: 'no-store' });
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);

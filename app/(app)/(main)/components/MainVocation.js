@@ -2,6 +2,8 @@ import Box2 from "@/components/Box2";
 import { Briefcase } from "lucide-react";
 import Image from "next/image";
 import { useVocation } from "@/utils/store/useVocation";
+import Link from "next/link";
+import Button from "@/components/Button";
 
 export default function MainVocation() {
     const jobs = useVocation();
@@ -20,6 +22,12 @@ export default function MainVocation() {
                     אין לי תעסוקה פעילה
                 </div>
             )}
+            <Link href="/vocation" className="absolute bottom-2 left-2">
+                <Button>
+                    <Briefcase className="w-4 h-4" />
+                    תעסוקה
+                </Button>
+            </Link>
         </Box2>
     )
 }
