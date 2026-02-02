@@ -1,7 +1,7 @@
 'use client'
 
 import { DashboardLayout, DashboardMain, DashboardPanel, DashboardPanelButton } from "@/components/DashboardLayout";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useUser } from "@/utils/store/useUser";
 import { supabase } from "@/utils/supabase/client";
@@ -26,13 +26,15 @@ export default function ReportPage() {
     const [data, setData] = useState(null);
     const groups = useUserGroups();
     const userClass = groups.find(group => group.type === 'class');
+    const userIdRef = useRef(userId);
 
     useEffect(() => {
+        userIdRef.current = userId;
         if (!userId) return;
         (async () => {
             const { data, error } = await supabase.from('report_cards_public').select('*').eq('id', userId);
             if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הדוח הציבורי');
-            if (data && data.length > 0 ) setData(data[0]);
+            if (data && data.length > 0) setData(data[0]);
         })();
     }, [userId]);
 
@@ -52,8 +54,12 @@ export default function ReportPage() {
             return;
         }
 
-        setData(prev => ({ ...prev, [key]: data }));
         toastsActions.addToast({ message: 'נשמר בהצלחה!', type: 'success' });
+
+        // Race condition check: if user switched while we were saving, don't update local state
+        if (userId !== userIdRef.current) return;
+
+        setData(prev => ({ ...prev, [key]: data }));
     }
 
     return (
