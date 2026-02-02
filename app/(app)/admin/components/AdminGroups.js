@@ -228,7 +228,7 @@ function GroupStudents({ group }) {
                                     </Cell>
                                 ) : (
                                     <Cell>
-                                        <span className='text-muted-foreground underline hover:text-foreground cursor-pointer' onClick={() => userActions.switchToStudent(student.id, 'admin')}>
+                                        <span className='text-muted-foreground underline hover:text-foreground cursor-pointer' onClick={() => userActions.switchToStudent(student, 'admin')}>
                                             {student.username}</span>
                                     </Cell>
                                 )}

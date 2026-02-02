@@ -49,7 +49,7 @@ function Meeting({ meeting }) {
     const handleGoToStudent = (e) => {
         e.stopPropagation();
         if (isStaff()) {
-            userActions.switchToStudent(student.id);
+            userActions.switchToStudent(student);
         }
     }
 
@@ -59,9 +59,9 @@ function Meeting({ meeting }) {
 
                 {isStaff() && (
                     <div className="flex justify-between w-full">
-                        <Edit2 onClick={open} 
+                        <Edit2 onClick={open}
                             className='p-1 rounded-lg w-6 h-0 group-hover/meeting:h-6 transition-all duration-300 hover:bg-white cursor-pointer' />
-                        <UserRound onClick={handleGoToStudent} 
+                        <UserRound onClick={handleGoToStudent}
                             className='p-1 rounded-lg w-6 h-0 group-hover/meeting:h-6 transition-all duration-300 hover:bg-white cursor-pointer' />
                     </div>
                 )}

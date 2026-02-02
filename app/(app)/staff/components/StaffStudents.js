@@ -156,7 +156,7 @@ export function GoToAnyStudentPicker() {
 
     const handleSelect = (student) => {
         close();
-        userActions.switchToStudent(student.id);
+        userActions.switchToStudent(student);
     };
 
     return (

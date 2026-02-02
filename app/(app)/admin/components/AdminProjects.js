@@ -69,8 +69,8 @@ export default function AdminProjects() {
     ]
 
 
-    const clickOnProject = async (studentId) => {
-        await userActions.switchToStudent(studentId);
+    const clickOnProject = (student) => {
+        userActions.switchToStudent(student);
         setTimeout(() => { router.push('/project'); }, 200);
     }
 
@@ -118,7 +118,7 @@ export default function AdminProjects() {
                             <Cell>
                                 {student.project ? (
                                     <div className="bg-secondary/100 rounded-sm hover:bg-secondary/100 text-white hover:text-blue-200 hover:cursor-pointer hover:underline transition-all duration-200 px-2 py-1"
-                                        onClick={() => clickOnProject(student.id)}>
+                                        onClick={() => clickOnProject(student)}>
                                         {student.project.title}
                                     </div>
                                 ) : (<span className="text-muted-foreground">אין פרויקט</span>
@@ -174,7 +174,7 @@ function DetailCell({ text }) {
                         </div>
                     </details>
                 </div>
-            </div>            
+            </div>
         </td>
     );
 }

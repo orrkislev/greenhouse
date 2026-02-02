@@ -81,8 +81,8 @@ export function SelectedStudentCard({ student, context, group, onClose }) {
         })()
     }, [student, today])
 
-    const goToStudent = async (student) => {
-        await userActions.switchToStudent(student.id);
+    const goToStudent = (student) => {
+        userActions.switchToStudent(student);
     }
 
     if (!data) return null;

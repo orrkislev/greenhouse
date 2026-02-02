@@ -88,7 +88,7 @@ export default function AdminStaff() {
                                 </Cell>
                             ) : (
                                 <Cell>
-                                    <span className='text-muted-foreground underline hover:text-foreground cursor-pointer' onClick={() => userActions.switchToStudent(staff.id)}>
+                                    <span className='text-muted-foreground underline hover:text-foreground cursor-pointer' onClick={() => userActions.switchToStudent(staff)}>
                                         {staff.username}
                                     </span>
                                 </Cell>

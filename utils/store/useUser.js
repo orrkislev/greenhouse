@@ -76,7 +76,7 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 		// ----------------------------------------------------
 		// ------------ Staff Switching User ------------------
 		// ----------------------------------------------------
-		switchToStudent: async (studentId, targetUrl = '/') => {
+		switchToStudent: async (student, targetUrl = '/') => {
 			const currUrl = window.location.pathname + window.location.search;
 			const user = get().user;
 			if (!user || !isStaff()) {
@@ -84,13 +84,15 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 			}
 
 			const originalUser = get().originalUser;
-			set({ originalUser: originalUser || { user, lastPage: currUrl }, user: null });
+			set({ originalUser: originalUser || { user, lastPage: currUrl }, user: student });
 
+			await new Promise(resolve => setTimeout(resolve, 100));
+			redirect(targetUrl);
+		},
+		switchToStudentById: async (studentId, targetUrl = '/') => {
 			const { data, error } = await supabase.from('users').select('*').eq('id', studentId).single();
 			if (error) set({ error });
-			else set({ user: data });
-
-			redirect(targetUrl);
+			else get().switchToStudent(data, targetUrl);
 		},
 		switchBackToOriginal: async () => {
 			const originalUser = get().originalUser;

@@ -22,12 +22,12 @@ export default function StaffGroup_Evaluations({ group }) {
         if (!group || !group.members) return;
         (async () => {
             const { data, error } = await supabase.from('report_cards_public').select('*')
-                .in('id', group.members.filter(member => member.role === 'student').map(member => member.id));
+                .in('id', group.members.filter(member => member?.role === 'student').map(member => member.id));
             if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הדוחות הציבוריים');
             const { data: privateData, error: privateError } = await supabase.from('report_cards_private').select('id,mentors')
-                .in('id', group.members.filter(member => member.role === 'student').map(member => member.id));
+                .in('id', group.members.filter(member => member?.role === 'student').map(member => member.id));
             if (privateError) toastsActions.addFromError(privateError, 'שגיאה בטעינת הדוחות הפרטיים');
-            setData(group.members.filter(member => member.role === 'student').map(member => ({
+            setData(group.members.filter(member => member?.role === 'student').map(member => ({
                 ...member,
                 report: {
                     ...data.find(report => report.id === member.id),
@@ -45,13 +45,13 @@ export default function StaffGroup_Evaluations({ group }) {
 
     const goToProject = (student, project) => {
         if (!project) return;
-        userActions.switchToStudent(student.id, '/project?id=' + project.id + '&view=review');
+        userActions.switchToStudent(student, '/project?id=' + project.id + '&view=review');
     };
     const goToResearch = (student, research) => {
         if (!research) return;
-        userActions.switchToStudent(student.id, '/research?id=' + research.id + '&view=review');
+        userActions.switchToStudent(student, '/research?id=' + research.id + '&view=review');
     };
-    const goToReport = (student, section) => userActions.switchToStudent(student.id, '/report?view=' + section);
+    const goToReport = (student, section) => userActions.switchToStudent(student, '/report?view=' + section);
     const viewFullReport = (student) => window.open(`/print_report/${student.id}`, "_blank", "noopener,noreferrer");
 
     let projectTitles = ['פרויקט סתו', 'חקר סתו', 'פרויקט חורף', 'חקר חורף'];
