@@ -65,7 +65,7 @@ export function createDataLoadingHook(store, dataKey, loadAction) {
             if (storeState[loadAction]) {
                 storeState[loadAction]();
             }
-        }, [user?.id]);
+        }, [user?.id, store, loadAction]);
 
         return data;
     };

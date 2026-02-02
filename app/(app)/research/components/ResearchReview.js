@@ -166,7 +166,7 @@ const sections = [
 export function ResearchReview() {
     const research = useResearchData(state => state.research);
 
-    const [formData, setFormData] = useState(research?.metadata?.review ||
+    const [formData, setFormData] = useState(
         sections.reduce((acc, section) => ({
             ...acc,
             [section.sectionName]: section.parameters.reduce((acc, param) => ({
@@ -177,10 +177,15 @@ export function ResearchReview() {
     );
     const [madeChanges, setMadeChanges] = useState(false);
 
+    useEffect(()=>{
+        if (research && research?.metadata?.review )
+            setFormData(research.metadata.review);
+    },[research?.metadata?.review]);
+
     useEffect(() => {
-        if (!formData) return;
+        if (!formData || !madeChanges) return;
         researchActions.updateResearch({ metadata: { review: formData } });
-    }, [formData])
+    }, [formData, madeChanges])
 
     const handleParameterChange = (sectionName, paramId, value) => {
         setFormData(prev => ({
@@ -204,6 +209,9 @@ export function ResearchReview() {
 
     return (
         <div className="flex flex-col gap-4 p-4 divide-y divide-stone-300/50">
+            <div className="text-2xl mb-4">
+                החקר שלי בנושא: <strong>{research.title}</strong>
+            </div>
             {sections.map(section => (
                 <Box2 key={section.sectionName} label={section.sectionName} LabelIcon={section.icon}>
                     <div className='flex flex-col gap-4 divide-y divide-stone-300/50'>

@@ -32,7 +32,7 @@ export default function ReportPage() {
         (async () => {
             const { data, error } = await supabase.from('report_cards_public').select('*').eq('id', userId);
             if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הדוח הציבורי');
-            setData(data);
+            if (data && data.length > 0 ) setData(data[0]);
         })();
     }, [userId]);
 

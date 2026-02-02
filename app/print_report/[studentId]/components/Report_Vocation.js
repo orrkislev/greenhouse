@@ -10,23 +10,23 @@ export default function Report_Vocation({ student }) {
                 <div className='flex-1 flex flex-col gap-1'>
                     <SectionTitle>תעסוקה</SectionTitle>
                     <div className="flex gap-8">
-                        <SectionSubtitle>{vocation.jobTitle}</SectionSubtitle>
-                        <SectionText>{vocation.hours} שעות</SectionText>
+                        <SectionSubtitle>{vocation?.jobTitle}</SectionSubtitle>
+                        <SectionText>{vocation?.hours} שעות</SectionText>
                     </div>
                     {vocation?.employmentQuestion && (
-                        <SectionSubtitle>{vocation.employmentQuestion}</SectionSubtitle>
+                        <SectionSubtitle>{vocation?.employmentQuestion}</SectionSubtitle>
                     )}
                     {vocation?.employmentAnswer && (
-                        <SectionText>{vocation.employmentAnswer}</SectionText>
+                        <SectionText>{vocation?.employmentAnswer}</SectionText>
                     )}
                 </div>
                 <div className='flex-1 flex flex-col gap-1'>
                     <SectionTitle>התנדבות</SectionTitle>
                     {vocation?.volunteeringQuestion && (
-                        <SectionSubtitle>{vocation.volunteeringQuestion}</SectionSubtitle>
+                        <SectionSubtitle>{vocation?.volunteeringQuestion}</SectionSubtitle>
                     )}
                     {vocation?.volunteeringAnswer && (
-                        <SectionText>{vocation.volunteeringAnswer}</SectionText>
+                        <SectionText>{vocation?.volunteeringAnswer}</SectionText>
                     )}
                 </div>
             </div>
