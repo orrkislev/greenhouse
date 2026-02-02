@@ -12,6 +12,8 @@ export default function Vocation({ vocation, onSave }) {
     const [employmentAnswer, setEmploymentAnswer] = useState(vocation?.employmentAnswer || '');
     const [volunteeringQuestion, setVolunteeringQuestion] = useState(vocation?.volunteeringQuestion || '');
     const [volunteeringAnswer, setVolunteeringAnswer] = useState(vocation?.volunteeringAnswer || '');
+    const [jobTitle, setJobTitle] = useState(vocation?.jobTitle || '');
+    const [hours, setHours] = useState(vocation?.hours || '');
 
     useEffect(() => {
         setEmploymentQuestion(vocation?.employmentQuestion || '');
@@ -21,9 +23,9 @@ export default function Vocation({ vocation, onSave }) {
     }, [vocation]);
 
     const shouldSave = useMemo(() => {
-        if (employmentQuestion.trim() === '' && employmentAnswer.trim() === '' && volunteeringQuestion.trim() === '' && volunteeringAnswer.trim() === '') return false;
-        return employmentQuestion.trim() !== vocation?.employmentQuestion?.trim() || employmentAnswer.trim() !== vocation?.employmentAnswer?.trim() || volunteeringQuestion.trim() !== vocation?.volunteeringQuestion?.trim() || volunteeringAnswer.trim() !== vocation?.volunteeringAnswer?.trim();
-    }, [employmentQuestion, employmentAnswer, volunteeringQuestion, volunteeringAnswer, vocation?.employmentQuestion, vocation?.employmentAnswer, vocation?.volunteeringQuestion, vocation?.volunteeringAnswer]);
+        if (employmentQuestion.trim() === '' && employmentAnswer.trim() === '' && volunteeringQuestion.trim() === '' && volunteeringAnswer.trim() === '' && jobTitle.trim() === '' && hours.trim() === '') return false;
+        return employmentQuestion.trim() !== vocation?.employmentQuestion?.trim() || employmentAnswer.trim() !== vocation?.employmentAnswer?.trim() || volunteeringQuestion.trim() !== vocation?.volunteeringQuestion?.trim() || volunteeringAnswer.trim() !== vocation?.volunteeringAnswer?.trim() || jobTitle.trim() !== vocation?.jobTitle?.trim() || hours.trim() !== vocation?.hours?.trim();
+    }, [employmentQuestion, employmentAnswer, volunteeringQuestion, volunteeringAnswer, jobTitle, hours, vocation?.employmentQuestion, vocation?.employmentAnswer, vocation?.volunteeringQuestion, vocation?.volunteeringAnswer, vocation?.jobTitle, vocation?.hours]);
 
     const canEdit = ALLOW_STUDENT_EDIT || !!originalUser;
 
@@ -39,19 +41,22 @@ export default function Vocation({ vocation, onSave }) {
                     <div className='flex-1 p-4 flex flex-col gap-2'>
                         <div className='flex gap-8'>
                             <SmartText
-                                text={vocation?.jobTitle || ''}
-                                onEdit={() => { }}
-                                editable={false}
+                                text={jobTitle}
+                                onEdit={(newText) => setJobTitle(newText)}
+                                editable={canEdit}
                                 className='text-xl font-bold text-gray-800'
                                 placeholder="תפקיד"
                             />
-                            <SmartText
-                                text={vocation?.hours ? `${vocation.hours} שעות` : ''}
-                                onEdit={() => { }}
-                                editable={false}
-                                className='text-lg text-gray-800'
-                                placeholder="שעות"
-                            />
+                            <div className='flxe gap-2'>
+                                <SmartText
+                                    text={hours}
+                                    onEdit={(newText) => setHours(newText)}
+                                    editable={canEdit}
+                                    className='text-lg text-gray-800'
+                                    placeholder="שעות"
+                                />
+                                <div>שעות</div>
+                            </div>
                         </div>
                         <SmartText
                             text={employmentQuestion}
@@ -111,7 +116,7 @@ export default function Vocation({ vocation, onSave }) {
                     >
                         <Button
                             data-role="save"
-                            onClick={() => onSave({ employmentQuestion, employmentAnswer, volunteeringQuestion, volunteeringAnswer })}
+                            onClick={() => onSave({ employmentQuestion, employmentAnswer, volunteeringQuestion, volunteeringAnswer, jobTitle, hours })}
                             disabled={!shouldSave}
                             className={shouldSave ? "shadow-lg" : ""}
                         >
