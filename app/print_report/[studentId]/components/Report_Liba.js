@@ -4,7 +4,7 @@ import { SectionText } from "./Layout";
 
 export default function Report_Liba({student}) {
     return (
-        <ReportPageSection title="ליבה">
+        <ReportPageSection title="ליבה" className="flex-1">
             <div className='w-full flex-1 h-full flex gap-[8px]'>
                 <div className='flex-1 flex flex-col gap-[4px]'>
                     <SectionSubtitle className='h-12'>{student.liba?.question}</SectionSubtitle>

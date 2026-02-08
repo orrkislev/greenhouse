@@ -24,7 +24,7 @@ export function ReportPage({ children }) {
 
 export function ReportPageSection({ title, children, className = '' }) {
     return (
-        <div className={`mt-4 border-2 border-neutral-400 bg-white rounded-[25px] overflow-hidden flex flex-1 min-h-0 ${className}`}>
+        <div className={`mt-4 border-2 border-neutral-400 bg-white rounded-[25px] overflow-hidden flex min-h-0 ${className}`}>
             <div className='bg-neutral-400 p-1 flex items-center justify-center w-12 flex-shrink-0'>
                 <div className='text-white -rotate-90 text-4xl font-bold whitespace-nowrap font-sans tracking-narrow '
                     style={{

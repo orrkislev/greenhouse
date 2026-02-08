@@ -240,7 +240,7 @@ function MiniIkigai({ ikigai }) {
 
 export default function Report_General({ student }) {
     return (
-        <ReportPageSection title="מבט כללי">
+        <ReportPageSection title="מבט כללי" className="flex-2">
             <div className='w-full flex-1 h-full flex gap-4'>
                 <div className='flex-1 flex flex-col gap-2'>
                     <SectionSubtitle>איקיגאי</SectionSubtitle>

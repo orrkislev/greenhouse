@@ -10,6 +10,7 @@ import { supabase } from '@/utils/supabase/client';
 import Report_Projects from './components/Report_Projects';
 import { toastsActions } from '@/utils/store/useToasts';
 import { ResizableSections } from './components/Helpers';
+import Report_Portfolio from './components/Report_Portfolio';
 
 
 
@@ -53,6 +54,7 @@ export default function PrintReportPage({studentId}) {
                 <div data-report-page>
                     <ReportPage>
                         <Report_Projects student={student}/>
+                        <Report_Portfolio student={student} />
                     </ReportPage>
                 </div>
 

@@ -30,19 +30,18 @@ function TermSection({ project, research, term }) {
         <div className='flex-1 flex flex-col'>
             <div className="flex gap-2 flex-1">
                 <div className="flex-1 flex flex-col">
-                    <SectionSubtitle>פרויקט ה{project?.term || term}</SectionSubtitle>
-                    <SectionText className="font-bold">{project?.title}</SectionText>
+                    <SectionTitle className='underline'>{term}</SectionTitle>
+                    <SectionSubtitle>פרויקט ה{project?.term || term} - <span className='text-2xl'>{project?.title}</span></SectionSubtitle>
                     {project?.master?.first_name && (
-                        <SectionText className="text-muted-foreground">בליווי {project?.master?.first_name}</SectionText>
+                        <SectionText className="text-muted-foreground -mt-2">בליווי {project?.master?.first_name}</SectionText>
                     )}
                     <SectionText className="italic mt-1">{project?.summary}</SectionText>
 
-                    <SectionSubtitle className="mt-2">חקר ה{term}</SectionSubtitle>
-                    <SectionText className="font-bold">{research?.title}</SectionText>
+                    <SectionSubtitle className="mt-4">חקר ה{term} - {research?.title}</SectionSubtitle>
                     <SectionText className="italic">{research?.summary}</SectionText>
                 </div>
                 <div className="flex items-start justify-start p-8">
-                    <RadarChart data={data} size={120} />
+                    <RadarChart data={data} size={200} />
                 </div>
             </div>
         </div>
@@ -77,7 +76,7 @@ function Final({ student }) {
     ];
 
     return (
-        <ReportPageSection title="פרויקט גמר" className="flex-1">
+        <ReportPageSection title="פרויקט גמר" className="flex-5">
             <div className='w-full flex-1 h-full flex flex-col gap-4'>
                 <div className="flex gap-4">
                     <div className="flex-1 flex flex-col gap-2">
