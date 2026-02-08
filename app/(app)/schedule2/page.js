@@ -12,6 +12,7 @@ const ScheduleOuter = tw`w-full h-full pr-2 md:pr-16 pt-4 md:pt-8`;
 export default function SchedulePage() {
     const [view, setView] = useState('week');
 
+
     return (
         <>
             <DashboardLayout>

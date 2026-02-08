@@ -44,12 +44,18 @@ export default function StaffGroup_Evaluations({ group }) {
     };
 
     const goToProject = (student, project) => {
-        if (!project) return;
-        userActions.switchToStudent(student, '/project?id=' + project.id + '&view=review');
+        if (!project) {
+            userActions.switchToStudent(student, '/project');
+        } else {
+            userActions.switchToStudent(student, '/project?id=' + project.id + '&view=review');
+        }
     };
     const goToResearch = (student, research) => {
-        if (!research) return;
-        userActions.switchToStudent(student, '/research?id=' + research.id + '&view=review');
+        if (!research) {
+            userActions.switchToStudent(student, '/research');
+        } else {
+            userActions.switchToStudent(student, '/research?id=' + research.id + '&view=review');
+        }
     };
     const goToReport = (student, section) => userActions.switchToStudent(student, '/report?view=' + section);
     const viewFullReport = (student) => window.open(`/print_report/${student.id}`, "_blank", "noopener,noreferrer");
