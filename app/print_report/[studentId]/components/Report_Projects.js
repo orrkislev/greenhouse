@@ -119,7 +119,7 @@ function PersonalGoals({ student }) {
 
     return (
         <ReportPageSection title="מטרות אישיות" className="flex-1">
-            <div className='w-full flex-1 h-full flex flex-col gap-4'>
+            <div className='w-full flex-1 h-full flex flex-col gap-4 justify-between pb-8'>
                 {/* Goals Section - Side by Side */}
                 {(personalGoals?.initialGoals?.some(g => g) || personalGoals?.updatedGoals?.some(g => g)) && (
                     <div className="flex gap-6">
@@ -160,15 +160,18 @@ function PersonalGoals({ student }) {
                 {/* Radar Chart Section (mode === 'radar') */}
                 {personalGoals?.mode === 'radar' && (
                     <div className="pt-2 border-t border-gray-200">
-                        <div className="flex gap-4">
-                            <div className="flex items-center justify-center">
-                                <RadarChart data={personalGoals?.radarData || defaultRadarData} size={150} />
-                            </div>
+                        <div className="flex gap-8">
                             {personalGoals?.summary && (
-                                <div className="flex-1 flex items-center">
+                                <div className="flex-1 flex flex-col">
+                                    <SectionSubtitle>פרויקט גמר</SectionSubtitle>
+                                    <SectionText className="text-muted-foreground">בליווי ערן</SectionText>
                                     <SectionText className="italic">{personalGoals.summary}</SectionText>
                                 </div>
                             )}
+
+                            <div className="flex items-center justify-center">
+                                <RadarChart data={personalGoals?.radarData || defaultRadarData} size={250} />
+                            </div>
                         </div>
                     </div>
                 )}

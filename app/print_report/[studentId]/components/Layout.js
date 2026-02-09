@@ -61,7 +61,7 @@ export function ReportTitle({student}) {
             </div>
             <div className='flex justify-around w-full'>
                 <div className='text-sm'>
-                    ת.ז. 200202927
+                    ת.ז. {student.id_number}
                     <br />
                     קבוצת {student.class}
                 </div>

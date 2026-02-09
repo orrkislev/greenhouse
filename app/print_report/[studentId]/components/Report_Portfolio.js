@@ -12,11 +12,7 @@ export default function Report_Portfolio({ student }) {
                         <div className="flex-1">
                             <SectionSubtitle>פורטפוליו אישי</SectionSubtitle>
                             <SectionText className="mt-2">
-                                הפורטפוליו האישי שלך הוא מקום להציג את העבודות, הפרויקטים והיצירות שלך.
-                                ניתן לגשת אליו באמצעות הקישור או סריקת קוד ה-QR.
-                            </SectionText>
-                            <SectionText className="mt-2 font-medium break-all">
-                                {portfolioUrl}
+                                ניתן לסרוק את ה-QR כדי לגשת לפורטפוליו, שבו מוצגים הפרויקטים, העבודות והיצירות שלי
                             </SectionText>
                         </div>
                         <div className="flex items-center justify-center p-4 border border-border rounded-lg bg-gray-50">
@@ -27,7 +23,7 @@ export default function Report_Portfolio({ student }) {
                     <div className="flex-1 flex items-center justify-center p-8">
                         <div className="text-center max-w-2xl">
                             <SectionText className="text-muted-foreground italic">
-                                כאן אמור להיות קישור לתיק העבודות שלך, שבו תוכל להציג את הפרויקטים, העבודות והיצירות שלך. נראה שלא העלית פורטפוליו עדיין, אבל תמיד יש זמן להתחיל! <br/>
+                                כאן אמור להיות קישור לתיק העבודות שלך, שבו תוכל להציג את הפרויקטים, העבודות והיצירות שלך. נראה שלא העלית פורטפוליו עדיין, אבל תמיד יש זמן להתחיל! <br />
                             </SectionText>
                             <SectionText className="text-muted-foreground italic mt-4">
                                 נשמח לראות את הפורטפוליו שלך בעתיד!
