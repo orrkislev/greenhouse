@@ -1,14 +1,15 @@
 import { useUser } from "@/utils/store/useUser";
 import { supabase } from "../supabase/client";
-import { createStore } from "./utils/createStore";
+import { create } from "zustand";
+import { createStoreActions, withUser } from "./utils/storeUtils";
 import { toastsActions } from "./useToasts";
 
-export const [useMentorships, mentorshipsActions] = createStore((set, get, withUser, withLoadingCheck) => ({
+export const useMentorships = create((set, get) => ({
     mentorships: [],
     projectMentorships: [],
     allStudents: [],
 
-    getMentorships: withLoadingCheck(async (user) => {
+    getMentorships: withUser(async (user) => {
         set({ mentorships: [] });
         let query = supabase.from('mentorships')
             .select(`*, 
@@ -67,3 +68,5 @@ export const [useMentorships, mentorshipsActions] = createStore((set, get, withU
         await supabase.from('mentorships').update({ is_active: false }).eq('mentor_id', user.id).eq('student_id', student.id);
     }
 }));
+
+export const mentorshipsActions = createStoreActions(useMentorships);

@@ -12,6 +12,29 @@ const compareStrings = (left, right, locale = 'he') => {
     return String(a).localeCompare(String(b), locale);
 };
 
+const PROPOSAL_FIELDS = [
+    { key: 'general_direction', label: 'הכיוון הכללי' },
+    { key: 'motivation', label: 'למה בחרתי בנושא' },
+    { key: 'mentor', label: 'מנחה מבוקש.ת' },
+];
+
+const getProposalText = (project) => {
+    if (!project?.metadata) return '';
+    if (project.metadata.questions?.length) {
+        return project.metadata.questions
+            .map(q => `${q.title}: ${q.value}`)
+            .join('\n');
+    }
+
+    return PROPOSAL_FIELDS
+        .map(field => {
+            const value = project.metadata?.[field.key];
+            if (!value) return null;
+            return `${field.label}: ${value}`;
+        })
+        .filter(Boolean)
+        .join('\n');
+};
 
 
 
@@ -124,7 +147,7 @@ export default function AdminProjects() {
                                 ) : (<span className="text-muted-foreground">אין פרויקט</span>
                                 )}
                             </Cell>
-                            <DetailCell text={student.project?.metadata?.questions?.map(q => q.title + ': ' + q.value).join('\n')} />
+                            <DetailCell text={getProposalText(student.project)} />
                             <Cell>
                                 {student.project && (
                                     <select

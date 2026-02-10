@@ -2,7 +2,7 @@ import { useTime } from "@/utils/store/useTime"
 import { ScheduleSection } from "../Layout";
 import { addDays, addWeeks, differenceInWeeks, endOfWeek, isSameDay, isToday, startOfWeek, subDays } from "date-fns";
 import { tw } from "@/utils/tw";
-import { eventsActions, useEventsData } from "@/utils/store/useEvents";
+import { eventsActions, useEventsData, eventSelectors } from "@/utils/store/useEvents";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import usePopper from "@/components/Popper";
@@ -75,7 +75,7 @@ export default function Term() {
                         {day.isFirstDayOfTerm && <div className="text-xs">היום הראשון של התקופה</div>}
                         {day.isLastDayOfTerm && <div className="text-xs">היום האחרון של התקופה</div>}
                     </div>
-                    {events[format(day.date, 'yyyy-MM-dd')]?.map((event, i) => (
+                    {eventSelectors.getEventsForDate(events, day.date).map((event, i) => (
                         <TermEvent key={event.id} event={event} onStartDrag={() => setDraggingEventId(event.id)} onEndDrag={() => setDraggingEventId(null)} isDragging={draggingEventId === event.id} />
                     ))}
                     {draggingEventId && <div className="absolute inset-0 z-0" onMouseEnter={() => onMove(draggingEventId, day)} />}

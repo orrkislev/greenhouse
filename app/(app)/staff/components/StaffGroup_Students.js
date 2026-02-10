@@ -2,7 +2,7 @@ import { StudentCard } from "./StudentCard";
 import { useEffect, useState } from "react";
 import { userActions } from "@/utils/store/useUser";
 import Avatar from "@/components/Avatar";
-import { eventsActions } from "@/utils/store/useEvents";
+import { eventsActions, useRecurringEvents } from "@/utils/store/useEvents";
 import { groupsActions, groupUtils, useGroups } from "@/utils/store/useGroups";
 import { daysOfWeek, useTime } from "@/utils/store/useTime";
 import Button from "@/components/Button";
@@ -11,7 +11,6 @@ import { mentorshipsActions } from "@/utils/store/useMentorships";
 import WithLabel from "@/components/WithLabel";
 import usePopper from "@/components/Popper";
 import { EditMeeting } from "./StaffGroup_Meetings";
-import { meetingUtils, useMeetings } from "@/utils/store/useMeetings";
 import { AllStudentPicker } from "./StaffStudents";
 import { projectActions } from "@/utils/store/useProject";
 import { motion } from "motion/react";
@@ -158,10 +157,10 @@ export function SelectedStudentCard({ student, context, group, onClose }) {
 
 function SelectedStudentCard_Meeting({ student }) {
     const { open, close, Popper, baseRef } = usePopper();
-    const meetings = useMeetings(state => state.meetings);
+    const events = useRecurringEvents();
+    const meeting = events.find(event => event.day_of_the_week && event.participants?.find(participant => participant?.id === student.id || participant === student.id));
 
-    const meeting = meetings.find(meeting => meetingUtils.hasUser(meeting, student));
-
+    console.log({events})
     return (
         <WithLabel label="פגישה קבועה" icon={Calendar}>
             <Button onClick={open} ref={baseRef}>

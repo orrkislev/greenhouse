@@ -1,5 +1,5 @@
 import { isAdmin, useUser } from "@/utils/store/useUser"
-import AuthGoogleCalendar from "./Google/AuthGoogleCalendar";
+import AuthGoogleCalendar from "@/app/(app)/(main)/components/AuthGoogleCalendar";
 import { ganttActions, useGantt } from "@/utils/store/useGantt";
 import { useEffect, useState } from "react";
 import { Pencil, Plus, Save, Trash2 } from "lucide-react";

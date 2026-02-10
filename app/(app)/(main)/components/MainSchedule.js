@@ -1,4 +1,4 @@
-import { useTodayEvents } from "@/utils/store/useEvents";
+import { useTodayEvents, eventSelectors } from "@/utils/store/useEvents";
 import { useGoogleCalendarEventsToday } from "@/utils/store/useGoogleCalendar";
 import { groupsActions, useUserGroups } from "@/utils/store/useGroups";
 import { useTime } from "@/utils/store/useTime";
@@ -9,7 +9,6 @@ import Link from "next/link";
 import { Calendar } from "lucide-react";
 import MainGreetings from "./MainGreetings";
 import Image from "next/image";
-import { useMeetingsToday } from "@/utils/store/useMeetings";
 
 export default function MainSchedule() {
     const today = useTime(state => state.today);
@@ -17,7 +16,6 @@ export default function MainSchedule() {
     const events = useTodayEvents();
     const groups = useUserGroups();
     const googleCalendarEvents = useGoogleCalendarEventsToday();
-    const meetings = useMeetingsToday();
 
     const groupIds = groups.map(g => g.id).join(',');
     useEffect(() => {
@@ -26,15 +24,17 @@ export default function MainSchedule() {
 
     if (!today) return null;
 
-    const todayEvents = [...(events[today] ?? [])];
+    const todayEvents = [...eventSelectors.getEventsForDateWithRecurring(events, today)];
     todayEvents.push(...googleCalendarEvents.filter(event => event.date === today));
-    groups.forEach(group => group.events?.[today]?.forEach(event => todayEvents.push({ ...event, group: group.name })));
+    groups.forEach(group => {
+        const groupEvents = group.events ? eventSelectors.getEventsForDate(group.events, today) : [];
+        groupEvents.forEach(event => todayEvents.push({ ...event, group: group.name }));
+    });
 
-    // Combine meetings and events
-    const allEvents = [
-        ...todayEvents.map(e => ({ ...e, type: 'event' })),
-        ...meetings.map(m => ({ ...m, type: 'meeting' }))
-    ];
+    const allEvents = todayEvents.map(e => ({
+        ...e,
+        type: e.participants?.length ? 'meeting' : 'event'
+    }));
 
     allEvents.sort((a, b) => a.start.localeCompare(b.start));
 
@@ -53,7 +53,9 @@ export default function MainSchedule() {
                         <EventTime time={item.start} />
                         <div className="text-sm font-bold flex items-center gap-1">
                             {item.type === 'meeting' ? (
-                                item.other_participants?.length > 0 ? `${item.other_participants[0]?.first_name} ${item.other_participants[0]?.last_name}` : item.title
+                                typeof item.participants?.[0] === 'object'
+                                    ? `${item.participants[0]?.first_name} ${item.participants[0]?.last_name}`
+                                    : (item.title || 'פגישה')
                             ) : (
                                 <>
                                     {item.title}

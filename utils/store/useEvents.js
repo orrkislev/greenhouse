@@ -1,6 +1,6 @@
-import { addDays, format } from "date-fns";
-import { debounce } from "lodash";
-import { createStore, createDataLoadingHook } from "./utils/createStore";
+import { format } from "date-fns";
+import { create } from "zustand";
+import { createDataLoadingHook, createStoreActions, withUser } from "./utils/storeUtils";
 import { useTime } from "./useTime";
 import { prepareForEventsTable } from "../supabase/utils";
 import { supabase } from "../supabase/client";
@@ -8,27 +8,16 @@ import { useEffect } from "react";
 import { useUser } from "./useUser";
 
 
-export const [useEventsData, eventsActions] = createStore((set, get, withUser, withLoadingCheck) => {
-    const debouncedUpdateEvents = debounce(async () => {
-        const { events } = get();
-        const dates = Object.keys(events);
-        for (const date of dates) {
-            for (const event of events[date]) {
-                if (event._dirty && event.id) {
-                    const { id, _dirty, ...data } = event;
-                    const { error } = await supabase.from('events').update(prepareForEventsTable(data)).eq('id', id);
-                    event._dirty = false;
-                }
-            }
-        }
-        set({ events: { ...events } });
-    }, 1000);
+export const useEventsData = create((set, get) => {
+    useUser.subscribe(originalUser => {
+        set({ events: [] });
+    });
 
     return {
-        events: {},
+        events: [],
 
         loadTodayEvents: withUser(async (user) => {
-            set({ events: {} });
+            set({ events: [] });
             await get().loadEvents(user, format(new Date(), 'yyyy-MM-dd'));
         }),
         loadWeekEvents: withUser(async (user, week) => {
@@ -41,42 +30,38 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
             if (!term || !term.start || !term.end) return;
             await get().loadEvents(user, term.start, term.end);
         }),
-
         loadEvents: async (user, start, end) => {
+            get().loadRecurringEvents();
             if (!end) end = start;
-            let date = new Date(start)
-            let shouldLoad = false;
-            const currEvents = get().events;
-            while (date <= new Date(end)) {
-                if (!currEvents[format(date, 'yyyy-MM-dd')]) {
-                    shouldLoad = true;
-                    break;
-                }
-                date = addDays(date, 1);
-            }
-            if (!shouldLoad) return;
-
-
             const { data, error } = await supabase.rpc('get_user_events', {
                 p_user_id: user.id,
                 p_start_date: start,
                 p_end_date: end
             });
             if (error) throw error;
-
-            const newEvents = { ...get().events };
-
-            date = new Date(start);
-            while (date <= new Date(end)) {
-                const dateStr = format(date, 'yyyy-MM-dd');
-                if (!newEvents[dateStr]) newEvents[dateStr] = [];
-                data.filter(e => e.date === dateStr).sort((a, b) => a.start.localeCompare(b.start)).forEach(e => {
-                    if (!newEvents[dateStr].find(e => e.id === e.id)) newEvents[dateStr].push(e);
-                });
-                date = addDays(date, 1);
-            }
-            set({ events: newEvents });
+            get().addEvents(data);
         },
+        addEvents: (newEvents) => {
+            const mergedEvents = [...get().events];
+            newEvents.forEach(newEvent => {
+                if (!mergedEvents.find(e => e.id === newEvent.id)) {
+                    mergedEvents.push(newEvent);
+                }
+            });
+            set({ events: mergedEvents });
+        },
+
+        // -----------------------------------
+        // ---- recurring events -------------
+        // -----------------------------------
+        loadRecurringEvents: withUser(async (user) => {
+            if (get().events.some(e => e.day_of_the_week !== undefined)) return;
+            const { data, error } = await supabase.rpc('get_user_recurring_events', {
+                p_user_id: user.id,
+            });
+            if (error) throw error;
+            get().addEvents(data);
+        }),
 
         // ------------------------------
         // ---- CRUD Events -------------
@@ -85,29 +70,45 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
             event.created_by = user.id;
             const { data, error } = await supabase.from('events').insert(prepareForEventsTable(event)).select().single();
             if (error) throw error;
-            const newEvents = { ...get().events };
-            if (!newEvents[event.date]) newEvents[event.date] = [];
-            newEvents[event.date].push(data);
-            set({ events: newEvents });
+            get().addEvents([data]);
+            if (event.participants && event.participants.length > 0) {
+                await supabase.from('event_participants').insert(event.participants.map(p => ({ event_id: data.id, user_id: p })));
+            }
         }),
-        updateEvent: async (eventId, updates) => {
-            const event = Object.values(get().events).flat().find(event => event.id === eventId);
-            if (!event) return;
-            const newEvents = { ...get().events };
+        saveEvent: withUser(async (user, event) => {
+            console.log('saving event:', event);
+            if (!event.id) return await get().addEvent(user, event);
 
-            if (!newEvents[event.date]) newEvents[event.date] = [];
-            newEvents[event.date] = newEvents[event.date].filter(event => event.id !== eventId);
-            Object.assign(event, updates);
-            event._dirty = true;
-            newEvents[event.date] = [...(newEvents[event.date] || []), event];
+            const origEvent = get().events.find(e => e.id === event.id);
+            if (!origEvent) return;
+
+            const updatedEvent = { ...origEvent, ...event };
+            const { data, error } = await supabase.from('events').update(prepareForEventsTable(updatedEvent)).eq('id', event.id).select().single();
+            if (error) throw error;
+
+            const newEvents = get().events.map(e => e.id === event.id ? updatedEvent : e);
             set({ events: newEvents });
-            debouncedUpdateEvents();
-        },
+
+            if (event.participants) {
+                const origParticipants = origEvent.participants || [];
+                const newParticipants = event.participants;
+
+                const participantsToAdd = newParticipants.filter(p => !origParticipants.includes(p));
+                const participantsToRemove = origParticipants.filter(p => !newParticipants.includes(p));
+
+                if (participantsToAdd.length > 0) {
+                    await supabase.from('event_participants').insert(participantsToAdd.map(p => ({ event_id: event.id, user_id: p })));
+                }
+                if (participantsToRemove.length > 0) {
+                    await supabase.from('event_participants').delete().eq('event_id', event.id).in('user_id', participantsToRemove);
+                }
+            }
+        }),
         deleteEvent: async (event) => {
-            const newEvents = { ...get().events };
-            newEvents[event.date] = newEvents[event.date].filter(e => e.id !== event.id);
+            const newEvents = get().events.filter(e => e.id !== event.id);
             set({ events: newEvents });
             await supabase.from('events').delete().eq('id', event.id);
+            await supabase.from('event_participants').delete().eq('event_id', event.id);
         },
 
         // -----------------------------------
@@ -127,11 +128,38 @@ export const [useEventsData, eventsActions] = createStore((set, get, withUser, w
             if (meetingsError) throw meetingsError;
             return { scheduledEvents, meetings };
         }
-    }
+    };
 });
 
+export const eventsActions = createStoreActions(useEventsData);
+
+// Selector utilities for components
+export const eventSelectors = {
+    getEventsForDate: (events, date) => {
+        const dateStr = typeof date === 'string' ? date : format(date, 'yyyy-MM-dd');
+        return events.filter(e => e.date === dateStr);
+    },
+
+    getRecurringEventsForDay: (events, dayOfWeek) => {
+        return events.filter(e => e.day_of_the_week === dayOfWeek);
+    },
+
+    getEventsForDateWithRecurring: (events, date) => {
+        const dateStr = typeof date === 'string' ? date : format(date, 'yyyy-MM-dd');
+        const dayOfWeek = new Date(date).getDay() + 1;
+        return events.filter(e =>
+            e.date === dateStr || e.day_of_the_week === dayOfWeek
+        );
+    },
+
+    getEventsForWeek: (events, weekDates) => {
+        const dateSet = new Set(weekDates.map(d => typeof d === 'string' ? d : format(d, 'yyyy-MM-dd')));
+        return events.filter(e => e.date && dateSet.has(e.date));
+    }
+};
+
+export const useRecurringEvents = createDataLoadingHook(useEventsData, 'events', 'loadRecurringEvents');
 export const useTodayEvents = createDataLoadingHook(useEventsData, 'events', 'loadTodayEvents');
-// export const useWeekEvents = createDataLoadingHook(useEventsData, 'events', 'loadWeekEvents');
 export const useWeekEvents = function useWeekEvents() {
     const week = useTime(state => state.week);
     const user = useUser(state => state.user);

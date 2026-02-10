@@ -1,13 +1,13 @@
 import { projectActions, useProjectData } from "@/utils/store/useProject";
 import Avatar from "@/components/Avatar";
 import { daysOfWeek, timeActions, useTime } from "@/utils/store/useTime";
-import { useMeetings } from "@/utils/store/useMeetings";
+import { useRecurringEvents } from "@/utils/store/useEvents";
 import { CalendarFold } from "lucide-react";
 import { useEffect } from "react";
 
 export default function ProjectInfo() {
   const project = useProjectData(state => state.project);
-  const meetings = useMeetings()
+  const events = useRecurringEvents()
   const terms = useTime(state => state.terms)
 
   useEffect(() => {
@@ -15,7 +15,7 @@ export default function ProjectInfo() {
   }, []);
 
   const getTermName = (termId) => terms.find(term => term.id === termId)?.name
-  const meeting = meetings.find(m => m.other_participants?.[0]?.id === project.master?.id);
+  const meeting = events.find(m => m.participants?.includes(project.master?.id));
 
   return (
     <div className="flex gap-3">
@@ -43,7 +43,7 @@ export default function ProjectInfo() {
             <div className="flex gap-2">
               <CalendarFold className="w-4 h-4" />
               {meeting ? (
-                <div className="text-xs">ימי {daysOfWeek[meeting.day - 1]} בשעה {meeting.start}</div>
+                <div className="text-xs">ימי {daysOfWeek[meeting.day_of_the_week - 1]} בשעה {meeting.start}</div>
               ) : (
                 <div className="text-xs text-destructive">אין פגישה מתוכננת</div>
               )}

@@ -1,5 +1,6 @@
 import { useTime } from "@/utils/store/useTime";
-import { createDataLoadingHook, createStore } from "./utils/createStore";
+import { create } from "zustand";
+import { createDataLoadingHook, createStoreActions, withUser } from "./utils/storeUtils";
 import { makeLink, prepareForProjectsTable, unLink } from "../supabase/utils";
 import { supabase } from "../supabase/client";
 import { resizeImage } from "../actions/storage actions";
@@ -7,15 +8,21 @@ import { newLogActions } from "./useLogs";
 import { debounce } from "lodash";
 import { format } from "date-fns";
 import { toastsActions } from "./useToasts";
+import { useUser } from "./useUser";
 
 
-export const [useProjectData, projectActions] = createStore((set, get, withUser, withLoadingCheck) => {
+export const useProjectData = create((set, get) => {
+    useUser.subscribe(originalUser => {
+        set({ project: null, tasks: [] });
+    });
+
     return {
         project: null,
+        tasks: [],
+        view: 'list',
 
         setProject: (project) => set({ project }),
         loadProject: withUser(async (user) => {
-            set({ project: null, tasks: [] });
             const currTerm = useTime.getState().currTerm;
             if (!currTerm) return;
             const { data, error } = await supabase.from('projects').select(`
@@ -135,8 +142,7 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
         // ------------------------------
         // ------ Project Tasks -------
         // ------------------------------
-        tasks: [],
-        view: 'list',
+        
         loadTasks: async () => {
             set({ tasks: [] });
             if (!useProjectData.getState().project) return;
@@ -220,6 +226,8 @@ export const [useProjectData, projectActions] = createStore((set, get, withUser,
         },
     }
 });
+
+export const projectActions = createStoreActions(useProjectData);
 
 
 export const useProject = createDataLoadingHook(useProjectData, 'project', 'loadProject');

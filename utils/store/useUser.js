@@ -6,6 +6,7 @@ import { resetPin } from '../actions/admin actions';
 import { supabase } from '../supabase/client';
 import { redirect } from 'next/navigation';
 import { toastsActions } from './useToasts';
+import { createStoreActions } from './utils/storeUtils';
 
 
 export const useUser = create(subscribeWithSelector((set, get) => {
@@ -141,9 +142,7 @@ export const isAdmin = () => {
 	return user && user.role == 'staff' && user.is_admin;
 }
 
-export const userActions = Object.fromEntries(
-	Object.entries(useUser.getState()).filter(([key, value]) => typeof value === 'function')
-);
+export const userActions = createStoreActions(useUser);
 
 async function getSession() {
 	const { data: { session }, error } = await supabase.auth.getSession()

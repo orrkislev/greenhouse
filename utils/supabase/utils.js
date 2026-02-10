@@ -20,7 +20,7 @@ export const prepareForGroupsTable = obj => buildSafeUpdates(obj, groupsFields)
 const projectsFields = ['title', 'description', 'student_id', 'status', 'metadata']
 export const prepareForProjectsTable = obj => buildSafeUpdates(obj, projectsFields)
 
-const eventsFields = ['title', 'description', 'date', 'start', 'end', 'created_by', 'metadata', 'repeat_weekly', 'day_of_the_week']
+const eventsFields = ['title', 'description', 'date', 'start', 'end', 'created_by', 'metadata', 'day_of_the_week']
 export const prepareForEventsTable = obj => buildSafeUpdates(obj, eventsFields)
 
 const studyPathsFields = ['title', 'description', 'student_id', 'status', 'metadata', 'sources']

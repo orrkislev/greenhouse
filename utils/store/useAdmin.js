@@ -3,7 +3,7 @@ import { createUser, deleteUser } from "@/utils/actions/admin actions";
 import { supabase } from "../supabase/client";
 import { makeLink, prepareForGroupsTable, prepareForUsersTable } from "../supabase/utils";
 import { projectActions } from "./useProject";
-import { createDataLoadingHook } from "./utils/createStore";
+import { createDataLoadingHook } from "./utils/storeUtils";
 import { format } from "date-fns";
 import { toastsActions } from "./useToasts";
 import { useTime } from "./useTime";

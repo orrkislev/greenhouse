@@ -28,7 +28,6 @@ export default function AuthGoogleCalendar() {
 }
 
 
-
 export function AuthGoogleListener() {
     const searchParams = useSearchParams();
     const router = useRouter();

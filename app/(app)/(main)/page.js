@@ -9,7 +9,7 @@ import MainStudy from "./components/MainStudy"
 import MainResearch from "./components/MainResearch"
 import MainVocation from "./components/MainVocation"
 import MainNews from "./components/MainNews"
-import { AuthGoogleListener } from "../schedule/components/Google/AuthGoogleCalendar"
+import { AuthGoogleListener } from "./components/AuthGoogleCalendar"
 
 export default function MainPage() {
 

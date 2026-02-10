@@ -1,11 +1,17 @@
-import { createDataLoadingHook, createStore } from "./utils/createStore";
+import { create } from "zustand";
+import { createDataLoadingHook, createStoreActions, withUser } from "./utils/storeUtils";
 import { supabase } from "../supabase/client";
+import { useUser } from "./useUser";
 
-export const [useVocationData, vocationActions] = createStore((set, get, withUser, withLoadingCheck) => {
+export const useVocationData = create((set, get) => {
+    useUser.subscribe(originalUser => {
+        set({ jobs: [] });
+    });
+    
     return {
         jobs: [],
 
-        loadJobs: withLoadingCheck(async (user) => {
+        loadJobs: withUser(async (user) => {
             set({ jobs: [] });
             const { data, error } = await supabase.from('vocation').select('*').eq('user_id', user.id);
             if (error) throw error;
@@ -31,5 +37,7 @@ export const [useVocationData, vocationActions] = createStore((set, get, withUse
         }
     }
 });
+
+export const vocationActions = createStoreActions(useVocationData);
 
 export const useVocation = createDataLoadingHook(useVocationData, 'jobs', 'loadJobs');

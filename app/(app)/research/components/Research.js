@@ -2,7 +2,7 @@ import Box2 from "@/components/Box2";
 import WithLabel from "@/components/WithLabel";
 import { researchActions, researchUtils, useResearchData } from "@/utils/store/useResearch";
 import { useUser } from "@/utils/store/useUser";
-import AuthGoogleCalendar from "../../schedule/components/Google/AuthGoogleCalendar";
+import AuthGoogleCalendar from "@/app/(app)/(main)/components/AuthGoogleCalendar";
 import Button from "@/components/Button";
 import { Clock, FileText } from "lucide-react";
 import Section_Questions from "./sections/Section_Questions";

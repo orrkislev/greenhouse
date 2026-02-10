@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { createStoreActions } from "./utils/createStore";
+import { createStoreActions } from "./utils/storeUtils";
 
 export const useToasts = create((set, get) => ({
     toasts: [],

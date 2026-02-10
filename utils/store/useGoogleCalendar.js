@@ -1,13 +1,14 @@
 import { useTime } from "@/utils/store/useTime";
 import { fetchEventsFromGoogleCalendar } from "@/utils/actions/google actions";
 import { addDays, format } from "date-fns";
-import { createDataLoadingHook, createStore } from "./utils/createStore";
+import { create } from "zustand";
+import { createDataLoadingHook, createStoreActions, withUser } from "./utils/storeUtils";
 
-export const [useGoogleCalendar, googleCalendarActions] = createStore((set, get, withUser, withLoadingCheck) => ({
+export const useGoogleCalendar = create((set, get) => ({
     events: [],
     loadedRanges: [],
 
-    getTodayEvents: withLoadingCheck(async (user) => {
+    getTodayEvents: withUser(async (user) => {
         set({ events: [], loadedRanges: [] });
 
         if (!user.googleRefreshToken) return;
@@ -21,7 +22,7 @@ export const [useGoogleCalendar, googleCalendarActions] = createStore((set, get,
         const events = await fetchEventsFromGoogleCalendar(user.googleRefreshToken, day, tomorrow);
         set({ events: events.map(formatEvent) })
     }),
-    getWeeksEvents: withLoadingCheck(async (user) => {
+    getWeeksEvents: withUser(async (user) => {
         set({ events: [], loadedRanges: [] });
         const week = useTime.getState().week;
         if (!week || week.length === 0) return
@@ -38,6 +39,8 @@ export const [useGoogleCalendar, googleCalendarActions] = createStore((set, get,
         set({ events: events.map(formatEvent) });
     }),
 }));
+
+export const googleCalendarActions = createStoreActions(useGoogleCalendar);
 
 export const useGoogleCalendarEventsToday = createDataLoadingHook(useGoogleCalendar, 'events', 'getTodayEvents');
 export const useGoogleCalendarEventsWeek = createDataLoadingHook(useGoogleCalendar, 'events', 'getWeeksEvents');

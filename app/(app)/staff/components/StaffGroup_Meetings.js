@@ -1,17 +1,23 @@
 
-import { ScheduleSection } from "@/app/(app)/schedule/components/Layout";
 import Button from "@/components/Button";
-import TimeRange from "@/components/TimeRange";
-import { meetingsActions, meetingUtils, useMeetings } from "@/utils/store/useMeetings";
 import { CalendarCheck, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import usePopper from "@/components/Popper";
+import { eventsActions, useRecurringEvents } from "@/utils/store/useEvents";
 
 const daysOfWeek = ['א', 'ב', 'ג', 'ד', 'ה'];
 
+const addMinutes = (time, minutes) => {
+    const [hours, mins] = time.split(':').map(Number);
+    const total = hours * 60 + mins + minutes;
+    const nextHours = Math.floor(total / 60) % 24;
+    const nextMins = total % 60;
+    return `${String(nextHours).padStart(2, '0')}:${String(nextMins).padStart(2, '0')}`;
+}
+
 export default function StaffGroup_Meetings({ group }) {
     const [isCollapsed, setIsCollapsed] = useState(true);
-    const meetings = useMeetings();
+    const events = useRecurringEvents();
 
     if (!group.members) return null;
     const students = group.members.filter(member => member.role === 'student');
@@ -19,7 +25,7 @@ export default function StaffGroup_Meetings({ group }) {
     const studentsWithMeetings = []
     const studentsWithoutMeetings = []
     students.forEach(student => {
-        const meeting = meetings.find(m => meetingUtils.hasUser(m, student));
+        const meeting = events.find(e => e.participants && e.participants.includes(student.id));
         if (meeting) studentsWithMeetings.push({ ...student, meeting: meeting });
         else studentsWithoutMeetings.push(student);
     });
@@ -64,7 +70,7 @@ export default function StaffGroup_Meetings({ group }) {
 
             {/* Desktop view - grid */}
             <div className="hidden md:block">
-                <ScheduleSection withLabel={false}>
+                <div>
                     <div className="bg-muted px-2 py-1 text-sm">
                         חניכים ללא שיחה מתוכננת
                     </div>
@@ -88,7 +94,7 @@ export default function StaffGroup_Meetings({ group }) {
                             ))}
                         </div>
                     ))}
-                </ScheduleSection>
+                </div>
             </div>
                 </>
             )}
@@ -110,7 +116,7 @@ function StudentMeetingSlot({ student, meeting }) {
                 <span className="">{student.first_name} {student.last_name}</span>
                 {meeting && (
                     <span className="text-muted-foreground">
-                        {displayTime(meeting.start)} - {displayTime(meeting.end)}
+                        {displayTime(meeting.start)}
                     </span>
                 )}
             </div>
@@ -122,20 +128,36 @@ function StudentMeetingSlot({ student, meeting }) {
 }
 
 export function EditMeeting({ student, meeting, onClose }) {
-    const [time, setTime] = useState({ start: meeting ? meeting.start : '09:30', end: meeting ? meeting.end : '10:00' });
+    const [startTime, setStartTime] = useState(meeting ? meeting.start : '09:30');
     const [day, setDay] = useState(meeting ? meeting.day_of_the_week : 1);
 
     const onDelete = () => {
-        meetingsActions.deleteMeeting(meeting.id);
+        eventsActions.deleteEvent(meeting);
         onClose();
     }
 
     const onSave = () => {
         const formatTime = (time) => time.split(':')[0] + ':' + time.split(':')[1];
+        const formattedStart = formatTime(startTime);
+        const formattedEnd = addMinutes(formattedStart, 30);
         if (meeting) {
-            meetingsActions.updateMeeting(meeting.id, { start: formatTime(time.start), end: formatTime(time.end), day_of_the_week: day });
+            eventsActions.saveEvent({
+                id: meeting.id,
+                start: formattedStart,
+                end: formattedEnd,
+                day_of_the_week: day,
+                repeat_weekly: true,
+                participants: [student.id],
+            });
         } else {
-            meetingsActions.createMeeting(student, day, formatTime(time.start), formatTime(time.end));
+            eventsActions.addEvent({
+                title: 'פגישה',
+                repeat_weekly: true,
+                day_of_the_week: day,
+                start: formattedStart,
+                end: formattedEnd,
+                participants: [student.id],
+            });
         }
         onClose();
     }
@@ -149,9 +171,11 @@ export function EditMeeting({ student, meeting, onClose }) {
                     <p className="text-sm text-muted-foreground">ניתן לתאם שיחה חדשה עם החניך.</p>
                 </>
             )}
-            <TimeRange
-                defaultValue={time}
-                onUpdate={(newTime) => setTime(newTime)}
+            <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="rounded-lg border px-3 py-2 shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
             />
             <select value={day} onChange={(e) => setDay(Number(e.target.value))} className="border border-border rounded px-2 py-1 w-full text-sm md:text-base">
                 {daysOfWeek.map((day, index) => (
