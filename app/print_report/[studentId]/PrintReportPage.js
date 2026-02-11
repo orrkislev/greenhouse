@@ -35,6 +35,12 @@ export default function PrintReportPage({ studentId }) {
         })();
     }, [studentId])
 
+    useEffect(() => {
+        if (student) {
+            document.title = `הערכה תשפו א - ${student.first_name} ${student.last_name}`;
+        }
+    }, [student])
+
 
     if (!student) return null;
     return (
