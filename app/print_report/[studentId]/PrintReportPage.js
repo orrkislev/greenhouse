@@ -67,6 +67,16 @@ export default function PrintReportPage({studentId}) {
                         />
                     </ReportPage>
                 </div>
+
+                <div data-report-page>
+                    <ReportPage withChamama={false} withAvoda={false} withHodHasharon={false} withAmal={false}>
+                        <div className="flex justify-center items-center h-full">
+                            <div className="flex flex-col items-center justify-center">
+                                <img src="/images/report/chamamaLarge.jpg" alt="logo" className="h-64 grayscale" /> 
+                            </div>
+                        </div>
+                    </ReportPage>
+                </div>
             </div>
         </div>
     )

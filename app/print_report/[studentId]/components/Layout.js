@@ -4,7 +4,7 @@
 import { tw, cn } from "@/utils/tw"
 import { forwardRef } from "react"
 
-export function ReportPage({ children }) {
+export function ReportPage({ children, withChamama=true, withAvoda=true, withHodHasharon=true, withAmal=true }) {
     return (
         <div data-report-page className="w-[793px] h-[1122px] bg-white p-8 flex flex-col david-libre [&_*]:outline-none"
         style={{
@@ -12,10 +12,10 @@ export function ReportPage({ children }) {
         }}
         >
             <div className="flex items-center justify-between grayscale mb-6">
-                <img src="/images/report/chamama.png" alt="logo" className="h-12 " />
-                <img src="/images/report/haavoda.png" alt="logo" className="h-12" />
-                <img src="/images/report/hodHasharon.png" alt="logo" className="h-12" />
-                <img src="/images/report/amal.jpeg" alt="logo" className="h-12" />
+                {withChamama ? <img src="/images/report/chamama.png" alt="logo" className="h-12 " /> : <div className="h-12" />}
+                {withAvoda ? <img src="/images/report/haavoda.png" alt="logo" className="h-12" /> : <div className="h-12" />}
+                {withHodHasharon ? <img src="/images/report/hodHasharon.png" alt="logo" className="h-12" /> : <div className="h-12" />}
+                {withAmal ? <img src="/images/report/amal.jpeg" alt="logo" className="h-12" /> : <div className="h-12" />}
             </div>
             {children}
         </div>
