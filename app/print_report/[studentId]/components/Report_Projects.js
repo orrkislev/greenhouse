@@ -1,7 +1,7 @@
 import RadarChart from "@/components/RadarChart";
 import { ReportPageSection, SectionSubtitle, SectionText, SectionTitle } from "./Layout";
 
-export default function Report_Projects({ student}) {
+export default function Report_Projects({ student }) {
 
     if (student.year === '1' || student.year === '2') {
         return <Regular student={student} />;
@@ -81,9 +81,9 @@ function Final({ student }) {
                 <div className="flex gap-4">
                     <div className="flex-1 flex flex-col gap-2">
                         <SectionSubtitle>פרויקט הגמר</SectionSubtitle>
-                        <SectionText className="font-bold text-lg">{finalProject?.title || "ללא כותרת"}</SectionText>
-                        {finalProject?.master?.first_name && (
-                            <SectionText className="text-muted-foreground">בליווי {finalProject?.master?.first_name}</SectionText>
+                        <SectionText className="font-bold text-lg">{finalProject?.project_title || "ללא כותרת"}</SectionText>
+                        {finalProject?.master_name && (
+                            <SectionText className="text-muted-foreground">בליווי {finalProject?.master_name}</SectionText>
                         )}
                         <SectionText className="italic mt-2">{finalProject?.reflections_project || ""}</SectionText>
                     </div>
@@ -94,7 +94,7 @@ function Final({ student }) {
 
                 <div className="flex-1 flex flex-col gap-2">
                     <SectionSubtitle>החקר</SectionSubtitle>
-                    <SectionText className="italic">{finalProject?.reflections_project || ""}</SectionText>
+                    <SectionText className="italic">{finalProject?.reflections_research || ""}</SectionText>
                 </div>
 
                 <div className="flex-1 flex flex-col gap-2 bg-[#f9fafb] p-3 rounded">

@@ -239,6 +239,9 @@ function MiniIkigai({ ikigai }) {
 }
 
 export default function Report_General({ student }) {
+
+    const smaller = student.year == 4;
+
     return (
         <ReportPageSection title="מבט כללי" className="flex-2">
             <div className='w-full flex-1 h-full flex gap-4'>
@@ -250,7 +253,7 @@ export default function Report_General({ student }) {
                 </div>
                 <div className='flex-1 flex flex-col gap-1'>
                     <SectionSubtitle>ממני אליך</SectionSubtitle>
-                    <SectionText>{student.mentors}</SectionText>
+                    <SectionText className={smaller ? "text-[12pt]" : ""}>{student.mentors}</SectionText>
                 </div>
             </div>
         </ReportPageSection>

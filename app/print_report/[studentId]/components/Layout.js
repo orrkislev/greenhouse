@@ -4,12 +4,12 @@
 import { tw, cn } from "@/utils/tw"
 import { forwardRef } from "react"
 
-export function ReportPage({ children, withChamama=true, withAvoda=true, withHodHasharon=true, withAmal=true }) {
+export function ReportPage({ children, withChamama = true, withAvoda = true, withHodHasharon = true, withAmal = true }) {
     return (
         <div data-report-page className="w-[793px] h-[1122px] bg-white p-8 flex flex-col david-libre [&_*]:outline-none"
-        style={{
-            breakAfter: 'page',
-        }}
+            style={{
+                breakAfter: 'page',
+            }}
         >
             <div className="flex items-center justify-between grayscale mb-6">
                 {withChamama ? <img src="/images/report/chamama.png" alt="logo" className="h-12 " /> : <div className="h-12" />}
@@ -50,7 +50,7 @@ const yearMap = [
     'שנה רביעית',
 ]
 
-export function ReportTitle({student}) {
+export function ReportTitle({ student }) {
     return (
         <div className='flex flex-col items-center justify-center'>
             <div className='text-lg text-center'>
@@ -98,7 +98,7 @@ export const SectionText = forwardRef(({ children, className, ...props }, ref) =
         contentEditable
         suppressContentEditableWarning
         className={cn("david-libre text-[12pt] focus:bg-[#eff6ff] rounded px-0.5 -mx-0.5", className)}
-        style={{ outline: 'none' }}
+        style={{ outline: 'none', lineHeight: '1.3' }}
         {...props}
     >
         {children}

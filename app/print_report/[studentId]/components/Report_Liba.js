@@ -2,10 +2,10 @@ import { ReportPageSection } from "./Layout";
 import { SectionSubtitle } from "./Layout";
 import { SectionText } from "./Layout";
 
-export default function Report_Liba({student}) {
+export default function Report_Liba({ student }) {
     return (
         <ReportPageSection title="ליבה" className="flex-1">
-            <div className='w-full flex-1 h-full flex gap-[8px]'>
+            <div className='w-full flex-1 h-full flex gap-[16px]'>
                 <div className='flex-1 flex flex-col gap-[4px]'>
                     <SectionSubtitle className='h-12'>{student.liba?.question}</SectionSubtitle>
                     <SectionText>{student.liba?.answer}</SectionText>
