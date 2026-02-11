@@ -15,13 +15,13 @@ import Report_Portfolio from './components/Report_Portfolio';
 
 
 
-export default function PrintReportPage({studentId}) {
+export default function PrintReportPage({ studentId }) {
     const [student, setStudent] = useState(null);
 
-    useEffect(()=>{
+    useEffect(() => {
         if (!studentId) return;
         (async () => {
-            const { data:publicData, error: publicError } = await supabase.from('report_cards_public').select('*').eq('id', studentId).single();
+            const { data: publicData, error: publicError } = await supabase.from('report_cards_public').select('*').eq('id', studentId).single();
             if (publicError) {
                 toastsActions.addFromError(publicError, 'שגיאה בטעינת הדוח הציבורי של התלמיד');
                 return;
@@ -31,9 +31,9 @@ export default function PrintReportPage({studentId}) {
                 toastsActions.addFromError(privateError, 'שגיאה בטעינת הדוח הפרטי של התלמיד');
                 return;
             }
-            setStudent({...publicData, ...privateData});
-        })();        
-    },[studentId])
+            setStudent({ ...publicData, ...privateData });
+        })();
+    }, [studentId])
 
 
     if (!student) return null;
@@ -53,8 +53,8 @@ export default function PrintReportPage({studentId}) {
 
                 <div data-report-page>
                     <ReportPage>
-                        <Report_Projects student={student}/>
-                        <Report_Portfolio student={student} />
+                        <Report_Projects student={student} />
+                        {student.year != '1' && (<Report_Portfolio student={student} />)}
                     </ReportPage>
                 </div>
 
@@ -72,7 +72,7 @@ export default function PrintReportPage({studentId}) {
                     <ReportPage withChamama={false} withAvoda={false} withHodHasharon={false} withAmal={false}>
                         <div className="flex justify-center items-center h-full">
                             <div className="flex flex-col items-center justify-center">
-                                <img src="/images/report/chamamaLarge.jpg" alt="logo" className="h-64 grayscale" /> 
+                                <img src="/images/report/chamamaLarge.jpg" alt="logo" className="h-64 grayscale" />
                             </div>
                         </div>
                     </ReportPage>

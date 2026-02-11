@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { ReportPageSection, SectionSubtitle, SectionText } from "./Layout";
 
 export default function Report_Learning({ student }) {
@@ -21,8 +22,8 @@ export default function Report_Learning({ student }) {
                         </thead>
                         <tbody>
                             {topics.map((topic, index) => (
-                                <>
-                                    <tr key={index} className='border-b border-dashed border-neutral-400'>
+                                <Fragment key={index}>
+                                    <tr className='border-b border-dashed border-neutral-400'>
                                         <td className='font-bold p-1 align-top' contentEditable suppressContentEditableWarning>{topic.name}</td>
                                         <td className='p-1 align-top' contentEditable suppressContentEditableWarning>
                                             <ul className='list-disc list-inside'>
@@ -41,7 +42,7 @@ export default function Report_Learning({ student }) {
                                             </td>
                                         </tr>
                                     )}
-                                </>
+                                </Fragment>
                             ))}
                         </tbody>
                     </table>
