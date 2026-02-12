@@ -16,7 +16,7 @@ export default function Report_Projects({ student }) {
     return null;
 }
 
-function TermSection({ project, research, term }) {
+function TermSection({ project, research, term, student }) {
     if (!project && !research) return null;
 
     const data = [
@@ -26,6 +26,8 @@ function TermSection({ project, research, term }) {
         { subject: 'תכנון', value: project?.['הצגה ותיעוד']?.overview || 50 },
     ];
 
+    const smaller = student.year == 1;
+
     return (
         <div className='flex-1 flex flex-col'>
             <div className="flex gap-2 flex-1">
@@ -33,12 +35,12 @@ function TermSection({ project, research, term }) {
                     <SectionTitle className='underline'>{term}</SectionTitle>
                     <SectionSubtitle>פרויקט ה{project?.term || term} - <span className='text-2xl'>{project?.title}</span></SectionSubtitle>
                     {project?.master?.first_name && (
-                        <SectionText className="text-muted-foreground -mt-2">בליווי {project?.master?.first_name}</SectionText>
+                        <SectionText smaller className="text-muted-foreground -mt-2">בליווי {project?.master?.first_name}</SectionText>
                     )}
-                    <SectionText className="italic mt-1">{project?.summary}</SectionText>
+                    <SectionText smaller className="italic mt-1">{project?.summary}</SectionText>
 
                     <SectionSubtitle className="mt-4">חקר ה{term} - {research?.title}</SectionSubtitle>
-                    <SectionText className="italic">{research?.summary}</SectionText>
+                    <SectionText smaller className="italic">{research?.summary}</SectionText>
                 </div>
                 <div className="flex items-start justify-start p-8">
                     <RadarChart data={data} size={200} />
@@ -57,8 +59,8 @@ function Regular({ student }) {
     return (
         <ReportPageSection title="פרויקטים" className="flex-1">
             <div className='w-full flex-1 h-full flex flex-col gap-4'>
-                <TermSection project={autumnProject} research={autumnResearch} term="סתיו" />
-                <TermSection project={winterProject} research={winterResearch} term="חורף" />
+                <TermSection project={autumnProject} research={autumnResearch} term="סתיו" student={student}/>
+                <TermSection project={winterProject} research={winterResearch} term="חורף" student={student}/>
             </div>
         </ReportPageSection>
     )

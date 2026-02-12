@@ -253,7 +253,7 @@ export default function Report_General({ student }) {
                 </div>
                 <div className='flex-1 flex flex-col gap-1'>
                     <SectionSubtitle>ממני אליך</SectionSubtitle>
-                    <SectionText className={smaller ? "text-[11pt]" : ""}>{student.mentors}</SectionText>
+                    <SectionText smaller>{student.mentors}</SectionText>
                 </div>
             </div>
         </ReportPageSection>

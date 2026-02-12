@@ -9,6 +9,7 @@ export default function RadarChart({ data, size = 400, onEdit }) {
     const center = size / 2;
     const maxRadius = size * 0.35;
     const gridLevels = 4;
+    const gridLabels = ['לא בוצע', 'בוצע חלקית', 'בוצע', 'בוצע מעולה'];
 
     // Calculate points for each metric on a circle
     const calculatePoint = (index, value, total) => {
@@ -160,6 +161,8 @@ export default function RadarChart({ data, size = 400, onEdit }) {
                 />
             ))}
 
+            
+
             {/* Radial grid lines */}
             {gridLines.map((line, i) => (
                 <line
@@ -207,7 +210,7 @@ export default function RadarChart({ data, size = 400, onEdit }) {
                 return (
                     <text
                         key={i}
-                        x={point.labelX}
+                        x={point.labelX * 1.03}
                         y={point.labelY}
                         textAnchor="middle"
                         dominantBaseline="middle"
@@ -216,6 +219,27 @@ export default function RadarChart({ data, size = 400, onEdit }) {
                         fill="#333"
                     >
                         {item.subject}
+                    </text>
+                );
+            })}
+
+            {/* Grid level labels */}
+            {gridCircles.map((radius, i) => {
+                const labelX = center + (radius + 10) * Math.cos(Math.PI / 4);
+                const labelY = center - (radius + 10) * Math.sin(Math.PI / 4);
+                return (
+                    <text
+                        key={i}
+                        x={labelX}
+                        y={labelY}
+                        fontSize="10"
+                        fill="#666"
+                        dominantBaseline="middle"
+                        textAnchor="middle"
+                        transform={`rotate(45, ${labelX}, ${labelY})`}
+                        style={{ userSelect: 'none' }}
+                    >
+                        {gridLabels[i]}
                     </text>
                 );
             })}

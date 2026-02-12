@@ -84,7 +84,7 @@ export const SectionSubtitle = forwardRef(({ children, className, ...props }, re
         contentEditable
         suppressContentEditableWarning
         className={cn("david-libre leading-none tracking-tight font-bold text-[14pt] focus:bg-[#eff6ff] rounded px-0.5 -mx-0.5", className)}
-        style={{ outline: 'none' }}
+        style={{ outline: 'none', lineHeight: '1.2' }}
         {...props}
     >
         {children}
@@ -92,12 +92,12 @@ export const SectionSubtitle = forwardRef(({ children, className, ...props }, re
 ))
 SectionSubtitle.displayName = 'SectionSubtitle'
 
-export const SectionText = forwardRef(({ children, className, ...props }, ref) => (
+export const SectionText = forwardRef(({ children, className, smaller = false, ...props }, ref) => (
     <div
         ref={ref}
         contentEditable
         suppressContentEditableWarning
-        className={cn("david-libre text-[12pt] focus:bg-[#eff6ff] rounded px-0.5 -mx-0.5", className)}
+        className={cn(`david-libre text-[${smaller ? '11pt' : '12pt'}] focus:bg-[#eff6ff] rounded px-0.5 -mx-0.5`, className)}
         style={{ outline: 'none', lineHeight: '1.3' }}
         {...props}
     >
