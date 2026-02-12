@@ -84,7 +84,7 @@ export const SectionSubtitle = forwardRef(({ children, className, ...props }, re
         contentEditable
         suppressContentEditableWarning
         className={cn("david-libre leading-none tracking-tight font-bold text-[14pt] focus:bg-[#eff6ff] rounded px-0.5 -mx-0.5", className)}
-        style={{ outline: 'none' }}
+        style={{ outline: 'none', lineHeight: '1.2' }}
         {...props}
     >
         {children}
