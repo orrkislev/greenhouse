@@ -15,15 +15,15 @@ export default function Report_Learning({ student }) {
                     <table className='w-full text-right'>
                         <thead className='border-b border-neutral-600'>
                             <tr>
-                                <th className='font-bold pb-1'>נושא הלמידה</th>
-                                <th className='font-bold pb-1'>מה למדתי</th>
+                                <th className='font-bold pb-1 min-w-[8em]'>נושא הלמידה</th>
+                                <th className='font-bold pb-1 min-w-[10em]'>מה למדתי</th>
                                 <th className='font-bold pb-1'>איך למדתי</th>
                             </tr>
                         </thead>
                         <tbody>
                             {topics.map((topic, index) => (
                                 <Fragment key={index}>
-                                    <tr className='border-b border-dashed border-neutral-400'>
+                                    <tr className={`${(index === 0 && englishMasterReview) ? '' : 'border-b border-dashed border-neutral-400'}`}>
                                         <td className='font-bold p-1 align-top' contentEditable suppressContentEditableWarning>{topic.name}</td>
                                         <td className='p-1 align-top' contentEditable suppressContentEditableWarning>
                                             <ul className='list-disc list-inside'>
@@ -35,8 +35,9 @@ export default function Report_Learning({ student }) {
                                         <td className='text-neutral-700 p-1 align-top' contentEditable suppressContentEditableWarning>{topic.howLearned}</td>
                                     </tr>
                                     {index === 0 && englishMasterReview && (
-                                        <tr key={`${index}-master-review`} className='border-b border-dashed border-neutral-400'>
-                                            <td className='font-bold p-1 align-top' contentEditable suppressContentEditableWarning>חוות דעת מנחה</td>
+                                        <tr key={`${index}-master-review`} className='border-b border-dashed border-neutral-400 text-[9pt]'>
+                                            <td />
+                                            <td className='font-bold p-1 align-top' contentEditable suppressContentEditableWarning>משוב מאסטר אנגלית</td>
                                             <td colSpan="2" className='p-1 align-top text-neutral-700 italic' contentEditable suppressContentEditableWarning>
                                                 {englishMasterReview}
                                             </td>
