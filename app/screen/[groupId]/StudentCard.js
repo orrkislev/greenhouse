@@ -31,7 +31,7 @@ export default function StudentCard({ student, viewMode }) {
                     {allEvents.length > 0 ? (
                         <div className="space-y-1">
                             {allEvents.map((event, idx) => (
-                                <div key={event.id || idx} className="text-xs">
+                                <div key={idx} className="text-xs">
                                     <div className="flex items-center gap-1">
                                         <span className="text-foreground font-medium">{event.start.split(':').slice(0, 2).join(':')}</span>
                                         {(event.participants && event.participants.length > 0) ?

@@ -5,7 +5,7 @@ import { differenceInWeeks, startOfWeek } from "date-fns";
 
 const TopBarButton = tw`px-4 py-2 rounded-t-lg font-semibold text-sm transition-all flex items-center gap-2
 text-foreground hover:bg-primary hover:text-foreground
-${props => props.active ? 'bg-primary text-primary-foreground shadow-lg' : 'hover:bg-orange-200 hover:text-foreground'}`;
+${props => props.$active ? 'bg-primary text-primary-foreground shadow-lg' : 'hover:bg-orange-200 hover:text-foreground'}`;
 
 export default function ScreenTopBar({ group, viewMode, setViewMode, includeStaff, toggleStaff, isRotating, toggleRotate }) {
     const currTerm = useTime((state) => state.currTerm);
@@ -40,26 +40,26 @@ export default function ScreenTopBar({ group, viewMode, setViewMode, includeStaf
             <div className="flex items-center gap-3 justify-self-end">
                 <TopBarButton
                     onClick={() => setViewMode('events')}
-                    active={viewMode === 'events'}
+                    $active={viewMode === 'events'}
                 >
                     <Calendar className="w-4 h-4" />
                     לוח זמנים
                 </TopBarButton>
                 <TopBarButton
                     onClick={() => setViewMode('project')}
-                    active={viewMode === 'project'}
+                    $active={viewMode === 'project'}
                 >
                     <Snail className="w-4 h-4" />
                     פרויקטים
                 </TopBarButton>
                 <TopBarButton
                     onClick={() => setViewMode('research')}
-                    active={viewMode === 'research'}
+                    $active={viewMode === 'research'}
                 >
                     <Brain className="w-4 h-4" />
                     חקר
                 </TopBarButton>
-                
+
                 {/* Checkboxes */}
                 <div className="flex items-center gap-4 mr-4">
                     <label className="flex items-center gap-2 cursor-pointer text-sm text-stone-700 hover:text-stone-900">
