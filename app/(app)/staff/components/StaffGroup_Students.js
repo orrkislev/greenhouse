@@ -2,7 +2,7 @@ import { StudentCard } from "./StudentCard";
 import { useEffect, useState } from "react";
 import { userActions } from "@/utils/store/useUser";
 import Avatar from "@/components/Avatar";
-import { eventsActions, useRecurringEvents } from "@/utils/store/useEvents";
+import { eventsActions, eventSelectors, useRecurringEvents, useEventsData } from "@/utils/store/useEvents";
 import { groupsActions, groupUtils, useGroups } from "@/utils/store/useGroups";
 import { daysOfWeek, useTime } from "@/utils/store/useTime";
 import Button from "@/components/Button";
@@ -68,15 +68,19 @@ export function Staff_Students_List({ students, context, group }) {
 export function SelectedStudentCard({ student, context, group, onClose }) {
     const [data, setData] = useState(null)
     const groups = useGroups(state => state.groups);
+    const events = useEventsData(state => state.events);
     const today = useTime(state => state.today);
 
     useEffect(() => {
         setData({ ...student });
         (async () => {
-            const events = await eventsActions.getTodaysEventsForUser(student.id);
-            groupUtils.getUserGroupIds(student).forEach(groupId => groupsActions.loadGroupEvents(groupId, today, today));
+            const userEvents = await eventsActions.getTodaysEventsForUser(student.id);
+            const groupIds = groupUtils.getUserGroupIds(student);
+            if (groupIds.length > 0) {
+                await eventsActions.loadGroupEvents(groupIds, today, today);
+            }
             const project = await projectActions.getProjectForStudent(student.id);
-            setData({ ...student, events, project });
+            setData({ ...student, events: userEvents, project });
         })()
     }, [student, today])
 
@@ -123,17 +127,20 @@ export function SelectedStudentCard({ student, context, group, onClose }) {
                         <div className="text-sm font-bold">{event.title}</div>
                     </div>
                 )) : <div className="text-xs text-muted-foreground">אין אירועים היום</div>}
-                {groups.filter(g => groupUtils.isMember(g, data)).map(group => (
-                    <div key={group.id} className="flex gap-3 items-center">
-                        <div className="text-sm font-semibold">ב{group.name}</div>
-                        {group.events && group.events[today] && group.events[today].length > 0 ? group.events[today].map(event => (
-                            <div key={event.id} className="flex gap-3 items-center">
-                                <div className="text-xs">ב{event.start}</div>
-                                <div className="text-sm">{event.title}</div>
-                            </div>
-                        )) : <div className="text-xs text-muted-foreground">אין אירועים היום</div>}
-                    </div>
-                ))}
+                {groups.filter(g => groupUtils.isMember(g, data)).map(group => {
+                    const groupEvents = eventSelectors.getGroupEventsForDate(events, group.id, today);
+                    return (
+                        <div key={group.id} className="flex gap-3 items-center">
+                            <div className="text-sm font-semibold">ב{group.name}</div>
+                            {groupEvents.length > 0 ? groupEvents.map(event => (
+                                <div key={event.id} className="flex gap-3 items-center">
+                                    <div className="text-xs">ב{event.start}</div>
+                                    <div className="text-sm">{event.title}</div>
+                                </div>
+                            )) : <div className="text-xs text-muted-foreground">אין אירועים היום</div>}
+                        </div>
+                    );
+                })}
             </WithLabel>
 
             <SelectedStudentCard_Meeting student={data} />

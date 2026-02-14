@@ -1,5 +1,7 @@
 import Box2 from "@/components/Box2";
 import { groupsActions, useUserGroups } from "@/utils/store/useGroups";
+import { eventsActions } from "@/utils/store/useEvents";
+import { useTime } from "@/utils/store/useTime";
 import { useEffect, useState } from "react";
 import { isStaff, useUser } from "@/utils/store/useUser";
 import { Check, CheckSquare, Square, Users2 } from "lucide-react";
@@ -30,10 +32,14 @@ export default function MainGroups() {
 }
 
 function MainGroup({ group }) {
+    const week = useTime(state => state.week);
+
     useEffect(() => {
         groupsActions.loadGroupTasks(group.id);
-        groupsActions.loadWeekEvents(group.id);
-    }, [group])
+        if (week && week.length > 0) {
+            eventsActions.loadGroupEvents([group.id], week[0], week[week.length - 1]);
+        }
+    }, [group.id, week])
 
     const groupName = group.type === 'class' ? 'קבוצת ' + group.name : group.type === 'major' ? 'מגמת ' + group.name : group.name;
 

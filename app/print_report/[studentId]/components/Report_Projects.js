@@ -90,7 +90,7 @@ function Final({ student }) {
                         <SectionText className="italic mt-2">{finalProject?.reflections_project || ""}</SectionText>
                     </div>
                     <div className="flex items-center justify-center">
-                        <RadarChart data={radarData} size={150} />
+                        <RadarChart data={radarData} size={250} />
                     </div>
                 </div>
 

@@ -1,10 +1,8 @@
 import { create } from "zustand";
 import { createDataLoadingHook, createStoreActions, withUser } from "./utils/storeUtils";
 import { useUser } from "@/utils/store/useUser";
-import { useTime } from "@/utils/store/useTime";
 import { supabase } from "../supabase/client";
 import { makeLink, prepareForGroupsTable } from "../supabase/utils";
-import { addDays, format } from "date-fns";
 import { toastsActions } from "./useToasts";
 
 export const useGroups = create((set, get) => {
@@ -18,6 +16,7 @@ export const useGroups = create((set, get) => {
         // ----------- Group Loading -----------
         // -------------------------------------
         loadUserGroups: withUser(async (user) => {
+            if (get().groups.length > 0) return;
             const { data, error } = await supabase.rpc('get_user_groups', {
                 p_user_id: user.id
             })
@@ -64,118 +63,6 @@ export const useGroups = create((set, get) => {
             set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, members: g.members.filter(m => m.id !== userId) } : g) }));
             const { error } = await supabase.from('users_groups').delete().eq('group_id', groupId).eq('user_id', userId);
             if (error) toastsActions.addFromError(error, 'שגיאה בהסרת משתמש מהקבוצה');
-        },
-
-        // ----------- Group Events Management -----------
-        // ------------------------------------------------
-        loadTodayEvents: async (groupId) => {
-            const today = useTime.getState().today;
-            if (groupId) {
-                await get().loadGroupEvents(groupId, today);
-                return;
-            }
-            for (const group of get().groups) {
-                await get().loadGroupEvents(group.id, today);
-            }
-        },
-        loadWeekEvents: async (groupId) => {
-            const week = useTime.getState().week;
-            if (!week || week.length === 0) return;
-            if (groupId) {
-                await get().loadGroupEvents(groupId, week[0], week[week.length - 1]);
-                return;
-            }
-            for (const group of get().groups) {
-                await get().loadGroupEvents(group.id, week[0], week[week.length - 1]);
-            }
-        },
-        loadGroupEvents: async (groupId, start, end) => {
-            if (!end) end = start;
-
-            const group = get().groups.find(g => g.id === groupId);
-            if (!group) return;
-
-            // Initialize events array if not exists
-            const events = group.events || [];
-            const loadedRanges = group.loadedRanges || [];
-
-            // Check if range is already loaded
-            const isRangeLoaded = loadedRanges.some(range =>
-                range.start <= start && range.end >= end
-            );
-            if (isRangeLoaded) return;
-
-            const obj = { p_group_id: groupId, p_start_date: start, p_end_date: end || start }
-            const { data, error } = await supabase.rpc('get_group_events', obj)
-            if (error) toastsActions.addFromError(error, 'שגיאה בטעינת אירועים לקבוצה');
-
-            // Add new events to flat array
-            const newEvents = [...events];
-            data.forEach(newEvent => {
-                if (!newEvents.find(e => e.id === newEvent.id)) {
-                    newEvents.push(newEvent);
-                }
-            });
-
-            // Sort by date and start time
-            newEvents.sort((a, b) => {
-                const dateCompare = (a.date || '').localeCompare(b.date || '');
-                if (dateCompare !== 0) return dateCompare;
-                return (a.start || '').localeCompare(b.start || '');
-            });
-
-            set((state) => ({
-                groups: state.groups.map(g => g.id === groupId ? {
-                    ...g,
-                    events: newEvents,
-                    loadedRanges: [...loadedRanges, { start, end }]
-                } : g)
-            }));
-        },
-        createGroupEvent: async (groupId, obj) => {
-            const { data, error } = await supabase.from('events').insert(obj).select().single();
-            if (error) toastsActions.addFromError(error, 'שגיאה ביצירת אירוע');
-
-            const group = get().groups.find(g => g.id === groupId);
-            const events = group?.events || [];
-            const newEvents = [...events, data];
-
-            // Sort by date and start time
-            newEvents.sort((a, b) => {
-                const dateCompare = (a.date || '').localeCompare(b.date || '');
-                if (dateCompare !== 0) return dateCompare;
-                return (a.start || '').localeCompare(b.start || '');
-            });
-
-            set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: newEvents } : g) }));
-            await makeLink('events', data.id, 'groups', groupId);
-        },
-        updateGroupEvent: async (groupId, obj) => {
-            const group = get().groups.find(g => g.id === groupId);
-            const events = group?.events || [];
-            const newEvents = events.map(e => e.id === obj.id ? obj : e);
-
-            // Sort by date and start time
-            newEvents.sort((a, b) => {
-                const dateCompare = (a.date || '').localeCompare(b.date || '');
-                if (dateCompare !== 0) return dateCompare;
-                return (a.start || '').localeCompare(b.start || '');
-            });
-
-            set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: newEvents } : g) }));
-
-            const { error } = await supabase.from('events').update(obj).eq('id', obj.id);
-            if (error) toastsActions.addFromError(error, 'שגיאה בעדכון אירוע');
-        },
-        removeGroupEvent: async (groupId, date, objId) => {
-            const group = get().groups.find(g => g.id === groupId);
-            const events = group?.events || [];
-            const newEvents = events.filter(e => e.id !== objId);
-
-            set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, events: newEvents } : g) }));
-
-            const { error } = await supabase.from('events').delete().eq('id', objId);
-            if (error) toastsActions.addFromError(error, 'שגיאה במחיקת אירוע');
         },
 
         // ----------- Group Students Management -----------

@@ -6,8 +6,8 @@ import ContextBar from "@/components/ContextBar";
 import { DashboardLayout, DashboardMain, DashboardPanel, DashboardPanelButton } from "@/components/DashboardLayout";
 import Schedule from "./components/Schedule";
 import ScheduleContext from "../schedule/components/ScheduleContext";
+import Term from "./term/Term";
 
-const ScheduleOuter = tw`w-full h-full pr-2 md:pr-16 pt-4 md:pt-8`;
 
 export default function SchedulePage() {
     const [view, setView] = useState('week');
@@ -21,7 +21,7 @@ export default function SchedulePage() {
                     <DashboardPanelButton onClick={() => setView('semester')} $active={view === 'semester'}>תקופה</DashboardPanelButton>
                 </DashboardPanel>
                 <DashboardMain>
-                    <Schedule />
+                    {view === 'week' ? <Schedule view="week" /> : <Term />}
                 </DashboardMain>
             </DashboardLayout>
             <ContextBar>

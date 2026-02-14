@@ -1,6 +1,8 @@
 import Button from "@/components/Button";
 import { eventsActions } from "@/utils/store/useEvents";
 import { useAdmin, adminActions } from "@/utils/store/useAdmin";
+import { isStaff } from "@/utils/store/useUser";
+import { useUserGroups } from "@/utils/store/useGroups";
 import { format } from "date-fns";
 import { Save, Trash2, Plus, X } from "lucide-react";
 import { useState, useRef } from "react";
@@ -8,6 +10,8 @@ import { useState, useRef } from "react";
 export function EventEditModal({ event, close, _date, _time }) {
     const isNew = !event;
     const allMembers = useAdmin(state => state.allMembers);
+    const userGroups = useUserGroups();
+    const isUserStaff = isStaff();
     const dateInputRef = useRef(null);
 
     const isRecurring = event?.day_of_the_week != null;
@@ -20,6 +24,7 @@ export function EventEditModal({ event, close, _date, _time }) {
     const [startTime, setStartTime] = useState(event?.start || _time || '08:30');
     const [participants, setParticipants] = useState(event?.participants || []);
     const [showParticipantList, setShowParticipantList] = useState(false);
+    const [selectedGroup, setSelectedGroup] = useState(event?.group_id || '');
 
     const days = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 
@@ -36,6 +41,7 @@ export function EventEditModal({ event, close, _date, _time }) {
                 participants: participants.map(p => p.id),
                 day_of_the_week: repeatWeekly ? dayOfWeek : null,
                 date: !repeatWeekly ? format(date, 'yyyy-MM-dd') : null,
+                group_id: selectedGroup || null,
             };
             if (!isNew) eventData.id = event.id;
 
@@ -121,115 +127,136 @@ export function EventEditModal({ event, close, _date, _time }) {
                                 {formatHebrewDate(date)}
                             </div>
                         </div>
-                ) : (
-                <select
-                    className="flex-1 border border-gray-300 rounded p-2"
-                    value={dayOfWeek}
-                    onChange={(e) => setDayOfWeek(parseInt(e.target.value))}
-                >
-                    {days.map((day, index) => (
-                        <option key={index} value={index + 1}>יום {day}</option>
-                    ))}
-                </select>
-                    )}
-                <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap">
-                    <input
-                        type="checkbox"
-                        checked={repeatWeekly}
-                        onChange={(e) => setRepeatWeekly(e.target.checked)}
-                        className="w-4 h-4"
-                    />
-                    <span className="text-sm">חוזר שבועית</span>
-                </label>
-            </div>
-        </div>
-
-            {/* Time Selection */ }
-    <div className="flex flex-col gap-2">
-        <label className="text-sm font-semibold">שעה:</label>
-        <input
-            type="time"
-            className="border border-gray-300 rounded p-2"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-        />
-    </div>
-
-    {/* Participants */ }
-    <div className="flex flex-col gap-2">
-        <label className="text-sm font-semibold">משתתפים:</label>
-
-        {/* Display current participants */}
-        <div className="flex flex-wrap gap-2 mb-2">
-            {participants.map((participant) => (
-                <div key={participant.id} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                    <span>{participant.first_name} {participant.last_name}</span>
-                    <button
-                        onClick={() => handleRemoveParticipant(participant.id)}
-                        className="hover:bg-green-200 rounded-full p-0.5"
-                    >
-                        <X className="h-3 w-3" />
-                    </button>
-                </div>
-            ))}
-        </div>
-
-        {/* Add participant button */}
-        <div className="relative">
-            <button
-                onClick={() => {
-                    if (!showParticipantList) {
-                        adminActions.loadData();
-                    }
-                    setShowParticipantList(!showParticipantList);
-                }}
-                className="flex items-center gap-2 px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
-            >
-                <Plus className="h-4 w-4" />
-                הוספת משתתפים
-            </button>
-
-            {/* Participant selection dropdown */}
-            {showParticipantList && (
-                <div className="absolute top-full left-0 mt-1 w-full max-h-60 overflow-y-auto bg-white border border-gray-300 rounded shadow-lg z-10">
-                    {availableMembers.length > 0 ? (
-                        availableMembers.map((member) => (
-                            <button
-                                key={member.id}
-                                onClick={() => handleAddParticipant(member)}
-                                className="w-full text-right px-4 py-2 hover:bg-gray-100 border-b border-gray-200 last:border-b-0"
-                            >
-                                {member.first_name} {member.last_name}
-                            </button>
-                        ))
                     ) : (
-                        <div className="px-4 py-2 text-gray-400 text-sm">
-                            אין משתתפים זמינים
-                        </div>
+                        <select
+                            className="flex-1 border border-gray-300 rounded p-2"
+                            value={dayOfWeek}
+                            onChange={(e) => setDayOfWeek(parseInt(e.target.value))}
+                        >
+                            {days.map((day, index) => (
+                                <option key={index} value={index + 1}>יום {day}</option>
+                            ))}
+                        </select>
                     )}
+                    <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap">
+                        <input
+                            type="checkbox"
+                            checked={repeatWeekly}
+                            onChange={(e) => setRepeatWeekly(e.target.checked)}
+                            className="w-4 h-4"
+                        />
+                        <span className="text-sm">חוזר שבועית</span>
+                    </label>
+                </div>
+            </div>
+
+            {/* Time Selection */}
+            <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold">שעה:</label>
+                <input
+                    type="time"
+                    className="border border-gray-300 rounded p-2"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                />
+            </div>
+
+            {/* Group Selection (Staff only) */}
+            {isUserStaff && (
+                <div className="flex flex-col gap-2">
+                    <label className="text-sm font-semibold">קבוצה:</label>
+                    <select
+                        className="border border-gray-300 rounded p-2"
+                        value={selectedGroup}
+                        onChange={(e) => setSelectedGroup(e.target.value)}
+                    >
+                        <option value="">ללא קבוצה (אישי)</option>
+                        {userGroups?.map((group) => (
+                            <option key={group.id} value={group.id}>
+                                {group.type === 'class' ? 'קבוצת ' : group.type === 'major' ? 'מגמת ' : ''}{group.name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
             )}
-        </div>
-    </div>
 
-    {/* Action Buttons */ }
-    <div className="flex justify-between gap-2">
-        <div>
-            {!isNew && (
-                <Button onClick={handleDelete} variant="danger">
-                    <Trash2 className="ml-2 h-4 w-4" /> מחיקה
-                </Button>
+            {/* Participants */}
+            {isStaff() && (
+                <div className="flex flex-col gap-2">
+                    <label className="text-sm font-semibold">משתתפים:</label>
+
+                    {/* Display current participants */}
+                    <div className="flex flex-wrap gap-2 mb-2">
+                        {participants.map((participant) => (
+                            <div key={participant.id} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                                <span>{participant.first_name} {participant.last_name}</span>
+                                <button
+                                    onClick={() => handleRemoveParticipant(participant.id)}
+                                    className="hover:bg-green-200 rounded-full p-0.5"
+                                >
+                                    <X className="h-3 w-3" />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Add participant button */}
+                    <div className="relative">
+                        <button
+                            onClick={() => {
+                                if (!showParticipantList) {
+                                    adminActions.loadData();
+                                }
+                                setShowParticipantList(!showParticipantList);
+                            }}
+                            className="flex items-center gap-2 px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                        >
+                            <Plus className="h-4 w-4" />
+                            הוספת משתתפים
+                        </button>
+
+                        {/* Participant selection dropdown */}
+                        {showParticipantList && (
+                            <div className="absolute top-full left-0 mt-1 w-full max-h-60 overflow-y-auto bg-white border border-gray-300 rounded shadow-lg z-10">
+                                {availableMembers.length > 0 ? (
+                                    availableMembers.map((member) => (
+                                        <button
+                                            key={member.id}
+                                            onClick={() => handleAddParticipant(member)}
+                                            className="w-full text-right px-4 py-2 hover:bg-gray-100 border-b border-gray-200 last:border-b-0"
+                                        >
+                                            {member.first_name} {member.last_name}
+                                        </button>
+                                    ))
+                                ) : (
+                                    <div className="px-4 py-2 text-gray-400 text-sm">
+                                        אין משתתפים זמינים
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
             )}
-        </div>
-        <div className="flex gap-2">
-            <Button onClick={close} variant="secondary">
-                ביטול
-            </Button>
-            <Button onClick={handleSave}>
-                שמירה <Save className="ml-2 h-4 w-4" />
-            </Button>
-        </div>
-    </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-between gap-2">
+                <div>
+                    {!isNew && (
+                        <Button onClick={handleDelete} variant="danger">
+                            <Trash2 className="ml-2 h-4 w-4" /> מחיקה
+                        </Button>
+                    )}
+                </div>
+                <div className="flex gap-2">
+                    <Button onClick={close} variant="secondary">
+                        ביטול
+                    </Button>
+                    <Button onClick={handleSave}>
+                        שמירה <Save className="ml-2 h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
         </div >
     )
 }

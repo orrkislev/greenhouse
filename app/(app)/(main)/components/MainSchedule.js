@@ -1,6 +1,6 @@
-import { useTodayEvents, eventSelectors } from "@/utils/store/useEvents";
+import { useTodayEvents, eventSelectors, eventsActions } from "@/utils/store/useEvents";
 import { useGoogleCalendarEventsToday } from "@/utils/store/useGoogleCalendar";
-import { groupsActions, useUserGroups } from "@/utils/store/useGroups";
+import { useUserGroups } from "@/utils/store/useGroups";
 import { useTime } from "@/utils/store/useTime";
 import { useEffect } from "react";
 import Box2 from "@/components/Box2";
@@ -17,18 +17,25 @@ export default function MainSchedule() {
     const groups = useUserGroups();
     const googleCalendarEvents = useGoogleCalendarEventsToday();
 
-    const groupIds = groups.map(g => g.id).join(',');
+    const groupIds = groups.map(g => g.id);
     useEffect(() => {
-        groupsActions.loadTodayEvents();
-    }, [week, groupIds])
+        if (groupIds.length > 0) {
+            eventsActions.loadGroupEvents(groupIds, today, today);
+        }
+    }, [week, groupIds.join(',')])
 
     if (!today) return null;
 
     const todayEvents = [...eventSelectors.getEventsForDateWithRecurring(events, today)];
     todayEvents.push(...googleCalendarEvents.filter(event => event.date === today));
-    groups.forEach(group => {
-        const groupEvents = group.events ? eventSelectors.getEventsForDate(group.events, today) : [];
-        groupEvents.forEach(event => todayEvents.push({ ...event, group: group.name }));
+
+    // Add group events
+    const groupEvents = events.filter(e => e.group_id);
+    groupEvents.forEach(event => {
+        const group = groups.find(g => g.id === event.group_id);
+        if (group && (event.date === today || event.day_of_the_week === new Date(today).getDay() + 1)) {
+            todayEvents.push({ ...event, group: group.name });
+        }
     });
 
     const allEvents = todayEvents.map(e => ({

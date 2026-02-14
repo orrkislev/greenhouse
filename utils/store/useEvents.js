@@ -6,15 +6,17 @@ import { prepareForEventsTable } from "../supabase/utils";
 import { supabase } from "../supabase/client";
 import { useEffect } from "react";
 import { useUser } from "./useUser";
+import { useUserGroups } from "./useGroups";
 
 
 export const useEventsData = create((set, get) => {
     useUser.subscribe(originalUser => {
-        set({ events: [] });
+        set({ events: [], loadedGroupRecurring: new Set() });
     });
 
     return {
         events: [],
+        loadedGroupRecurring: new Set(), // Track which groups have loaded recurring events
 
         loadTodayEvents: withUser(async (user) => {
             set({ events: [] });
@@ -62,6 +64,46 @@ export const useEventsData = create((set, get) => {
             if (error) throw error;
             get().addEvents(data);
         }),
+
+        // -----------------------------------
+        // ---- Group Events -----------------
+        // -----------------------------------
+        loadGroupEvents: async (groupIds, start, end) => {
+            if (!Array.isArray(groupIds)) groupIds = [groupIds];
+            if (groupIds.length === 0) return;
+            if (!end) end = start;
+
+            // Load recurring events for groups (only once per group)
+            const groupsNeedingRecurring = groupIds.filter(id => !get().loadedGroupRecurring.has(id));
+            if (groupsNeedingRecurring.length > 0) {
+                const { data: recurringData, error: recurringError } = await supabase
+                    .from('events')
+                    .select('*')
+                    .in('group_id', groupsNeedingRecurring)
+                    .not('day_of_the_week', 'is', null)
+                    .is('date', null);
+
+                if (recurringError) throw recurringError;
+                if (recurringData) get().addEvents(recurringData);
+
+                // Mark these groups as loaded
+                set({ loadedGroupRecurring: new Set([...get().loadedGroupRecurring, ...groupsNeedingRecurring]) });
+            }
+
+            // Load regular events for the date range
+            const { data, error } = await supabase
+                .from('events')
+                .select('*')
+                .in('group_id', groupIds)
+                .gte('date', start)
+                .lte('date', end)
+                .not('date', 'is', null)
+                .order('date', { ascending: true })
+                .order('start', { ascending: true });
+
+            if (error) throw error;
+            if (data) get().addEvents(data);
+        },
 
         // ------------------------------
         // ---- CRUD Events -------------
@@ -155,20 +197,60 @@ export const eventSelectors = {
     getEventsForWeek: (events, weekDates) => {
         const dateSet = new Set(weekDates.map(d => typeof d === 'string' ? d : format(d, 'yyyy-MM-dd')));
         return events.filter(e => e.date && dateSet.has(e.date));
+    },
+
+    // Group event selectors
+    getGroupEvents: (events, groupId) => {
+        return events.filter(e => e.group_id === groupId);
+    },
+
+    getGroupEventsForDate: (events, groupId, date) => {
+        const dateStr = typeof date === 'string' ? date : format(date, 'yyyy-MM-dd');
+        const dayOfWeek = new Date(date).getDay() + 1;
+        return events.filter(e =>
+            e.group_id === groupId &&
+            (e.date === dateStr || e.day_of_the_week === dayOfWeek)
+        );
+    },
+
+    getGroupEventsForWeek: (events, groupId, weekDates) => {
+        const dateSet = new Set(weekDates.map(d => typeof d === 'string' ? d : format(d, 'yyyy-MM-dd')));
+        const dayOfWeekSet = new Set(weekDates.map(d => new Date(d).getDay() + 1));
+        return events.filter(e =>
+            e.group_id === groupId &&
+            (e.date && dateSet.has(e.date) || dayOfWeekSet.has(e.day_of_the_week))
+        );
     }
 };
 
 export const useRecurringEvents = createDataLoadingHook(useEventsData, 'events', 'loadRecurringEvents');
 export const useTodayEvents = createDataLoadingHook(useEventsData, 'events', 'loadTodayEvents');
-export const useWeekEvents = function useWeekEvents() {
+export function useWeekEvents() {
     const week = useTime(state => state.week);
     const user = useUser(state => state.user);
     const events = useEventsData(state => state.events);
-    if (!week || week.length === 0) return null;
+
     useEffect(() => {
         if (!user) return;
         eventsActions.loadWeekEvents(week);
     }, [week, user]);
+
+    if (!week || week.length === 0) return null;
     return events;
 }
 export const useTermEvents = createDataLoadingHook(useEventsData, 'events', 'loadTermEvents');
+
+// Group event hooks
+export function useGroupWeekEvents() {
+    const week = useTime(state => state.week);
+    const events = useEventsData(state => state.events);
+    const groups = useUserGroups();
+    const groupIds = groups.map(g => g.id);
+
+    useEffect(() => {
+        if (!week || week.length === 0 || !groupIds || groupIds.length === 0) return;
+        eventsActions.loadGroupEvents(groupIds, week[0], week[week.length - 1]);
+    }, [week, groupIds.join(',')]);
+
+    return events;
+};
