@@ -128,7 +128,7 @@ function MiniIkigai({ ikigai }) {
                 style={{
                     width: circleSize,
                     height: circleSize,
-                    top: 0,
+                    top: '5%',
                     left: '50%',
                     transform: 'translateX(-50%)'
                 }}
@@ -142,7 +142,7 @@ function MiniIkigai({ ikigai }) {
                     width: circleSize,
                     height: circleSize,
                     top: '50%',
-                    left: 0,
+                    left: '5%',
                     transform: 'translateY(-50%)'
                 }}
             >
@@ -155,7 +155,7 @@ function MiniIkigai({ ikigai }) {
                     width: circleSize,
                     height: circleSize,
                     top: '50%',
-                    right: 0,
+                    right: '5%',
                     transform: 'translateY(-50%)'
                 }}
             >
@@ -167,7 +167,7 @@ function MiniIkigai({ ikigai }) {
                 style={{
                     width: circleSize,
                     height: circleSize,
-                    bottom: 0,
+                    bottom: '5%',
                     left: '50%',
                     transform: 'translateX(-50%)'
                 }}
@@ -184,8 +184,7 @@ function MiniIkigai({ ikigai }) {
                 onPointerLeave={onPointerUp}
             >
                 {markers.map(marker => {
-                    const markerX = (marker.x / 100) * size;
-                    const markerY = (marker.y / 100) * size;
+                    const { x: markerX, y: markerY } = markerPositions[marker.id] || { x: 0, y: 0 };
 
                     const currentOffset = labelOffsets[marker.id] || { x: 0, y: 0 };
                     const labelX = markerX + currentOffset.x;
