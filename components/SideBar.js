@@ -99,8 +99,6 @@ export default function SideBar() {
                     {/* Home */}
                     <SideBarItem href="/" Icon={TreePalm} label="בית" active={pathname === '/'} />
 
-                    <SideBarItem href="/report" Icon={Cat} label="תעודות" active={pathname === '/report'} />
-
                     {/* Schedule */}
                     <SideBarItem href="/schedule" Icon={Calendar} label="לוח זמנים" active={pathname === '/schedule'} />
 

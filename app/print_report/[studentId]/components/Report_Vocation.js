@@ -9,7 +9,7 @@ export default function Report_Vocation({ student }) {
             <div className='w-full flex-1 h-full flex gap-4'>
                 <div className='flex-1 flex flex-col gap-1'>
                     <SectionTitle>תעסוקה</SectionTitle>
-                    {vocation?.jobTitle ? (
+                    {vocation?.employmentAnswer ? (
                         <>
                             <div className="flex gap-8">
                                 <SectionSubtitle>{vocation?.jobTitle}</SectionSubtitle>

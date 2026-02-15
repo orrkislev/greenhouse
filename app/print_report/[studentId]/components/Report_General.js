@@ -175,6 +175,51 @@ function MiniIkigai({ ikigai }) {
                 <Coins className="w-6 h-6 text-gray-500 translate-y-3" />
             </div>
 
+            {/* only circles */}
+            <div
+                className="absolute rounded-full border border-gray-400/50"
+                style={{
+                    width: circleSize,
+                    height: circleSize,
+                    top: '5%',
+                    left: '50%',
+                    transform: 'translateX(-50%)'
+                }}
+            />
+            {/* Left circle - Star */}
+            <div
+                className="absolute rounded-full"
+                style={{
+                    width: circleSize,
+                    height: circleSize,
+                    top: '50%',
+                    left: '5%',
+                    transform: 'translateY(-50%)'
+                }}
+            />
+            {/* Right circle - Globe */}
+            <div
+                className="absolute rounded-full border border-gray-400/50"
+                style={{
+                    width: circleSize,
+                    height: circleSize,
+                    top: '50%',
+                    right: '5%',
+                    transform: 'translateY(-50%)'
+                }}
+            />
+            {/* Bottom circle - Coins */}
+            <div
+                className="absolute rounded-full border border-gray-400/50"
+                style={{
+                    width: circleSize,
+                    height: circleSize,
+                    bottom: '5%',
+                    left: '50%',
+                    transform: 'translateX(-50%)'
+                }}
+            />
+
             {/* Markers with labels and connecting lines */}
             <svg
                 ref={svgRef}
@@ -244,11 +289,23 @@ export default function Report_General({ student }) {
     return (
         <ReportPageSection title="מבט כללי" className="flex-2">
             <div className='w-full flex-1 h-full flex gap-4'>
-                <div className='flex-1 flex flex-col gap-2'>
-                    <SectionSubtitle>איקיגאי</SectionSubtitle>
-                    <div className="flex justify-center">
-                        <MiniIkigai ikigai={student.ikigai} />
+                <div className='flex-1 flex flex-col justify-between'>
+                    <div className='flex-1 flex flex-col gap-2'>
+                        <SectionSubtitle>איקיגאי</SectionSubtitle>
+                        <div className="flex justify-center">
+                            <MiniIkigai ikigai={student.ikigai} />
+                        </div>
                     </div>
+                    {/* <div className='flex flex-col gap-2'>
+                        <div className='flex items-center gap-2'>
+                            <SectionSubtitle>נוכחות </SectionSubtitle>
+                            <SectionText smaller>100%</SectionText>    
+                        </div>
+                        <div className='flex items-center gap-2'>
+                            <SectionSubtitle>איחורים </SectionSubtitle>
+                            <SectionText smaller>לא מאחר בכלל!</SectionText>    
+                        </div>
+                    </div> */}
                 </div>
                 <div className='flex-1 flex flex-col gap-1'>
                     <SectionSubtitle>ממני אליך</SectionSubtitle>
