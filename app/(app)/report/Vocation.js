@@ -44,6 +44,7 @@ export default function Vocation({ vocation, onSave }) {
                                 text={jobTitle}
                                 onEdit={(newText) => setJobTitle(newText)}
                                 editable={canEdit}
+                                multiline={false}
                                 className='text-xl font-bold text-gray-800'
                                 placeholder="תפקיד"
                             />
@@ -52,6 +53,7 @@ export default function Vocation({ vocation, onSave }) {
                                     text={hours}
                                     onEdit={(newText) => setHours(newText)}
                                     editable={canEdit}
+                                    multiline={false}
                                     className='text-lg text-gray-800'
                                     placeholder="שעות"
                                 />

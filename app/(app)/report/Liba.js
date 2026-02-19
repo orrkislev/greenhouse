@@ -41,6 +41,7 @@ export default function Liba({ liba, onSave }) {
                             onEdit={(newText) => setQuestion(newText)}
                             editable={canEdit}
                             withIcon={true}
+                            multiline={false}
                             className='font-bold text-gray-600'
                             placeholder="שאלת ליבה"
                         />

@@ -26,6 +26,7 @@ export default function StudyPath_Sources({ path }) {
                         <SmartText text={source}
                             onEdit={(text) => studyActions.updateSource(path.id, sourceIndex, text)}
                             withIcon={false}
+                            multiline={false}
                             className="text-sm text-muted-foreground"
                         />
                         <Trash2 className="mr-2 h-4 cursor-pointer text-muted-foreground w-0 group-hover/source:w-4 opacity-0 group-hover/source:opacity-100 hover:bg-accent/50 transition-all rounded-full" onClick={() => studyActions.deleteSource(path.id, sourceIndex)} />

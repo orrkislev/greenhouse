@@ -63,7 +63,7 @@ function PathBG({ path }) {
                 )}
                 <div className="absolute bottom-1 left-1 right-1">
                     <SmartText className="text-6xl font-bold bg-white" text={path.title}
-                        onEdit={(title) => studyActions.updatePath(path.id, { ...path, title })} editable={isOwner} />
+                        onEdit={(title) => studyActions.updatePath(path.id, { ...path, title })} editable={isOwner} multiline={false} />
                 </div>
             </div>
             <SmartText className="text-xl text-muted-foreground" text={path.description}

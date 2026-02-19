@@ -10,7 +10,7 @@ export default function StaffGroup_Header({ group }) {
             <div className="flex items-center justify-between">
                 <div>
                     {group.type == 'club' ? (
-                        <SmartText text={group.name} onEdit={(val) => groupsActions.updateGroup(group, { name: val })} className="text-lg md:text-2xl font-bold border-none text-center font-semibold" />
+                        <SmartText text={group.name} onEdit={(val) => groupsActions.updateGroup(group, { name: val })} multiline={false} className="text-lg md:text-2xl font-bold border-none text-center font-semibold" />
                     ) : (
                         <h3 className="text-lg md:text-xl font-bold">
                             {group.name}

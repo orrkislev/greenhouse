@@ -99,6 +99,7 @@ export default function Learning({ learning, onSave }) {
                                                     onEdit={(newText) => updateTopic(topicIndex, 'name', newText)}
                                                     editable={canEdit && topicIndex !== 0}
                                                     withIcon={true}
+                                                    multiline={false}
                                                     className='font-bold'
                                                     placeholder={topicIndex === 0 ? 'אנגלית' : `נושא ${topicIndex + 1}`}
                                                 />
