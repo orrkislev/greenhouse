@@ -23,6 +23,11 @@ export default function StaffStudents() {
         timeActions.loadTerms();
     }, []);
 
+    const getTermDate = (termName) => {
+        const term = terms.find(t => t.name === termName);
+        return term ? new Date(term.start_date) : new Date(0);
+    }
+
     const onSelect = (student) => {
         mentorshipsActions.createMentorship(student, 'הנחייה חדשה');
     }
@@ -76,22 +81,25 @@ export default function StaffStudents() {
                     <div className="h-px border-b border-stone-300 w-full border-dashed my-4" />
 
 
-                    {projectMentorships.length > 0 ? (
+                    {terms && projectMentorships.length > 0 ? (
                         <>
-                            {Object.keys(projectsByTerm).map(term => (
-                                <WithLabel key={term} label={`פרויקטים בתקופת ה${term}`}>
-                                    <div className="flex gap-2 flex-wrap">
-                                        {projectsByTerm[term].map(project => (
-                                            <div key={project.id} className="flex flex-col gap-1 bg-muted p-2 rounded-md border border-border cursor-pointer hover:bg-primary-100 transition-colors hover:border-primary-200"
-                                                onClick={() => goToProject(project)}
-                                            >
-                                                <div className="text-sm">{project.title}</div>
-                                                <div className="text-xs text-muted-foreground">{project.student.first_name} {project.student.last_name}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </WithLabel>
-                            ))}
+                            {terms.sort((a, b) => a.start > b.start ? -1 : 1).map(term => {
+                                if (!projectsByTerm[term.name]) return null;
+                                return (
+                                    <WithLabel key={term.name} label={`פרויקטים בתקופת ה${term.name}`}>
+                                        <div className="flex gap-2 flex-wrap">
+                                            {projectsByTerm[term.name].map(project => (
+                                                <div key={project.id} className="flex flex-col gap-1 bg-muted p-2 rounded-md border border-border cursor-pointer hover:bg-primary-100 transition-colors hover:border-primary-200"
+                                                    onClick={() => goToProject(project)}
+                                                >
+                                                    <div className="text-sm">{project.title}</div>
+                                                    <div className="text-xs text-muted-foreground">{project.student.first_name} {project.student.last_name}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </WithLabel>
+                                )
+                            })}
                         </>
                     ) : (
                         <div className="text-center text-muted-foreground py-12">
