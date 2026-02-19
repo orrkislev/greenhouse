@@ -61,6 +61,6 @@ export function ProjectName() {
     }
 
     return (
-        <SmartText text={project.title} onEdit={onEdit} className="w-full h-full border-none text-center text-2xl font-semibold" />
+        <SmartText text={project.title} onEdit={onEdit} multiline={false} className="w-full h-full border-none text-center text-2xl font-semibold" />
     );
 }

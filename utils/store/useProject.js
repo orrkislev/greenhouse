@@ -67,7 +67,13 @@ export const useProjectData = create((set, get) => {
             newLogActions.add(`התחלתי פרויקט חדש בתקופת ${useTime.getState().currTerm.name}. `);
         }),
         updateProject: async (updates) => {
-            set((state) => ({ project: { ...state.project, ...updates } }));
+            set((state) => ({
+                project: { ...state.project, ...updates },
+                // Also update the matching entry in allProjects
+                allProjects: state.allProjects.map(p =>
+                    p.id === state.project?.id ? { ...p, ...updates } : p
+                ),
+            }));
             get().updateOnSupabase();
         },
 
@@ -142,7 +148,7 @@ export const useProjectData = create((set, get) => {
         // ------------------------------
         // ------ Project Tasks -------
         // ------------------------------
-        
+
         loadTasks: async () => {
             set({ tasks: [] });
             if (!useProjectData.getState().project) return;

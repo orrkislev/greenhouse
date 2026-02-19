@@ -4,10 +4,16 @@ import { Pencil, Trash2 } from "lucide-react";
 import SmartTextArea from "@/components/SmartTextArea";
 
 
-export default function SmartText({ text, className, onEdit, withIcon = true, onRemove, editable = true, placeholder }) {
+export default function SmartText({ text, className, onEdit, withIcon = true, onRemove, editable = true, placeholder, multiline = true }) {
     const [isEditing, setIsEditing] = useState(false);
     const [lastValue, setLastValue] = useState(text);
     const [value, setValue] = useState(text);
+
+    useEffect(() => {
+        if (!isEditing) {
+            setValue(text);
+        }
+    }, [text]);
 
     if (!onEdit || !editable) return <SmartLabel text={text} className={className} placeholder={placeholder} />
 
@@ -25,12 +31,33 @@ export default function SmartText({ text, className, onEdit, withIcon = true, on
         setIsEditing(false);
     }
 
+    const onCancel = () => {
+        setValue(lastValue);
+        setIsEditing(false);
+    }
+
     const onChange = (e) => {
         setValue(e.target.value);
     }
 
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !multiline) { e.preventDefault(); e.target.blur(); }
+        if (e.key === 'Escape') { e.preventDefault(); onCancel(); }
+    }
+
     if (isEditing) {
-        return <SmartTextArea value={value} onChange={onChange} onBlur={onFinish} autoFocus={true} className={className} placeholder={placeholder} />
+        if (!multiline) {
+            return <input
+                value={value}
+                onChange={onChange}
+                onBlur={onFinish}
+                onKeyDown={handleKeyDown}
+                autoFocus
+                className={`bg-transparent text-stone-800 rounded px-1 w-full outline-none pointer-events-auto focus:bg-white/50 ${className}`}
+                placeholder={placeholder}
+            />
+        }
+        return <SmartTextArea value={value} onChange={onChange} onBlur={onFinish} onKeyDown={handleKeyDown} autoFocus={true} className={className} placeholder={placeholder} />
     }
 
     return (
