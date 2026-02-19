@@ -73,6 +73,9 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 		updatePortfolioUrl: async (portfolioUrl) => {
 			await get().updateUserProfile({ portfolio_url: portfolioUrl })
 		},
+		updateCvUrl: async (cvUrl) => {
+			await get().updateUserProfile({ cv_url: cvUrl })
+		},
 
 		// ----------------------------------------------------
 		// ------------ Staff Switching User ------------------

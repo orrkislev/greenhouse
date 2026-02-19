@@ -10,7 +10,7 @@ import { useUserGroups } from "./useGroups";
 
 
 export const useEventsData = create((set, get) => {
-    useUser.subscribe(originalUser => {
+    useUser.subscribe(state => state.user?.id, (id) => {
         set({ events: [], loadedGroupRecurring: new Set() });
     });
 

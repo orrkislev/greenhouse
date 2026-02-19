@@ -1,11 +1,11 @@
 import { create } from "zustand";
-import { createDataLoadingHook, createStoreActions, withUser} from "./utils/storeUtils";
+import { createDataLoadingHook, createStoreActions, withUser } from "./utils/storeUtils";
 import { supabase } from "../supabase/client";
 import { prepareForLogsTable } from "../supabase/utils";
 import { useUser } from "./useUser";
 
 export const useLogsData = create((set, get) => {
-    useUser.subscribe(originalUser => {
+    useUser.subscribe(state => state.user?.id, (id) => {
         set({ logs: [] });
     });
 

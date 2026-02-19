@@ -11,7 +11,7 @@ import { toastsActions } from "./useToasts";
 export const EnglishPathID = 'd5b55c53-5f6b-4832-97cf-3fbb99037218';
 
 export const useStudy = create((set, get) => {
-    useUser.subscribe(originalUser => {
+    useUser.subscribe(state => state.user?.id, (id) => {
         set({ paths: [] });
     });
 

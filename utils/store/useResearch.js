@@ -8,7 +8,7 @@ import { toastsActions } from "./useToasts";
 import { useUser } from "./useUser";
 
 export const useResearchData = create((set, get) => {
-    useUser.subscribe(originalUser => {
+    useUser.subscribe(state => state.user?.id, (id) => {
         set({ research: null, allResearch: [] });
     });
 
@@ -25,7 +25,7 @@ export const useResearchData = create((set, get) => {
                 .contains('term', [currTerm.id])
                 .order('created_at', { ascending: false })
             if (error) toastsActions.addFromError(error, 'שגיאה בטעינת החקר הנוכחי');
-            if (data && data.length > 0)  set({ research: data[0] });
+            if (data && data.length > 0) set({ research: data[0] });
         }),
         loadResearchById: async (researchId) => {
             const { data, error } = await supabase.from('research').select('*').eq('id', researchId).single();

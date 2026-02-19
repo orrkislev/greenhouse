@@ -4,10 +4,10 @@ import { supabase } from "../supabase/client";
 import { useUser } from "./useUser";
 
 export const useVocationData = create((set, get) => {
-    useUser.subscribe(originalUser => {
+    useUser.subscribe(state => state.user?.id, (id) => {
         set({ jobs: [] });
     });
-    
+
     return {
         jobs: [],
 
@@ -18,7 +18,7 @@ export const useVocationData = create((set, get) => {
             set({ jobs: data });
         }),
 
-        addJob: withUser(async (user ) => {
+        addJob: withUser(async (user) => {
             const { data, error } = await supabase.from('vocation').insert({ user_id: user.id }).select().single();
             if (error) throw error;
             set({ jobs: [...get().jobs, data] });

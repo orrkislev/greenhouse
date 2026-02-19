@@ -6,6 +6,7 @@ import { Briefcase, Plus, Trash2 } from "lucide-react";
 import { Cell, Edittable, TableHeader } from "../admin/components/Common";
 import { useVocation, vocationActions } from "@/utils/store/useVocation";
 import Menu, { MenuItem } from "@/components/Menu";
+import CvPortfolioCards from "./CvPortfolioCards";
 
 export default function VocationPage() {
   const jobs = useVocation();
@@ -13,6 +14,7 @@ export default function VocationPage() {
   return (
     <>
       <PageMain>
+        <CvPortfolioCards />
         <div className="flex flex-col md:flex-row gap-3 md:gap-4 md:flex-wrap">
           {jobs.map((job, index) => (
             <JobCard key={index} job={job} />

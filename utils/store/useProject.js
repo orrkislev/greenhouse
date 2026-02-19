@@ -12,7 +12,7 @@ import { useUser } from "./useUser";
 
 
 export const useProjectData = create((set, get) => {
-    useUser.subscribe(originalUser => {
+    useUser.subscribe(state => state.user?.id, (id) => {
         set({ project: null, tasks: [] });
     });
 

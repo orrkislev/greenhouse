@@ -6,7 +6,7 @@ import { makeLink, prepareForGroupsTable } from "../supabase/utils";
 import { toastsActions } from "./useToasts";
 
 export const useGroups = create((set, get) => {
-    useUser.subscribe(originalUser => {
+    useUser.subscribe(state => state.user?.id, (id) => {
         set({ groups: [] });
     });
 
@@ -127,7 +127,7 @@ export const useGroups = create((set, get) => {
                 { task_id: task.id, student_id: user.id, status: newStatus },
                 { onConflict: 'task_id,student_id' }
             )
-            if (error) toastsActions.addFromError(error, 'שגיאה בעדכון סטטוס משימה '); 
+            if (error) toastsActions.addFromError(error, 'שגיאה בעדכון סטטוס משימה ');
         })
     }
 });
