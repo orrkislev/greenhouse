@@ -17,14 +17,14 @@ export default function ProjectTasks() {
     const taskStyle = useProjectData(state => state.project?.metadata?.taskStyle)
     const [isOpen, setIsOpen] = useState(false)
 
-    useEffect(()=>{
+    useEffect(() => {
         projectActions.loadTasks();
     }, [project?.id])
 
     const ViewComponent = taskStyle ? views[taskStyle].component : views.list.component
 
     const taskContext = useMemo(() => projectUtils.getContext(project.id), [project])
-    
+
 
     return (
         <>
@@ -77,7 +77,7 @@ function ViewSelector() {
     return (
         <ButtonGroup className='my-4'>
             {Object.entries(views).map(([key, { label, icon: Icon }]) => (
-                <ButtonGroupItem key={key} active={taskStyle === key} onClick={() => selectView(key)} className="flex items-center gap-1 px-4">
+                <ButtonGroupItem key={key} active={(taskStyle === key) ? "true" : undefined} onClick={() => selectView(key)} className="flex items-center gap-1 px-4">
                     <Icon className="w-4 h-4" />
                     {label}
                 </ButtonGroupItem>
