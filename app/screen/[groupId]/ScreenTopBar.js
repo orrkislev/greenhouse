@@ -2,13 +2,59 @@ import { tw } from '@/utils/tw';
 import { Calendar, Snail, Brain } from 'lucide-react';
 import { useTime } from "@/utils/store/useTime";
 import { differenceInWeeks, startOfWeek } from "date-fns";
+import { motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 
 const TopBarButton = tw`px-4 py-2 rounded-t-lg font-semibold text-sm transition-all flex items-center gap-2
 text-foreground hover:bg-primary hover:text-foreground
 ${props => props.$active ? 'bg-primary text-primary-foreground shadow-lg' : 'hover:bg-orange-200 hover:text-foreground'}`;
 
-export default function ScreenTopBar({ group, viewMode, setViewMode, includeStaff, toggleStaff, isRotating, toggleRotate }) {
+export default function ScreenTopBar({
+    group,
+    viewMode,
+    setViewMode,
+    includeStaff,
+    toggleStaff,
+    isRotating,
+    toggleRotate,
+    onHiddenChange,
+}) {
     const currTerm = useTime((state) => state.currTerm);
+    const [isHidden, setIsHidden] = useState(false);
+    const idleTimeoutRef = useRef(null);
+    const idleDelayMs = 3500;
+
+    useEffect(() => {
+        const startIdleTimer = () => {
+            if (idleTimeoutRef.current) {
+                clearTimeout(idleTimeoutRef.current);
+            }
+            idleTimeoutRef.current = setTimeout(() => {
+                setIsHidden(true);
+            }, idleDelayMs);
+        };
+
+        const handleMouseMove = () => {
+            setIsHidden(false);
+            startIdleTimer();
+        };
+
+        startIdleTimer();
+        window.addEventListener('mousemove', handleMouseMove);
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            if (idleTimeoutRef.current) {
+                clearTimeout(idleTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        if (onHiddenChange) {
+            onHiddenChange(isHidden);
+        }
+    }, [isHidden, onHiddenChange]);
 
     const dayNumberInTerm = () => {
         if (!currTerm || !currTerm.start) return '';
@@ -28,7 +74,13 @@ export default function ScreenTopBar({ group, viewMode, setViewMode, includeStaf
     }
 
     return (
-        <div className="flex items-end justify-between gap-3 pt-3 bg-muted">
+        <motion.div
+            className="flex items-end justify-between gap-3 pt-3 bg-muted"
+            animate={{ y: isHidden ? -24 : 0, opacity: isHidden ? 0 : 1, height: isHidden ? 0 : 'auto' }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            style={{ pointerEvents: isHidden ? 'none' : 'auto', overflow: 'hidden' }}
+            aria-hidden={isHidden}
+        >
             {/* Left Side: Group Name and Date Info */}
             <div className="h-full flex items-center mr-8">
                 <div className="text-xl font-bold text-foreground">
@@ -89,6 +141,6 @@ export default function ScreenTopBar({ group, viewMode, setViewMode, includeStaf
                 {currTerm && <div>{dayNumberInTerm()}</div>}
                 <div>שבוע <span dir="ltr">{weekInYear()}</span> מתוך 42 בשנה</div>
             </div>
-        </div>
+        </motion.div>
     );
 }

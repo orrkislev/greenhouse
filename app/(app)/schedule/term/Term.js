@@ -30,7 +30,6 @@ function getGroupColor(groupId) {
 export default function Term() {
     const events = useEventsData(state => state.events);
     const currTerm = useTime((state) => state.currTerm);
-    console.log(currTerm)
 
     useEffect(() => {
         if (!currTerm) return;

@@ -60,8 +60,6 @@ export default function Schedule() {
         return result;
     }, [allEvents, week])
 
-    console.log('events for week:', allEvents);
-
     return (
         <table className="table-fixed border-collapse w-full h-full">
             <thead>
@@ -163,10 +161,7 @@ function getGroupColor(groupId) {
 }
 
 function Event({ event }) {
-    const { open, close, Popper } = usePopper({
-        onOpen: () => console.log('Event modal opened for:', event.title || event.summary),
-        onClose: () => console.log('Event modal closed for:', event.title || event.summary)
-    });
+    const { open, close, Popper } = usePopper();
     const user = useUser(state => state.user);
     const groups = useGroups(state => state.groups);
     const isMeeting = event.day_of_the_week !== null;

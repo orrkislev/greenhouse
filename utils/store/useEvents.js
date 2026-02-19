@@ -7,6 +7,7 @@ import { supabase } from "../supabase/client";
 import { useEffect } from "react";
 import { useUser } from "./useUser";
 import { useUserGroups } from "./useGroups";
+import { toastsActions } from "./useToasts";
 
 
 export const useEventsData = create((set, get) => {
@@ -111,14 +112,19 @@ export const useEventsData = create((set, get) => {
         addEvent: withUser(async (user, event) => {
             event.created_by = user.id;
             const { data, error } = await supabase.from('events').insert(prepareForEventsTable(event)).select().single();
-            if (error) throw error;
-            get().addEvents([data]);
+            if (error) {
+                toastsActions.addFromError(error, "שגיאה ביצירת אירוע");
+                return
+            }
+            get().addEvents([event]);
             if (event.participants && event.participants.length > 0) {
-                await supabase.from('event_participants').insert(event.participants.map(p => ({ event_id: data.id, user_id: p })));
+                const {error} = await supabase.from('event_participants').insert(event.participants.map(p => ({ event_id: data.id, user_id: p.id || p })));
+                if (error) {
+                    toastsActions.addFromError(error, "שגיאה בהוספת משתתפים לאירוע");
+                }
             }
         }),
         saveEvent: withUser(async (user, event) => {
-            console.log('saving event:', event);
             if (!event.id) return await get().addEvent(user, event);
 
             const origEvent = get().events.find(e => e.id === event.id);
