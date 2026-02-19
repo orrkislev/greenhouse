@@ -72,11 +72,19 @@ export const useGroups = create((set, get) => {
 
             const { data, error } = await supabase
                 .from('users_groups')
-                .select('users( id, first_name, last_name, username, role, active, user_profiles( avatar_url ) )')
+                .select('users( id, first_name, last_name, username, role, active, user_profiles( avatar_url, cv_url, portfolio_url ) )')
                 .eq('group_id', group.id)
                 .eq('users.active', true)
             if (error) toastsActions.addFromError(error, 'שגיאה בטעינת חברי קבוצה');
-            set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, members: data.map(d => d.users) } : g) }));
+            set((state) => ({
+                groups: state.groups.map(g => g.id === group.id ? {
+                    ...g,
+                    members: data.map(d => {
+                        const profile = Array.isArray(d.users?.user_profiles) ? d.users.user_profiles[0] : d.users?.user_profiles;
+                        return { ...d.users, ...profile };
+                    })
+                } : g)
+            }));
         },
 
         // ----------- Group Tasks Management -----------

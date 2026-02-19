@@ -88,25 +88,30 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 			}
 
 			const originalUser = get().originalUser;
+
 			set({ originalUser: originalUser || { user, lastPage: currUrl }, user: student });
 
 			await new Promise(resolve => setTimeout(resolve, 100));
 			redirect(targetUrl);
 		},
-		switchToStudentById: async (studentId, targetUrl = '/') => {
-			const { data, error } = await supabase.from('users').select('*').eq('id', studentId).single();
-			if (error) set({ error });
-			else get().switchToStudent(data, targetUrl);
-		},
+
 		switchBackToOriginal: async () => {
 			const originalUser = get().originalUser;
 			const lastPage = originalUser.lastPage;
 			if (!originalUser) {
 				throw new Error("No original user to switch back to.");
 			}
-			const { data, error } = await supabase.from('users').select('*').eq('id', originalUser.user.id).single();
+			const { data, error } = await supabase.from('users').select(`
+				*,
+				user_profiles(
+					*
+				)
+				`).eq('id', originalUser.user.id).single();
 			if (error) set({ error });
-			else set({ user: data, originalUser: null });
+			else {
+				const newData = { ...data, ...data.user_profiles }
+				set({ user: newData, originalUser: null });
+			}
 
 			return lastPage;
 		},

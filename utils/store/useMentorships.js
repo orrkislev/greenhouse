@@ -14,7 +14,7 @@ export const useMentorships = create((set, get) => ({
         let query = supabase.from('mentorships')
             .select(`*, 
                 student:users!mentorships_student_id_fkey (
-                    id, first_name, last_name, username, role, user_profiles( avatar_url )
+                    id, first_name, last_name, username, role, user_profiles( avatar_url, cv_url, portfolio_url )
                 ),
                 mentor:users!mentorships_mentor_id_fkey (
                     id, first_name, last_name, username, role, user_profiles( avatar_url )
@@ -22,17 +22,34 @@ export const useMentorships = create((set, get) => ({
         if (user.role === 'student') query = query.eq('student_id', user.id);
         else query = query.eq('mentor_id', user.id);
         query = query.eq('is_active', true);
-        const { data: mentorships, error: mentorshipsError  } = await query;
+        const { data: mentorships, error: mentorshipsError } = await query;
         if (mentorshipsError) toastsActions.addFromError(mentorshipsError, 'שגיאה בטעינת המנטורשיפים');
+
+        // Merge user_profiles fields into the student object for the switcher
+        mentorships?.forEach(m => {
+            if (m.student && m.student.user_profiles) {
+                const profile = Array.isArray(m.student.user_profiles) ? m.student.user_profiles[0] : m.student.user_profiles;
+                Object.assign(m.student, profile);
+            }
+        });
+
         set({ mentorships: mentorships });
 
         const { data, error } = await supabase.from('projects').select(`
             *,
             student:users!projects_student_id_fkey (
-                id, first_name, last_name, username, role, user_profiles( avatar_url )
+                id, first_name, last_name, username, role, user_profiles( avatar_url, cv_url, portfolio_url )
             ),
             master:staff_public!master(id:user_id,first_name, last_name, avatar_url)
             `).eq('master', user.id);
+
+        // Merge profile data for project students as well
+        data?.forEach(p => {
+            if (p.student && p.student.user_profiles) {
+                const profile = Array.isArray(p.student.user_profiles) ? p.student.user_profiles[0] : p.student.user_profiles;
+                Object.assign(p.student, profile);
+            }
+        });
         if (error) toastsActions.addFromError(error, 'שגיאה בטעינת המנטורשיפים');
         set({ projectMentorships: data });
     }),
