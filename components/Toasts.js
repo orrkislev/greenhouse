@@ -41,8 +41,6 @@ function Toast({ toast }) {
         alert: 'bg-blue-400',
     }[toast.type] || 'bg-gray-400';
 
-    console.log(toast)
-
     return (
         <div className={`p-2 rounded-md text-xs ${bgColor} text-neutral-900 cursor-pointer toast flex justify-between gap-4 items-center text-left max-w-xs`}
             onClick={() => setExpanded(!expanded)}

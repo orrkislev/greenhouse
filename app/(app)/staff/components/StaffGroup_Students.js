@@ -167,7 +167,6 @@ function SelectedStudentCard_Meeting({ student }) {
     const events = useRecurringEvents();
     const meeting = events.find(event => event.day_of_the_week && event.participants?.find(participant => participant?.id === student.id || participant === student.id));
 
-    console.log({events})
     return (
         <WithLabel label="פגישה קבועה" icon={Calendar}>
             <Button onClick={open} ref={baseRef}>

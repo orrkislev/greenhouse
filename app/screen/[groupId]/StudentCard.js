@@ -7,8 +7,8 @@ export default function StudentCard({ student, viewMode }) {
     const cardRef = useRef(null);
 
     // Data is now passed from server via props
-    const { scheduledEvents = [], meetings = [] } = student.events || {};
-    const allEvents = [...scheduledEvents, ...meetings].sort((a, b) => a.start.localeCompare(b.start));
+    // const { scheduledEvents = [], meetings = [] } = student.events || {};
+    // const allEvents = [...scheduledEvents, ...meetings].sort((a, b) => a.start.localeCompare(b.start));
 
     return (
         <div
@@ -28,9 +28,9 @@ export default function StudentCard({ student, viewMode }) {
             {/* Content based on view mode */}
             {viewMode === 'events' && (
                 <>
-                    {allEvents.length > 0 ? (
+                    {student.events.length > 0 ? (
                         <div className="space-y-1">
-                            {allEvents.map((event, idx) => (
+                            {student.events.map((event, idx) => (
                                 <div key={idx} className="text-xs">
                                     <div className="flex items-center gap-1">
                                         <span className="text-foreground font-medium">{event.start.split(':').slice(0, 2).join(':')}</span>

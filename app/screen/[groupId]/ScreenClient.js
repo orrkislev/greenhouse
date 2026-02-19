@@ -30,6 +30,7 @@ export default function ScreenClient({ groups = [] }) {
     const [rotateInterval, setRotateInterval] = useState(initialRotate || 15); // Store interval separately
     const [includeStaff, setIncludeStaff] = useState(initialIncludeStaff);
     const [currentGroupIndex, setCurrentGroupIndex] = useState(0);
+    const [isTopBarHidden, setIsTopBarHidden] = useState(false);
 
     const currentGroup = groups[currentGroupIndex];
 
@@ -94,12 +95,13 @@ export default function ScreenClient({ groups = [] }) {
                 toggleStaff={toggleStaff}
                 isRotating={shouldRotate}
                 toggleRotate={toggleRotate}
+                onHiddenChange={setIsTopBarHidden}
             />
 
             {/* Content */}
-            <div className="flex-1 overflow-hidden p-3">
+            <div className={`flex-1 overflow-hidden p-3 ${isTopBarHidden ? 'pt-2' : 'pt-3'}`}>
                 {columns.length > 0 ? (
-                    <div className="flex flex-row gap-2 items-start justify-center h-full mt-8">
+                    <div className={`flex flex-row gap-2 items-start justify-center h-full ${isTopBarHidden ? 'mt-2' : 'mt-8'}`}>
                         {columns.map((columnStudents, colIndex) => (
                             <div key={colIndex} className="flex flex-col gap-2 flex-1 max-w-[280px] overflow-y-auto">
                                 {columnStudents.map((student, idx) => (

@@ -4,7 +4,7 @@ import { projectActions, useProject, useProjectData } from "@/utils/store/usePro
 import { timeActions, useTime } from "@/utils/store/useTime";
 import { tw } from "@/utils/tw";
 import { ChevronLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function ProjectContext() {
     const project = useProject();
@@ -31,6 +31,20 @@ const ProjectDiv = tw.div`
 
 function OtherProjects() {
     const allProjects = useProjectData((state) => state.allProjects);
+    const terms = useTime((state) => state.terms);
+
+    const sortedProjects = useMemo(() => {
+        if (!allProjects) return [];
+        const termsById = new Map(terms.map((term) => [term.id, term]));
+        return [...allProjects].sort((a, b) => {
+            const aTerm = termsById.get(a.term?.[0]);
+            const bTerm = termsById.get(b.term?.[0]);
+            const aStart = aTerm?.start ? new Date(aTerm.start).getTime() : Number.POSITIVE_INFINITY;
+            const bStart = bTerm?.start ? new Date(bTerm.start).getTime() : Number.POSITIVE_INFINITY;
+            if (aStart !== bStart) return bStart - aStart;
+            return (a.title || '').localeCompare(b.title || '');
+        });
+    }, [allProjects, terms]);
 
     useEffect(() => {
         projectActions.loadAllProjects();
@@ -41,7 +55,7 @@ function OtherProjects() {
         <div>
             <div className='w-full h-px bg-stone-300 mb-2'></div>
             <div className="text-sm text-foreground mb-4">כל הפרויקטים שלי</div>
-            {allProjects.map(project => (
+            {sortedProjects.map(project => (
                 <SingleProject key={project.id} project={project} />
             ))}
         </div>

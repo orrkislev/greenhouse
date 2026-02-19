@@ -147,7 +147,7 @@ export function EditMeeting({ student, meeting, onClose }) {
                 end: formattedEnd,
                 day_of_the_week: day,
                 repeat_weekly: true,
-                participants: [student.id],
+                participants: [student],
             });
         } else {
             eventsActions.addEvent({
@@ -156,7 +156,7 @@ export function EditMeeting({ student, meeting, onClose }) {
                 day_of_the_week: day,
                 start: formattedStart,
                 end: formattedEnd,
-                participants: [student.id],
+                participants: [student],
             });
         }
         onClose();
