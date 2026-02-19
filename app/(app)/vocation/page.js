@@ -65,14 +65,14 @@ function JobCard({ job }) {
                   <Cell><Edittable value={hour.hours} placeholder="שעות " onFinish={value => updateWorkHours(job.work_hours.map((h, i) => i === index ? { ...h, hours: value } : h))} className="w-12 md:w-16" /></Cell>
                 </tr>
               ))}
-              <div className="flex gap-1 items-center text-xs cursor-pointer bg-muted hover:bg-primary/10 rounded-md p-1 mt-2"
-                onClick={() => updateWorkHours([...(job.work_hours || []), { year: new Date().getFullYear(), month: new Date().getMonth() + 1, hours: '?' }])} >
-                <Plus className="w-4 h-4" /> חודש נוסף
-              </div>
             </tbody>
           </table>
+          <div className="flex gap-1 items-center text-xs cursor-pointer bg-muted hover:bg-primary/10 rounded-md p-1 mt-2 self-start"
+            onClick={() => updateWorkHours([...(job.work_hours || []), { year: new Date().getFullYear(), month: new Date().getMonth() + 1, hours: '?' }])} >
+            <Plus className="w-4 h-4" /> חודש נוסף
+          </div>
         </div>
       </div>
-    </Box2>
+    </Box2 >
   );
 }
