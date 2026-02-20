@@ -11,24 +11,24 @@ import Avatar from "./Avatar";
 import { useStudyPaths } from "@/utils/store/useStudy";
 import { useState } from "react";
 
-const SideBarDiv = tw`flex flex-col border-l border-pastel-6/50 bg-pastel-5/10 -my-6 py-4
+const SideBarDiv = tw`flex flex-col border-l border-ghdark bg-ghgreen -my-6 py-4
 md:flex md:flex-col
 hidden
 `
 
 // Mobile top bar
-const TopBarDiv = tw`flex md:hidden items-center justify-between border-b border-stone-400 bg-stone-200 px-2 py-2 z-50`
+const TopBarDiv = tw`flex md:hidden items-center justify-between border-b border-ghdark bg-stone-200 px-2 py-2 z-50`
 const TopBarContent = tw`flex items-center gap-1 overflow-x-auto flex-1 justify-center`
 
 const SideBarContent = tw`h-full flex flex-col gap-1 pt-8 flex-1 z-0`
 const SideBarFooter = tw`flex flex-col gap-1 pb-4`
 
-const NavigationMenuItem = tw`flex gap-2 rtl items-center p-1 pl-2 text-stone-500 hover:text-stone-700 mr-4 relative overflow-hidden -ml-px
+const NavigationMenuItem = tw`flex gap-2 rtl items-center p-1 pl-2 text-ghwhite hover:text-ghglow mr-4 relative overflow-hidden -ml-px
 ${props => props.$disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
 ${props => props.$small ? 'text-xs py-1 -mt-1' : 'text-sm'}
 `
 const LinkClasses = `flex justify-center gap-1 rounded-lg z-2 items-center`
-const Separator = tw`h-px w-8 bg-stone-300 mx-auto ${props => props.$small ? 'my-1' : ''}`
+const Separator = tw`h-px w-8 bg-ghdark mx-auto ${props => props.$small ? 'my-1' : ''}`
 const IconClasses = `w-4 h-4`
 
 
@@ -83,7 +83,7 @@ export default function SideBar() {
             {/* Desktop Sidebar */}
             <SideBarDiv>
                 <Link href="/" className="aspect-square flex items-center justify-center p-2 relative">
-                    <Image src="/logo.png" alt="logo" fill={true} style={{ objectFit: 'contain' }} priority={true}
+                    <Image src="/images/logo.svg" alt="logo" fill={true} style={{ objectFit: 'contain' }} priority={true}
                         sizes="(max-width: 768px) 20vw, (max-width: 1200px) 20vw, 20vw" />
                 </Link>
                 <Separator className='w-full' />
@@ -148,11 +148,11 @@ function SideBarItem({ href, Icon, label, active, disabled, small = false, child
                         initial={{ x: '-100%' }}
                         animate={{ x: 0, transition: { duration: .2, ease: 'circInOut' } }}
                         exit={{ x: '-100%', transition: { duration: .2, ease: 'circInOut' } }}
-                        className="w-full h-full rounded-r-full absolute left-0 z-1 -translate-x-px border-r border-y border-pastel-6/50 bg-white"
+                        className="w-full h-full rounded-r-full absolute left-0 z-1 -translate-x-px border-r border-y border-ghdark bg-ghwhite"
                     />
                 )}
             </AnimatePresence>
-            <Link href={href} className={`${LinkClasses} ${active ? 'text-black' : 'hover:bg-white '} ${small ? 'p-1' : 'p-2'}`}>
+            <Link href={href} className={`${LinkClasses} ${active ? 'text-ghdarkblue' : 'hover:bg-ghdark '} ${small ? 'p-1' : 'p-2'}`}>
                 {children ? children : (
                     <>
                         {Icon && <Icon className={`${IconClasses} ${small ? 'w-3 h-3' : 'w-4 h-4'}`} />}

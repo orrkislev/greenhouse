@@ -40,7 +40,7 @@ export function ProjectImage() {
         , [img]);
 
     return (
-        <div className="relative w-full aspect-[20/3] bg-stone-300 bg-cover bg-center bg-no-repeat border-b border-pastel-6/50" style={{ backgroundImage: imgUrl }}>
+        <div className="relative w-full aspect-[20/3] bg-stone-300 bg-cover bg-center bg-no-repeat border-b border-ghdark" style={{ backgroundImage: imgUrl }}>
             <Menu className="absolute left-4 top-4 bg-white">
                 <MenuList>
                     <MenuItem title="סגירת הפרויקט" icon={Trash2} onClick={() => projectActions.closeProject()} />
@@ -61,6 +61,6 @@ export function ProjectName() {
     }
 
     return (
-        <SmartText text={project.title} onEdit={onEdit} multiline={false} className="w-full h-full border-none text-center text-2xl font-semibold" />
+        <SmartText text={project.title} onEdit={onEdit} multiline={false} className="w-full h-full border-none text-center text-2xl font-semibold text-ghdarkblue" />
     );
 }

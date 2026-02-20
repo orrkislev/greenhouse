@@ -9,7 +9,7 @@ export default function ContextBar({ name, children, initialOpen = true }) {
     const [isOpen, setIsOpen] = useState(initialOpen)
 
     return (
-        <div className={`hidden md:flex p-2 flex-col bg-white transition-all duration-500  border-r border-pastel-6/50 ${isOpen ? 'min-w-64 w-64' : 'min-w-12 w-12'
+        <div className={`hidden md:flex p-2 flex-col bg-white transition-all duration-500  border-r border-ghdark ${isOpen ? 'min-w-64 w-64' : 'min-w-12 w-12'
             }`}>
             {/* Header with toggle button */}
             <div className="flex items-center justify-start mb-2">

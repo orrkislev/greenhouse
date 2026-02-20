@@ -80,7 +80,7 @@ export default function MainSchedule() {
             </div>
 
             <Link href="/schedule" className="absolute bottom-2 left-2">
-                <Button className="bg-white">
+                <Button className="bg-white hover:bg-ghgreen hover:text-ghglow">
                     <Calendar className="w-4 h-4" />
                     לוח הזמנים
                 </Button>

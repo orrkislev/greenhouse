@@ -35,32 +35,40 @@ export default function WithAuth({ children, role }) {
     };
 
     return (
-        <div className="min-h-screen flex flex-col md:flex-row">
+        <div className="min-h-screen flex flex-col md:flex-row"
+        style={{
+            backgroundImage: "url('/images/pattern.png')",
+            backgroundSize: '266px 200px',
+            backgroundRepeat: 'repeat',
+            backgroundPosition: 'top left',
+        }}
+        >
+
             {/* Main Login Section */}
-            <div className="flex-1 md:flex-2 bg-white flex items-center justify-center p-4 md:p-8">
+            <div className="flex-1 md:flex-2 flex items-center bg-ghdark/50 justify-center p-4 md:p-8">
                 <div className="w-full max-w-md md:max-w-lg">
                     {/* Logo - smaller on mobile */}
                     <div className="flex flex-col items-center justify-center mb-6 md:mb-4">
                         <Image
-                            src="/logo.png"
+                            src="/images/logo.svg"
                             alt="logo"
                             width={200}
                             height={200}
                             priority={true}
-                            className="w-40 md:w-72"
+                            className="w-40 md:w-72 bg-ghdark rounded-full shadow-lg"
                         />
                     </div>
 
                     {/* Login Form - vertical stack on mobile */}
-                    <div className='flex flex-col md:flex-row gap-4 md:gap-4'>
+                    <div className='flex flex-col md:flex-row gap-4 md:gap-4 p-4 bg-ghwhite rounded-lg shadow-md'>
                         <form onSubmit={onSubmit} className="flex-1 flex flex-col justify-center px-2 md:px-4 gap-4 md:gap-8">
                             {error && (
-                                <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                                <div className="p-3 text-sm text-ghpurple bg-red-50 border border-red-200 rounded-md">
                                     {error.message}
                                 </div>
                             )}
 
-                            <p className="text-xs md:text-sm text-stone-600 text-center">
+                            <p className="text-xs md:text-sm text-ghdark text-center">
                                 היכנסו עם שם המשתמש והסיסמא הקצרה <br />
                                 אם אתם לא זוכרים, פנו למנטורים
                             </p>
@@ -84,7 +92,7 @@ export default function WithAuth({ children, role }) {
                             </WithLabel>
                             <button
                                 type="submit"
-                                className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-3 px-4 rounded-lg disabled:opacity-50 transition-all duration-200"
+                                className="w-full bg-ghgreen hover:bg-ghdark text-white font-semibold py-3 px-4 rounded-lg disabled:opacity-50 transition-all duration-200"
                                 disabled={loading}
                             >
                                 {loading ? 'ממתין...' : 'התחבר'}
@@ -111,24 +119,15 @@ export default function WithAuth({ children, role }) {
                 </div>
             </div>
 
-            {/* Gradient Graphics Side - hidden on mobile, shown on desktop */}
-            <div className="hidden md:block md:flex-1 bg-gradient-to-br from-purple-200 via-pink-100 to-orange-200 relative overflow-hidden">
-                {/* Abstract geometric shapes for visual interest */}
-                <div className="absolute inset-0">
-                    {/* Large gradient circle */}
+            {/* <div className="hidden md:block md:flex-1 bg-gradient-to-br from-purple-200 via-pink-100 to-orange-200 relative overflow-hidden"> */}
+                {/* <div className="absolute inset-0">
                     <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-br from-purple-300/30 to-pink-300/30 rounded-full blur-3xl"></div>
-
-                    {/* Medium gradient circle */}
                     <div className="absolute bottom-32 left-16 w-48 h-48 bg-gradient-to-br from-orange-300/40 to-pink-300/40 rounded-full blur-2xl"></div>
-
-                    {/* Small accent circles */}
                     <div className="absolute top-1/3 left-1/3 w-32 h-32 bg-gradient-to-br from-blue-300/20 to-purple-300/20 rounded-full blur-xl"></div>
-
-                    {/* Subtle line elements */}
                     <div className="absolute top-1/2 right-1/4 w-1 h-32 bg-gradient-to-b from-transparent via-white/20 to-transparent transform rotate-12"></div>
                     <div className="absolute bottom-1/3 left-1/2 w-1 h-24 bg-gradient-to-b from-transparent via-white/15 to-transparent transform -rotate-12"></div>
-                </div>
-            </div>
+                </div> */}
+            {/* </div> */}
         </div>
     );
 }

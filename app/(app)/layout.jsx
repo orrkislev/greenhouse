@@ -10,10 +10,10 @@ import Toasts from "@/components/Toasts";
 export default function RootLayout({ children }) {
 	return (
 		<WithAuth>
-			<BGGrads />
-			<div className="flex flex-col md:flex-row h-screen overflow-hidden">
+			{/* <BGGrads /> */}
+			<div className="flex flex-col md:flex-row h-screen overflow-hidden bg-ghwhite">
 				<SideBar />
-				<div className={`bg-gradient-to-l from-white to-10% to-transparent relative flex-1 flex flex-col md:flex-row justify-between md:justify-center overflow-y-auto md:overflow-y-hidden`}>
+				<div className={`relative flex-1 flex flex-col md:flex-row justify-between md:justify-center overflow-y-auto md:overflow-y-hidden`}>
 					{children}
 					<JournalHandle />
 					<SwitchBackPanel />
