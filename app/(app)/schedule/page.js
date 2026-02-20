@@ -10,7 +10,7 @@ import Term from "./term/Term";
 
 
 export default function SchedulePage() {
-    const [view, setView] = useState('week');
+    const [view, setView] = useState('semester');
 
 
     return (

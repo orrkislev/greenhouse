@@ -1,4 +1,4 @@
-import Button from "@/components/Button";
+import Button, { IconButton } from "@/components/Button";
 import { eventsActions } from "@/utils/store/useEvents";
 import { useAdmin, adminActions } from "@/utils/store/useAdmin";
 import { isStaff } from "@/utils/store/useUser";
@@ -6,6 +6,7 @@ import { useUserGroups } from "@/utils/store/useGroups";
 import { format } from "date-fns";
 import { Save, Trash2, Plus, X } from "lucide-react";
 import { useState, useRef } from "react";
+import WithLabel from "@/components/WithLabel";
 
 export function EventEditModal({ event, close, _date, _time }) {
     const isNew = !event;
@@ -22,6 +23,12 @@ export function EventEditModal({ event, close, _date, _time }) {
     const [repeatWeekly, setRepeatWeekly] = useState(isNew ? false : isRecurring);
     const [dayOfWeek, setDayOfWeek] = useState(event?.day_of_the_week ?? (date.getDay() + 1));
     const [startTime, setStartTime] = useState(event?.start || _time || '08:30');
+    const [endTime, setEndTime] = useState(() => {
+        if (event?.end) return event.end;
+        const base = event?.start || _time || '08:30';
+        const [h, m] = base.split(':').map(Number);
+        return `${String(h + 1).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    });
     const [participants, setParticipants] = useState(event?.participants || []);
     const [showParticipantList, setShowParticipantList] = useState(false);
     const [selectedGroup, setSelectedGroup] = useState(event?.group_id || '');
@@ -32,12 +39,10 @@ export function EventEditModal({ event, close, _date, _time }) {
 
     const handleSave = async () => {
         try {
-            const endTime = new Date()
-            endTime.setHours(parseInt(startTime.split(':')[0]), parseInt(startTime.split(':')[1]) + 30);
             const eventData = {
                 title: title || 'אירוע',
                 start: startTime,
-                end: `${endTime.getHours()}:${endTime.getMinutes().toString().padStart(2, '0')}`,
+                end: endTime,
                 participants: participants.map(p => p.id),
                 day_of_the_week: repeatWeekly ? dayOfWeek : null,
                 date: !repeatWeekly ? format(date, 'yyyy-MM-dd') : null,
@@ -84,158 +89,165 @@ export function EventEditModal({ event, close, _date, _time }) {
 
     return (
         <div className="flex flex-col gap-4 min-w-[400px]">
-            <div className="font-bold text-lg mb-2">{isNew ? 'יצירת אירוע חדש' : 'עריכת אירוע'}</div>
+            <div className="font-bold text-lg">{isNew ? 'יצירת אירוע חדש' : 'עריכת אירוע'}</div>
 
             {/* Event Title */}
-            <div className="flex flex-col gap-2">
+            <WithLabel label="תיאור">
                 <input
                     type="text"
                     placeholder="תיאור האירוע"
-                    className="border border-gray-300 rounded p-2"
+                    className="border border-gray-300 rounded p-2 w-full"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                 />
-            </div>
+            </WithLabel>
 
             {/* Date/Day Selection with repeating checkbox */}
-            <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-3">
-                    {!repeatWeekly ? (
-                        <div
-                            className="relative flex-1 cursor-pointer"
-                            onClick={() => {
-                                if (dateInputRef.current) {
-                                    dateInputRef.current.focus();
-                                    if (typeof dateInputRef.current.showPicker === "function") {
-                                        dateInputRef.current.showPicker();
+            <WithLabel label="תאריך">
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
+                        {!repeatWeekly ? (
+                            <div
+                                className="relative flex-1 cursor-pointer"
+                                onClick={() => {
+                                    if (dateInputRef.current) {
+                                        dateInputRef.current.focus();
+                                        if (typeof dateInputRef.current.showPicker === "function") {
+                                            dateInputRef.current.showPicker();
+                                        }
                                     }
-                                }
-                            }}
-                        >
-                            <input
-                                id="hebrew-date"
-                                type="date"
-                                ref={dateInputRef}
-                                className="w-full border border-gray-300 rounded p-2 opacity-0 absolute inset-0 cursor-pointer"
-                                value={date.toISOString().split('T')[0]}
-                                onChange={(e) => {
-                                    setDate(new Date(e.target.value));
-                                    setDayOfWeek(new Date(e.target.value).getDay() + 1);
                                 }}
-                            />
-                            <div className="border border-gray-300 rounded p-2 bg-white">
-                                {formatHebrewDate(date)}
+                            >
+                                <input
+                                    id="hebrew-date"
+                                    type="date"
+                                    ref={dateInputRef}
+                                    className="w-full border border-gray-300 rounded p-2 opacity-0 absolute inset-0 cursor-pointer"
+                                    value={date.toISOString().split('T')[0]}
+                                    onChange={(e) => {
+                                        setDate(new Date(e.target.value));
+                                        setDayOfWeek(new Date(e.target.value).getDay() + 1);
+                                    }}
+                                />
+                                <div className="border border-gray-300 rounded p-2 bg-white">
+                                    {formatHebrewDate(date)}
+                                </div>
                             </div>
-                        </div>
-                    ) : (
-                        <select
-                            className="flex-1 border border-gray-300 rounded p-2"
-                            value={dayOfWeek}
-                            onChange={(e) => setDayOfWeek(parseInt(e.target.value))}
-                        >
-                            {days.map((day, index) => (
-                                <option key={index} value={index + 1}>יום {day}</option>
-                            ))}
-                        </select>
-                    )}
-                    <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap">
-                        <input
-                            type="checkbox"
-                            checked={repeatWeekly}
-                            onChange={(e) => setRepeatWeekly(e.target.checked)}
-                            className="w-4 h-4"
-                        />
-                        <span className="text-sm">חוזר שבועית</span>
-                    </label>
+                        ) : (
+                            <select
+                                className="flex-1 border border-gray-300 rounded p-2"
+                                value={dayOfWeek}
+                                onChange={(e) => setDayOfWeek(parseInt(e.target.value))}
+                            >
+                                {days.map((day, index) => (
+                                    <option key={index} value={index + 1}>יום {day}</option>
+                                ))}
+                            </select>
+                        )}
+                        <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap">
+                            <input
+                                type="checkbox"
+                                checked={repeatWeekly}
+                                onChange={(e) => setRepeatWeekly(e.target.checked)}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">חוזר שבועית</span>
+                        </label>
+                    </div>
                 </div>
-            </div>
+            </WithLabel>
 
             {/* Time Selection */}
-            <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold">שעה:</label>
-                <input
-                    type="time"
-                    className="border border-gray-300 rounded p-2"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                />
-            </div>
+            {/* <div className="flex flex-col gap-2"> */}
+            {/* <label className="text-sm font-semibold">שעה:</label> */}
+            <WithLabel label="שעה">
+                <div className="flex items-center gap-2">
+                    <input
+                        type="time"
+                        className="border border-gray-300 rounded p-2 flex-1"
+                        value={startTime}
+                        onChange={(e) => setStartTime(e.target.value)}
+                    />
+                    <span className="text-sm text-gray-500">עד</span>
+                    <input
+                        type="time"
+                        className="border border-gray-300 rounded p-2 flex-1"
+                        value={endTime}
+                        onChange={(e) => setEndTime(e.target.value)}
+                    />
+                </div>
+            </WithLabel>
+            {/* </div> */}
 
             {/* Group Selection (Staff only) */}
-            {isUserStaff && (
-                <div className="flex flex-col gap-2">
-                    <label className="text-sm font-semibold">קבוצה:</label>
-                    <select
-                        className="border border-gray-300 rounded p-2"
-                        value={selectedGroup}
-                        onChange={(e) => setSelectedGroup(e.target.value)}
-                    >
-                        <option value="">ללא קבוצה (אישי)</option>
-                        {userGroups?.map((group) => (
-                            <option key={group.id} value={group.id}>
-                                {group.type === 'class' ? 'קבוצת ' : group.type === 'major' ? 'מגמת ' : ''}{group.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            )}
-
-            {/* Participants */}
             {isStaff() && (
-                <div className="flex flex-col gap-2">
-                    <label className="text-sm font-semibold">משתתפים:</label>
-
-                    {/* Display current participants */}
-                    <div className="flex flex-wrap gap-2 mb-2">
-                        {participants.map((participant) => (
-                            <div key={participant.id} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                                <span>{participant.first_name} {participant.last_name}</span>
-                                <button
-                                    onClick={() => handleRemoveParticipant(participant.id)}
-                                    className="hover:bg-green-200 rounded-full p-0.5"
-                                >
-                                    <X className="h-3 w-3" />
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Add participant button */}
-                    <div className="relative">
-                        <button
-                            onClick={() => {
-                                if (!showParticipantList) {
-                                    adminActions.loadData();
-                                }
-                                setShowParticipantList(!showParticipantList);
-                            }}
-                            className="flex items-center gap-2 px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                <div className="flex gap-4">
+                    <WithLabel label="קבוצה" className='border-l border-gray-300 pl-4'>
+                        <select
+                            className="border border-gray-300 rounded p-2"
+                            value={selectedGroup}
+                            onChange={(e) => setSelectedGroup(e.target.value)}
                         >
-                            <Plus className="h-4 w-4" />
-                            הוספת משתתפים
-                        </button>
+                            <option value="">אישי</option>
+                            {userGroups?.map((group) => (
+                                <option key={group.id} value={group.id}>
+                                    {group.type === 'class' ? 'קבוצת ' : group.type === 'major' ? 'מגמת ' : ''}{group.name}
+                                </option>
+                            ))}
+                        </select>
+                        {/* </div> */}
+                    </WithLabel>
+                    <WithLabel label="משתתפים">
+                        {/* Display current participants */}
+                        <div className="flex flex-wrap gap-2 mb-2">
+                            {participants.map((participant) => (
+                                <div key={participant.id} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                                    <span>{participant.first_name} {participant.last_name}</span>
+                                    <button
+                                        onClick={() => handleRemoveParticipant(participant.id)}
+                                        className="hover:bg-green-200 rounded-full p-0.5"
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                </div>
+                            ))}
 
-                        {/* Participant selection dropdown */}
-                        {showParticipantList && (
-                            <div className="absolute top-full left-0 mt-1 w-full max-h-60 overflow-y-auto bg-white border border-gray-300 rounded shadow-lg z-10">
-                                {availableMembers.length > 0 ? (
-                                    availableMembers.map((member) => (
-                                        <button
-                                            key={member.id}
-                                            onClick={() => handleAddParticipant(member)}
-                                            className="w-full text-right px-4 py-2 hover:bg-gray-100 border-b border-gray-200 last:border-b-0"
-                                        >
-                                            {member.first_name} {member.last_name}
-                                        </button>
-                                    ))
-                                ) : (
-                                    <div className="px-4 py-2 text-gray-400 text-sm">
-                                        אין משתתפים זמינים
+                            {/* Add participant button */}
+                            <div className="relative">
+                                <IconButton
+                                    icon={Plus}
+                                    onClick={() => {
+                                        if (!showParticipantList) {
+                                            adminActions.loadData();
+                                        }
+                                        setShowParticipantList(!showParticipantList);
+                                    }}
+                                />
+
+                                {showParticipantList && (
+                                    <div className="absolute top-full left-0 mt-1 w-full max-h-60 overflow-y-auto bg-white border border-gray-300 rounded shadow-lg z-10">
+                                        {availableMembers.length > 0 ? (
+                                            availableMembers.map((member) => (
+                                                <button
+                                                    key={member.id}
+                                                    onClick={() => handleAddParticipant(member)}
+                                                    className="w-full text-right px-4 py-2 hover:bg-gray-100 border-b border-gray-200 last:border-b-0"
+                                                >
+                                                    {member.first_name} {member.last_name}
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="px-4 py-2 text-gray-400 text-sm">
+                                                אין משתתפים זמינים
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
-                        )}
-                    </div>
+                        </div>
+
+
+                    </WithLabel>
                 </div>
             )}
 
