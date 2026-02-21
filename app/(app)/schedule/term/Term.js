@@ -91,36 +91,24 @@ export default function Term() {
 
     const dayHeaders = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'סופ״ש'];
 
-    // Memoize events per cell
     const cellEvents = useMemo(() => {
         const result = {};
         weeks.forEach((week, weekIndex) => {
             week.forEach((day, dayIndex) => {
                 const key = `${weekIndex}-${dayIndex}`;
                 if (day.isWeekend) {
-                    // Combine Friday and Saturday events (both regular and recurring)
-                    const fridayDayOfWeek = 6; // Friday is day 6 (Sunday=1, Monday=2, ..., Friday=6)
-                    const saturdayDayOfWeek = 7; // Saturday is day 7
-
                     result[key] = {
-                        events: [
-                            ...eventSelectors.getEventsForDate(events, day.date),
-                            ...eventSelectors.getRecurringEventsForDay(events, fridayDayOfWeek),
-                            ...eventSelectors.getEventsForDate(events, day.endDate),
-                            ...eventSelectors.getRecurringEventsForDay(events, saturdayDayOfWeek)
-                        ],
+                        events: events.filter(event => event.date == day.date || event.date == day.endDate ||
+                            event.day_of_the_week === 6 ||
+                            event.day_of_the_week === 7
+                        ),
                         tasks: projectTasks.filter(task => isSameDay(new Date(task.due_date), day.date) || isSameDay(new Date(task.due_date), day.endDate))
                     };
                 } else {
-                    // dayIndex 0-4 maps to Sunday-Thursday
-                    // day_of_the_week: Sunday=1, Monday=2, Tuesday=3, Wednesday=4, Thursday=5
-                    const dayOfWeek = dayIndex + 1;
-
                     result[key] = {
-                        events: [
-                            ...eventSelectors.getEventsForDate(events, day.date),
-                            ...eventSelectors.getRecurringEventsForDay(events, dayOfWeek)
-                        ],
+                        events: events.filter(event => event.date && isSameDay(new Date(event.date), day.date) ||
+                            event.day_of_the_week === dayIndex + 1
+                        ),
                         tasks: projectTasks.filter(task => isSameDay(new Date(task.due_date), day.date))
                     }
                 }
