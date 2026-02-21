@@ -1,11 +1,15 @@
 import { useTime } from "@/utils/store/useTime"
 import { addDays, addWeeks, differenceInWeeks, endOfWeek, isSameDay, isToday, startOfWeek, subDays, format } from "date-fns";
 import { eventsActions, useEventsData, eventSelectors } from "@/utils/store/useEvents";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import usePopper from "@/components/Popper";
 import { EventEditModal, EventDetailModal } from "../components/EventModal";
 import { useUser } from "@/utils/store/useUser";
 import { useGroups } from "@/utils/store/useGroups";
+import { useProjectData, projectUtils } from "@/utils/store/useProject";
+import TaskModal from "@/components/TaskModal";
+import Menu, { MenuItem, MenuList } from "@/components/Menu";
+import { ClipboardPlus, Plus } from "lucide-react";
 
 // Color palette for groups
 const GROUP_COLORS = [
@@ -30,6 +34,11 @@ function getGroupColor(groupId) {
 export default function Term() {
     const events = useEventsData(state => state.events);
     const currTerm = useTime((state) => state.currTerm);
+    const projectTasks = useProjectData(state => state.tasks);
+
+    useEffect(() => {
+        useProjectData.getState().loadTasks();
+    }, [])
 
     useEffect(() => {
         if (!currTerm) return;
@@ -93,21 +102,27 @@ export default function Term() {
                     const fridayDayOfWeek = 6; // Friday is day 6 (Sunday=1, Monday=2, ..., Friday=6)
                     const saturdayDayOfWeek = 7; // Saturday is day 7
 
-                    result[key] = [
-                        ...eventSelectors.getEventsForDate(events, day.date),
-                        ...eventSelectors.getRecurringEventsForDay(events, fridayDayOfWeek),
-                        ...eventSelectors.getEventsForDate(events, day.endDate),
-                        ...eventSelectors.getRecurringEventsForDay(events, saturdayDayOfWeek)
-                    ];
+                    result[key] = {
+                        events: [
+                            ...eventSelectors.getEventsForDate(events, day.date),
+                            ...eventSelectors.getRecurringEventsForDay(events, fridayDayOfWeek),
+                            ...eventSelectors.getEventsForDate(events, day.endDate),
+                            ...eventSelectors.getRecurringEventsForDay(events, saturdayDayOfWeek)
+                        ],
+                        tasks: projectTasks.filter(task => isSameDay(new Date(task.due_date), day.date) || isSameDay(new Date(task.due_date), day.endDate))
+                    };
                 } else {
                     // dayIndex 0-4 maps to Sunday-Thursday
                     // day_of_the_week: Sunday=1, Monday=2, Tuesday=3, Wednesday=4, Thursday=5
                     const dayOfWeek = dayIndex + 1;
 
-                    result[key] = [
-                        ...eventSelectors.getEventsForDate(events, day.date),
-                        ...eventSelectors.getRecurringEventsForDay(events, dayOfWeek)
-                    ];
+                    result[key] = {
+                        events: [
+                            ...eventSelectors.getEventsForDate(events, day.date),
+                            ...eventSelectors.getRecurringEventsForDay(events, dayOfWeek)
+                        ],
+                        tasks: projectTasks.filter(task => isSameDay(new Date(task.due_date), day.date))
+                    }
                 }
             });
         });
@@ -135,7 +150,8 @@ export default function Term() {
                                     <Cell
                                         key={key}
                                         day={day}
-                                        events={cellEvents[key] || []}
+                                        events={cellEvents[key]?.events || []}
+                                        tasks={cellEvents[key]?.tasks || []}
                                     />
                                 );
                             })}
@@ -147,11 +163,13 @@ export default function Term() {
     )
 }
 
-function Cell({ day, events }) {
+function Cell({ day, events, tasks }) {
+    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+
     const bgClass = day.isToday ? 'bg-stone-200 hover:bg-stone-300' :
-                    day.inPast ? 'bg-gray-50' :
-                    day.isWeekend ? 'bg-blue-50' :
-                    !day.inTerm ? 'bg-gray-100' : '';
+        day.inPast ? 'bg-gray-50 stripes' :
+            day.isWeekend ? 'bg-blue-50' :
+                !day.inTerm ? 'bg-gray-100' : '';
 
     return (
         <td className={`relative border border-slate-300 w-1/6 min-h-32 align-top p-2 hover:bg-stone-100 group/cell ${bgClass}`}>
@@ -173,13 +191,50 @@ function Cell({ day, events }) {
             )}
 
             <div className="flex flex-col gap-1 w-full">
+                {tasks.map((task) => (
+                    <Task key={task.id} task={task} />
+                ))}
+
                 {events.map((event) => (
                     <Event key={event.id} event={event} />
                 ))}
 
                 <NewEventButton date={day.date} />
+                <Menu small className="absolute left-2 top-2 bg-white opacity-0 group-hover/cell:opacity-100 scale-80 transition-all duration-300" icon={Plus}>
+                    <MenuList>
+                        <MenuItem title="משימה חדשה בפרויקט" icon={ClipboardPlus} onClick={() => setIsTaskModalOpen(true)} />
+                    </MenuList>
+                </Menu>
             </div>
+
+            <TaskModal
+                isOpen={isTaskModalOpen}
+                onClose={() => setIsTaskModalOpen(false)}
+                context={projectUtils.getContext()}
+                defaultDueDate={format(day.date, 'yyyy-MM-dd')}
+            />
         </td>
+    )
+}
+
+function Task({ task }) {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    return (
+        <>
+            <div className="bg-white rounded p-1 text-xs relative cursor-pointer hover:bg-stone-100" onClick={() => setIsModalOpen(true)}>
+                {task.title}
+                <div className={`absolute left-0 top-[-4px] text-[10px] px-1 rounded-sm bg-white`}>
+                    פרויקט
+                </div>
+            </div>
+            <TaskModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                task={task}
+                context={task.context}
+            />
+        </>
     )
 }
 
@@ -242,7 +297,7 @@ function NewEventButton({ date }) {
     return (
         <>
             <div
-                className="opacity-0 group-hover/cell:opacity-100 bg-green-500 rounded-full text-xs flex justify-center items-center hover:bg-green-800 text-white cursor-pointer group/add-button h-6"
+                className="flex-[3] opacity-0 group-hover/cell:opacity-100 bg-green-500 rounded-full text-xs flex justify-center items-center hover:bg-green-800 text-white cursor-pointer group/add-button h-4"
                 onClick={handleClick}
             >
                 <div className="group-hover/add-button:rotate-180 duration-300 font-bold text-md">+</div>

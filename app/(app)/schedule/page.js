@@ -1,6 +1,5 @@
 'use client';
 
-import { tw } from "@/utils/tw";
 import { useState } from "react";
 import ContextBar from "@/components/ContextBar";
 import { DashboardLayout, DashboardMain, DashboardPanel, DashboardPanelButton } from "@/components/DashboardLayout";
@@ -10,7 +9,7 @@ import Term from "./term/Term";
 
 
 export default function SchedulePage() {
-    const [view, setView] = useState('semester');
+    const [view, setView] = useState('week');
 
 
     return (

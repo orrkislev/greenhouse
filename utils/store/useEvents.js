@@ -141,14 +141,14 @@ export const useEventsData = create((set, get) => {
                 const origParticipants = origEvent.participants || [];
                 const newParticipants = event.participants;
 
-                const participantsToAdd = newParticipants.filter(p => !origParticipants.includes(p));
-                const participantsToRemove = origParticipants.filter(p => !newParticipants.includes(p));
+                const participantsToAdd = newParticipants.filter(p => !origParticipants.find(op => op.id === (p.id || p)));
+                const participantsToRemove = origParticipants.filter(p => !newParticipants.find(np => np.id === (p.id || p)));
 
                 if (participantsToAdd.length > 0) {
-                    await supabase.from('event_participants').insert(participantsToAdd.map(p => ({ event_id: event.id, user_id: p })));
+                    await supabase.from('event_participants').insert(participantsToAdd.map(p => ({ event_id: event.id, user_id: p.id || p })));
                 }
                 if (participantsToRemove.length > 0) {
-                    await supabase.from('event_participants').delete().eq('event_id', event.id).in('user_id', participantsToRemove);
+                    await supabase.from('event_participants').delete().eq('event_id', event.id).in('user_id', participantsToRemove.map(p => p.id || p));
                 }
             }
         }),

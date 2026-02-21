@@ -4,11 +4,11 @@ import usePopper from "./Popper"
 import { IconButton } from "./Button"
 import { Ellipsis } from "lucide-react"
 
-export default function Menu({ children, className, icon }) {
+export default function Menu({ children, className, icon, small=false }) {
     const { Popper, baseRef, open } = usePopper()
     return (
         <>
-            <IconButton icon={icon || Ellipsis} onClick={open} ref={baseRef} className={className} />
+            <IconButton icon={icon || Ellipsis} onClick={open} ref={baseRef} className={className} small={small} />
             <Popper>
                 {children}
             </Popper>

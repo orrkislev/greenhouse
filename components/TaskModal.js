@@ -11,7 +11,7 @@ import { useUser } from "@/utils/store/useUser";
 import { projectActions } from "@/utils/store/useProject";
 import { studyActions } from "@/utils/store/useStudy";
 
-export default function TaskModal({ task, isOpen, onClose: onCloseProp, context }) {
+export default function TaskModal({ task, isOpen, onClose: onCloseProp, context, defaultDueDate }) {
     const { open, Popper, close } = usePopper({ onClose: onCloseProp });
 
     useEffect(() => {
@@ -20,16 +20,16 @@ export default function TaskModal({ task, isOpen, onClose: onCloseProp, context 
 
     return (
         <Popper>
-            <TaskModalContent task={task} close={close} initialContext={context} />
+            <TaskModalContent task={task} close={close} initialContext={context} defaultDueDate={defaultDueDate} />
         </Popper>
     )
 }
 
-function TaskModalContent({ task, close, initialContext }) {
+function TaskModalContent({ task, close, initialContext, defaultDueDate }) {
     const [title, setTitle] = useState(task ? task.title : 'משימה חדשה');
     const [url, setUrl] = useState(task ? task.url : '');
     const [description, setDescription] = useState(task ? task.description : 'פירוט המשימה');
-    const [due_date, setDueDate] = useState(task ? task.due_date : format(new Date(), 'yyyy-MM-dd'));
+    const [due_date, setDueDate] = useState(task ? task.due_date : (defaultDueDate || format(new Date(), 'yyyy-MM-dd')));
     const [context, setContext] = useState(initialContext);
 
     useEffect(() => {

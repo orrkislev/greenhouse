@@ -21,7 +21,7 @@ export const useProjectData = create((set, get) => {
         tasks: [],
         view: 'list',
 
-        setProject: (project) => set({ project }),
+        setProject: (project) => set({ project, tasks: [] }),
         loadProject: withUser(async (user) => {
             const currTerm = useTime.getState().currTerm;
             if (!currTerm) return;
@@ -30,7 +30,7 @@ export const useProjectData = create((set, get) => {
                 master:staff_public!master(first_name, last_name, avatar_url)
             `).eq('student_id', user.id).contains('term', [currTerm.id]);
             if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הפרויקט');
-            if (data && data.length > 0) set({ project: data[0] })
+            if (data && data.length > 0) set({ project: data[0], tasks: [] });
         }),
         loadProjectById: async (projectId) => {
             const { data, error } = await supabase.from('projects').select(`
@@ -38,7 +38,7 @@ export const useProjectData = create((set, get) => {
                 master:staff_public!master(first_name, last_name, avatar_url)
             `).eq('id', projectId);
             if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הפרויקט');
-            if (data && data.length > 0) set({ project: data[0] })
+            if (data && data.length > 0) set({ project: data[0], tasks: [] });
         },
         continueProject: async (projectId) => {
             const newTerm = useTime.getState().currTerm.id;
@@ -57,7 +57,7 @@ export const useProjectData = create((set, get) => {
                 term: [useTime.getState().currTerm.id],
             }).select().single();
             if (projectError) toastsActions.addFromError(projectError, 'שגיאה ביצירת הפרויקט');
-            set({ project: projectData });
+            set({ project: projectData, tasks: [] });
 
             get().addTaskToProject({
                 title: 'למלא הצהרת כוונות',
@@ -150,8 +150,9 @@ export const useProjectData = create((set, get) => {
         // ------------------------------
 
         loadTasks: async () => {
-            set({ tasks: [] });
+            if (get().tasks.length > 0) return; // Don't reload if we already have tasks
             if (!useProjectData.getState().project) return;
+            set({ tasks: [] });
             const project = useProjectData.getState().project;
             if (!project) return;
             const { data, error } = await supabase.rpc('get_linked_items', {

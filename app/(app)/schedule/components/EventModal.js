@@ -7,6 +7,8 @@ import { format } from "date-fns";
 import { Save, Trash2, Plus, X } from "lucide-react";
 import { useState, useRef } from "react";
 import WithLabel from "@/components/WithLabel";
+import usePopper from "@/components/Popper";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 
 export function EventEditModal({ event, close, _date, _time }) {
     const isNew = !event;
@@ -30,8 +32,10 @@ export function EventEditModal({ event, close, _date, _time }) {
         return `${String(h + 1).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
     });
     const [participants, setParticipants] = useState(event?.participants || []);
-    const [showParticipantList, setShowParticipantList] = useState(false);
     const [selectedGroup, setSelectedGroup] = useState(event?.group_id || '');
+    const { open: openPicker, close: closePicker, Popper, baseRef } = usePopper({
+        onOpen: () => adminActions.loadData(),
+    });
 
     const days = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 
@@ -43,7 +47,7 @@ export function EventEditModal({ event, close, _date, _time }) {
                 title: title || 'אירוע',
                 start: startTime,
                 end: endTime,
-                participants: participants.map(p => p.id),
+                participants: participants,
                 day_of_the_week: repeatWeekly ? dayOfWeek : null,
                 date: !repeatWeekly ? format(date, 'yyyy-MM-dd') : null,
                 group_id: selectedGroup || null,
@@ -75,7 +79,7 @@ export function EventEditModal({ event, close, _date, _time }) {
         if (!participants.find(p => p.id === member.id)) {
             setParticipants([...participants, member]);
         }
-        setShowParticipantList(false);
+        closePicker();
     };
 
     const handleRemoveParticipant = (participantId) => {
@@ -213,37 +217,29 @@ export function EventEditModal({ event, close, _date, _time }) {
                             ))}
 
                             {/* Add participant button */}
-                            <div className="relative">
-                                <IconButton
-                                    icon={Plus}
-                                    onClick={() => {
-                                        if (!showParticipantList) {
-                                            adminActions.loadData();
-                                        }
-                                        setShowParticipantList(!showParticipantList);
-                                    }}
-                                />
-
-                                {showParticipantList && (
-                                    <div className="absolute top-full left-0 mt-1 w-full max-h-60 overflow-y-auto bg-white border border-gray-300 rounded shadow-lg z-10">
-                                        {availableMembers.length > 0 ? (
-                                            availableMembers.map((member) => (
-                                                <button
-                                                    key={member.id}
-                                                    onClick={() => handleAddParticipant(member)}
-                                                    className="w-full text-right px-4 py-2 hover:bg-gray-100 border-b border-gray-200 last:border-b-0"
-                                                >
-                                                    {member.first_name} {member.last_name}
-                                                </button>
-                                            ))
+                            <IconButton icon={Plus} onClick={openPicker} ref={baseRef} />
+                            <Popper>
+                                <Command>
+                                    <CommandInput placeholder="חפש משתתף..." />
+                                    <CommandList>
+                                        {availableMembers.length === 0 ? (
+                                            <CommandEmpty>אין משתתפים זמינים</CommandEmpty>
                                         ) : (
-                                            <div className="px-4 py-2 text-gray-400 text-sm">
-                                                אין משתתפים זמינים
-                                            </div>
+                                            <CommandGroup>
+                                                {availableMembers.map(member => (
+                                                    <CommandItem
+                                                        key={member.id}
+                                                        value={member.first_name + ' ' + member.last_name}
+                                                        onSelect={() => handleAddParticipant(member)}
+                                                    >
+                                                        {member.first_name} {member.last_name}
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
                                         )}
-                                    </div>
-                                )}
-                            </div>
+                                    </CommandList>
+                                </Command>
+                            </Popper>
                         </div>
 
 

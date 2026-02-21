@@ -6,14 +6,22 @@ import { EventEditModal, EventDetailModal } from "./EventModal";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useUser } from "@/utils/store/useUser";
 import { useGroups } from "@/utils/store/useGroups";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, ClipboardPlus, Plus } from "lucide-react";
 import { days, getTimeSlot, getEndTimeSlot, isInTimeSlot, times } from "./utils";
+import { projectActions, projectUtils, useProjectData } from "@/utils/store/useProject";
+import TaskModal from "@/components/TaskModal";
+import Menu, { MenuItem, MenuList } from "@/components/Menu";
 
 export default function Schedule() {
     const allEvents = useWeekEvents();
     useGroupWeekEvents();
     const week = useTime().week;
     const { nextWeek, prevWeek } = useTime();
+    const projectTasks = useProjectData(state => state.tasks);
+
+    useEffect(() => {
+        projectActions.loadTasks();
+    }, [])
 
     if (!week || week.length === 0) return null;
     if (!allEvents) return null;
@@ -50,6 +58,14 @@ export default function Schedule() {
                 ];
                 result[`${day}-${time}`] = { events: cellEvents, legCount: legCounts[time] };
             }
+
+            projectTasks.forEach(task => {
+                if (!task.due_date) return;
+                const taskDate = format(new Date(task.due_date), 'yyyy-MM-dd');
+                if (taskDate === day) {
+                    result[`${day}-9:30`].tasks = [...(result[`${day}-9:30`].tasks || []), task];
+                }
+            })
         });
         return result;
     }, [allEvents, week])
@@ -101,14 +117,13 @@ export default function Schedule() {
                         {week.map((day, dindex) => {
                             // Mark today, or mark weekend column if today is Friday (5) or Saturday (6)
                             const isCurrentDay = currentDayOfWeek === dindex ||
-                                                (dindex === 5 && (currentDayOfWeek === 5 || currentDayOfWeek === 6));
+                                (dindex === 5 && (currentDayOfWeek === 5 || currentDayOfWeek === 6));
 
                             return (
                                 <Cell key={`${dindex}-${tindex}`}
                                     time={time}
                                     date={new Date(day)}
-                                    events={cells[`${day}-${time}`]?.events}
-                                    legCount={cells[`${day}-${time}`]?.legCount || 0}
+                                    cellData={cells[`${day}-${time}`]}
                                     isToday={isCurrentDay} />
                             );
                         })}
@@ -119,13 +134,19 @@ export default function Schedule() {
     )
 }
 
-function Cell({ date, time, events, isToday, legCount }) {
+function Cell({ date, time, cellData, isToday }) {
+    const { events = [], legCount = 0, tasks = [] } = cellData || {};
+    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+    const show930Menu = time === '9:30';
     return (
         <td id={`${format(date, 'yyyy-MM-dd')}-${time}`}
             className={`relative border border-slate-300 w-1/6 h-24 align-top p-2 group/cell ${isToday ? 'bg-stone-200' : ''}`}
             style={legCount > 0 ? { paddingLeft: `${9 + legCount * 15}px` } : undefined}>
             <div className='text-xs opacity-50 mb-2'>{time}</div>
             <div className='flex flex-col w-full h-full gap-1'>
+                {tasks.map((task, index) => (
+                    <Task key={task.id || index} task={task} />
+                ))}
                 {events.map((event, index) => {
                     const precedingLegs = events.slice(0, index).filter(e =>
                         e.start && e.end && times.indexOf(getEndTimeSlot(e.end)) > times.indexOf(getTimeSlot(e.start))
@@ -134,8 +155,45 @@ function Cell({ date, time, events, isToday, legCount }) {
                 })}
 
                 <NewEventButton date={date} time={time} />
+                {show930Menu && (
+                    <Menu small className="absolute left-2 top-2 bg-white opacity-0 group-hover/cell:opacity-100 scale-80 transition-all duration-300" icon={Plus}>
+                        <MenuList>
+                            <MenuItem title="משימה חדשה בפרויקט" icon={ClipboardPlus} onClick={() => setIsTaskModalOpen(true)} />
+                        </MenuList>
+                    </Menu>
+                )}
             </div>
+
+            {show930Menu && (
+                <TaskModal
+                    isOpen={isTaskModalOpen}
+                    onClose={() => setIsTaskModalOpen(false)}
+                    context={projectUtils.getContext()}
+                    defaultDueDate={format(date, 'yyyy-MM-dd')}
+                />
+            )}
         </td>
+    )
+}
+
+function Task({ task }) {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    return (
+        <>
+            <div className="bg-white rounded p-1 text-xs relative cursor-pointer hover:bg-stone-100" onClick={() => setIsModalOpen(true)}>
+                {task.title}
+                <div className={`absolute left-0 top-[-4px] text-[10px] px-1 rounded-sm bg-white`}>
+                    פרויקט
+                </div>
+            </div>
+            <TaskModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                task={task}
+                context={task.context}
+            />
+        </>
     )
 }
 
@@ -169,7 +227,7 @@ function Event({ event, precedingLegs = 0 }) {
     const isMeeting = event.day_of_the_week !== null;
     const isOwner = user?.id && event?.created_by === user.id;
 
-    useEffect(()=>{
+    useEffect(() => {
         // if the event ends in a different time slot, get the cell of the end time (using id) nd set the lefEndRef to it
         if (getEndTimeSlot(event.end) !== getTimeSlot(event.start)) {
             const cellId = `${event.date}-${getEndTimeSlot(event.end)}`;
@@ -180,7 +238,7 @@ function Event({ event, precedingLegs = 0 }) {
                 setLegLength(cellRect.bottom - 30 - thisRect.top);
             }
         }
-    },[event])
+    }, [event])
 
     const timeString = event.start.split(':')[0].padStart(2, '0') + ':' + event.start.split(':')[1].padStart(2, '0');
 
