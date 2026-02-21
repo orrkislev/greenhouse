@@ -127,7 +127,7 @@ export default function Term() {
             });
         });
         return result;
-    }, [events, weeks]);
+    }, [events, weeks, projectTasks]);
 
     return (
         <div className="w-full overflow-auto p-4">

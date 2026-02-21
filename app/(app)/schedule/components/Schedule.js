@@ -68,7 +68,7 @@ export default function Schedule() {
             })
         });
         return result;
-    }, [allEvents, week])
+    }, [allEvents, week, projectTasks]);
 
     return (
         <table className="table-fixed border-collapse w-full h-full">
