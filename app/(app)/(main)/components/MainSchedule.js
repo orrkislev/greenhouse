@@ -10,6 +10,25 @@ import { Calendar } from "lucide-react";
 import MainGreetings from "./MainGreetings";
 import Image from "next/image";
 
+const GROUP_COLORS = [
+    { event: 'bg-blue-500 hover:bg-blue-700', groupHover: 'group-hover/event:bg-blue-700' },
+    { event: 'bg-purple-500 hover:bg-purple-700', groupHover: 'group-hover/event:bg-purple-700' },
+    { event: 'bg-pink-500 hover:bg-pink-700', groupHover: 'group-hover/event:bg-pink-700' },
+    { event: 'bg-orange-500 hover:bg-orange-700', groupHover: 'group-hover/event:bg-orange-700' },
+    { event: 'bg-teal-500 hover:bg-teal-700', groupHover: 'group-hover/event:bg-teal-700' },
+    { event: 'bg-indigo-500 hover:bg-indigo-700', groupHover: 'group-hover/event:bg-indigo-700' },
+    { event: 'bg-rose-500 hover:bg-rose-700', groupHover: 'group-hover/event:bg-rose-700' },
+    { event: 'bg-cyan-500 hover:bg-cyan-700', groupHover: 'group-hover/event:bg-cyan-700' },
+];
+
+const MEETING_COLORS = { event: 'bg-green-600 hover:bg-green-700', groupHover: 'group-hover/event:bg-green-700' };
+
+function getGroupColor(groupId) {
+    if (!groupId) return GROUP_COLORS[0];
+    const hash = groupId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return GROUP_COLORS[hash % GROUP_COLORS.length];
+}
+
 export default function MainSchedule() {
     const today = useTime(state => state.today);
     const week = useTime(state => state.week);
@@ -51,27 +70,32 @@ export default function MainSchedule() {
         return eventDate > new Date();
     })
 
+    console.log({allEvents, events, googleCalendarEvents, todayEvents})
+
     return (
         <Box2 label="מה יש לי היום" className="col-start-1 row-start-1 row-span-4 flex-1 relative" LabelIcon={Calendar}>
             <MainGreetings />
             <div className="flex flex-col gap-2 mt-2">
-                {allEvents.length > 0 ? allEvents.map(item => (
-                    <div key={item.id} className={`flex gap-3 items-center ${nextEvent?.id === item.id ? 'bg-accent rounded-[8px] border-2 border-border' : ''}`}>
-                        <EventTime time={item.start} />
-                        <div className="text-sm font-bold flex items-center gap-1">
-                            {item.type === 'meeting' ? (
-                                typeof item.participants?.[0] === 'object'
-                                    ? `${item.participants[0]?.first_name} ${item.participants[0]?.last_name}`
-                                    : (item.title || 'פגישה')
-                            ) : (
-                                <>
-                                    {item.title}
-                                    {item.group && <div className="text-xs font-normal text-muted-foreground">(ב{item.group})</div>}
-                                </>
+                {allEvents.length > 0 ? allEvents.map(item => {
+                    const colors = item.type === 'meeting' ? MEETING_COLORS : getGroupColor(item.group_id);
+                    const isNext = nextEvent?.id === item.id;
+                    const timeString = item.start.split(':')[0].padStart(2, '0') + ':' + item.start.split(':')[1].padStart(2, '0');
+                    return (
+                        <div key={item.id} className={`relative ${colors.event} text-white rounded p-1 text-xs flex gap-2 ${isNext ? 'ring-2 ring-offset-1 ring-ghpurple' : ''}`}>
+                            {item.group && (
+                                <div className={`absolute left-0 top-[-4px] text-[10px] px-1 rounded-sm ${colors.event} ${colors.groupHover}`}>
+                                    {item.group}
+                                </div>
                             )}
+                            <div className="shrink-0">{timeString}</div>
+                            <div className="break-words overflow-hidden">
+                                {item.type === 'meeting'
+                                    ? (item.title || 'פגישה') + " עם " + item.participants?.map(p => p.first_name).join(', ')
+                                    : item.title}
+                            </div>
                         </div>
-                    </div>
-                )) : (
+                    );
+                }) : (
                     <div className="flex flex-col items-center justify-center h-full">
                         <Image src="/images/no_events.png" alt="empty" width={200} height={200} className="w-[70%] object-cover" />
                         <div className="text-xs text-muted-foreground">אין אירועים היום</div>

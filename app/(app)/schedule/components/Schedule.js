@@ -1,7 +1,7 @@
 import usePopper from "@/components/Popper";
 import { useWeekEvents, useGroupWeekEvents } from "@/utils/store/useEvents";
 import { useTime } from "@/utils/store/useTime";
-import { format } from "date-fns";
+import { format, isToday } from "date-fns";
 import { EventEditModal, EventDetailModal } from "./EventModal";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useUser } from "@/utils/store/useUser";
@@ -92,8 +92,8 @@ export default function Schedule() {
                                             <ArrowRight />
                                         </button>
                                     )}
-                                    <div className="flex flex-col items-center">
-                                        <div className="font-bold">{day}</div>
+                                    <div className={`flex flex-col items-center`}>
+                                        <div className={`font-bold ${isToday(date) ? 'bg-ghpurple text-ghglow rounded-full aspect-square p-2' : ''}`}>{day}</div>
                                         <div className="text-xs text-gray-500 font-normal">{formattedDate}</div>
                                     </div>
                                     {index === 5 && (
@@ -140,7 +140,7 @@ function Cell({ date, time, cellData, isToday }) {
     const show930Menu = time === '9:30';
     return (
         <td id={`${format(date, 'yyyy-MM-dd')}-${time}`}
-            className={`relative border border-slate-300 w-1/6 h-24 align-top p-2 group/cell ${isToday ? 'bg-stone-200' : ''}`}
+            className={`relative border border-slate-300 w-1/6 h-24 align-top p-2 group/cell ${isToday ? '' : ''}`}
             style={legCount > 0 ? { paddingLeft: `${9 + legCount * 15}px` } : undefined}>
             <div className='text-xs opacity-50 mb-2'>{time}</div>
             <div className='flex flex-col w-full h-full gap-1'>
