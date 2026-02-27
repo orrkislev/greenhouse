@@ -1,7 +1,7 @@
 import { create } from "zustand"
-import { createUser, deleteUser } from "@/utils/actions/admin actions";
+import { createUser, deleteUser, updateUser } from "@/utils/actions/admin actions";
 import { supabase } from "../supabase/client";
-import { makeLink, prepareForGroupsTable, prepareForUsersTable } from "../supabase/utils";
+import { makeLink, prepareForGroupsTable } from "../supabase/utils";
 import { projectActions } from "./useProject";
 import { createDataLoadingHook } from "./utils/storeUtils";
 import { format } from "date-fns";
@@ -59,13 +59,12 @@ export const useAdmin = create((set, get) => ({
     // ------------------------------
     createMember: async (memberData) => {
         if (!isAdmin()) return;
-        const newID = await createUser(memberData.username, memberData.first_name, memberData.last_name);
+        const newID = await createUser(memberData.username, memberData.first_name, memberData.last_name, memberData);
         if (!newID) {
             toastsActions.addToast({ message: 'Failed to create user', type: 'error' });
             return;
         }
-        const { error: updateError } = await supabase.from('users').update(prepareForUsersTable(memberData)).eq('id', newID);
-        if (updateError) toastsActions.addFromError(updateError, 'שגיאה בעדכון המשתמש');
+
         const newMemberData = { ...memberData, id: newID, groups: memberData.groups || [] };
         set(state => ({
             allMembers: state.allMembers.concat(newMemberData)
@@ -74,18 +73,21 @@ export const useAdmin = create((set, get) => ({
     },
     updateMember: async (memberId, updates) => {
         if (!isAdmin()) return;
-        const cleanedUpdates = prepareForUsersTable(updates);
-        const { error: updateError } = await supabase.from('users').update(cleanedUpdates).eq('id', memberId);
-        if (updateError) toastsActions.addFromError(updateError, 'שגיאה בעדכון המשתמש');
-        set(state => ({
-            allMembers: state.allMembers.map(member => member.id === memberId ? { ...member, ...updates } : member)
-        }));
+
+        try {
+            await updateUser(memberId, updates);
+            set(state => ({
+                allMembers: state.allMembers.map(member => member.id === memberId ? { ...member, ...updates } : member)
+            }));
+        } catch (error) {
+            toastsActions.addFromError(error, 'שגיאה בעדכון המשתמש');
+        }
     },
     deleteMember: async (member) => {
         if (!isAdmin()) return;
         const { error: deleteError } = await deleteUser(member.id);
         if (deleteError) toastsActions.addFromError(deleteError, 'שגיאה במחיקת המשתמש');
-        const { error: deleteUserError } = await supabase.from('users').update({active: false}).eq('id', member.id);
+        const { error: deleteUserError } = await supabase.from('users').update({ active: false }).eq('id', member.id);
         if (deleteUserError) toastsActions.addFromError(deleteUserError, 'שגיאה בעדכון המשתמש');
         const { error: deleteGroupsError } = await supabase.from('users_groups').delete().eq('user_id', member.id);
         if (deleteGroupsError) toastsActions.addFromError(deleteGroupsError, 'שגיאה במחיקת המשתמש מהקבוצות');
@@ -108,7 +110,7 @@ export const useAdmin = create((set, get) => ({
     removeUserFromGroup: async (groupId, userId) => {
         if (!isAdmin()) return;
         const { error: deleteError } = await supabase.from('users_groups').delete().eq('user_id', userId).eq('group_id', groupId);
-        if (deleteError) toastsActions.addFromError(deleteError, 'שגיאה בהסרת משתמש מהקבוצה');  
+        if (deleteError) toastsActions.addFromError(deleteError, 'שגיאה בהסרת משתמש מהקבוצה');
         set(state => ({
             allMembers: state.allMembers.map(member => member.id === userId ? { ...member, groups: member.groups.filter(g => g !== groupId) } : member)
         }));

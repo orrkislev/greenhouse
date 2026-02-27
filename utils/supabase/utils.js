@@ -1,36 +1,7 @@
 import { supabase } from "./client";
 import { toastsActions } from "../store/useToasts";
 
-function buildSafeUpdates(updates, allowedKeys) {
-    const safe = {};
-    for (const key of allowedKeys) {
-        if (Object.prototype.hasOwnProperty.call(updates, key)) {
-            safe[key] = updates[key];
-        }
-    }
-    return safe;
-}
-
-const usersFields = ['first_name', 'last_name', 'username', 'role', 'avatar_url', 'profile']
-export const prepareForUsersTable = obj => buildSafeUpdates(obj, usersFields)
-
-const groupsFields = ['name', 'type', 'description', 'metadata', 'message']
-export const prepareForGroupsTable = obj => buildSafeUpdates(obj, groupsFields)
-
-const projectsFields = ['title', 'description', 'student_id', 'status', 'metadata']
-export const prepareForProjectsTable = obj => buildSafeUpdates(obj, projectsFields)
-
-const eventsFields = ['title', 'date', 'start', 'end', 'created_by', 'metadata', 'day_of_the_week', 'group_id']
-export const prepareForEventsTable = obj => buildSafeUpdates(obj, eventsFields)
-
-const studyPathsFields = ['title', 'description', 'student_id', 'status', 'metadata', 'sources']
-export const prepareForStudyPathsTable = obj => buildSafeUpdates(obj, studyPathsFields)
-
-const tasksFields = ['title', 'description', 'student_id', 'status', 'due_date','url', 'metadata', 'position', 'goal', 'target_count', 'current_count', 'created_by']
-export const prepareForTasksTable = obj => buildSafeUpdates(obj, tasksFields)
-
-const logsFields = ['user_id', 'action_type', 'text', 'metadata', 'mentor_id', 'context_table', 'context_id']
-export const prepareForLogsTable = obj => buildSafeUpdates(obj, logsFields)
+export * from "./schema";
 
 
 export const unLink = async (a_table, a_id, b_table, b_id) => {
