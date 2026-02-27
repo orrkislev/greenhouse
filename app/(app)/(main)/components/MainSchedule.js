@@ -46,7 +46,7 @@ export default function MainSchedule() {
     if (!today) return null;
 
     const todayEvents = [...eventSelectors.getEventsForDateWithRecurring(events, today)];
-    todayEvents.push(...googleCalendarEvents.filter(event => event.date === today));
+    todayEvents.push(...googleCalendarEvents.filter(event => event.date === today && event.eventType !== 'workingLocation'));
 
     // Add group events
     const groupEvents = events.filter(e => e.group_id);
