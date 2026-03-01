@@ -9,6 +9,7 @@ import { useGroups } from "@/utils/store/useGroups";
 import { ArrowLeft, ArrowRight, ClipboardPlus, Plus } from "lucide-react";
 import { days, getTimeSlot, getEndTimeSlot, isInTimeSlot, times } from "./utils";
 import { projectActions, projectUtils, useProjectData } from "@/utils/store/useProject";
+import { ganttActions, useGantt } from "@/utils/store/useGantt";
 import TaskModal from "@/components/TaskModal";
 import Menu, { MenuItem, MenuList } from "@/components/Menu";
 
@@ -18,10 +19,17 @@ export default function Schedule() {
     const week = useTime().week;
     const { nextWeek, prevWeek } = useTime();
     const projectTasks = useProjectData(state => state.tasks);
+    const gantt = useGantt(state => state.gantt);
 
     useEffect(() => {
         projectActions.loadTasks();
     }, [])
+
+    useEffect(() => {
+        if (week && week.length > 0) {
+            ganttActions.fetchGanttEvents(new Date(week[0]), new Date(week[week.length - 1]));
+        }
+    }, [week])
 
     if (!week || week.length === 0) return null;
     if (!allEvents) return null;
@@ -65,10 +73,23 @@ export default function Schedule() {
                 if (taskDate === day) {
                     result[`${day}-9:30`].tasks = [...(result[`${day}-9:30`].tasks || []), task];
                 }
-            })
+            });
+
+            const dayGanttEvents = gantt.get(day) || [];
+            dayGanttEvents.forEach(ganttEvent => {
+                if (ganttEvent.isAllDay) {
+                    result[`${day}-header`] = [...(result[`${day}-header`] || []), ganttEvent];
+                } else {
+                    const targetTime = getTimeSlot(ganttEvent.time) || '8:30';
+                    const cellKey = `${day}-${targetTime}`;
+                    if (result[cellKey]) {
+                        result[cellKey].ganttEvents = [...(result[cellKey].ganttEvents || []), ganttEvent];
+                    }
+                }
+            });
         });
         return result;
-    }, [allEvents, week, projectTasks]);
+    }, [allEvents, week, projectTasks, gantt]);
 
     return (
         <table className="table-fixed border-collapse w-full h-full">
@@ -79,6 +100,7 @@ export default function Schedule() {
                         const dateStr = index === 5 ? week[5] : week[index];
                         const date = new Date(dateStr);
                         const formattedDate = format(date, 'd/M');
+                        const allDayGantt = cells[`${dateStr}-header`] || [];
 
                         return (
                             <th key={day} className="border border-gray-300 w-1/6 p-2">
@@ -94,7 +116,10 @@ export default function Schedule() {
                                     )}
                                     <div className={`flex flex-col items-center`}>
                                         <div className={`font-bold ${isToday(date) ? 'bg-ghpurple text-ghglow rounded-full aspect-square p-2' : ''}`}>{day}</div>
-                                        <div className="text-xs text-gray-500 font-normal">{formattedDate}</div>
+                                        <div className="text-xs text-gray-500 font-normal mb-2">{formattedDate}</div>
+                                        {allDayGantt.map((e, i) => (
+                                            <div key={i} className="text-[11px] text-gray-400 font-normal truncate max-w-full">{e.summary}</div>
+                                        ))}
                                     </div>
                                     {index === 5 && (
                                         <button
@@ -135,7 +160,7 @@ export default function Schedule() {
 }
 
 function Cell({ date, time, cellData, isToday }) {
-    const { events = [], legCount = 0, tasks = [] } = cellData || {};
+    const { events = [], legCount = 0, tasks = [], ganttEvents = [] } = cellData || {};
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
     const show930Menu = time === '9:30';
     return (
@@ -144,6 +169,9 @@ function Cell({ date, time, cellData, isToday }) {
             style={legCount > 0 ? { paddingLeft: `${9 + legCount * 15}px` } : undefined}>
             <div className='text-xs opacity-50 mb-2'>{time}</div>
             <div className='flex flex-col w-full h-full gap-1'>
+                {ganttEvents.map((ganttEvent, index) => (
+                    <GanttEvent key={index} ganttEvent={ganttEvent} />
+                ))}
                 {tasks.map((task, index) => (
                     <Task key={task.id || index} task={task} />
                 ))}
@@ -195,6 +223,17 @@ function Task({ task }) {
             />
         </>
     )
+}
+
+function GanttEvent({ ganttEvent }) {
+    return (
+        <div className="bg-amber-100 border border-amber-300 rounded p-1 text-xs text-amber-800 truncate">
+            {!ganttEvent.isAllDay && (
+                <span className="shrink-0 mr-1">{ganttEvent.time}</span>
+            )}
+            {ganttEvent.summary}
+        </div>
+    );
 }
 
 // Color palette for groups

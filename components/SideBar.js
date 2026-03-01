@@ -10,6 +10,9 @@ import { AnimatePresence, motion } from "motion/react";
 import Avatar from "./Avatar";
 import { useStudyPaths } from "@/utils/store/useStudy";
 import { useState } from "react";
+import { useProjectData } from "@/utils/store/useProject";
+import { useResearchData } from "@/utils/store/useResearch";
+import { useTodayEvents } from "@/utils/store/useEvents";
 
 const SideBarDiv = tw`flex flex-col border-l border-ghdark bg-ghgreen -my-6 py-4
 md:flex md:flex-col
@@ -36,6 +39,9 @@ export default function SideBar() {
     const pathname = usePathname();
     const user = useUser((state) => state.user)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const project = useProjectData((state) => state.project)
+    const research = useResearchData((state) => state.research)
+    const todayEvents = useTodayEvents();
 
     if (!user) return null;
 
@@ -100,7 +106,7 @@ export default function SideBar() {
                     <SideBarItem href="/" Icon={TreePalm} label="בית" active={pathname === '/'} />
 
                     {/* Schedule */}
-                    <SideBarItem href="/schedule" Icon={Calendar} label="לוח זמנים" active={pathname === '/schedule'} />
+                    <SideBarItem href="/schedule" Icon={Calendar} label="לוח זמנים" active={pathname === '/schedule'} marker={!todayEvents.length} />
 
                     <Separator />
 
@@ -108,8 +114,8 @@ export default function SideBar() {
 
                     {pathname === '/study' && <SideBarStudyItems />}
 
-                    <SideBarItem href="/project" Icon={Snail} label="הפרויקט" active={pathname === '/project'} />
-                    <SideBarItem href="/research" Icon={Brain} label="חקר" active={pathname === '/research'} />
+                    <SideBarItem href="/project" Icon={Snail} label="הפרויקט" active={pathname === '/project'} marker={!project} />
+                    <SideBarItem href="/research" Icon={Brain} label="חקר" active={pathname === '/research'} marker={!research} />
                     <SideBarItem href="/vocation" Icon={Briefcase} label="תעסוקה" active={pathname === '/vocation'} />
 
                     <Separator />
@@ -139,7 +145,7 @@ export default function SideBar() {
     );
 }
 
-function SideBarItem({ href, Icon, label, active, disabled, small = false, children }) {
+function SideBarItem({ href, Icon, label, active, disabled, small = false, children, marker = false }) {
     return (
         <NavigationMenuItem $active={active} $disabled={disabled} $small={small}>
             <AnimatePresence>
@@ -157,6 +163,12 @@ function SideBarItem({ href, Icon, label, active, disabled, small = false, child
                     <>
                         {Icon && <Icon className={`${IconClasses} ${small ? 'w-3 h-3' : 'w-4 h-4'}`} />}
                         <div className={`text-sm ${small ? 'text-xs' : 'text-sm'}`}>{label}</div>
+                        {marker && (
+                            <>
+                                <div className="w-2 h-2 bg-white rounded-full absolute left-2 top-1/2 -translate-y-1/2 animate-ping" />
+                                <div className="w-2 h-2 bg-ghpurple rounded-full absolute left-2 top-1/2 -translate-y-1/2" />
+                            </>
+                        )}
                     </>
                 )}
             </Link>

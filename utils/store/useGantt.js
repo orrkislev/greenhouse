@@ -64,15 +64,16 @@ export const useGantt = create((set, get) => ({
             const eventStart = new Date(event.start.dateTime || event.start.date);
             const eventEnd = new Date(event.end.dateTime || event.end.date);
             const isAllDay = !event.start.dateTime;
+            const time = isAllDay ? null : format(eventStart, 'HH:mm');
             let current = new Date(eventStart);
             const last = new Date(eventEnd);
             if (isAllDay) last.setDate(last.getDate() - 1);
             while (current <= last) {
                 const currentKey = toKey(current);
                 const currentEvents = newGanttItems.get(currentKey) || [];
-                if (!currentEvents.includes(event.summary)) {
-                    // Create a new array to ensure immutability
-                    const updatedEvents = [...currentEvents, event.summary];
+                const isDuplicate = currentEvents.some(e => e.summary === event.summary);
+                if (!isDuplicate) {
+                    const updatedEvents = [...currentEvents, { summary: event.summary, time, isAllDay }];
                     newGanttItems.set(currentKey, updatedEvents);
                 }
                 current.setDate(current.getDate() + 1);

@@ -7,6 +7,7 @@ import { EventEditModal, EventDetailModal } from "../components/EventModal";
 import { useUser } from "@/utils/store/useUser";
 import { useGroups } from "@/utils/store/useGroups";
 import { useProjectData, projectUtils } from "@/utils/store/useProject";
+import { ganttActions, useGantt } from "@/utils/store/useGantt";
 import TaskModal from "@/components/TaskModal";
 import Menu, { MenuItem, MenuList } from "@/components/Menu";
 import { ClipboardPlus, Plus } from "lucide-react";
@@ -35,6 +36,7 @@ export default function Term() {
     const events = useEventsData(state => state.events);
     const currTerm = useTime((state) => state.currTerm);
     const projectTasks = useProjectData(state => state.tasks);
+    const gantt = useGantt(state => state.gantt);
 
     useEffect(() => {
         useProjectData.getState().loadTasks();
@@ -43,6 +45,7 @@ export default function Term() {
     useEffect(() => {
         if (!currTerm) return;
         eventsActions.loadTermEvents();
+        ganttActions.fetchGanttEvents(new Date(currTerm.start), new Date(currTerm.end));
     }, [currTerm])
 
     if (!currTerm) return null;
@@ -97,25 +100,32 @@ export default function Term() {
             week.forEach((day, dayIndex) => {
                 const key = `${weekIndex}-${dayIndex}`;
                 if (day.isWeekend) {
+                    const fridayGantt = gantt.get(format(day.date, 'yyyy-MM-dd')) || [];
+                    const saturdayGantt = gantt.get(format(day.endDate, 'yyyy-MM-dd')) || [];
+                    const allGantt = [...fridayGantt, ...saturdayGantt].filter(
+                        (e, i, arr) => arr.findIndex(x => x.summary === e.summary) === i
+                    );
                     result[key] = {
                         events: events.filter(event => event.date == day.date || event.date == day.endDate ||
                             event.day_of_the_week === 6 ||
                             event.day_of_the_week === 7
                         ),
-                        tasks: projectTasks.filter(task => isSameDay(new Date(task.due_date), day.date) || isSameDay(new Date(task.due_date), day.endDate))
+                        tasks: projectTasks.filter(task => isSameDay(new Date(task.due_date), day.date) || isSameDay(new Date(task.due_date), day.endDate)),
+                        ganttEvents: allGantt,
                     };
                 } else {
                     result[key] = {
                         events: events.filter(event => event.date && isSameDay(new Date(event.date), day.date) ||
                             event.day_of_the_week === dayIndex + 1
                         ),
-                        tasks: projectTasks.filter(task => isSameDay(new Date(task.due_date), day.date))
+                        tasks: projectTasks.filter(task => isSameDay(new Date(task.due_date), day.date)),
+                        ganttEvents: gantt.get(format(day.date, 'yyyy-MM-dd')) || [],
                     }
                 }
             });
         });
         return result;
-    }, [events, weeks, projectTasks]);
+    }, [events, weeks, projectTasks, gantt]);
 
     return (
         <div className="w-full overflow-auto p-4">
@@ -140,6 +150,7 @@ export default function Term() {
                                         day={day}
                                         events={cellEvents[key]?.events || []}
                                         tasks={cellEvents[key]?.tasks || []}
+                                        ganttEvents={cellEvents[key]?.ganttEvents || []}
                                     />
                                 );
                             })}
@@ -151,7 +162,7 @@ export default function Term() {
     )
 }
 
-function Cell({ day, events, tasks }) {
+function Cell({ day, events, tasks, ganttEvents }) {
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
     const bgClass = day.isToday ? 'bg-stone-200 hover:bg-stone-300' :
@@ -179,6 +190,14 @@ function Cell({ day, events, tasks }) {
             )}
 
             <div className="flex flex-col gap-1 w-full">
+                {ganttEvents.filter(e => e.isAllDay).map((e, i) => (
+                    <div key={i} className="text-[11px] text-gray-400 truncate">{e.summary}</div>
+                ))}
+                {ganttEvents.filter(e => !e.isAllDay).map((e, i) => (
+                    <div key={i} className="text-[11px] text-gray-400 truncate">
+                        <span className="ml-1">{e.time}</span>{e.summary}
+                    </div>
+                ))}
                 {tasks.map((task) => (
                     <Task key={task.id} task={task} />
                 ))}
