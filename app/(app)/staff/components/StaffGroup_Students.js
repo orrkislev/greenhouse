@@ -6,13 +6,14 @@ import { eventsActions, eventSelectors, useRecurringEvents, useEventsData } from
 import { groupsActions, groupUtils, useGroups } from "@/utils/store/useGroups";
 import { daysOfWeek, useTime } from "@/utils/store/useTime";
 import Button from "@/components/Button";
-import { UserRoundX, VenetianMask, Calendar, Pencil } from "lucide-react";
+import { UserRoundX, VenetianMask, Calendar, Pencil, CheckCircle, Circle, Plus } from "lucide-react";
 import { mentorshipsActions } from "@/utils/store/useMentorships";
 import WithLabel from "@/components/WithLabel";
 import usePopper from "@/components/Popper";
 import { EditMeeting } from "./StaffGroup_Meetings";
 import { AllStudentPicker } from "./StaffStudents";
 import { projectActions } from "@/utils/store/useProject";
+import GroupTaskModal from "@/components/GroupTaskModal";
 import { motion } from "motion/react";
 
 export default function StaffGroup_Students({ group }) {
@@ -20,14 +21,9 @@ export default function StaffGroup_Students({ group }) {
 
     const students = group.members.filter(member => member?.role === 'student');
 
-    const onSelect = (student) => {
-        groupsActions.addMember(group.id, student);
-    }
-
     return (
         <div className="flex flex-col gap-4">
             <Staff_Students_List students={students} context={group.type} group={group} />
-            {group.type === 'club' && <AllStudentPicker unavailableStudents={students} onSelect={onSelect} />}
         </div>
     )
 }
@@ -42,6 +38,10 @@ export function Staff_Students_List({ students, context, group }) {
         }
     }, [students])
 
+    const onSelect = (student) => {
+        groupsActions.addMember(group.id, student);
+    }
+
     return (
         <div className="flex flex-col md:block">
             <div className="md:float-right md:ml-4 mb-4 md:mb-0">
@@ -54,12 +54,14 @@ export function Staff_Students_List({ students, context, group }) {
                     .map((student) => (
                         <StudentCard key={student.id}
                             student={student}
+                            group={group}
                             onSelect={() => setSelectedStudent(student)}
                             selected={selectedStudent && selectedStudent.id === student.id}
                         />
                     ))
                 }
             </div>
+            {group.type === 'club' && <AllStudentPicker unavailableStudents={students} onSelect={onSelect} />}
         </div>
     )
 }
@@ -80,7 +82,7 @@ export function SelectedStudentCard({ student, context, group, onClose }) {
                 await eventsActions.loadGroupEvents(groupIds, today, today);
             }
             const project = await projectActions.getProjectForStudent(student.id);
-            setData({ ...student, events: userEvents, project });
+            setData({ ...student, events: userEvents, project: project.length > 0 ? project[0] : null });
         })()
     }, [student, today])
 
@@ -115,15 +117,19 @@ export function SelectedStudentCard({ student, context, group, onClose }) {
                     </div>
                 </div>
             </div>
+
+            <SelectedStudentCard_Tasks student={data} group={group} />
+
             <WithLabel label="פרויקט">
                 {data.project ? (
                     <div className="text-xs">{data.project.title}</div>
                 ) : <div className="text-xs text-muted-foreground">אין פרויקט </div>}
             </WithLabel>
+
             <WithLabel label="לוז היום">
-                {data.events && data.events.length > 0 ? data.events.map(event => (
+                {data.events && data.events.scheduledEvents.length > 0 ? data.events.scheduledEvents.map(event => (
                     <div key={event.id} className="flex gap-3 items-center">
-                        <div className="text-xs">ב{event.start}</div>
+                        <div className="text-xs">{event.start.split(":").slice(0,2).join(":")}</div>
                         <div className="text-sm font-bold">{event.title}</div>
                     </div>
                 )) : <div className="text-xs text-muted-foreground">אין אירועים היום</div>}
@@ -160,6 +166,43 @@ export function SelectedStudentCard({ student, context, group, onClose }) {
             </div>
         </motion.div>
     )
+}
+
+function SelectedStudentCard_Tasks({ student, group }) {
+    const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
+    const groups = useGroups(state => state.groups);
+    const currentGroup = groups.find(g => g.id === group.id);
+    const tasks = currentGroup?.tasks || [];
+
+    const studentTasks = tasks.filter(t =>
+        t.assigned_to?.length === 0 || !t.assigned_to || t.assigned_to.includes(student.id)
+    );
+
+    return (
+        <WithLabel label="משימות">
+            <div className="flex flex-col gap-1">
+                {studentTasks.map(task => {
+                    const done = task.completed_by?.includes(student.id);
+                    return (
+                        <div key={task.id} className="flex items-center gap-2 text-xs">
+                            {done
+                                ? <CheckCircle className="w-3 h-3 text-green-500 shrink-0" />
+                                : <Circle className="w-3 h-3 text-muted-foreground shrink-0" />
+                            }
+                            <span className={done ? 'line-through text-muted-foreground' : ''}>{task.title}</span>
+                        </div>
+                    );
+                })}
+                <button
+                    onClick={() => setIsNewTaskOpen(true)}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mt-1 w-fit"
+                >
+                    <Plus className="w-3 h-3" /> משימה חדשה
+                </button>
+            </div>
+            <GroupTaskModal task={null} group={group} isOpen={isNewTaskOpen} onClose={() => setIsNewTaskOpen(false)} initialAssignedTo={[student.id]} />
+        </WithLabel>
+    );
 }
 
 function SelectedStudentCard_Meeting({ student }) {

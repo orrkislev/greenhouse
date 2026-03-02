@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { createDataLoadingHook, createStoreActions, withUser } from "./utils/storeUtils";
 import { useUser } from "@/utils/store/useUser";
 import { supabase } from "../supabase/client";
-import { makeLink, prepareForGroupsTable } from "../supabase/utils";
+import { prepareForGroupsTable } from "../supabase/utils";
 import { toastsActions } from "./useToasts";
 
 export const useGroups = create((set, get) => {
@@ -89,33 +89,35 @@ export const useGroups = create((set, get) => {
 
         // ----------- Group Tasks Management -----------
         // ----------------------------------------------
-        loadGroupTasks: async (groupId) => {
-            if (get().groups.find(g => g.id === groupId)?.tasks) return;
+        loadGroupTasks: async (groupId, includeCompleted = false) => {
+            if (!includeCompleted && get().groups.find(g => g.id === groupId)?.tasks) return;
             const user = useUser.getState().user;
             const { data, error } = await supabase.rpc('get_user_group_tasks_by_group', {
                 p_group_id: groupId,
-                p_user_id: user.id
+                p_user_id: user.id,
+                p_include_completed: includeCompleted,
             })
             if (error) toastsActions.addFromError(error, 'שגיאה בטעינת משימות הקבוצה');
-            set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, tasks: data } : g) }));
+            if (includeCompleted) {
+                set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, allTasks: data } : g) }));
+            } else {
+                set((state) => ({ groups: state.groups.map(g => g.id === groupId ? { ...g, tasks: data } : g) }));
+            }
         },
-        loadAllTaskAssignments: async (taskId) => {
-            const { data, error } = await supabase.from('task_assignments').select('*').eq('task_id', taskId);
-            if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הקצאות המשימה');
-            set((state) => ({ groups: state.groups.map(g => ({ ...g, tasks: g.tasks ? g.tasks.map(t => t.id === taskId ? { ...t, assignments: data } : t) : [] })) }));
-        },
-        createGroupTask: async (group, text, description, due_date) => {
+        createGroupTask: async (group, text, description, due_date, assignedTo = []) => {
             const task = {
                 title: text,
                 status: 'todo',
                 description,
                 due_date,
                 created_by: useUser.getState().user.id,
+                group_id: group.id,
+                assigned_to: assignedTo,
+                completed_by: [],
             }
             const { data, error } = await supabase.from('tasks').insert(task).select().single();
             if (error) toastsActions.addFromError(error, 'שגיאה ביצירת משימה');
-            set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: [...g.tasks, data] } : g) }));
-            await makeLink('tasks', data.id, 'groups', group.id);
+            set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: [...(g.tasks || []), data] } : g) }));
         },
         updateGroupTask: async (group, task, updates) => {
             const { error } = await supabase.from('tasks').update(updates).eq('id', task.id);
@@ -125,18 +127,34 @@ export const useGroups = create((set, get) => {
         deleteGroupTask: async (group, task) => {
             const { error } = await supabase.from('tasks').delete().eq('id', task.id);
             if (error) toastsActions.addFromError(error, 'שגיאה במחיקת משימה');
-            set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: g.tasks.filter(t => t.id !== task.id) } : g) }));
+            set((state) => ({ groups: state.groups.map(g => g.id === group.id ? {
+                ...g,
+                tasks: (g.tasks || []).filter(t => t.id !== task.id),
+                allTasks: (g.allTasks || []).filter(t => t.id !== task.id),
+            } : g) }));
         },
         toggleGroupTaskStatus: withUser(async (user, group, task) => {
-            const newStatus = task.status === 'completed' ? 'todo' : 'completed';
-            set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: g.tasks.map(t => t.id === task.id ? { ...t, status: newStatus } : t) } : g) }));
+            const isCompleted = task.completed_by && task.completed_by.includes(user.id);
+            const newCompletedBy = isCompleted
+                ? task.completed_by.filter(id => id !== user.id)
+                : [...(task.completed_by || []), user.id];
+            const newStatus = newCompletedBy.includes(user.id) ? 'completed' : 'todo';
 
-            const { error } = await supabase.from('task_assignments').upsert(
-                { task_id: task.id, student_id: user.id, status: newStatus },
-                { onConflict: 'task_id,student_id' }
-            )
-            if (error) toastsActions.addFromError(error, 'שגיאה בעדכון סטטוס משימה ');
-        })
+            set((state) => ({
+                groups: state.groups.map(g => g.id === group.id ? {
+                    ...g,
+                    tasks: g.tasks.map(t => t.id === task.id ? { ...t, completed_by: newCompletedBy, status: newStatus } : t)
+                } : g)
+            }));
+
+            const { error } = await supabase.from('tasks').update({ completed_by: newCompletedBy }).eq('id', task.id);
+            if (error) toastsActions.addFromError(error, 'שגיאה בעדכון סטטוס משימה');
+        }),
+        archiveGroupTask: async (group, task) => {
+            const { error } = await supabase.from('tasks').update({ status: 'archived' }).eq('id', task.id);
+            if (error) toastsActions.addFromError(error, 'שגיאה בארכיון משימה');
+            set((state) => ({ groups: state.groups.map(g => g.id === group.id ? { ...g, tasks: g.tasks.filter(t => t.id !== task.id) } : g) }));
+        }
     }
 });
 

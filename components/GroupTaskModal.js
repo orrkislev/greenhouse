@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import usePopper from "./Popper";
 import WithLabel from "./WithLabel";
 import Button, { ButtonGroup, ButtonGroupItem, IconButton } from "./Button";
-import { CheckCircle, CircleX, Save, Trash2, X } from "lucide-react";
+import { Archive, CheckCircle, CircleX, Save, Trash2, X } from "lucide-react";
 import { addDays, format } from "date-fns";
 import { isStaff, useUser } from "@/utils/store/useUser";
 import { groupsActions } from "@/utils/store/useGroups";
 import { AvatarGroup } from "./Avatar";
 
-export default function GroupTaskModal({ task, group, isOpen, onClose: onCloseProp }) {
+export default function GroupTaskModal({ task, group, isOpen, onClose: onCloseProp, initialAssignedTo }) {
     const { open, Popper, close } = usePopper({ onClose: onCloseProp });
 
     useEffect(() => {
@@ -17,32 +17,37 @@ export default function GroupTaskModal({ task, group, isOpen, onClose: onClosePr
 
     return (
         <Popper>
-            <TaskModalContent task={task} close={close} group={group} />
+            <TaskModalContent task={task} close={close} group={group} initialAssignedTo={initialAssignedTo} />
         </Popper>
     )
 }
 
-function TaskModalContent({ task, close, group }) {
+function TaskModalContent({ task, close, group, initialAssignedTo }) {
     const [title, setTitle] = useState(task ? task.title : 'משימה חדשה בקבוצה');
     const [description, setDescription] = useState(task ? task.description : 'פירוט המשימה בקבוצה');
     const [due_date, setDueDate] = useState(task ? task.due_date : format(new Date(), 'yyyy-MM-dd'));
+    const [assignedTo, setAssignedTo] = useState(task ? (task.assigned_to || []) : (initialAssignedTo || []));
     const user = useUser(state => state.user);
 
-    const isMentor = isStaff()
+    const isMentor = isStaff();
+    const students = group.members ? group.members.filter(m => m?.role === 'student') : [];
+    const completedBy = task?.completed_by || [];
+    const isWholeGroup = assignedTo.length === 0;
 
     useEffect(() => {
         if (!task) return;
         setTitle(task.title);
         setDescription(task.description);
         setDueDate(task.due_date);
+        setAssignedTo(task.assigned_to || []);
     }, [task])
 
     const handleSave = async () => {
         if (!task) {
-            groupsActions.createGroupTask(group, title, description, due_date);
+            groupsActions.createGroupTask(group, title, description, due_date, assignedTo);
             close();
         } else {
-            groupsActions.updateGroupTask(group, task, { title, description, due_date });
+            groupsActions.updateGroupTask(group, task, { title, description, due_date, assigned_to: assignedTo });
             close();
         }
     };
@@ -52,14 +57,26 @@ function TaskModalContent({ task, close, group }) {
         close();
     };
 
+    const handleArchive = async () => {
+        groupsActions.archiveGroupTask(group, task);
+        close();
+    };
+
     const toggleTaskStatus = async () => {
         groupsActions.toggleGroupTaskStatus(group, task);
+        close();
+    };
+
+    const toggleStudent = (studentId) => {
+        setAssignedTo(prev =>
+            prev.includes(studentId) ? prev.filter(id => id !== studentId) : [...prev, studentId]
+        );
     };
 
     const headerText = task ? (isMentor ? 'עריכת משימה בקבוצת' : 'משימה בקבוצת') : 'משימה חדשה בקבוצת'
 
     return (
-        <div className="flex flex-col gap-2 min-w-xl relative">
+        <div className="flex flex-col gap-2 min-w-xl relative max-w-[60vw] max-h-[70vh] overflow-y-auto">
             <div className="flex gap-2 items-center">
                 <span className="font-bold">{headerText} {group.name}: </span>
             </div>
@@ -100,21 +117,41 @@ function TaskModalContent({ task, close, group }) {
                 )}
             </WithLabel>
 
+            {isMentor && students.length > 0 && (
+                <WithLabel label="מיועד ל">
+                    <div className="flex flex-row flex-wrap gap-x-4 gap-y-1">
+                        <label className="flex items-center gap-2 text-sm cursor-pointer w-full">
+                            <input type="checkbox" checked={isWholeGroup} onChange={() => setAssignedTo(isWholeGroup ? students.map(s => s.id) : [])} />
+                            כל הקבוצה
+                        </label>
+                        {students.map(student => (
+                            <label key={student.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={isWholeGroup || assignedTo.includes(student.id)}
+                                    onChange={() => toggleStudent(student.id)}
+                                />
+                                {student.first_name} {student.last_name}
+                            </label>
+                        ))}
+                    </div>
+                </WithLabel>
+            )}
+
             {task && isMentor && (
                 <>
                     <WithLabel label="סיימו">
-                        <AvatarGroup users={task?.completed?.map(id => group.members.find(member => member.id === id))} />
+                        <AvatarGroup users={completedBy.map(id => group.members?.find(m => m.id === id)).filter(Boolean)} />
                     </WithLabel>
                     <WithLabel label="לא סיימו">
-                        <AvatarGroup users={group.members && group.members.filter(member => !task.completed.includes(member.id) && member.role === 'student')} />
+                        <AvatarGroup users={students.filter(m => !completedBy.includes(m.id) && (isWholeGroup || assignedTo.includes(m.id)))} />
                     </WithLabel>
                 </>
             )}
 
-
             {task && !isMentor && (
                 <Button data-role="close" onClick={toggleTaskStatus} className={`w-full justify-center mt-4 ${task.status === 'completed' ? 'bg-green-200 opacity-50' : ''}`}>
-                    {task.completed && task.completed.includes(user.id) ? (
+                    {completedBy.includes(user.id) ? (
                         <>לא סיימתי <CircleX className="w-4 h-4" /></>
                     ) : (
                         <>סיימתי <CheckCircle className="w-4 h-4" /></>
@@ -127,7 +164,12 @@ function TaskModalContent({ task, close, group }) {
                     <Button data-role="save" onClick={handleSave} className='flex-[2]'>
                         שמירה <Save className="w-4 h-4" />
                     </Button>
-                    <Button data-role="delete" onClick={handleDelete} >
+                    {task && (
+                        <Button data-role="archive" onClick={handleArchive} title="ארכיון">
+                            <Archive className="w-4 h-4" />
+                        </Button>
+                    )}
+                    <Button data-role="delete" onClick={handleDelete}>
                         {task ? <Trash2 className="w-4 h-4" /> : <CircleX className="w-4 h-4 flex-[1]" />}
                     </Button>
                 </div>

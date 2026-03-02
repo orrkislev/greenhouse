@@ -43,16 +43,19 @@ function MainGroup({ group }) {
 
     const groupName = group.type === 'class' ? 'קבוצת ' + group.name : group.type === 'major' ? 'מגמת ' + group.name : group.name;
 
+    const isMessageEmpty = !group.message || group.message.trim().length === 0 || /^(<p>(\s|<br\s*\/?>)*<\/p>|\s)*$/i.test(group.message.trim());
+    if ((!group.tasks || group.tasks.length === 0) && isMessageEmpty) {
+        return null;
+    }
+
     return (
         <div className="flex flex-col gap-2">
-            <div className="text-sm text-foreground flex items-center gap-2">
+            <div className="font-bold text-sm text-foreground flex items-center gap-2">
                 <Users2 className="w-4 h-4" />
                 {groupName}
             </div>
-            {group.message ? (
+            {!isMessageEmpty && (
                 <div className="text-sm text-muted-foreground w-full" dangerouslySetInnerHTML={{ __html: group.message }} />
-            ) : (
-                <div className="text-xs text-muted-foreground w-full">אין הודעה</div>
             )}
             <div>
                 {group.tasks && group.tasks.map((task) => (
