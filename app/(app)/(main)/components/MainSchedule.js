@@ -70,8 +70,6 @@ export default function MainSchedule() {
         return eventDate > new Date();
     })
 
-    console.log({allEvents, events, googleCalendarEvents, todayEvents})
-
     return (
         <Box2 label="מה יש לי היום" className="col-start-1 row-start-1 row-span-4 flex-1 relative" LabelIcon={Calendar}>
             <MainGreetings />

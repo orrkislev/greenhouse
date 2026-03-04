@@ -151,7 +151,7 @@ export default function AdminProjects() {
                             <Cell>
                                 {student.project && (
                                     <select
-                                        value={student.project?.master?.id || ''}
+                                        value={student.project?.master?.user_id || ''}
                                         onChange={e => selectMaster(student.id, student.project.id, e.target.value)}
                                         className="bg-white border border-border rounded-md p-1"
                                     >

@@ -27,7 +27,7 @@ export const useProjectData = create((set, get) => {
             if (!currTerm) return;
             const { data, error } = await supabase.from('projects').select(`
                 *, 
-                master:staff_public!master(first_name, last_name, avatar_url)
+                master:staff_public!master(first_name, last_name, avatar_url, user_id)
             `).eq('student_id', user.id).contains('term', [currTerm.id]);
             if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הפרויקט');
             if (data && data.length > 0) set({ project: data[0], tasks: [] });
@@ -35,7 +35,7 @@ export const useProjectData = create((set, get) => {
         loadProjectById: async (projectId) => {
             const { data, error } = await supabase.from('projects').select(`
                 *, 
-                master:staff_public!master(first_name, last_name, avatar_url)
+                master:staff_public!master(first_name, last_name, avatar_url, user_id)
             `).eq('id', projectId);
             if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הפרויקט');
             if (data && data.length > 0) set({ project: data[0], tasks: [] });
@@ -89,6 +89,7 @@ export const useProjectData = create((set, get) => {
         updateOnSupabase: debounce(async () => {
             const { project } = get();
             if (!project) return;
+            if (project.master) project.master = project.master?.user_id || null;
             const { error } = await supabase.from('projects').update(prepareForProjectsTable(project)).eq('id', project.id);
             if (error) toastsActions.addFromError(error, 'שגיאה בעדכון הפרויקט');
         }, 1000),

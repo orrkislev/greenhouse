@@ -15,7 +15,7 @@ export default function ProjectInfo() {
   }, []);
 
   const getTermName = (termId) => terms.find(term => term.id === termId)?.name
-  const meeting = events.find(m => m.participants?.includes(project.master?.id));
+  const meeting = events.find(m => m.participants?.includes(project.master?.user_id));
 
   return (
     <div className="flex gap-3">
