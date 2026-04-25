@@ -1,4 +1,4 @@
-import { add, addDays, format, isBefore, isSameDay, startOfWeek, subDays } from "date-fns";
+import { add, addDays, format, isAfter, isBefore, isSameDay, startOfWeek, subDays } from "date-fns";
 import { create } from "zustand";
 import { supabase } from "../supabase/client";
 import { subscribeWithSelector } from "zustand/middleware";
@@ -58,14 +58,44 @@ export const useTime = create(subscribeWithSelector((set, get) => {
             set({ terms: newTerms });
         },
 
+        // ------ Report Halves ------
+        reportHalves: null,
+        loadReportHalves: async () => {
+            if (get().reportHalves) return;
+            const { data, error } = await supabase.from('misc').select().in('name', ['report_half_A', 'report_half_B']);
+            if (error) throw error;
+            const halves = Object.fromEntries(data.map(row => [row.name.replace('report_half_', ''), row.data]));
+            set({ reportHalves: halves });
+        },
+        updateReportHalf: async (halfId, updates) => {
+            const name = `report_half_${halfId}`;
+            const current = get().reportHalves?.[halfId] ?? {};
+            const newData = { ...current, ...updates };
+            const { error } = await supabase.from('misc').update({ data: newData }).eq('name', name);
+            if (error) throw error;
+            set(state => ({
+                reportHalves: {
+                    ...state.reportHalves,
+                    [halfId]: newData,
+                },
+            }));
+        },
+
     };
 }));
 
 export const BETWEEN_TERMS = { id: '', name: 'בין הזמנים' };
 (async () => {
-    const { data, error } = await supabase.from('current_term').select();
-    if (error) throw error;
-    useTime.setState({ currTerm: data[0] || BETWEEN_TERMS });
+    const [termResult, halvesResult] = await Promise.all([
+        supabase.from('current_term').select(),
+        supabase.from('misc').select().in('name', ['report_half_A', 'report_half_B']),
+    ]);
+    if (termResult.error) throw termResult.error;
+    useTime.setState({ currTerm: termResult.data[0] || BETWEEN_TERMS });
+    if (!halvesResult.error && halvesResult.data) {
+        const halves = Object.fromEntries(halvesResult.data.map(row => [row.name.replace('report_half_', ''), row.data]));
+        useTime.setState({ reportHalves: halves });
+    }
 })();
 
 export const timeActions = Object.fromEntries(
@@ -119,6 +149,26 @@ export function dateRange(start, end) {
     }
 
     return dates.map(date => format(date, 'yyyy-MM-dd'));
+}
+
+
+const REPORT_HALF_DEFAULTS = {
+    A: { start_month: 1, start_day: 1, end_month: 2, end_day: 28 },
+    B: { start_month: 4, start_day: 24, end_month: 6, end_day: 30 },
+};
+
+// Returns 'A' or 'B' based on configurable dates stored in misc table
+export function getReportHalf(date = new Date()) {
+    const reportHalves = useTime.getState().reportHalves;
+    const year = date.getFullYear();
+    for (const halfId of ['A', 'B']) {
+        const half = { ...REPORT_HALF_DEFAULTS[halfId], ...reportHalves?.[halfId] };
+        const start = new Date(year, half.start_month - 1, half.start_day);
+        const end = new Date(year, half.end_month - 1, half.end_day);
+        if (isAfter(date, start) && isBefore(date, end)) return halfId;
+    }
+    console.log('Not in any report half');
+    return null;
 }
 
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import usePopper from '@/components/Popper'
 import { RATING_LABELS } from '../topicBank'
 import RatingBars from './RatingBars'
 
@@ -12,40 +12,30 @@ export default function RatingCell({
     onRatingChange,
     onToggleStar,
 }) {
-    const [open, setOpen] = useState(false);
-    const ref = useRef(null);
-
-    useEffect(() => {
-        if (!open) return;
-
-        const handler = (e) => {
-            if (ref.current && !ref.current.contains(e.target)) {
-                setOpen(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, [open]);
+    const popper = usePopper({
+        onOpen: () => {},
+        onClose: () => {},
+    });
 
     return (
-        <div className="flex items-center gap-1 justify-center" ref={ref}>
-            <div className="relative">
+        <div className="flex items-center gap-1 justify-center">
+            <div>
                 <button
-                    onClick={() => canEdit && setOpen((prev) => !prev)}
+                    ref={popper.baseRef}
+                    onClick={() => canEdit && popper.open()}
                     className="flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity"
                     title={rating ? RATING_LABELS[rating - 1] : 'לא הוגדר'}
                 >
                     <RatingBars rating={rating} />
                     {RATING_LABELS[rating - 1]}
                 </button>
-                {open && (
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white border border-stone-200 rounded-lg shadow-lg z-50 min-w-[130px] overflow-hidden">
+                <popper.Popper className="flex justify-center items-center">
+                    <>
                         <button
                             className="w-full text-right px-3 py-1.5 text-sm hover:bg-stone-50 text-stone-400"
                             onClick={() => {
                                 onRatingChange(null);
-                                setOpen(false);
+                                popper.close();
                             }}
                         >
                             —
@@ -56,15 +46,15 @@ export default function RatingCell({
                                 className={`w-full text-right px-3 py-1.5 text-sm hover:bg-stone-50 flex items-center justify-between gap-2 ${rating === i + 1 ? 'font-semibold bg-stone-50' : ''}`}
                                 onClick={() => {
                                     onRatingChange(i + 1);
-                                    setOpen(false);
+                                    popper.close();
                                 }}
                             >
                                 <span>{label}</span>
                                 <RatingBars rating={i + 1} />
                             </button>
                         ))}
-                    </div>
-                )}
+                    </>
+                </popper.Popper>
             </div>
 
             {rating &&

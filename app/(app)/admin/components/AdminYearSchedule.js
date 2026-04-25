@@ -6,11 +6,91 @@ import { Trash } from "lucide-react";
 import { Plus } from "lucide-react";
 import { useEffect } from "react";
 
+const REPORT_HALF_DEFAULTS = {
+    A: { start_month: 1, start_day: 1, end_month: 2, end_day: 28 },
+    B: { start_month: 4, start_day: 24, end_month: 6, end_day: 30 },
+};
+
+const MONTHS = [
+    { value: 1, label: "ינואר" },
+    { value: 2, label: "פברואר" },
+    { value: 3, label: "מרץ" },
+    { value: 4, label: "אפריל" },
+    { value: 5, label: "מאי" },
+    { value: 6, label: "יוני" },
+    { value: 7, label: "יולי" },
+    { value: 8, label: "אוגוסט" },
+    { value: 9, label: "ספטמבר" },
+    { value: 10, label: "אוקטובר" },
+    { value: 11, label: "נובמבר" },
+    { value: 12, label: "דצמבר" },
+];
+
+function ReportHalfCard({ halfId, title }) {
+    const reportHalves = useTime(state => state.reportHalves);
+    const half = { ...REPORT_HALF_DEFAULTS[halfId], ...reportHalves?.[halfId] };
+
+    const onFieldChange = (field, value) => {
+        const parsed = Number(value);
+        if (Number.isNaN(parsed)) return;
+        timeActions.updateReportHalf(halfId, { [field]: parsed });
+    };
+
+    return (
+        <div className="border border-stone-300 rounded-md p-3 min-w-72 bg-white">
+            <div className="font-semibold text-stone-900 mb-2">{title}</div>
+            <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                    <span className="w-16 text-muted-foreground">מתאריך</span>
+                    <select
+                        className="border border-stone-300 rounded px-2 py-1"
+                        value={half.start_month}
+                        onChange={(e) => onFieldChange("start_month", e.target.value)}
+                    >
+                        {MONTHS.map(month => (
+                            <option key={month.value} value={month.value}>{month.label}</option>
+                        ))}
+                    </select>
+                    <input
+                        type="number"
+                        min={1}
+                        max={31}
+                        className="w-16 border border-stone-300 rounded px-2 py-1"
+                        value={half.start_day}
+                        onChange={(e) => onFieldChange("start_day", e.target.value)}
+                    />
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="w-16 text-muted-foreground">עד</span>
+                    <select
+                        className="border border-stone-300 rounded px-2 py-1"
+                        value={half.end_month}
+                        onChange={(e) => onFieldChange("end_month", e.target.value)}
+                    >
+                        {MONTHS.map(month => (
+                            <option key={month.value} value={month.value}>{month.label}</option>
+                        ))}
+                    </select>
+                    <input
+                        type="number"
+                        min={1}
+                        max={31}
+                        className="w-16 border border-stone-300 rounded px-2 py-1"
+                        value={half.end_day}
+                        onChange={(e) => onFieldChange("end_day", e.target.value)}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function AdminYearSchedule() {
     const terms = useTime(state => state.terms);
 
     useEffect(() => {
         timeActions.loadTerms();
+        timeActions.loadReportHalves();
     }, []);
 
     const startYear = new Date().getMonth() < 7 ? new Date().getFullYear() - 1 : new Date().getFullYear();
@@ -55,6 +135,14 @@ export default function AdminYearSchedule() {
                 })}>
                     <Plus className="w-4 h-4" />
                 </button>
+            </div>
+
+            <div className="mt-8 px-4">
+                <h2 className="text-xl font-bold text-stone-900 mb-3">מחציות דוח</h2>
+                <div className="flex gap-4 flex-wrap">
+                    <ReportHalfCard halfId="A" title="מחצית א" />
+                    <ReportHalfCard halfId="B" title="מחצית ב" />
+                </div>
             </div>
         </div>
     );
