@@ -43,6 +43,7 @@ export default function ReportPage() {
     }, [viewParam]);
 
     const handleSave = async (key, data) => {
+        console.log('Saving', key, data);
         if (!userId) {
             toastsActions.addToast({ message: 'אנא המתן לטעינת המשתמש', type: 'error' });
             return;
