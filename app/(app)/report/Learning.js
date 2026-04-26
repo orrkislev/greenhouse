@@ -12,6 +12,7 @@ import HeutagogySkillBankModal from './learning/HeutagogySkillBankModal'
 import {
     defaultGeneralTopics,
     defaultHeutagogySkills,
+    emptyHeutagogySkill,
     emptyTopic,
     HEUTAGOGY_ROW_COUNT,
     migrateLearningData,
@@ -72,6 +73,11 @@ export default function Learning({ learning, onSave }) {
 
     const updateHeutagogy = (index, field, value) => {
         setHeutagogySkills(prev => prev.map((t, i) => i === index ? { ...t, [field]: value } : t));
+        setMadeChanges(true);
+    };
+
+    const clearHeutagogy = (index) => {
+        setHeutagogySkills(prev => prev.map((s, i) => i === index ? emptyHeutagogySkill() : s));
         setMadeChanges(true);
     };
 
@@ -156,6 +162,7 @@ export default function Learning({ learning, onSave }) {
                         isStaffMode={isStaffMode}
                         onOpenBank={openHeutagogyBank}
                         onUpdate={updateHeutagogy}
+                        onClear={clearHeutagogy}
                     />
                 </div>
             </div>

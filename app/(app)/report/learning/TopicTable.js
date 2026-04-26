@@ -1,7 +1,12 @@
+'use client'
+
+import { useState } from 'react'
 import { KeyRound, Library, X } from 'lucide-react'
 import Button from '@/components/Button'
 import SmartText from '@/components/SmartText'
 import RatingCell from './RatingCell'
+import StaffRatingCell from './StaffRatingCell'
+import ConfirmDialog from '@/components/ConfirmDialog'
 
 export default function TopicTable({
     title,
@@ -14,7 +19,7 @@ export default function TopicTable({
     onOpenBank,
     tableType,
 }) {
-    const colSpan = canEdit ? 5 : 4;
+    const [confirmIndex, setConfirmIndex] = useState(null);
 
     return (
         <div className="mb-6">
@@ -22,10 +27,11 @@ export default function TopicTable({
             <table className="w-full text-right border-collapse">
                 <thead>
                     <tr className="border-b-2 border-gray-300 text-sm text-gray-500">
-                        <th className="font-semibold pb-1.5 pr-1 w-[22%]">נושא</th>
-                        <th className="font-semibold pb-1.5 px-1 w-[28%]">פירוט</th>
+                        <th className="font-semibold pb-1.5 pr-1 w-[20%]">נושא</th>
+                        <th className="font-semibold pb-1.5 px-1 w-[24%]">פירוט</th>
                         <th className="font-semibold pb-1.5 px-1">יישום</th>
-                        <th className="font-semibold pb-1.5 px-1 w-[80px] text-center">הערכה</th>
+                        <th className="font-semibold pb-1.5 px-1 w-[90px] text-center">הערכה עצמית</th>
+                        <th className="font-semibold pb-1.5 px-1 w-[90px] text-center">הערכת צוות</th>
                         {canEdit && <th className="pb-1.5 w-6" />}
                     </tr>
                 </thead>
@@ -73,18 +79,24 @@ export default function TopicTable({
                             <td className="py-2 px-1 align-top text-center">
                                 <RatingCell
                                     rating={topic.rating}
-                                    isSelfRated={topic.isSelfRated}
                                     canEdit={canEdit}
-                                    isStaffMode={isStaffMode}
                                     onRatingChange={(v) => onUpdate(index, 'rating', v)}
-                                    onToggleStar={(v) => onUpdate(index, 'isSelfRated', v)}
+                                />
+                            </td>
+                            <td className="py-2 px-1 align-top text-center">
+                                <StaffRatingCell
+                                    staffRating={topic.staffRating}
+                                    staffEvaluatorName={topic.staffEvaluatorName}
+                                    isStaffMode={isStaffMode}
+                                    onRatingChange={(v) => onUpdate(index, 'staffRating', v)}
+                                    onNameChange={(v) => onUpdate(index, 'staffEvaluatorName', v)}
                                 />
                             </td>
                             {canEdit && (
                                 <td className="py-2 align-top text-center">
                                     {!topic.locked && (
                                         <button
-                                            onClick={() => onRemove(index)}
+                                            onClick={() => setConfirmIndex(index)}
                                             className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all p-0.5"
                                             title="הסר שורה"
                                         >
@@ -97,16 +109,20 @@ export default function TopicTable({
                     ))}
                 </tbody>
             </table>
-            <div className="flex justify-between items-center mt-3">
-                <div className="flex items-center gap-2">
-                    <Button data-role="main-new" onClick={() => onOpenBank(tableType)}>
-                        <Library className="w-3.5 h-3.5" />
-                        הוסף מבנק הנושאים
-                    </Button>
-                    <Button onClick={onAddManual}>+ הוסף שורה ידנית</Button>
-                </div>
-                <div className="text-xs text-stone-400 text-left">הערכה עצמית, ולא על ידי איש צוות *</div>
+            <div className="flex justify-start items-center mt-3 gap-2">
+                <Button data-role="main-new" onClick={() => onOpenBank(tableType)}>
+                    <Library className="w-3.5 h-3.5" />
+                    הוסף מבנק הנושאים
+                </Button>
+                <Button onClick={onAddManual}>+ הוסף שורה ידנית</Button>
             </div>
+
+            <ConfirmDialog
+                isOpen={confirmIndex !== null}
+                message="האם למחוק את השורה?"
+                onConfirm={() => { onRemove(confirmIndex); setConfirmIndex(null); }}
+                onCancel={() => setConfirmIndex(null)}
+            />
         </div>
     );
 }

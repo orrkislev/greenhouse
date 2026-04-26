@@ -1,15 +1,15 @@
 export function defaultGeneralTopics() {
     return [
-        { name: 'שפה', detail: '', application: '', rating: null, isSelfRated: true, locked: true, keyTopic: true },
-        { name: 'אנגלית', detail: '', application: '', rating: null, isSelfRated: true, locked: true, keyTopic: true },
-        { name: 'פרזנטציה', detail: '', application: '', rating: null, isSelfRated: true, locked: true, keyTopic: true },
+        { name: 'שפה', detail: '', application: '', rating: null, locked: true, keyTopic: true },
+        { name: 'אנגלית', detail: '', application: '', rating: null, locked: true, keyTopic: true },
+        { name: 'פרזנטציה', detail: '', application: '', rating: null, locked: true, keyTopic: true },
     ];
 }
 
 export const HEUTAGOGY_ROW_COUNT = 5;
 
 export function emptyHeutagogySkill() {
-    return { name: '', detail: '', rating: null, isSelfRated: true };
+    return { name: '', detail: '', rating: null };
 }
 
 export function defaultHeutagogySkills() {
@@ -17,7 +17,7 @@ export function defaultHeutagogySkills() {
 }
 
 export function emptyTopic() {
-    return { name: '', detail: '', application: '', rating: null, isSelfRated: true };
+    return { name: '', detail: '', application: '', rating: null };
 }
 
 export function migrateLearningData(learning) {
@@ -49,12 +49,11 @@ export function migrateLearningData(learning) {
             detail: t.learnings?.filter(Boolean).join(', ') || '',
             application: t.howLearned || '',
             rating: null,
-            isSelfRated: true,
         }));
 
     return { professionalTopics, generalTopics, heutagogySkills: defaultHeutagogySkills() };
 }
 
 export function topicFromBank(topic) {
-    return { name: topic.name, detail: topic.detail, application: '', rating: null, isSelfRated: true };
+    return { name: topic.name, detail: topic.detail, application: '', rating: null };
 }

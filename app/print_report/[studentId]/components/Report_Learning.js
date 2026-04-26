@@ -46,12 +46,16 @@ function TopicTable({ title, topics }) {
                                 {topic.application}
                             </td>
                             <td className='p-1 align-top text-center text-[8pt]'>
-                                {topic.rating ? (
-                                    <span className="flex items-center gap-1 justify-center">
-                                        <RatingBars rating={topic.rating} />
-                                        {topic.isSelfRated && <span className="font-bold">*</span>}
-                                    </span>
-                                ) : '—'}
+                                {(() => {
+                                    const r = topic.staffRating || topic.rating;
+                                    const isSelf = !topic.staffRating && !!topic.rating;
+                                    return r ? (
+                                        <span className="flex items-center gap-1 justify-center">
+                                            <RatingBars rating={r} />
+                                            {isSelf && <span className="font-bold">*</span>}
+                                        </span>
+                                    ) : '—';
+                                })()}
                             </td>
                         </tr>
                     ))}
