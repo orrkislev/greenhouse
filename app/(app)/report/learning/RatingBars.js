@@ -11,7 +11,7 @@ export default function RatingBars({ rating }) {
                 const barH = barsHeight[i - 1];
                 const x = (i - 1) * (barW + barGap);
                 const y = maxH / 2 - barH / 2;
-                const filled = rating && rating >= i;
+                const filled = rating && i >= (6 - rating);
 
                 return (
                     <rect
