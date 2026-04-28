@@ -534,6 +534,16 @@
   font-size: 0.875rem !important;
 }
 
+.dup-blink {
+  animation: dup-blink 0.65s ease-in-out;
+}
+
+@keyframes dup-blink {
+  0%, 100% { background-color: transparent; }
+  20%, 60%  { background-color: rgb(252 165 165 / 0.55); }
+  40%, 80%  { background-color: transparent; }
+}
+
 .shake {
   animation: shake 0.2s ease-in-out;
 }

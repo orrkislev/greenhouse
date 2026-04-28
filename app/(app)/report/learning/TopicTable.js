@@ -18,6 +18,7 @@ export default function TopicTable({
     onAddManual,
     onOpenBank,
     tableType,
+    allTopics = [],
 }) {
     const [confirmIndex, setConfirmIndex] = useState(null);
 
@@ -62,7 +63,7 @@ export default function TopicTable({
                                     withIcon={false}
                                     multiline={false}
                                     className="text-sm text-gray-600"
-                                    placeholder="פירוט..."
+                                    placeholder={allTopics.find(t => t.name === topic.name)?.detail || 'פירוט...'}
                                 />
                             </td>
                             <td className="py-2 px-1 align-top">

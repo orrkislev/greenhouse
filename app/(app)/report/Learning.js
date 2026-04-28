@@ -162,6 +162,7 @@ export default function Learning({ learning, onSave }) {
                         onAddManual={addManualProfessional}
                         onOpenBank={openBank}
                         tableType="professional"
+                        allTopics={allTopics}
                     />
                     <TopicTable
                         title="למידה כללית"
@@ -173,6 +174,7 @@ export default function Learning({ learning, onSave }) {
                         onAddManual={addManualGeneral}
                         onOpenBank={openBank}
                         tableType="general"
+                        allTopics={allTopics}
                     />
                     <div className="my-12 border-t border-gray-300/40" />
                     <HeutagogyTable
@@ -226,6 +228,8 @@ export default function Learning({ learning, onSave }) {
                 userMajor={userMajor}
                 allTopics={allTopics}
                 heutagogyMajorId={heutagogyMajorId}
+                existingProfessional={professionalTopics.map(t => t.name)}
+                existingGeneral={generalTopics.map(t => t.name)}
             />
             <HeutagogySkillBankModal
                 isOpen={heutagogyBankOpen}

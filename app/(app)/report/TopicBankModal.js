@@ -28,24 +28,26 @@ function buildTree(topics) {
 
 // ── TopicRow ──────────────────────────────────────────────────────────────────
 
-function TopicRow({ node, depth, expandedIds, onToggle, recentlyAdded, onAdd }) {
+function TopicRow({ node, depth, expandedIds, onToggle, recentlyAdded, onAdd, blinkingId }) {
     const isCategory = node.children.length > 0;
     const isExpanded = expandedIds.has(node.id);
     const added = recentlyAdded.has(node.id);
+    const isBlinking = blinkingId === node.id;
     const indent = depth * 16;
 
     return (
         <>
             <div
                 style={{ paddingRight: `${indent + 8}px` }}
-                className={`flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors ${
-                    added ? 'bg-green-50' : 'hover:bg-stone-50'
+                onClick={() => onAdd(node)}
+                className={`flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors cursor-pointer ${
+                    isBlinking ? 'dup-blink' : added ? 'bg-green-50' : 'hover:bg-stone-50'
                 }`}
             >
                 <div className="flex items-center gap-1.5 min-w-0 flex-1">
                     {isCategory ? (
                         <button
-                            onClick={() => onToggle(node.id)}
+                            onClick={(e) => { e.stopPropagation(); onToggle(node.id); }}
                             className="shrink-0 text-stone-400 hover:text-stone-600"
                         >
                             {isExpanded ? (
@@ -67,7 +69,7 @@ function TopicRow({ node, depth, expandedIds, onToggle, recentlyAdded, onAdd }) 
                     </span>
                 </div>
                 <button
-                    onClick={() => onAdd(node)}
+                    onClick={(e) => { e.stopPropagation(); onAdd(node); }}
                     className="shrink-0 p-0.5 rounded hover:bg-stone-200 transition-colors"
                     title="הוסף נושא"
                 >
@@ -88,6 +90,7 @@ function TopicRow({ node, depth, expandedIds, onToggle, recentlyAdded, onAdd }) 
                         onToggle={onToggle}
                         recentlyAdded={recentlyAdded}
                         onAdd={onAdd}
+                        blinkingId={blinkingId}
                     />
                 ))
             }
@@ -105,12 +108,15 @@ export default function TopicBankModal({
     userMajor,
     allTopics = [],
     heutagogyMajorId,
+    existingProfessional = [],
+    existingGeneral = [],
 }) {
     const [search, setSearch] = useState('');
     const [activeMajorId, setActiveMajorId] = useState(null); // null = "כולם"
     const [targetTable, setTargetTable] = useState(defaultTable);
     const [recentlyAdded, setRecentlyAdded] = useState(new Set());
     const [expandedIds, setExpandedIds] = useState(new Set());
+    const [blinkingId, setBlinkingId] = useState(null);
 
     // ── Derived data ──────────────────────────────────────────────────────────
     const majors = useMemo(
@@ -132,6 +138,7 @@ export default function TopicBankModal({
         if (!isOpen) return;
         setSearch('');
         setRecentlyAdded(new Set());
+        setBlinkingId(null);
 
         const table = defaultTable;
         setTargetTable(table);
@@ -209,6 +216,12 @@ export default function TopicBankModal({
     };
 
     const handleAdd = (node) => {
+        const existingNames = targetTable === 'professional' ? existingProfessional : existingGeneral;
+        if (existingNames.some(name => name === node.name)) {
+            setBlinkingId(node.id);
+            setTimeout(() => setBlinkingId(null), 700);
+            return;
+        }
         onAddTopic({ name: node.name, detail: node.detail }, targetTable);
         setRecentlyAdded(prev => new Set([...prev, node.id]));
         setTimeout(() => {
@@ -319,15 +332,16 @@ export default function TopicBankModal({
                                             return (
                                                 <div
                                                     key={t.id}
-                                                    className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                                                        added ? 'bg-green-50' : 'hover:bg-stone-50'
+                                                    onClick={() => handleAdd(t)}
+                                                    className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
+                                                        blinkingId === t.id ? 'dup-blink' : added ? 'bg-green-50' : 'hover:bg-stone-50'
                                                     }`}
                                                 >
                                                     <span>
                                                         <span className="font-medium">{t.name}</span>
                                                         {t.detail && <span className="text-stone-500"> — {t.detail}</span>}
                                                     </span>
-                                                    <button onClick={() => handleAdd(t)} className="shrink-0 p-0.5 rounded hover:bg-stone-200">
+                                                    <button onClick={(e) => { e.stopPropagation(); handleAdd(t); }} className="shrink-0 p-0.5 rounded hover:bg-stone-200">
                                                         {added ? <Check className="w-4 h-4 text-green-500" /> : <Plus className="w-4 h-4 text-stone-400" />}
                                                     </button>
                                                 </div>
@@ -359,6 +373,7 @@ export default function TopicBankModal({
                                                             onToggle={toggleExpand}
                                                             recentlyAdded={recentlyAdded}
                                                             onAdd={handleAdd}
+                                                            blinkingId={blinkingId}
                                                         />
                                                     ))}
                                                 </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import usePopper from '@/components/Popper'
-import { RATING_LABELS } from '../topicBank'
+import { RATING_LABELS } from './data'
 import RatingBars from './RatingBars'
 
 export default function RatingCell({ rating, canEdit, onRatingChange }) {

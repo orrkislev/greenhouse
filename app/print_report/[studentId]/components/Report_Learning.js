@@ -1,6 +1,4 @@
-import { Fragment } from "react";
-import { ReportPageSection, SectionSubtitle, SectionText } from "./Layout";
-import { RATING_LABELS } from "@/app/(app)/report/topicBank";
+import { ReportPageSection } from "./Layout";
 
 function RatingBars({ rating }) {
     const barW = 4; const barGap = 2; const maxH = 14;

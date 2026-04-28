@@ -1,3 +1,5 @@
+export const RATING_LABELS = ['רמה התחלתית', 'רמה בסיסית', 'רמה עצמאית', 'רמה מתקדמת', 'שליטה מלאה'];
+
 export function defaultGeneralTopics(keyTopics = []) {
     if (keyTopics.length > 0) {
         return keyTopics.map(t => ({ name: t.name, detail: t.detail || '', application: '', rating: null, locked: true, keyTopic: true }));
