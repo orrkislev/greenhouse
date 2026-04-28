@@ -1,6 +1,14 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(xargs -I {} bash -c \"echo '=== {} ===' && head -30 {}\")",
+      "Bash(grep -v \"^\\\\.$\")",
+      "Bash(grep -v \"^\\\\.\\\\.$\")",
+      "Bash(npm ls *)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "supabase"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

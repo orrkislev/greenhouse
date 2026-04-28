@@ -5,7 +5,6 @@ import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { Check, Plus, Search, X } from 'lucide-react'
 import Button from '@/components/Button'
-import { HEUTAGOGY_SKILLS_BANK } from '../topicBank'
 
 export default function HeutagogySkillBankModal({
     isOpen,
@@ -13,25 +12,20 @@ export default function HeutagogySkillBankModal({
     onSelect,
     selectedNames,
     currentName,
+    heutagogyTopics = [],
 }) {
     const [search, setSearch] = useState('');
 
     useEffect(() => {
-        if (isOpen) {
-            setSearch('');
-        }
+        if (isOpen) setSearch('');
     }, [isOpen]);
 
     const filteredSkills = useMemo(() => {
         const q = search.trim().toLowerCase();
-        return HEUTAGOGY_SKILLS_BANK.filter((skill) => {
-            if (!q) return true;
-            return (
-                skill.name.toLowerCase().includes(q) ||
-                skill.detail.toLowerCase().includes(q)
-            );
-        });
-    }, [search]);
+        return heutagogyTopics.filter(t =>
+            !q || t.name.toLowerCase().includes(q) || t.detail.toLowerCase().includes(q)
+        ).sort((a, b) => a.name.localeCompare(b.name, 'he'));
+    }, [search, heutagogyTopics]);
 
     if (typeof window === 'undefined') return null;
 
@@ -83,11 +77,11 @@ export default function HeutagogySkillBankModal({
                             {filteredSkills.length === 0 ? (
                                 <div className="text-center text-stone-400 py-8 text-sm">לא נמצאו מיומנויות</div>
                             ) : (
-                                filteredSkills.map((skill, i) => {
+                                filteredSkills.map((skill) => {
                                     const isTaken = selectedNames.includes(skill.name) && skill.name !== currentName;
                                     return (
                                         <button
-                                            key={i}
+                                            key={skill.id}
                                             disabled={isTaken}
                                             onClick={() => {
                                                 onSelect(skill);
@@ -101,7 +95,9 @@ export default function HeutagogySkillBankModal({
                                         >
                                             <span>
                                                 <span className="font-medium">{skill.name}</span>
-                                                <span className="text-stone-500"> — {skill.detail}</span>
+                                                {skill.detail && (
+                                                    <span className="text-stone-500"> — {skill.detail}</span>
+                                                )}
                                             </span>
                                             {isTaken ? (
                                                 <Check className="w-4 h-4 text-stone-300 shrink-0" />

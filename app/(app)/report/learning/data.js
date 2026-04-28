@@ -1,9 +1,9 @@
-export function defaultGeneralTopics() {
-    return [
-        { name: 'שפה', detail: '', application: '', rating: null, locked: true, keyTopic: true },
-        { name: 'אנגלית', detail: '', application: '', rating: null, locked: true, keyTopic: true },
-        { name: 'פרזנטציה', detail: '', application: '', rating: null, locked: true, keyTopic: true },
-    ];
+export function defaultGeneralTopics(keyTopics = []) {
+    if (keyTopics.length > 0) {
+        return keyTopics.map(t => ({ name: t.name, detail: t.detail || '', application: '', rating: null, locked: true, keyTopic: true }));
+    }
+    // Fallback while key topics are loading
+    return [];
 }
 
 export const HEUTAGOGY_ROW_COUNT = 5;
@@ -20,8 +20,8 @@ export function emptyTopic() {
     return { name: '', detail: '', application: '', rating: null };
 }
 
-export function migrateLearningData(learning) {
-    if (!learning) return { professionalTopics: [], generalTopics: defaultGeneralTopics() };
+export function migrateLearningData(learning, keyTopics = []) {
+    if (!learning) return { professionalTopics: [], generalTopics: defaultGeneralTopics(keyTopics) };
     if (learning.professionalTopics !== undefined) {
         const heutagogySkills = (learning.heutagogySkills || []).slice(0, HEUTAGOGY_ROW_COUNT);
         while (heutagogySkills.length < HEUTAGOGY_ROW_COUNT) {
@@ -31,7 +31,7 @@ export function migrateLearningData(learning) {
     }
 
     const oldTopics = learning.topics || [];
-    const generalTopics = defaultGeneralTopics();
+    const generalTopics = defaultGeneralTopics(keyTopics);
 
     if (oldTopics[0]) {
         const engRow = generalTopics.find((t) => t.name === 'אנגלית');

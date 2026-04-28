@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useUser } from '@/utils/store/useUser'
 import { useUserGroups } from '@/utils/store/useGroups'
+import { supabase } from '@/utils/supabase/client'
 import Button from '@/components/Button'
 import { motion, AnimatePresence } from 'motion/react'
 import { ALLOW_STUDENT_EDIT } from './page'
@@ -19,10 +20,28 @@ import {
     topicFromBank,
 } from './learning/data'
 
+const HEUTAGOGY_MAJOR_NAME = 'מיומנויות יוטגוגיות';
+
 export default function Learning({ learning, onSave }) {
     const originalUser = useUser(state => state.originalUser);
     const groups = useUserGroups();
     const userMajor = groups.find(g => g.type === 'major')?.name || null;
+
+    const [allTopics, setAllTopics] = useState([]);
+    const [topicsLoading, setTopicsLoading] = useState(true);
+
+    useEffect(() => {
+        supabase.from('topic_bank').select('*').order('name').then(({ data }) => {
+            setAllTopics(data || []);
+            setTopicsLoading(false);
+        });
+    }, []);
+
+    const keyTopics = allTopics.filter(t => t.is_key);
+    const heutagogyMajorId = allTopics.find(t => !t.parent_id && t.name === HEUTAGOGY_MAJOR_NAME)?.id;
+    const heutagogyTopics = heutagogyMajorId
+        ? allTopics.filter(t => t.parent_id === heutagogyMajorId)
+        : [];
 
     const [madeChanges, setMadeChanges] = useState(false);
     const [bankOpen, setBankOpen] = useState(false);
@@ -30,18 +49,19 @@ export default function Learning({ learning, onSave }) {
     const [heutagogyBankOpen, setHeutagogyBankOpen] = useState(false);
     const [heutagogyBankRow, setHeutagogyBankRow] = useState(0);
 
-    const migratedData = migrateLearningData(learning);
-    const [professionalTopics, setProfessionalTopics] = useState(migratedData.professionalTopics || []);
-    const [generalTopics, setGeneralTopics] = useState(migratedData.generalTopics || defaultGeneralTopics());
-    const [heutagogySkills, setHeutagogySkills] = useState(migratedData.heutagogySkills || defaultHeutagogySkills());
+    const [professionalTopics, setProfessionalTopics] = useState([]);
+    const [generalTopics, setGeneralTopics] = useState([]);
+    const [heutagogySkills, setHeutagogySkills] = useState(defaultHeutagogySkills());
 
+    // Re-init when learning data or key topics change (key topics arrive async)
     useEffect(() => {
-        const d = migrateLearningData(learning);
+        const d = migrateLearningData(learning, keyTopics);
         setProfessionalTopics(d.professionalTopics || []);
-        setGeneralTopics(d.generalTopics || defaultGeneralTopics());
+        setGeneralTopics(d.generalTopics || defaultGeneralTopics(keyTopics));
         setHeutagogySkills(d.heutagogySkills || defaultHeutagogySkills());
         setMadeChanges(false);
-    }, [learning]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [learning, topicsLoading]);
 
     const canEdit = ALLOW_STUDENT_EDIT || !!originalUser;
     const isStaffMode = !!originalUser;
@@ -204,6 +224,8 @@ export default function Learning({ learning, onSave }) {
                 onAddTopic={handleAddFromBank}
                 defaultTable={bankDefaultTable}
                 userMajor={userMajor}
+                allTopics={allTopics}
+                heutagogyMajorId={heutagogyMajorId}
             />
             <HeutagogySkillBankModal
                 isOpen={heutagogyBankOpen}
@@ -211,6 +233,7 @@ export default function Learning({ learning, onSave }) {
                 onSelect={selectHeutagogySkill}
                 selectedNames={heutagogyNames}
                 currentName={heutagogySkills[heutagogyBankRow]?.name || ''}
+                heutagogyTopics={heutagogyTopics}
             />
         </>
     );

@@ -16,6 +16,8 @@ import PersonalGoals from "./PersonalGoals";
 import Portfolio from "./Portfolio";
 import { useUserGroups } from "@/utils/store/useGroups";
 import { getReportHalf } from "@/utils/store/useTime";
+import { isAdmin } from "@/utils/store/useUser";
+import Link from "next/link";
 
 export const ALLOW_STUDENT_EDIT = true;
 
@@ -136,6 +138,11 @@ export default function ReportPage() {
                 <DashboardPanelButton onClick={() => setView('learning')} $active={view === 'learning'}>למידה</DashboardPanelButton>
                 <DashboardPanelButton onClick={() => setView('vocation')} $active={view === 'vocation'}>יזמות מקיימת</DashboardPanelButton>
 
+                {isAdmin() && (
+                    <Link href="/topic-bank">
+                        <DashboardPanelButton>ניהול בנק נושאים</DashboardPanelButton>
+                    </Link>
+                )}
             </DashboardPanel>
             <DashboardMain>
                 <div className="gap-3 flex flex-col px-16 py-8">

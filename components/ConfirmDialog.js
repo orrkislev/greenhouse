@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { createPortal } from 'react-dom'
 
-export default function ConfirmDialog({ isOpen, message, onConfirm, onCancel }) {
+export default function ConfirmDialog({ isOpen, message, onConfirm, onCancel, confirmLabel = 'מחיקה' }) {
     if (typeof document === 'undefined') return null;
     return createPortal(
         <AnimatePresence>
@@ -27,9 +27,9 @@ export default function ConfirmDialog({ isOpen, message, onConfirm, onCancel }) 
                         <div className="flex gap-2 justify-start">
                             <button
                                 onClick={onConfirm}
-                                className="px-4 py-1.5 rounded-lg text-sm bg-red-500 text-white hover:bg-red-600 transition-colors"
+                                className={`px-4 py-1.5 rounded-lg text-sm text-white transition-colors ${confirmLabel === 'מחיקה' ? 'bg-red-500 hover:bg-red-600' : 'bg-stone-700 hover:bg-stone-800'}`}
                             >
-                                מחיקה
+                                {confirmLabel}
                             </button>
                             <button
                                 onClick={onCancel}
