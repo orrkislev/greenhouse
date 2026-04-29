@@ -171,7 +171,7 @@ export function SelectedStudentCard({ student, context, group, onClose }) {
 function SelectedStudentCard_Tasks({ student, group }) {
     const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
     const groups = useGroups(state => state.groups);
-    const currentGroup = groups.find(g => g.id === group.id);
+    const currentGroup = groups.find(g => g.id === group?.id);
     const tasks = currentGroup?.tasks || [];
 
     const studentTasks = tasks.filter(t =>
