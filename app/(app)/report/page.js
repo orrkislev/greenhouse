@@ -52,7 +52,7 @@ export default function ReportPage() {
             return;
         }
 
-        const { error } = await supabase.from('report_cards_private').update({ [key]: data }).eq('id', userId);
+        const { error } = await supabase.from('report_cards_private').upsert({ id: userId, [key]: data });
         if (error) {
             toastsActions.addFromError(error, 'שגיאה בשמירת הדוח');
             return;

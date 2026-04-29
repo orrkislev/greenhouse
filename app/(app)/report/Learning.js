@@ -136,7 +136,7 @@ export default function Learning({ learning, onSave }) {
     const canSave = madeChanges  && hasUniqueHeutagogySkills;
 
     const handleSave = () => {
-        if (!hasAllHeutagogySkills || !hasUniqueHeutagogySkills) {
+        if (!hasUniqueHeutagogySkills) {
             return;
         }
         onSave({ professionalTopics, generalTopics, heutagogySkills });
@@ -214,9 +214,9 @@ export default function Learning({ learning, onSave }) {
                 )}
             </AnimatePresence>
 
-            {canEdit && (!hasAllHeutagogySkills || !hasUniqueHeutagogySkills) && (
+            {canEdit && !hasAllHeutagogySkills && (
                 <div className="mt-2 text-center text-xs text-stone-500">
-                    יש לבחור 5 מיומנויות יוטגוגיות שונות לפני שמירה.
+                    יש לבחור 5 מיומנויות יוטגוגיות שונות
                 </div>
             )}
 
