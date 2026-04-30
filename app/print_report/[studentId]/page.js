@@ -1,9 +1,10 @@
 import PrintReportPage from "./PrintReportPage";
 
-export default async function Page({params}) {
-    const {studentId} = await params
+export default async function Page({params, searchParams}) {
+    const {studentId} = await params;
+    const {semester} = await searchParams;
 
     return (
-        <PrintReportPage studentId={studentId} />
+        <PrintReportPage studentId={studentId} semester={semester} />
     );
 }

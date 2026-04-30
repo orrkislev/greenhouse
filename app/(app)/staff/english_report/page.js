@@ -6,6 +6,7 @@ import { supabase } from "@/utils/supabase/client";
 import { toastsActions } from "@/utils/store/useToasts";
 import SmartText from "@/components/SmartText";
 import Button from "@/components/Button";
+import { getReportSemester } from "@/utils/store/useTime";
 
 export default function EnglishReportPage() {
     const [students, setStudents] = useState([]);
@@ -19,9 +20,11 @@ export default function EnglishReportPage() {
 
     const loadStudents = async () => {
         setLoading(true);
+        const currentSemester = getReportSemester() ?? '2026A';
         const { data, error } = await supabase
             .from('report_cards_public')
-            .select('id, first_name, last_name, class, learning')
+            .select('id, first_name, last_name, class, learning, report_semester')
+            .eq('report_semester', currentSemester)
             .order('class', { ascending: true })
             .order('last_name', { ascending: true });
 
@@ -45,10 +48,12 @@ export default function EnglishReportPage() {
             englishMasterReview
         };
 
+        const currentSemester = getReportSemester() ?? '2026A';
         const { error } = await supabase
             .from('report_cards_private')
             .update({ learning: updatedLearning })
-            .eq('id', studentId);
+            .eq('id', studentId)
+            .eq('report_semester', currentSemester);
 
         if (error) {
             toastsActions.addFromError(error, 'שגיאה בשמירת המשוב');

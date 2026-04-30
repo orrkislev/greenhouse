@@ -58,25 +58,25 @@ export const useTime = create(subscribeWithSelector((set, get) => {
             set({ terms: newTerms });
         },
 
-        // ------ Report Halves ------
-        reportHalves: null,
-        loadReportHalves: async () => {
-            if (get().reportHalves) return;
-            const { data, error } = await supabase.from('misc').select().in('name', ['report_half_A', 'report_half_B']);
+        // ------ Report Semesters ------
+        reportSemesters: null,
+        loadReportSemesters: async () => {
+            if (get().reportSemesters) return;
+            const { data, error } = await supabase.from('misc').select().in('name', ['report_semester_A', 'report_semester_B']);
             if (error) throw error;
-            const halves = Object.fromEntries(data.map(row => [row.name.replace('report_half_', ''), row.data]));
-            set({ reportHalves: halves });
+            const semesters = Object.fromEntries(data.map(row => [row.name.replace('report_semester_', ''), row.data]));
+            set({ reportSemesters: semesters });
         },
-        updateReportHalf: async (halfId, updates) => {
-            const name = `report_half_${halfId}`;
-            const current = get().reportHalves?.[halfId] ?? {};
+        updateReportSemester: async (semesterId, updates) => {
+            const name = `report_semester_${semesterId}`;
+            const current = get().reportSemesters?.[semesterId] ?? {};
             const newData = { ...current, ...updates };
             const { error } = await supabase.from('misc').update({ data: newData }).eq('name', name);
             if (error) throw error;
             set(state => ({
-                reportHalves: {
-                    ...state.reportHalves,
-                    [halfId]: newData,
+                reportSemesters: {
+                    ...state.reportSemesters,
+                    [semesterId]: newData,
                 },
             }));
         },
@@ -86,15 +86,15 @@ export const useTime = create(subscribeWithSelector((set, get) => {
 
 export const BETWEEN_TERMS = { id: '', name: 'בין הזמנים' };
 (async () => {
-    const [termResult, halvesResult] = await Promise.all([
+    const [termResult, semestersResult] = await Promise.all([
         supabase.from('current_term').select(),
-        supabase.from('misc').select().in('name', ['report_half_A', 'report_half_B']),
+        supabase.from('misc').select().in('name', ['report_semester_A', 'report_semester_B']),
     ]);
     if (termResult.error) throw termResult.error;
     useTime.setState({ currTerm: termResult.data[0] || BETWEEN_TERMS });
-    if (!halvesResult.error && halvesResult.data) {
-        const halves = Object.fromEntries(halvesResult.data.map(row => [row.name.replace('report_half_', ''), row.data]));
-        useTime.setState({ reportHalves: halves });
+    if (!semestersResult.error && semestersResult.data) {
+        const semesters = Object.fromEntries(semestersResult.data.map(row => [row.name.replace('report_semester_', ''), row.data]));
+        useTime.setState({ reportSemesters: semesters });
     }
 })();
 
@@ -152,23 +152,56 @@ export function dateRange(start, end) {
 }
 
 
-const REPORT_HALF_DEFAULTS = {
+export const REPORT_SEMESTER_DEFAULTS = {
     A: { start_month: 1, start_day: 1, end_month: 2, end_day: 28 },
     B: { start_month: 4, start_day: 24, end_month: 6, end_day: 30 },
 };
 
-// Returns 'A' or 'B' based on configurable dates stored in misc table
-export function getReportHalf(date = new Date()) {
-    const reportHalves = useTime.getState().reportHalves;
+// Returns 'A' or 'B' when inside a report semester window, null otherwise
+export function getSemesterId(date = new Date()) {
+    const reportSemesters = useTime.getState().reportSemesters;
     const year = date.getFullYear();
-    for (const halfId of ['A', 'B']) {
-        const half = { ...REPORT_HALF_DEFAULTS[halfId], ...reportHalves?.[halfId] };
-        const start = new Date(year, half.start_month - 1, half.start_day);
-        const end = new Date(year, half.end_month - 1, half.end_day);
-        if (isAfter(date, start) && isBefore(date, end)) return halfId;
+    for (const semId of ['A', 'B']) {
+        const sem = { ...REPORT_SEMESTER_DEFAULTS[semId], ...reportSemesters?.[semId] };
+        const start = new Date(year, sem.start_month - 1, sem.start_day);
+        const end = new Date(year, sem.end_month - 1, sem.end_day);
+        if (isAfter(date, start) && isBefore(date, end)) return semId;
     }
-    console.log('Not in any report half');
     return null;
+}
+
+// Returns the academic year as a short string, e.g. "2026"
+// Academic year 2026 = August 2025 through July 2026
+export function getAcademicYear(date = new Date()) {
+    const startYear = date.getMonth() < 7 ? date.getFullYear() - 1 : date.getFullYear();
+    return String(startYear + 1);
+}
+
+// Returns the academic year as a display label, e.g. "2025-2026"
+export function getAcademicYearLabel(date = new Date()) {
+    const startYear = date.getMonth() < 7 ? date.getFullYear() - 1 : date.getFullYear();
+    return `${startYear}-${startYear + 1}`;
+}
+
+// Returns the full semester code, e.g. "2026A" or "2026B", or null if outside any semester
+export function getReportSemester(date = new Date()) {
+    const semId = getSemesterId(date);
+    if (!semId) return null;
+    return `${getAcademicYear(date)}${semId}`;
+}
+
+// Human-readable label: "2026A" → "מחצית א 2026"
+export function formatSemesterLabel(semester) {
+    const year = semester.slice(0, 4);
+    const letter = semester.slice(4);
+    return `מחצית ${letter === 'A' ? 'א' : 'ב'} ${year}`;
+}
+
+// Previous semester: "2026A" → "2025B", "2026B" → "2026A"
+export function previousSemester(semester) {
+    const year = parseInt(semester.slice(0, 4));
+    const letter = semester.slice(4);
+    return letter === 'A' ? `${year - 1}B` : `${year}A`;
 }
 
 

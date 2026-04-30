@@ -15,25 +15,50 @@ import Report_Portfolio from './components/Report_Portfolio';
 
 
 
-export default function PrintReportPage({ studentId }) {
+export default function PrintReportPage({ studentId, semester }) {
     const [student, setStudent] = useState(null);
 
     useEffect(() => {
         if (!studentId) return;
         (async () => {
-            const { data: publicData, error: publicError } = await supabase.from('report_cards_public').select('*').eq('id', studentId).single();
+            // Determine which semester to print: use provided semester, or fall back to the latest one
+            let targetSemester = semester;
+            if (!targetSemester) {
+                const { data: latestRow } = await supabase
+                    .from('report_cards_private')
+                    .select('report_semester')
+                    .eq('id', studentId)
+                    .order('report_semester', { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+                targetSemester = latestRow?.report_semester;
+            }
+
+            if (!targetSemester) return;
+
+            const { data: publicData, error: publicError } = await supabase
+                .from('report_cards_public')
+                .select('*')
+                .eq('id', studentId)
+                .eq('report_semester', targetSemester)
+                .single();
             if (publicError) {
                 toastsActions.addFromError(publicError, 'שגיאה בטעינת הדוח הציבורי של התלמיד');
                 return;
             }
-            const { data: privateData, error: privateError } = await supabase.from('report_cards_private').select('mentors').eq('id', studentId).single();
+            const { data: privateData, error: privateError } = await supabase
+                .from('report_cards_private')
+                .select('mentors')
+                .eq('id', studentId)
+                .eq('report_semester', targetSemester)
+                .single();
             if (privateError) {
                 toastsActions.addFromError(privateError, 'שגיאה בטעינת הדוח הפרטי של התלמיד');
                 return;
             }
             setStudent({ ...publicData, ...privateData });
         })();
-    }, [studentId])
+    }, [studentId, semester])
 
     useEffect(() => {
         if (student) {

@@ -6,6 +6,7 @@ import usePopper from "@/components/Popper";
 import { userActions } from "@/utils/store/useUser";
 import Button from "@/components/Button";
 import { useRouter } from "next/navigation";
+import { getReportSemester } from "@/utils/store/useTime";
 
 const Cell = tw.td` text-center cursor-pointer
     ${p => p.$good ? 'bg-green-400 hover:bg-green-500' : 'bg-stone-200 hover:bg-stone-400'}
@@ -20,20 +21,23 @@ export default function StaffGroup_Evaluations({ group }) {
 
     useEffect(() => {
         if (!group || !group.members) return;
+        const currentSemester = getReportSemester() ?? '2026A';
+        const studentIds = group.members.filter(member => member?.role === 'student').map(member => member.id);
         (async () => {
             const { data, error } = await supabase.from('report_cards_public').select('*')
-                .in('id', group.members.filter(member => member?.role === 'student').map(member => member.id));
+                .in('id', studentIds)
+                .eq('report_semester', currentSemester);
             if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הדוחות הציבוריים');
             const { data: privateData, error: privateError } = await supabase.from('report_cards_private').select('id,mentors')
-                .in('id', group.members.filter(member => member?.role === 'student').map(member => member.id));
+                .in('id', studentIds)
+                .eq('report_semester', currentSemester);
             if (privateError) toastsActions.addFromError(privateError, 'שגיאה בטעינת הדוחות הפרטיים');
             setData(group.members.filter(member => member?.role === 'student').map(member => ({
                 ...member,
                 report: {
-                    ...data.find(report => report.id === member.id),
-                    mentors: privateData.find(report => report.id === member.id)?.mentors || null
+                    ...data?.find(report => report.id === member.id),
+                    mentors: privateData?.find(report => report.id === member.id)?.mentors || null
                 }
-
             })));
         })();
     }, [group]);
@@ -158,10 +162,12 @@ function MentorsEditor({ student, closeModal }) {
     const save = async () => {
         if (!shouldSave) return;
         setButtonText('...');
+        const currentSemester = getReportSemester() ?? '2026A';
         const { error } = await supabase
             .from('report_cards_private')
             .update({ mentors: value })
-            .eq('id', student.id);
+            .eq('id', student.id)
+            .eq('report_semester', currentSemester);
         if (error) toastsActions.addFromError(error, 'שגיאה בשמירת הממני אליך');
         setButtonText('רונן!');
         setTimeout(() => {

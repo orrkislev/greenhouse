@@ -4,7 +4,8 @@
       "Bash(xargs -I {} bash -c \"echo '=== {} ===' && head -30 {}\")",
       "Bash(grep -v \"^\\\\.$\")",
       "Bash(grep -v \"^\\\\.\\\\.$\")",
-      "Bash(npm ls *)"
+      "Bash(npm ls *)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx|sql\\)$\")"
     ]
   },
   "enableAllProjectMcpServers": true,

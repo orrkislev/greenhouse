@@ -15,8 +15,11 @@ import FinalProject from "./FinalProject";
 import PersonalGoals from "./PersonalGoals";
 import Portfolio from "./Portfolio";
 import { useUserGroups } from "@/utils/store/useGroups";
-import { getReportHalf } from "@/utils/store/useTime";
+import { getReportSemester, formatSemesterLabel } from "@/utils/store/useTime";
 import { isAdmin } from "@/utils/store/useUser";
+import { initializeReportSemester } from "@/utils/actions/report actions";
+import ContextBar from "@/components/ContextBar";
+import ReportContext from "./components/ReportContext";
 import Link from "next/link";
 
 export const ALLOW_STUDENT_EDIT = true;
@@ -27,138 +30,195 @@ export default function ReportPage() {
     const [view, setView] = useState(viewParam || 'ikigai');
     const userId = useUser(state => state.user?.id);
     const [data, setData] = useState(null);
+    const [selectedSemester, setSelectedSemester] = useState(null);
+    const [availableSemesters, setAvailableSemesters] = useState([]);
     const groups = useUserGroups();
     const userClass = groups.find(group => group.type === 'class');
     const userIdRef = useRef(userId);
 
     useEffect(() => {
         userIdRef.current = userId;
-        if (!userId) return;
-        (async () => {
-            const { data, error } = await supabase.from('report_cards_public').select('*').eq('id', userId);
-            if (error) toastsActions.addFromError(error, 'שגיאה בטעינת הדוח הציבורי');
-            if (data && data.length > 0) setData(data[0]);
-        })();
     }, [userId]);
 
     useEffect(() => {
         if (viewParam) setView(viewParam);
     }, [viewParam]);
 
-    const handleSave = async (key, data) => {
-        console.log('Saving', key, data);
-        if (!userId) {
-            toastsActions.addToast({ message: 'אנא המתן לטעינת המשתמש', type: 'error' });
+    // On load: build the available-semesters list and select the right one
+    useEffect(() => {
+        if (!userId) return;
+        (async () => {
+            const { data: semesterList } = await supabase
+                .from('report_cards_private')
+                .select('report_semester')
+                .eq('id', userId)
+                .order('report_semester', { ascending: false });
+
+            const available = semesterList?.map(r => r.report_semester) ?? [];
+
+            const current = getReportSemester();
+            const target = current ?? available[0] ?? null;
+
+            if (current && !available.includes(current)) {
+                try {
+                    await initializeReportSemester(userId, current);
+                    toastsActions.addToast({
+                        message: `ההערכה עבור ${formatSemesterLabel(current)} נוצרה על בסיס העתקה מהמחצית הקודמת`,
+                        type: 'success',
+                    });
+                    setAvailableSemesters([current, ...available]);
+                } catch (e) {
+                    toastsActions.addToast({ message: 'שגיאה ביצירת ההערכה', type: 'error' });
+                    setAvailableSemesters(available);
+                }
+            } else {
+                setAvailableSemesters(available);
+            }
+
+            setSelectedSemester(target);
+        })();
+    }, [userId]);
+
+    // Reload report data whenever the selected semester changes
+    useEffect(() => {
+        if (!userId || !selectedSemester) return;
+        (async () => {
+            const { data, error } = await supabase
+                .from('report_cards_public')
+                .select('*')
+                .eq('id', userId)
+                .eq('report_semester', selectedSemester)
+                .maybeSingle();
+            if (error) toastsActions.addFromError(error, 'שגיאה בטעינת ההערכה');
+            if (userId !== userIdRef.current) return;
+            setData(data ?? null);
+        })();
+    }, [userId, selectedSemester]);
+
+    const handleSave = async (key, newValue) => {
+        if (!userId || !selectedSemester) {
+            toastsActions.addToast({ message: 'אנא המתן לטעינת ההערכה', type: 'error' });
             return;
         }
 
-        const { error } = await supabase.from('report_cards_private').upsert({ id: userId, [key]: data });
+        const { error } = await supabase
+            .from('report_cards_private')
+            .upsert({ id: userId, report_semester: selectedSemester, [key]: newValue });
+
         if (error) {
-            toastsActions.addFromError(error, 'שגיאה בשמירת הדוח');
+            toastsActions.addFromError(error, 'שגיאה בשמירת ההערכה');
             return;
         }
 
         toastsActions.addToast({ message: 'נשמר בהצלחה!', type: 'success' });
 
-        // Race condition check: if user switched while we were saving, don't update local state
         if (userId !== userIdRef.current) return;
+        setData(prev => ({ ...prev, [key]: newValue }));
+    };
 
-        setData(prev => ({ ...prev, [key]: data }));
-    }
-
-    const currentReportHalf = getReportHalf();
-    const year = userClass?.description
+    const semesterId = selectedSemester?.slice(4); // "A" or "B"
+    const year = userClass?.description;
 
     return (
-        <DashboardLayout>
-            <DashboardPanel>
-                <DashboardPanelButton onClick={() => setView('ikigai')} $active={view === 'ikigai'}>איקיגאי</DashboardPanelButton>
-                <DashboardPanelButton onClick={() => setView('portfolio')} $active={view === 'portfolio'}>פורטפוליו</DashboardPanelButton>
+        <>
+            <DashboardLayout>
+                <DashboardPanel>
+                    <DashboardPanelButton onClick={() => setView('ikigai')} $active={view === 'ikigai'}>איקיגאי</DashboardPanelButton>
+                    <DashboardPanelButton onClick={() => setView('portfolio')} $active={view === 'portfolio'}>פורטפוליו</DashboardPanelButton>
 
-                <DashboardPanelButton onClick={() => setView('liba')} $active={view === 'liba'}>ליבה</DashboardPanelButton>
-                {year == '1' && (
-                    <>
-                        {currentReportHalf == "A" && (
-                            <>
-                                <DashboardPanelButton onClick={() => setView('autumn')} $active={view === 'autumn'}>תקופת סתו</DashboardPanelButton>
-                                <DashboardPanelButton onClick={() => setView('winter')} $active={view === 'winter'}>תקופת חורף</DashboardPanelButton>
-                            </>
-                        )}
-                         {currentReportHalf == "B" && (
-                            <>
-                                <DashboardPanelButton onClick={() => setView('spring')} $active={view === 'spring'}>תקופת אביב</DashboardPanelButton>
-                                <DashboardPanelButton onClick={() => setView('summer')} $active={view === 'summer'}>תקופת קיץ</DashboardPanelButton>
-                            </>
-                         )}
-                    </>
-                )}
+                    <DashboardPanelButton onClick={() => setView('liba')} $active={view === 'liba'}>ליבה</DashboardPanelButton>
+                    {year == '1' && (
+                        <>
+                            {semesterId === "A" && (
+                                <>
+                                    <DashboardPanelButton onClick={() => setView('autumn')} $active={view === 'autumn'}>תקופת סתו</DashboardPanelButton>
+                                    <DashboardPanelButton onClick={() => setView('winter')} $active={view === 'winter'}>תקופת חורף</DashboardPanelButton>
+                                </>
+                            )}
+                             {semesterId === "B" && (
+                                <>
+                                    <DashboardPanelButton onClick={() => setView('spring')} $active={view === 'spring'}>תקופת אביב</DashboardPanelButton>
+                                    <DashboardPanelButton onClick={() => setView('summer')} $active={view === 'summer'}>תקופת קיץ</DashboardPanelButton>
+                                </>
+                             )}
+                        </>
+                    )}
 
-                {(year == '2') && (
-                    <>
-                        {currentReportHalf == "A" && (
-                            <>
-                                <DashboardPanelButton onClick={() => setView('autumn')} $active={view === 'autumn'}>תקופת סתו</DashboardPanelButton>
-                                <DashboardPanelButton onClick={() => setView('winter')} $active={view === 'winter'}>תקופת חורף</DashboardPanelButton>
-                            </>
-                        )}
-                        {currentReportHalf == "B" && (
-                            <>
-                                <DashboardPanelButton onClick={() => setView('spring')} $active={view === 'spring'}>תקופת אביב</DashboardPanelButton>
+                    {(year == '2') && (
+                        <>
+                            {semesterId === "A" && (
+                                <>
+                                    <DashboardPanelButton onClick={() => setView('autumn')} $active={view === 'autumn'}>תקופת סתו</DashboardPanelButton>
+                                    <DashboardPanelButton onClick={() => setView('winter')} $active={view === 'winter'}>תקופת חורף</DashboardPanelButton>
+                                </>
+                            )}
+                            {semesterId === "B" && (
+                                <>
+                                    <DashboardPanelButton onClick={() => setView('spring')} $active={view === 'spring'}>תקופת אביב</DashboardPanelButton>
+                                    <DashboardPanelButton onClick={() => setView('POL')} $active={view === 'POL'}>P.O.L</DashboardPanelButton>
+                                </>
+                            )}
+                        </>
+                    )}
+
+                    {year == '3' && (
+                        <>
+                            {semesterId === "A" && (
+                                <DashboardPanelButton onClick={() => setView('finalProject')} $active={view === 'finalProject'}>פרויקט גמר</DashboardPanelButton>
+                            )}
+                            {semesterId === "B" && (
+                                <>
+                                    <DashboardPanelButton onClick={() => setView('finalProject_B')} $active={view === 'finalProject_B'}>פרויקט גמר</DashboardPanelButton>
+                                    <DashboardPanelButton onClick={() => setView('POL')} $active={view === 'POL'}>P.O.L</DashboardPanelButton>
+                                </>
+                            )}
+                        </>
+                    )}
+
+                    {year == '4' && (
+                        <>
+                            {semesterId === "A" && (
+                                <DashboardPanelButton onClick={() => setView('personalGoals')} $active={view === 'personalGoals'}>מטרות אישיות</DashboardPanelButton>
+                            )}
+                            {semesterId === "B" && (
                                 <DashboardPanelButton onClick={() => setView('POL')} $active={view === 'POL'}>P.O.L</DashboardPanelButton>
-                            </>
-                        )}
-                    </>
-                )}
+                            )}
+                        </>
+                    )}
 
-                {year == '3' && (
-                    <>
-                        {currentReportHalf == "A" && (
-                            <DashboardPanelButton onClick={() => setView('finalProject')} $active={view === 'finalProject'}>פרויקט גמר</DashboardPanelButton>
-                        )}
-                        {currentReportHalf == "B" && (
-                            <>
-                                <DashboardPanelButton onClick={() => setView('finalProject_B')} $active={view === 'finalProject'}>פרויקט גמר</DashboardPanelButton>
-                                <DashboardPanelButton onClick={() => setView('POL')} $active={view === 'POL'}>P.O.L</DashboardPanelButton>
-                            </>
-                        )}
-                    </>
-                )}
+                    <DashboardPanelButton onClick={() => setView('learning')} $active={view === 'learning'}>למידה</DashboardPanelButton>
+                    <DashboardPanelButton onClick={() => setView('vocation')} $active={view === 'vocation'}>יזמות מקיימת</DashboardPanelButton>
 
-                {userClass?.description == '4' && (
-                    <>
-                        {currentReportHalf == "A" && (
-                            <DashboardPanelButton onClick={() => setView('personalGoals')} $active={view === 'personalGoals'}>מטרות אישיות</DashboardPanelButton>
-                        )}
-                        {currentReportHalf == "B" && (
-                            <DashboardPanelButton onClick={() => setView('POL')} $active={view === 'POL'}>P.O.L</DashboardPanelButton>
-                        )}
-                    </>
-                )}
-
-                <DashboardPanelButton onClick={() => setView('learning')} $active={view === 'learning'}>למידה</DashboardPanelButton>
-                <DashboardPanelButton onClick={() => setView('vocation')} $active={view === 'vocation'}>יזמות מקיימת</DashboardPanelButton>
-
-                {isAdmin() && (
-                    <Link href="/topic-bank">
-                        <DashboardPanelButton>ניהול בנק נושאים</DashboardPanelButton>
-                    </Link>
-                )}
-            </DashboardPanel>
-            <DashboardMain>
-                <div className="gap-3 flex flex-col px-16 py-8">
-                    {view === 'ikigai' && <Ikigai ikigai={data?.ikigai} onSave={data => handleSave('ikigai', data)} />}
-                    {view === 'liba' && <Liba liba={data?.liba} onSave={data => handleSave('liba', data)} />}
-                    {view === 'autumn' && <Term project={data?.autumn_project} research={data?.autumn_research} term='סתו' />}
-                    {view === 'winter' && <Term project={data?.winter_project} research={data?.winter_research} term='חורף' />}
-                    {view === 'spring' && <Term project={data?.spring_project} research={data?.spring_research} term='אביב' />}
-                    {view === 'summer' && <Term project={data?.summer_project} research={data?.summer_research} term='קיץ' />}
-                    {view === 'learning' && <Learning learning={data?.learning} onSave={data => handleSave('learning', data)} />}
-                    {view === 'vocation' && <Vocation vocation={data?.vocation} onSave={data => handleSave('vocation', data)} />}
-                    {view === 'finalProject' && <FinalProject finalProject={data?.special} onSave={data => handleSave('special', data)} />}
-                    {view === 'personalGoals' && <PersonalGoals personalGoals={data?.special} onSave={data => handleSave('special', data)} />}
-                    {view === 'portfolio' && <Portfolio portfolio={data?.portfolio_url} />}
-                </div>
-            </DashboardMain>
-        </DashboardLayout>
-    )
+                    {isAdmin() && (
+                        <Link href="/topic-bank">
+                            <DashboardPanelButton>ניהול בנק נושאים</DashboardPanelButton>
+                        </Link>
+                    )}
+                </DashboardPanel>
+                <DashboardMain>
+                    <div className="gap-3 flex flex-col px-16 py-8">
+                        {view === 'ikigai' && <Ikigai ikigai={data?.ikigai} onSave={val => handleSave('ikigai', val)} />}
+                        {view === 'liba' && <Liba liba={data?.liba} onSave={val => handleSave('liba', val)} />}
+                        {view === 'autumn' && <Term project={data?.autumn_project} research={data?.autumn_research} term='סתו' />}
+                        {view === 'winter' && <Term project={data?.winter_project} research={data?.winter_research} term='חורף' />}
+                        {view === 'spring' && <Term project={data?.spring_project} research={data?.spring_research} term='אביב' />}
+                        {view === 'summer' && <Term project={data?.summer_project} research={data?.summer_research} term='קיץ' />}
+                        {view === 'learning' && <Learning learning={data?.learning} onSave={val => handleSave('learning', val)} />}
+                        {view === 'vocation' && <Vocation vocation={data?.vocation} onSave={val => handleSave('vocation', val)} />}
+                        {view === 'finalProject' && <FinalProject finalProject={data?.special} onSave={val => handleSave('special', val)} />}
+                        {view === 'finalProject_B' && <FinalProject finalProject={data?.special} onSave={val => handleSave('special', val)} />}
+                        {view === 'personalGoals' && <PersonalGoals personalGoals={data?.special} onSave={val => handleSave('special', val)} />}
+                        {view === 'portfolio' && <Portfolio portfolio={data?.portfolio_url} />}
+                    </div>
+                </DashboardMain>
+            </DashboardLayout>
+            <ContextBar name="מחציות" initialOpen={false}>
+                <ReportContext
+                    semesters={availableSemesters}
+                    selected={selectedSemester}
+                    onSelect={setSelectedSemester}
+                />
+            </ContextBar>
+        </>
+    );
 }

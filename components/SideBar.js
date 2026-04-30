@@ -13,7 +13,7 @@ import { useState } from "react";
 import { useProjectData } from "@/utils/store/useProject";
 import { useResearchData } from "@/utils/store/useResearch";
 import { useTodayEvents } from "@/utils/store/useEvents";
-import { getReportHalf } from "@/utils/store/useTime";
+import { getSemesterId } from "@/utils/store/useTime";
 
 const SideBarDiv = tw`flex flex-col border-l border-ghdark bg-ghgreen -my-6 py-4
 md:flex md:flex-col
@@ -55,7 +55,7 @@ export default function SideBar() {
                 </Link>
 
                 <TopBarContent>
-                    {getReportHalf() && (
+                    {getSemesterId() && (
                         <TopBarIconItem href="/report" Icon={Sparkles} active={pathname === '/report'} title="הערכות" />
                     )}
                     <TopBarIconItem href="/" Icon={TreePalm} active={pathname === '/'} title="בית" />
@@ -106,7 +106,7 @@ export default function SideBar() {
                 <Separator className='w-full' />
                 <SideBarContent>
 
-                    {getReportHalf() && (
+                    {getSemesterId() && (
                         <SideBarItem href="/report" Icon={ScrollText} label="הערכות" active={pathname === '/report'} />
                     )}
 

@@ -1,15 +1,10 @@
 "use client"
 
-import { timeActions, useTime } from "@/utils/store/useTime";
+import { timeActions, useTime, REPORT_SEMESTER_DEFAULTS, getAcademicYearLabel } from "@/utils/store/useTime";
 import { format } from "date-fns";
 import { Trash } from "lucide-react";
 import { Plus } from "lucide-react";
 import { useEffect } from "react";
-
-const REPORT_HALF_DEFAULTS = {
-    A: { start_month: 1, start_day: 1, end_month: 2, end_day: 28 },
-    B: { start_month: 4, start_day: 24, end_month: 6, end_day: 30 },
-};
 
 const MONTHS = [
     { value: 1, label: "ינואר" },
@@ -26,14 +21,14 @@ const MONTHS = [
     { value: 12, label: "דצמבר" },
 ];
 
-function ReportHalfCard({ halfId, title }) {
-    const reportHalves = useTime(state => state.reportHalves);
-    const half = { ...REPORT_HALF_DEFAULTS[halfId], ...reportHalves?.[halfId] };
+function ReportSemesterCard({ semesterId, title }) {
+    const reportSemesters = useTime(state => state.reportSemesters);
+    const semester = { ...REPORT_SEMESTER_DEFAULTS[semesterId], ...reportSemesters?.[semesterId] };
 
     const onFieldChange = (field, value) => {
         const parsed = Number(value);
         if (Number.isNaN(parsed)) return;
-        timeActions.updateReportHalf(halfId, { [field]: parsed });
+        timeActions.updateReportSemester(semesterId, { [field]: parsed });
     };
 
     return (
@@ -44,7 +39,7 @@ function ReportHalfCard({ halfId, title }) {
                     <span className="w-16 text-muted-foreground">מתאריך</span>
                     <select
                         className="border border-stone-300 rounded px-2 py-1"
-                        value={half.start_month}
+                        value={semester.start_month}
                         onChange={(e) => onFieldChange("start_month", e.target.value)}
                     >
                         {MONTHS.map(month => (
@@ -56,7 +51,7 @@ function ReportHalfCard({ halfId, title }) {
                         min={1}
                         max={31}
                         className="w-16 border border-stone-300 rounded px-2 py-1"
-                        value={half.start_day}
+                        value={semester.start_day}
                         onChange={(e) => onFieldChange("start_day", e.target.value)}
                     />
                 </div>
@@ -64,7 +59,7 @@ function ReportHalfCard({ halfId, title }) {
                     <span className="w-16 text-muted-foreground">עד</span>
                     <select
                         className="border border-stone-300 rounded px-2 py-1"
-                        value={half.end_month}
+                        value={semester.end_month}
                         onChange={(e) => onFieldChange("end_month", e.target.value)}
                     >
                         {MONTHS.map(month => (
@@ -76,7 +71,7 @@ function ReportHalfCard({ halfId, title }) {
                         min={1}
                         max={31}
                         className="w-16 border border-stone-300 rounded px-2 py-1"
-                        value={half.end_day}
+                        value={semester.end_day}
                         onChange={(e) => onFieldChange("end_day", e.target.value)}
                     />
                 </div>
@@ -90,11 +85,10 @@ export default function AdminYearSchedule() {
 
     useEffect(() => {
         timeActions.loadTerms();
-        timeActions.loadReportHalves();
+        timeActions.loadReportSemesters();
     }, []);
 
-    const startYear = new Date().getMonth() < 7 ? new Date().getFullYear() - 1 : new Date().getFullYear();
-    const academicYear = `${startYear}-${startYear + 1}`;
+    const academicYear = getAcademicYearLabel();
 
     terms.sort((a, b) => new Date(a.start) - new Date(b.start));
 
@@ -140,13 +134,10 @@ export default function AdminYearSchedule() {
             <div className="mt-8 px-4">
                 <h2 className="text-xl font-bold text-stone-900 mb-3">מחציות דוח</h2>
                 <div className="flex gap-4 flex-wrap">
-                    <ReportHalfCard halfId="A" title="מחצית א" />
-                    <ReportHalfCard halfId="B" title="מחצית ב" />
+                    <ReportSemesterCard semesterId="A" title="מחצית א" />
+                    <ReportSemesterCard semesterId="B" title="מחצית ב" />
                 </div>
             </div>
         </div>
     );
 }
-
-
-
