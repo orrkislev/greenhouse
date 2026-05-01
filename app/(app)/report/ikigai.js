@@ -5,8 +5,9 @@ import { Coins, Earth, Heart, Save, Star, X } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useUser } from '@/utils/store/useUser'
 import { toastsActions } from '@/utils/store/useToasts'
+import { formatSemesterLabel } from '@/utils/store/useTime'
 
-export default function Ikigai({ ikigai, onSave }) {
+export default function Ikigai({ ikigai, semester, onSave }) {
     const originalUser = useUser(state => state.originalUser)
     const [markers, setMarkers] = useState(ikigai?.markers || [])
     const [editingId, setEditingId] = useState(null)
@@ -68,7 +69,7 @@ export default function Ikigai({ ikigai, onSave }) {
     return (
         <div className="w-full h-full flex flex-col items-center justify-start relative">
             <div className="absolute top-2 right-2 mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">איקיגאי מחצית א</h2>
+                <h2 className="text-2xl font-bold text-gray-800">איקיגאי {semester ? formatSemesterLabel(semester, false) : ''}</h2>
                 <p className="text-gray-600">לחץ בכל מקום כדי להוסיף סמן חדש</p>
             </div>
 

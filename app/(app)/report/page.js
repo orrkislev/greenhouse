@@ -197,7 +197,7 @@ export default function ReportPage() {
                 </DashboardPanel>
                 <DashboardMain>
                     <div className="gap-3 flex flex-col px-16 py-8">
-                        {view === 'ikigai' && <Ikigai ikigai={data?.ikigai} onSave={val => handleSave('ikigai', val)} />}
+                        {view === 'ikigai' && <Ikigai ikigai={data?.ikigai} semester={selectedSemester} onSave={val => handleSave('ikigai', val)} />}
                         {view === 'liba' && <Liba liba={data?.liba} onSave={val => handleSave('liba', val)} />}
                         {view === 'autumn' && <Term project={data?.autumn_project} research={data?.autumn_research} term='סתו' />}
                         {view === 'winter' && <Term project={data?.winter_project} research={data?.winter_research} term='חורף' />}
