@@ -1,6 +1,6 @@
 import { addHours } from "date-fns";
 
-export const times = ['8:30', '9:30', '10:30', '11:30', '12:30', 'ערב'];
+export const times = ['9:30', '10:30', '11:30', '12:30', 'ערב'];
 export const days = ['א', 'ב', 'ג', 'ד', 'ה', 'סופ״ש'];
 
 export function stringToTime(timeStr) {
@@ -21,7 +21,7 @@ export function isInTimeSlot(timeSlotStr, eventTimeStr) {
     if (timeSlotStr === 'ערב') nextHour.setHours(23, 59, 0, 0);
     else nextHour = addHours(nextHour, 1);
     const eventTime = stringToTime(eventTimeStr);
-    const isFirstMorningSlot = timeSlotTime.getHours() === 8 && timeSlotTime.getMinutes() === 30;
+    const isFirstMorningSlot = timeSlotTime.getHours() === 9 && timeSlotTime.getMinutes() === 30;
     if (isFirstMorningSlot) {
         return eventTime < nextHour;
     }

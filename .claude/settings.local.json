@@ -5,7 +5,9 @@
       "Bash(grep -v \"^\\\\.$\")",
       "Bash(grep -v \"^\\\\.\\\\.$\")",
       "Bash(npm ls *)",
-      "Bash(grep -E \"\\\\.\\(ts|tsx|sql\\)$\")"
+      "Bash(grep -E \"\\\\.\\(ts|tsx|sql\\)$\")",
+      "Bash(supabase status *)",
+      "Bash(npx supabase *)"
     ]
   },
   "enableAllProjectMcpServers": true,

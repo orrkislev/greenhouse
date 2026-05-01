@@ -80,7 +80,7 @@ export default function Schedule() {
                 if (ganttEvent.isAllDay) {
                     result[`${day}-header`] = [...(result[`${day}-header`] || []), ganttEvent];
                 } else {
-                    const targetTime = getTimeSlot(ganttEvent.time) || '8:30';
+                    const targetTime = getTimeSlot(ganttEvent.time) || '9:30';
                     const cellKey = `${day}-${targetTime}`;
                     if (result[cellKey]) {
                         result[cellKey].ganttEvents = [...(result[cellKey].ganttEvents || []), ganttEvent];
@@ -102,8 +102,16 @@ export default function Schedule() {
                         const formattedDate = format(date, 'd/M');
                         const allDayGantt = cells[`${dateStr}-header`] || [];
 
+                        const isCurrentDayHeader = index === currentDayOfWeek ||
+                            (index === 5 && (currentDayOfWeek === 5 || currentDayOfWeek === 6));
+                        const isWeekendHeader = index === 5;
+                        const thClass = isCurrentDayHeader
+                            ? 'bg-violet-100 border-violet-300'
+                            : isWeekendHeader
+                            ? 'bg-stone-100 border-stone-300'
+                            : 'border-slate-400';
                         return (
-                            <th key={day} className="border border-gray-300 w-1/6 p-2">
+                            <th key={day} className={`border w-1/6 p-2 ${thClass}`}>
                                 <div className="flex items-center justify-center gap-2 relative">
                                     {index === 0 && (
                                         <button
@@ -149,7 +157,8 @@ export default function Schedule() {
                                     time={time}
                                     date={new Date(day)}
                                     cellData={cells[`${day}-${time}`]}
-                                    isToday={isCurrentDay} />
+                                    isToday={isCurrentDay}
+                                    isWeekend={dindex === 5} />
                             );
                         })}
                     </tr>
@@ -159,32 +168,60 @@ export default function Schedule() {
     )
 }
 
-function Cell({ date, time, cellData, isToday }) {
+function Cell({ date, time, cellData, isToday, isWeekend }) {
     const { events = [], legCount = 0, tasks = [], ganttEvents = [] } = cellData || {};
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
     const show930Menu = time === '9:30';
+    const isEvening = time === 'ערב';
+
+    let bgClass = '';
+    let borderClass = 'border-slate-400';
+    if (isToday) {
+        bgClass = isEvening ? 'bg-violet-100' : 'bg-violet-50';
+        borderClass = 'border-violet-300';
+    } else if (isWeekend || isEvening) {
+        bgClass = 'bg-stone-200';
+        // borderClass = 'border-stone-300';
+    }
+
     return (
         <td id={`${format(date, 'yyyy-MM-dd')}-${time}`}
-            className={`relative border border-slate-300 w-1/6 h-24 align-top p-2 group/cell ${isToday ? '' : ''}`}
+            className={`relative border w-1/6 h-24 align-top p-2 group/cell ${bgClass} ${borderClass}`}
             style={legCount > 0 ? { paddingLeft: `${9 + legCount * 15}px` } : undefined}>
-            <div className='text-xs opacity-50 mb-2'>{time}</div>
-            <div className='flex flex-col w-full h-full gap-1'>
-                {ganttEvents.map((ganttEvent, index) => (
-                    <GanttEvent key={index} ganttEvent={ganttEvent} />
-                ))}
-                {tasks.map((task, index) => (
-                    <Task key={task.id || index} task={task} />
-                ))}
-                {events.map((event, index) => {
-                    const precedingLegs = events.slice(0, index).filter(e =>
-                        e.start && e.end && times.indexOf(getEndTimeSlot(e.end)) > times.indexOf(getTimeSlot(e.start))
-                    ).length;
-                    return <Event key={index} event={event} precedingLegs={precedingLegs} />;
-                })}
+            <div className='text-xs opacity-50'>{time}</div>
 
-                <NewEventButton date={date} time={time} />
+            <div className="relative" style={{ height: 'calc(100% - 1.25rem)' }}>
+                {/* Events area: shrinks on hover to reveal "+" button */}
+                <div className='flex flex-col gap-1 h-full transition-[padding-bottom] duration-200 group-hover/cell:pb-8'>
+                    {ganttEvents.map((ganttEvent, index) => (
+                        <div key={index} className="shrink-0">
+                            <GanttEvent ganttEvent={ganttEvent} />
+                        </div>
+                    ))}
+                    {tasks.map((task, index) => (
+                        <div key={task.id || index} className="shrink-0">
+                            <Task task={task} />
+                        </div>
+                    ))}
+                    {events.map((event, index) => {
+                        const precedingLegs = events.slice(0, index).filter(e =>
+                            e.start && e.end && times.indexOf(getEndTimeSlot(e.end)) > times.indexOf(getTimeSlot(e.start))
+                        ).length;
+                        return (
+                            <div key={index} className="flex-1 min-h-0">
+                                <Event event={event} precedingLegs={precedingLegs} />
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* "+" button: absolute at bottom, visible on cell hover */}
+                <div className="absolute bottom-0 left-0 right-0 h-7 opacity-0 group-hover/cell:opacity-100 transition-opacity duration-200">
+                    <NewEventButton date={date} time={time} />
+                </div>
+
                 {show930Menu && (
-                    <Menu small className="absolute left-2 top-2 bg-white opacity-0 group-hover/cell:opacity-100 scale-80 transition-all duration-300" icon={Plus}>
+                    <Menu small className="absolute left-0 top-0 bg-white opacity-0 group-hover/cell:opacity-100 scale-80 transition-all duration-300" icon={Plus}>
                         <MenuList>
                             <MenuItem title="משימה חדשה בפרויקט" icon={ClipboardPlus} onClick={() => setIsTaskModalOpen(true)} />
                         </MenuList>
@@ -293,7 +330,7 @@ function Event({ event, precedingLegs = 0 }) {
     return (
         <>
             <div ref={thisRef} onClick={handleClick}
-                className={`relative ${colors.event} group/event cursor-pointer text-white rounded p-1 text-xs flex gap-2`}
+                className={`relative h-full ${colors.event} group/event cursor-pointer text-white rounded p-1 text-xs flex gap-2 items-start`}
                 style={precedingLegs > 0 ? { marginLeft: `${5 + precedingLegs * 10}px` } : undefined}
             >
                 {group && (
@@ -307,7 +344,7 @@ function Event({ event, precedingLegs = 0 }) {
                     {isMeeting && event.participants?.length > 0 && " עם " + event.participants.map(participant => participant.first_name).join(', ')}
                 </div>
                 {legLength && (
-                    <div className={`absolute left-0 top-[80%] rounded w-3 h-full ${colors.event} ${colors.groupHover}`} style={{ height: legLength }} />
+                    <div className={`absolute left-0 top-4 z-10 rounded w-3 ${colors.event} ${colors.groupHover}`} style={{ height: legLength }} />
                 )}
             </div>
             <Popper>
@@ -335,7 +372,7 @@ function NewEventButton({ date, time }) {
     return (
         <>
             <div
-                className="opacity-0 group-hover/cell:opacity-100 bg-green-500 rounded-full text-xs flex justify-center items-center hover:bg-green-800 text-white cursor-pointer group/add-button"
+                className="h-full w-full bg-green-500 rounded text-xs flex justify-center items-center hover:bg-green-800 text-white cursor-pointer group/add-button"
                 onClick={handleClick}
             >
                 <div className="group-hover/add-button:rotate-180 duration-300 font-bold text-md">+</div>

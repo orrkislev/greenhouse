@@ -15,7 +15,7 @@ export default function RootLayout({ children }) {
 				<SideBar />
 				<div className={`relative flex-1 flex flex-col md:flex-row justify-between md:justify-center overflow-y-auto md:overflow-y-hidden`}>
 					{children}
-					<JournalHandle />
+					{/* <JournalHandle /> */}
 					<SwitchBackPanel />
 				</div>
 			</div>
