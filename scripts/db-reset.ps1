@@ -2,14 +2,14 @@ $ErrorActionPreference = "Stop"
 $container = "supabase_db_greenhouse"
 
 Write-Host "-> Hiding seed.sql from CLI..."
-Rename-Item supabase/seed.sql supabase/seed.sql.bak
+Rename-Item supabase/seed.sql seed.sql.bak
 
 try {
     Write-Host "-> Resetting database (migrations only)..."
     npx supabase db reset
 } finally {
     Write-Host "-> Restoring seed.sql..."
-    Rename-Item supabase/seed.sql.bak supabase/seed.sql
+    Rename-Item supabase/seed.sql.bak seed.sql
 }
 
 Write-Host "-> Applying seed..."

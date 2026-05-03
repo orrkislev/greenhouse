@@ -24,36 +24,82 @@ The production app is deployed on Vercel and connects to the managed Supabase Cl
 You must have **Docker Desktop** installed and running on your system.
 - [Download Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
-### 2. Install Supabase CLI
-The Supabase CLI is used to manage the local database.
+Node.js 20+ and npm are also required.
 
-**On Windows (Powershell):**
+### 2. Install dependencies
 ```powershell
-# Using Scoop (Recommended)
-scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
-scoop install supabase
-```
-Alternatively, you can download the binary from the [Supabase CLI Releases](https://github.com/supabase/cli/releases).
-
-### 3. Starting the Project
-To start the local environment:
-```bash
-# Start Supabase services (Docker must be running)
-npx supabase start
-
-# Install dependencies
 npm install
+```
 
-# Start the Next.js dev server
+### 3. Start Supabase
+```powershell
+npx supabase start
+```
+
+This pulls and starts the local Supabase Docker containers. On first run it downloads ~1 GB of images. Subsequent starts are fast.
+
+> [!NOTE]
+> On Windows you may see a warning:
+> ```
+> WARNING: Analytics on Windows requires Docker daemon exposed on tcp://localhost:2375.
+> ```
+> This is harmless — analytics is a non-critical background service. You can ignore it.
+
+When startup completes, the CLI prints your local credentials:
+```
+╭──────────────────────────────────────────────────────────────╮
+│ 🔑 Authentication Keys                                       │
+├─────────────┬────────────────────────────────────────────────┤
+│ Publishable │ sb_publishable_XXXX...                         │
+│ Secret      │ sb_secret_XXXX...                              │
+╰─────────────┴────────────────────────────────────────────────╝
+```
+Keep this terminal output handy for the next step. You can always re-display it with `npx supabase status`.
+
+### 4. Create `.env.local`
+Copy the example file and fill in the values from the `supabase start` output above:
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+Then edit `.env.local`:
+
+| Variable | Where to find it |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | **Project URL** — always `http://127.0.0.1:54321` for local dev |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | **Publishable** key from the output |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Secret** key from the output |
+
+The Google and `GETIMG_KEY` variables are only needed for Google Calendar / Drive integration and AI image generation. You can leave them blank for basic local development.
+
+### 5. Populate the database
+Run the reset script to apply all migrations and load seed data:
+```powershell
+npm run db:reset
+```
+
+After reset, all users are available with PIN **1111**.
+
+> [!WARNING]
+> This wipes all local data. Only run this when you want a clean slate.
+
+> [!NOTE]
+> You may see a non-fatal `duplicate key` error in the output — this is a known quirk of the seed data and does not affect the result.
+
+### 6. Start the dev server
+```powershell
 npm run dev
 ```
+
+The app is now running at **http://localhost:3000**.
 
 ---
 
 ## Database Procedures
 
-### 1. Resetting the Local Database
-If you want to wipe the local database and re-apply all migrations, seed data, and local auth users:
+### Resetting the Local Database
+To wipe the local database and re-apply all migrations, seed data, and local auth users:
 ```powershell
 npm run db:reset
 ```
@@ -65,7 +111,7 @@ npm run db:reset
 >
 > After reset, all users are available with PIN **1111**.
 
-### 2. Exporting Seed Data
+### Exporting Seed Data
 Use this command to export your current local public data to `seed.sql`. Writing inside the container first avoids Windows encoding issues:
 
 ```powershell

@@ -5,8 +5,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-# Start local Supabase (Docker must be running) + dev server
-npx supabase start
+# First-time setup: install deps, start Supabase, create .env.local (see README), populate DB
+npm install
+npx supabase start        # prints Publishable + Secret keys → copy into .env.local
+npm run db:reset          # applies migrations + seed; users login with PIN 1111
 npm run dev
 
 # Build & lint
