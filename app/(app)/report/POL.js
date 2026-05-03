@@ -19,6 +19,7 @@ const CATEGORIES = [
 
 export default function POLEvaluation({ pol, year, onSave }) {
     const originalUser = useUser(state => state.originalUser)
+    const user = useUser(state => state.user)
     const canEdit = ALLOW_STUDENT_EDIT || !!originalUser
     const isStaffMode = !!originalUser
 
@@ -131,7 +132,12 @@ export default function POLEvaluation({ pol, year, onSave }) {
                             <div className='text-xs font-semibold text-gray-400 uppercase tracking-wide'>הערכה</div>
                             {CATEGORIES.map(({ key, label }) => (
                                 <div key={key}>
-                                    <div className='text-sm font-medium text-gray-600 mb-1'>{label}</div>
+                                    <div className='text-sm font-medium text-gray-600 mb-1 flex items-center gap-2'>
+                                        {label}
+                                        {key === 'portfolio' && !user?.portfolio_url && (
+                                            <span className='text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-300'>חסר</span>
+                                        )}
+                                    </div>
                                     <GooeySlider
                                         min={25}
                                         max={100}
