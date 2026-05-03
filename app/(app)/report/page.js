@@ -14,6 +14,7 @@ import Term from "./Term";
 import FinalProject from "./FinalProject";
 import PersonalGoals from "./PersonalGoals";
 import Portfolio from "./Portfolio";
+import POL from "./POL";
 import { useUserGroups } from "@/utils/store/useGroups";
 import { getReportSemester, formatSemesterLabel } from "@/utils/store/useTime";
 import { isAdmin } from "@/utils/store/useUser";
@@ -196,7 +197,7 @@ export default function ReportPage() {
                     )}
                 </DashboardPanel>
                 <DashboardMain>
-                    <div className="gap-3 flex flex-col px-16 py-8">
+                    <div className="gap-3 flex flex-col px-16 py-8 mb-32">
                         {view === 'ikigai' && <Ikigai ikigai={data?.ikigai} semester={selectedSemester} onSave={val => handleSave('ikigai', val)} />}
                         {view === 'liba' && <Liba liba={data?.liba} onSave={val => handleSave('liba', val)} />}
                         {view === 'autumn' && <Term project={data?.autumn_project} research={data?.autumn_research} term='סתו' />}
@@ -209,6 +210,7 @@ export default function ReportPage() {
                         {view === 'finalProject_B' && <FinalProject finalProject={data?.special} onSave={val => handleSave('special', val)} />}
                         {view === 'personalGoals' && <PersonalGoals personalGoals={data?.special} onSave={val => handleSave('special', val)} />}
                         {view === 'portfolio' && <Portfolio portfolio={data?.portfolio_url} />}
+                        {view === 'POL' && <POL pol={data?.pol} year={year} onSave={val => handleSave('pol', val)} />}
                     </div>
                 </DashboardMain>
             </DashboardLayout>

@@ -6,24 +6,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Start local Supabase (Docker must be running) + dev server
-supabase start
+npx supabase start
 npm run dev
 
 # Build & lint
 npm run build
 npm run lint
 
-# Database: reset local DB (wipes all local data, re-applies migrations + seed)
-supabase db reset
+# Database: reset local DB (wipes all local data, re-applies migrations + seed + auth users)
+npm run db:reset
 
 # Database: capture a schema change as a migration after editing via Supabase Studio
-supabase db diff -f <migration_name>
+npx supabase db diff -f <migration_name>
 
 # Database: push migrations to production
-supabase db push
+npx supabase db push
 
-# Seed export (if supabase db dump fails on Windows/Docker)
-docker exec -t supabase_db_greenhouse pg_dump --data-only --username postgres --schema public > supabase/seed.sql
+# Seed export — write inside container first to avoid host encoding issues, then copy out
+docker exec supabase_db_greenhouse pg_dump --data-only --username postgres --schema public -f /tmp/seed_new.sql
+docker cp supabase_db_greenhouse:/tmp/seed_new.sql supabase/seed.sql
 ```
 
 There are no test files or test runner configured in this project.

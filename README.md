@@ -39,7 +39,7 @@ Alternatively, you can download the binary from the [Supabase CLI Releases](http
 To start the local environment:
 ```bash
 # Start Supabase services (Docker must be running)
-supabase start
+npx supabase start
 
 # Install dependencies
 npm install
@@ -53,22 +53,28 @@ npm run dev
 ## Database Procedures
 
 ### 1. Resetting the Local Database
-If you want to wipe the local database and re-apply all migrations and seed data:
-```bash
-supabase db reset
+If you want to wipe the local database and re-apply all migrations, seed data, and local auth users:
+```powershell
+npm run db:reset
 ```
 > [!WARNING]
 > This command will delete all data in your local database. Ensure you have exported anything important first!
 
-### 2. Exporting Test Data (Seeding)
-If `supabase db dump` fails (common on some Windows/Docker setups), use this direct Docker command to export your current public data to the seed file:
+> [!NOTE]
+> The Supabase CLI crashes when processing `seed.sql` directly on this setup (SQLSTATE 08P01). The `db:reset` script handles the workaround automatically — do not run `npx supabase db reset` directly.
+>
+> After reset, all users are available with PIN **1111**.
 
-```bash
-# Export local 'public' schema data directly from the container
-docker exec -t supabase_db_greenhouse pg_dump --data-only --username postgres --schema public > supabase/seed.sql
+### 2. Exporting Seed Data
+Use this command to export your current local public data to `seed.sql`. Writing inside the container first avoids Windows encoding issues:
+
+```powershell
+docker exec supabase_db_greenhouse pg_dump --data-only --username postgres --schema public -f /tmp/seed_new.sql
+docker cp supabase_db_greenhouse:/tmp/seed_new.sql supabase/seed.sql
 ```
 
-After running this, the next time you run `supabase db reset`, it will automatically re-populate the database using this data.
+> [!WARNING]
+> Never use PowerShell's `>` redirect operator or `Set-Content`/`Out-File` to write `seed.sql` — they corrupt the Hebrew text with wrong encoding. Always write via Docker as shown above.
 
 ---
 
@@ -83,14 +89,14 @@ Use the local Supabase Studio (`http://localhost:54323`) to make your changes vi
 Once your local DB is correct, generate a migration file that captures the difference:
 ```bash
 # This creates a new .sql file in supabase/migrations/
-supabase db diff -f rename_this_to_your_feature_name
+npx supabase db diff -f rename_this_to_your_feature_name
 ```
 
 ### 3. Deploy the changes
 1.  **Push Code**: Commit the new migration file and push to GitHub. This updates your **Code** on Vercel.
 2.  **Push Database**: Run the following to update your **Production Database**:
     ```bash
-    supabase db push
+    npx supabase db push
     ```
 > [!IMPORTANT]
 > Always push your database migrations *before* or *simultaneously* with your code push to avoid "column not found" errors in the live app!

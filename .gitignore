@@ -43,3 +43,6 @@ next-env.d.ts
 
 /.vscode
 __Local*
+
+# Local supabase
+supabase/config.toml

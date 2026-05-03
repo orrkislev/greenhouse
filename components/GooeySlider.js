@@ -86,11 +86,11 @@ const GooeySlider = ({
   return (
     <div className="w-full flex items-start justify-center gap-4 select-none relative font-sans">
       {/* Left Label */}
-      <div className={`flex-1 text-slate-600 font-medium text-sm tracking-wide min-w-[2rem] text-left ${midValues.length > 0 ? '' : 'mt-2'}`}>
+      <div className="flex-1 text-slate-600 font-medium text-sm tracking-wide min-w-[2rem] text-left mt-[18px]">
         {labelLeft}
       </div>
 
-      <div className="flex-1 flex h-12 flex-col justify-center mx-2">
+      <div className="flex-1 flex flex-col mx-2">
         {/* Slider Container */}
         <div
           ref={containerRef}
@@ -163,6 +163,24 @@ const GooeySlider = ({
               fill="white"
               style={{ pointerEvents: 'none' }}
             />
+
+            {/* Tick marks at mid-value positions */}
+            {midValues.map((_, i) => {
+              const tickX = 100 - ((i + 1) / (midValues.length + 1)) * 100;
+              return (
+                <line
+                  key={i}
+                  x1={`${tickX}%`}
+                  x2={`${tickX}%`}
+                  y1={`calc(50% + ${(trackHeight + 4) / 2 + 2}px)`}
+                  y2={`calc(50% + ${(trackHeight + 4) / 2 + 9}px)`}
+                  stroke={color}
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  opacity="0.45"
+                />
+              );
+            })}
           </svg>
 
           {/* Invisible Range Input for Interaction */}
@@ -173,17 +191,26 @@ const GooeySlider = ({
           />
         </div>
 
-        <div className="flex items-center justify-between gap-2 w-full mt-4">
-          {midValues.map((value, index) => (
-            <span key={index} className="text-slate-400 font-medium text-xs tracking-wide min-w-[2rem]">
-              {value}
-            </span>
-          ))}
-        </div>
+        {midValues.length > 0 && (
+          <div className="relative w-full mt-1 mb-4 h-4">
+            {midValues.map((label, i) => {
+              const pct = 100 - ((i + 1) / (midValues.length + 1)) * 100;
+              return (
+                <span
+                  key={i}
+                  className="absolute text-slate-400 font-medium text-xs tracking-wide whitespace-nowrap"
+                  style={{ left: `${pct}%`, transform: 'translateX(-50%)' }}
+                >
+                  {label}
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Right Label */}
-      <div className={`flex-1 text-slate-600 font-medium text-sm tracking-wide min-w-[2rem] text-right ${midValues.length > 0 ? '' : 'mt-2'}`}>
+      <div className="flex-1 text-slate-600 font-medium text-sm tracking-wide min-w-[2rem] text-right mt-[18px]">
         {labelRight}
       </div>
 
