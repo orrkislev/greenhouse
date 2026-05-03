@@ -119,7 +119,7 @@ export default function POLEvaluation({ pol, year, onSave }) {
                                 <div key={key}>
                                     <div className='text-sm font-medium text-gray-600 mb-1'>{label}</div>
                                     <GooeySlider
-                                        min={0}
+                                        min={25}
                                         max={100}
                                         value={rankings[key]}
                                         onChange={val => setRanking(key, val)}
