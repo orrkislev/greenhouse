@@ -2,10 +2,11 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { BookOpen, Brain, Circle, CircleOff, ChevronDown, ChevronUp, Heart, Lightbulb, Microscope, Pencil, Presentation, Target, TrendingUp, Zap, Hammer, ChartLine, Compass, Wrench, Briefcase, Globe, ArrowRight } from "lucide-react";
-import Button, { IconButton } from "@/components/Button";
+import { IconButton } from "@/components/Button";
 import GooeySlider from "@/components/GooeySlider";
 import SmartText from "@/components/SmartText";
-import { motion, AnimatePresence } from "motion/react";
+import AutoSaveIndicator from './components/AutoSaveIndicator';
+import { useSaveOnUnmount } from '@/utils/useSaveOnUnmount';
 import RadarChart from "@/components/RadarChart";
 import { useUser } from "@/utils/store/useUser";
 import Box2 from "@/components/Box2";
@@ -256,10 +257,16 @@ export default function FinalProject({ finalProject, onSave }) {
     setMadeChanges(true);
   };
 
-  const handleSave = () => {
-    onSave(formData);
-    setMadeChanges(false);
-  };
+  useEffect(() => {
+    if (!madeChanges) return;
+    const timer = setTimeout(() => {
+      onSave(formData);
+      setMadeChanges(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [madeChanges, formData]);
+
+  useSaveOnUnmount(() => madeChanges, () => formData, onSave);
 
   const handleRadarChange = (radarData) => {
     setFormData(prev => ({ ...prev, radar: radarData }));
@@ -394,35 +401,7 @@ export default function FinalProject({ finalProject, onSave }) {
         </div>
       </div>
 
-      <AnimatePresence>
-        {canEdit && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{
-              opacity: madeChanges ? 1 : 0.5,
-              y: madeChanges ? 0 : -10,
-              scale: madeChanges ? 1 : 0.95
-            }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 20,
-              duration: 0.3
-            }}
-            className="mt-4 flex justify-center"
-          >
-            <Button
-              data-role="save"
-              onClick={handleSave}
-              disabled={!madeChanges}
-              className={madeChanges ? "shadow-lg" : ""}
-            >
-              שמירה
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <AutoSaveIndicator isDirty={madeChanges} canEdit={canEdit} />
     </>
   );
 }

@@ -96,9 +96,9 @@ export default function ReportPage() {
         })();
     }, [userId, selectedSemester]);
 
-    const handleSave = async (key, newValue) => {
+    const handleSave = async (key, newValue, { silent = false } = {}) => {
         if (!userId || !selectedSemester) {
-            toastsActions.addToast({ message: 'אנא המתן לטעינת ההערכה', type: 'error' });
+            if (!silent) toastsActions.addToast({ message: 'אנא המתן לטעינת ההערכה', type: 'error' });
             return;
         }
 
@@ -107,11 +107,11 @@ export default function ReportPage() {
             .upsert({ id: userId, report_semester: selectedSemester, [key]: newValue });
 
         if (error) {
-            toastsActions.addFromError(error, 'שגיאה בשמירת ההערכה');
+            if (!silent) toastsActions.addFromError(error, 'שגיאה בשמירת ההערכה');
             return;
         }
 
-        toastsActions.addToast({ message: 'נשמר בהצלחה!', type: 'success' });
+        if (!silent) toastsActions.addToast({ message: 'נשמר בהצלחה!', type: 'success' });
 
         if (userId !== userIdRef.current) return;
         setData(prev => ({ ...prev, [key]: newValue }));
@@ -198,19 +198,19 @@ export default function ReportPage() {
                 </DashboardPanel>
                 <DashboardMain>
                     <div className="gap-3 flex flex-col px-16 py-8 mb-32">
-                        {view === 'ikigai' && <Ikigai ikigai={data?.ikigai} semester={selectedSemester} onSave={val => handleSave('ikigai', val)} />}
-                        {view === 'liba' && <Liba liba={data?.liba} onSave={val => handleSave('liba', val)} />}
+                        {view === 'ikigai' && <Ikigai ikigai={data?.ikigai} semester={selectedSemester} onSave={val => handleSave('ikigai', val, { silent: true })} />}
+                        {view === 'liba' && <Liba liba={data?.liba} onSave={val => handleSave('liba', val, { silent: true })} />}
                         {view === 'autumn' && <Term project={data?.autumn_project} research={data?.autumn_research} term='סתו' />}
                         {view === 'winter' && <Term project={data?.winter_project} research={data?.winter_research} term='חורף' />}
                         {view === 'spring' && <Term project={data?.spring_project} research={data?.spring_research} term='אביב' />}
                         {view === 'summer' && <Term project={data?.summer_project} research={data?.summer_research} term='קיץ' />}
-                        {view === 'learning' && <Learning learning={data?.learning} onSave={val => handleSave('learning', val)} />}
-                        {view === 'vocation' && <Vocation vocation={data?.vocation} onSave={val => handleSave('vocation', val)} />}
-                        {view === 'finalProject' && <FinalProject finalProject={data?.special} onSave={val => handleSave('special', val)} />}
-                        {view === 'finalProject_B' && <FinalProject finalProject={data?.special} onSave={val => handleSave('special', val)} />}
-                        {view === 'personalGoals' && <PersonalGoals personalGoals={data?.special} onSave={val => handleSave('special', val)} />}
+                        {view === 'learning' && <Learning learning={data?.learning} onSave={val => handleSave('learning', val, { silent: true })} />}
+                        {view === 'vocation' && <Vocation vocation={data?.vocation} onSave={val => handleSave('vocation', val, { silent: true })} />}
+                        {view === 'finalProject' && <FinalProject finalProject={data?.special} onSave={val => handleSave('special', val, { silent: true })} />}
+                        {view === 'finalProject_B' && <FinalProject finalProject={data?.special} onSave={val => handleSave('special', val, { silent: true })} />}
+                        {view === 'personalGoals' && <PersonalGoals personalGoals={data?.special} onSave={val => handleSave('special', val, { silent: true })} />}
                         {view === 'portfolio' && <Portfolio portfolio={data?.portfolio_url} />}
-                        {view === 'POL' && <POL pol={data?.pol} year={year} onSave={val => handleSave('pol', val)} />}
+                        {view === 'POL' && <POL pol={data?.pol} year={year} onSave={val => handleSave('pol', val, { silent: true })} />}
                     </div>
                 </DashboardMain>
             </DashboardLayout>

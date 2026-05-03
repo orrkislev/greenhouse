@@ -1,20 +1,23 @@
 'use client'
-import Button, { IconButton } from '@/components/Button'
+import { IconButton } from '@/components/Button'
 import { supabase } from '@/utils/supabase/client'
-import { Coins, Earth, Heart, Save, Star, X } from 'lucide-react'
+import { Coins, Earth, Heart, Star, X } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useUser } from '@/utils/store/useUser'
-import { toastsActions } from '@/utils/store/useToasts'
 import { formatSemesterLabel } from '@/utils/store/useTime'
+import AutoSaveIndicator from './components/AutoSaveIndicator'
+import { useSaveOnUnmount } from '@/utils/useSaveOnUnmount'
 
 export default function Ikigai({ ikigai, semester, onSave }) {
     const originalUser = useUser(state => state.originalUser)
     const [markers, setMarkers] = useState(ikigai?.markers || [])
     const [editingId, setEditingId] = useState(null)
+    const [madeChanges, setMadeChanges] = useState(false)
     const containerRef = useRef(null)
 
     useEffect(() => {
         setMarkers(ikigai?.markers || [])
+        setMadeChanges(false)
     }, [ikigai])
 
     const handleAddMarker = (e) => {
@@ -33,6 +36,7 @@ export default function Ikigai({ ikigai, semester, onSave }) {
 
         const newMarkers = [...markers, newMarker]
         setMarkers(newMarkers)
+        setMadeChanges(true)
         setEditingId(newMarker.id)
     }
 
@@ -45,26 +49,36 @@ export default function Ikigai({ ikigai, semester, onSave }) {
             m.id === id ? { ...m, x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) } : m
         )
         setMarkers(newMarkers)
+        setMadeChanges(true)
     }
 
     const handleLabelChange = (id, label) => {
         const newMarkers = markers.map(m => m.id === id ? { ...m, label } : m)
         setMarkers(newMarkers)
+        setMadeChanges(true)
     }
 
     const handleDeleteMarker = (id) => {
         const newMarkers = markers.filter(m => m.id !== id)
         setMarkers(newMarkers)
+        setMadeChanges(true)
     }
 
-    const handleSave = async () => {
-        if (originalUser) onSave?.({ markers })
-        else {
-            const { error } = await supabase.rpc('update_student_ikigai', { new_ikigai: { markers } })
-            if (error) toastsActions.addFromError(error, 'שגיאה בשמירת איקיגאי')
-        }
-        setEditingId(null)
-    }
+    const autoSave = (data) => {
+        if (originalUser) onSave?.({ markers: data.markers });
+        else supabase.rpc('update_student_ikigai', { new_ikigai: data });
+    };
+
+    useEffect(() => {
+        if (!madeChanges) return;
+        const timer = setTimeout(() => {
+            autoSave({ markers });
+            setMadeChanges(false);
+        }, 800);
+        return () => clearTimeout(timer);
+    }, [madeChanges, markers]);
+
+    useSaveOnUnmount(() => madeChanges, () => ({ markers }), autoSave);
 
     return (
         <div className="w-full h-full flex flex-col items-center justify-start relative">
@@ -173,10 +187,7 @@ export default function Ikigai({ ikigai, semester, onSave }) {
                 <p>גרור סמנים כדי לשנות את מיקומם • לחץ על הטקסט כדי לערוך • מעבר עם העכבר כדי למחוק</p>
             </div>
 
-            <Button data-role="save" onClick={handleSave}>
-                <Save className="w-4 h-4" />
-                שמור
-            </Button>
+            <AutoSaveIndicator isDirty={madeChanges} canEdit={true} />
         </div>
     )
 }

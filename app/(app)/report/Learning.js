@@ -3,8 +3,8 @@ import { useState, useEffect } from 'react'
 import { useUser } from '@/utils/store/useUser'
 import { useUserGroups } from '@/utils/store/useGroups'
 import { supabase } from '@/utils/supabase/client'
-import Button from '@/components/Button'
-import { motion, AnimatePresence } from 'motion/react'
+import AutoSaveIndicator from './components/AutoSaveIndicator'
+import { useSaveOnUnmount } from '@/utils/useSaveOnUnmount'
 import { ALLOW_STUDENT_EDIT } from './page'
 import TopicBankModal from './TopicBankModal'
 import TopicTable from './learning/TopicTable'
@@ -135,13 +135,20 @@ export default function Learning({ learning, onSave }) {
     const hasUniqueHeutagogySkills = new Set(heutagogyNames).size === heutagogyNames.length;
     const canSave = madeChanges  && hasUniqueHeutagogySkills;
 
-    const handleSave = () => {
-        if (!hasUniqueHeutagogySkills) {
-            return;
-        }
-        onSave({ professionalTopics, generalTopics, heutagogySkills });
-        setMadeChanges(false);
-    };
+    useEffect(() => {
+        if (!canSave) return;
+        const timer = setTimeout(() => {
+            onSave({ professionalTopics, generalTopics, heutagogySkills });
+            setMadeChanges(false);
+        }, 800);
+        return () => clearTimeout(timer);
+    }, [canSave, professionalTopics, generalTopics, heutagogySkills]);
+
+    useSaveOnUnmount(
+        () => madeChanges && hasUniqueHeutagogySkills,
+        () => ({ professionalTopics, generalTopics, heutagogySkills }),
+        onSave
+    );
 
     return (
         <>
@@ -189,30 +196,7 @@ export default function Learning({ learning, onSave }) {
                 </div>
             </div>
 
-            <AnimatePresence>
-                {canEdit && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{
-                            opacity: madeChanges ? 1 : 0.5,
-                            y: madeChanges ? 0 : -10,
-                            scale: madeChanges ? 1 : 0.95,
-                        }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                        className="mt-4 flex justify-center"
-                    >
-                        <Button
-                            data-role="save"
-                            onClick={handleSave}
-                            disabled={!canSave}
-                            className={canSave ? 'shadow-lg' : ''}
-                        >
-                            שמירה
-                        </Button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            <AutoSaveIndicator isDirty={canSave} canEdit={canEdit} />
 
             {canEdit && !hasAllHeutagogySkills && (
                 <div className="mt-2 text-center text-xs text-stone-500">

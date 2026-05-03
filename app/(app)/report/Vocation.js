@@ -1,10 +1,10 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
 import { useUser } from '@/utils/store/useUser'
-import Button from '@/components/Button'
 import SmartText from '@/components/SmartText'
-import { motion, AnimatePresence } from 'motion/react'
 import { ALLOW_STUDENT_EDIT } from './page';
+import AutoSaveIndicator from './components/AutoSaveIndicator'
+import { useSaveOnUnmount } from '@/utils/useSaveOnUnmount'
 
 export default function Vocation({ vocation, onSave }) {
     const originalUser = useUser(state => state.originalUser);
@@ -28,6 +28,20 @@ export default function Vocation({ vocation, onSave }) {
     }, [employmentQuestion, employmentAnswer, volunteeringQuestion, volunteeringAnswer, jobTitle, hours, vocation?.employmentQuestion, vocation?.employmentAnswer, vocation?.volunteeringQuestion, vocation?.volunteeringAnswer, vocation?.jobTitle, vocation?.hours]);
 
     const canEdit = ALLOW_STUDENT_EDIT || !!originalUser;
+
+    useEffect(() => {
+        if (!shouldSave) return;
+        const timer = setTimeout(() => {
+            onSave({ employmentQuestion, employmentAnswer, volunteeringQuestion, volunteeringAnswer, jobTitle, hours });
+        }, 800);
+        return () => clearTimeout(timer);
+    }, [shouldSave, employmentQuestion, employmentAnswer, volunteeringQuestion, volunteeringAnswer, jobTitle, hours]);
+
+    useSaveOnUnmount(
+        () => shouldSave,
+        () => ({ employmentQuestion, employmentAnswer, volunteeringQuestion, volunteeringAnswer, jobTitle, hours }),
+        onSave
+    );
 
     return (
         <>
@@ -98,35 +112,7 @@ export default function Vocation({ vocation, onSave }) {
                 </div>
             </div>
 
-            <AnimatePresence>
-                {canEdit && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{
-                            opacity: shouldSave ? 1 : 0.5,
-                            y: shouldSave ? 0 : -10,
-                            scale: shouldSave ? 1 : 0.95
-                        }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 20,
-                            duration: 0.3
-                        }}
-                        className="mt-4 flex justify-center"
-                    >
-                        <Button
-                            data-role="save"
-                            onClick={() => onSave({ employmentQuestion, employmentAnswer, volunteeringQuestion, volunteeringAnswer, jobTitle, hours })}
-                            disabled={!shouldSave}
-                            className={shouldSave ? "shadow-lg" : ""}
-                        >
-                            שמירה
-                        </Button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            <AutoSaveIndicator isDirty={shouldSave} canEdit={canEdit} />
         </>
     )
 }

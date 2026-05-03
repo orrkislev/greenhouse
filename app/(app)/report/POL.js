@@ -1,11 +1,11 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
 import { useUser } from '@/utils/store/useUser'
-import Button from '@/components/Button'
 import SmartText from '@/components/SmartText'
+import AutoSaveIndicator from './components/AutoSaveIndicator'
+import { useSaveOnUnmount } from '@/utils/useSaveOnUnmount'
 import GooeySlider from '@/components/GooeySlider'
 import RadarChart from '@/components/RadarChart'
-import { motion, AnimatePresence } from 'motion/react'
 import { ALLOW_STUDENT_EDIT } from './page'
 
 const DEFAULT_RANKINGS = { content: 0, presentation: 0, portfolio: 0, planning: 0 }
@@ -46,6 +46,20 @@ export default function POLEvaluation({ pol, year, onSave }) {
             CATEGORIES.some(({ key }) => rankings[key] !== ({ ...DEFAULT_RANKINGS, ...pol?.rankings })[key])
         )
     }, [studentSummary, studentQuote, mentorSummary, rankings, futurePlan, pol])
+
+    useEffect(() => {
+        if (!shouldSave) return;
+        const timer = setTimeout(() => {
+            onSave({ studentSummary, studentQuote, mentorSummary, rankings, futurePlan });
+        }, 800);
+        return () => clearTimeout(timer);
+    }, [shouldSave, studentSummary, studentQuote, mentorSummary, rankings, futurePlan]);
+
+    useSaveOnUnmount(
+        () => shouldSave,
+        () => ({ studentSummary, studentQuote, mentorSummary, rankings, futurePlan }),
+        onSave
+    );
 
     const setRanking = (key, value) => setRankings(prev => ({ ...prev, [key]: value }))
 
@@ -139,30 +153,7 @@ export default function POLEvaluation({ pol, year, onSave }) {
                 </div>
             </div>
 
-            <AnimatePresence>
-                {canEdit && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{
-                            opacity: shouldSave ? 1 : 0.5,
-                            y: shouldSave ? 0 : -10,
-                            scale: shouldSave ? 1 : 0.95
-                        }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 20, duration: 0.3 }}
-                        className='mt-4 flex justify-center'
-                    >
-                        <Button
-                            data-role='save'
-                            onClick={() => onSave({ studentSummary, studentQuote, mentorSummary, rankings, futurePlan })}
-                            disabled={!shouldSave}
-                            className={shouldSave ? 'shadow-lg' : ''}
-                        >
-                            שמירה
-                        </Button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            <AutoSaveIndicator isDirty={shouldSave} canEdit={canEdit} />
         </>
     )
 }

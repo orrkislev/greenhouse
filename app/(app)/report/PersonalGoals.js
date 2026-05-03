@@ -1,8 +1,9 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
 import { useUser } from '@/utils/store/useUser'
-import Button from '@/components/Button'
 import Box2 from '@/components/Box2'
+import AutoSaveIndicator from './components/AutoSaveIndicator'
+import { useSaveOnUnmount } from '@/utils/useSaveOnUnmount'
 import { Target } from 'lucide-react'
 import RadarChart from '@/components/RadarChart'
 import { ALLOW_STUDENT_EDIT } from './page';
@@ -67,6 +68,20 @@ export default function PersonalGoals({ personalGoals, onSave }) {
     }, [initialGoals, updatedGoals, mode, question, answer, radarData, summary, personalGoals]);
 
     const canEdit = ALLOW_STUDENT_EDIT || !!originalUser;
+
+    useEffect(() => {
+        if (!shouldSave) return;
+        const timer = setTimeout(() => {
+            onSave({ initialGoals, updatedGoals, mode, question, answer, radarData, summary });
+        }, 800);
+        return () => clearTimeout(timer);
+    }, [shouldSave, initialGoals, updatedGoals, mode, question, answer, radarData, summary]);
+
+    useSaveOnUnmount(
+        () => shouldSave,
+        () => ({ initialGoals, updatedGoals, mode, question, answer, radarData, summary }),
+        onSave
+    );
 
     return (
         <>
@@ -162,14 +177,7 @@ export default function PersonalGoals({ personalGoals, onSave }) {
                         </div>
                     </div>
 
-                    {canEdit && (<Button
-                        data-role="save"
-                        onClick={() => onSave({ initialGoals, updatedGoals, mode, question, answer, radarData, summary })}
-                        disabled={!shouldSave}
-                        className="mt-3"
-                    >
-                        שמירה
-                    </Button>)}
+                    <AutoSaveIndicator isDirty={shouldSave} canEdit={canEdit} />
                 </Box2>
             )}
 

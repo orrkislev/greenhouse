@@ -1,10 +1,11 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
 import { useUser } from '@/utils/store/useUser'
-import Button from '@/components/Button'
 import Box2 from '@/components/Box2'
 import { Briefcase } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
+import AutoSaveIndicator from './components/AutoSaveIndicator'
+import { useSaveOnUnmount } from '@/utils/useSaveOnUnmount'
 
 export default function Portfolio({ portfolio }) {
     const user = useUser(state => state.user)
@@ -22,9 +23,16 @@ export default function Portfolio({ portfolio }) {
         return portfolioUrl !== savedUrl
     }, [portfolioUrl, savedUrl])
 
-    const handleSave = async () => {
-        await updatePortfolioUrl(portfolioUrl)
-    }
+    useEffect(() => {
+        if (!shouldSave) return;
+        const timer = setTimeout(() => {
+            updatePortfolioUrl(portfolioUrl);
+            setSavedUrl(portfolioUrl);
+        }, 800);
+        return () => clearTimeout(timer);
+    }, [shouldSave, portfolioUrl]);
+
+    useSaveOnUnmount(() => shouldSave, () => portfolioUrl, updatePortfolioUrl);
 
     return (
         <Box2 label="פורטפוליו" LabelIcon={Briefcase}>
@@ -47,14 +55,7 @@ export default function Portfolio({ portfolio }) {
                 )}
             </div>
 
-            <Button
-                data-role="save"
-                onClick={handleSave}
-                disabled={!shouldSave}
-                className="mt-3"
-            >
-                שמור
-            </Button>
+            <AutoSaveIndicator isDirty={shouldSave} canEdit={true} />
         </Box2>
     )
 }
