@@ -38,7 +38,6 @@ export default function POLEvaluation({ pol, year, onSave }) {
     }, [pol])
 
     const shouldSave = useMemo(() => {
-        if (!studentSummary.trim() && !studentQuote.trim() && !mentorSummary.trim()) return false
         return (
             studentSummary.trim() !== (pol?.studentSummary || '').trim() ||
             studentQuote.trim() !== (pol?.studentQuote || '').trim() ||
@@ -52,7 +51,7 @@ export default function POLEvaluation({ pol, year, onSave }) {
         if (!shouldSave) return;
         const timer = setTimeout(() => {
             onSave({ studentSummary, studentQuote, mentorSummary, rankings, futurePlan });
-        }, 800);
+        }, 5000);
         return () => clearTimeout(timer);
     }, [shouldSave, studentSummary, studentQuote, mentorSummary, rankings, futurePlan]);
 

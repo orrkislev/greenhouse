@@ -20,7 +20,6 @@ export default function Liba({ liba, onSave }) {
     }, [liba]);
 
     const shouldSave = useMemo(() => {
-        if (question.trim() === '' && answer.trim() === '') return false;
         return question.trim() !== liba?.question?.trim() || answer.trim() !== liba?.answer?.trim() || nextStep.trim() !== liba?.nextStep?.trim();
     }, [question, answer, nextStep, liba?.question, liba?.answer, liba?.nextStep]);
 
@@ -28,7 +27,7 @@ export default function Liba({ liba, onSave }) {
 
     useEffect(() => {
         if (!shouldSave) return;
-        const timer = setTimeout(() => onSave({ question, answer, nextStep }), 800);
+        const timer = setTimeout(() => onSave({ question, answer, nextStep }), 5000);
         return () => clearTimeout(timer);
     }, [shouldSave, question, answer, nextStep]);
 
