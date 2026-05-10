@@ -4,16 +4,21 @@ import usePopper from '@/components/Popper'
 import { RATING_LABELS } from './data'
 import RatingBars from './RatingBars'
 
-export default function RatingCell({ rating, canEdit, onRatingChange }) {
+export default function RatingCell({ rating, canEdit, onRatingChange, evaluatorName, onNameChange }) {
     const popper = usePopper({ onOpen: () => {}, onClose: () => {} });
+    const isStaff = !!onNameChange;
+
+    if (isStaff && !canEdit && !rating) {
+        return <span className="text-gray-300">—</span>;
+    }
 
     return (
-        <div className="flex items-center justify-center">
+        <div className={isStaff ? "flex flex-col items-center gap-1" : "flex items-center justify-center"}>
             <div>
                 <button
                     ref={popper.baseRef}
                     onClick={() => canEdit && popper.open()}
-                    className="flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity"
+                    className={`flex items-center gap-2 transition-opacity ${canEdit ? 'cursor-pointer hover:opacity-70' : 'cursor-default'}`}
                     title={rating ? RATING_LABELS[rating - 1] : 'לא הוגדר'}
                 >
                     <RatingBars rating={rating} />
@@ -40,6 +45,18 @@ export default function RatingCell({ rating, canEdit, onRatingChange }) {
                     </>
                 </popper.Popper>
             </div>
+            {isStaff && canEdit && (popper.isOpen || evaluatorName) && (
+                <input
+                    type="text"
+                    value={evaluatorName || ''}
+                    onChange={(e) => onNameChange(e.target.value)}
+                    placeholder="שם המעריך"
+                    className="text-xs text-center border-b border-dashed border-gray-300 outline-none w-full max-w-[80px] bg-transparent placeholder:text-gray-300"
+                />
+            )}
+            {isStaff && !canEdit && evaluatorName && (
+                <span className="text-xs text-gray-400">{evaluatorName}</span>
+            )}
         </div>
     );
 }

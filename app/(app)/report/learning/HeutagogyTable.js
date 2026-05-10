@@ -5,8 +5,8 @@ import { Library, X } from 'lucide-react'
 import Button from '@/components/Button'
 import SmartText from '@/components/SmartText'
 import RatingCell from './RatingCell'
-import StaffRatingCell from './StaffRatingCell'
 import ConfirmDialog from '@/components/ConfirmDialog'
+import { useUser } from '@/utils/store/useUser'
 
 export default function HeutagogyTable({
     title,
@@ -18,6 +18,8 @@ export default function HeutagogyTable({
     onClear,
 }) {
     const [confirmIndex, setConfirmIndex] = useState(null);
+    const originalUser = useUser(state => state.originalUser);
+    const staffName = originalUser ? `${originalUser.user.first_name} ${originalUser.user.last_name}` : '';
 
     return (
         <div className="mb-6">
@@ -33,7 +35,9 @@ export default function HeutagogyTable({
                     </tr>
                 </thead>
                 <tbody>
-                    {skills.map((skill, index) => (
+                    {skills.map((skill, index) => {
+                        const clearBlocked = !isStaffMode && !!skill.staffRating;
+                        return (
                         <tr key={index} className="border-b border-dashed border-gray-200 group">
                             <td className="py-2 pr-1 align-top">
                                 {canEdit ? (
@@ -64,11 +68,15 @@ export default function HeutagogyTable({
                                 />
                             </td>
                             <td className="py-2 px-1 align-top text-center">
-                                <StaffRatingCell
-                                    staffRating={skill.staffRating}
-                                    staffEvaluatorName={skill.staffEvaluatorName}
-                                    isStaffMode={isStaffMode}
-                                    onRatingChange={(v) => onUpdate(index, 'staffRating', v)}
+                                <RatingCell
+                                    rating={skill.staffRating}
+                                    canEdit={isStaffMode}
+                                    onRatingChange={(v) => {
+                                        onUpdate(index, 'staffRating', v);
+                                        if (v === null) onUpdate(index, 'staffEvaluatorName', '');
+                                        else if (!skill.staffEvaluatorName) onUpdate(index, 'staffEvaluatorName', staffName);
+                                    }}
+                                    evaluatorName={skill.staffEvaluatorName}
                                     onNameChange={(v) => onUpdate(index, 'staffEvaluatorName', v)}
                                 />
                             </td>
@@ -76,9 +84,10 @@ export default function HeutagogyTable({
                                 <td className="py-2 align-top text-center">
                                     {skill.name && (
                                         <button
-                                            onClick={() => setConfirmIndex(index)}
-                                            className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all p-0.5"
-                                            title="נקה שורה"
+                                            onClick={() => !clearBlocked && setConfirmIndex(index)}
+                                            disabled={clearBlocked}
+                                            className={`opacity-0 group-hover:opacity-100 transition-all p-0.5 ${clearBlocked ? 'text-gray-200 cursor-not-allowed' : 'text-gray-300 hover:text-red-400'}`}
+                                            title={clearBlocked ? 'צוות יכול להסיר את שורת ההערכה הזו' : 'נקה שורה'}
                                         >
                                             <X className="w-3.5 h-3.5" />
                                         </button>
@@ -86,7 +95,8 @@ export default function HeutagogyTable({
                                 </td>
                             )}
                         </tr>
-                    ))}
+                        );
+                    })}
                 </tbody>
             </table>
 

@@ -5,8 +5,8 @@ import { KeyRound, Library, X } from 'lucide-react'
 import Button from '@/components/Button'
 import SmartText from '@/components/SmartText'
 import RatingCell from './RatingCell'
-import StaffRatingCell from './StaffRatingCell'
 import ConfirmDialog from '@/components/ConfirmDialog'
+import { useUser } from '@/utils/store/useUser'
 
 export default function TopicTable({
     title,
@@ -21,6 +21,8 @@ export default function TopicTable({
     allTopics = [],
 }) {
     const [confirmIndex, setConfirmIndex] = useState(null);
+    const originalUser = useUser(state => state.originalUser);
+    const staffName = originalUser ? `${originalUser.user.first_name} ${originalUser.user.last_name}` : '';
 
     return (
         <div className="mb-6">
@@ -37,7 +39,9 @@ export default function TopicTable({
                     </tr>
                 </thead>
                 <tbody>
-                    {topics.map((topic, index) => (
+                    {topics.map((topic, index) => {
+                        const removeBlocked = !isStaffMode && !!topic.staffRating;
+                        return (
                         <tr key={index} className="border-b border-dashed border-gray-200 group">
                             <td className="py-2 pr-1 align-top">
                                 <div className="flex items-center gap-1">
@@ -85,11 +89,15 @@ export default function TopicTable({
                                 />
                             </td>
                             <td className="py-2 px-1 align-top text-center">
-                                <StaffRatingCell
-                                    staffRating={topic.staffRating}
-                                    staffEvaluatorName={topic.staffEvaluatorName}
-                                    isStaffMode={isStaffMode}
-                                    onRatingChange={(v) => onUpdate(index, 'staffRating', v)}
+                                <RatingCell
+                                    rating={topic.staffRating}
+                                    canEdit={isStaffMode}
+                                    onRatingChange={(v) => {
+                                        onUpdate(index, 'staffRating', v);
+                                        if (v === null) onUpdate(index, 'staffEvaluatorName', '');
+                                        else if (!topic.staffEvaluatorName) onUpdate(index, 'staffEvaluatorName', staffName);
+                                    }}
+                                    evaluatorName={topic.staffEvaluatorName}
                                     onNameChange={(v) => onUpdate(index, 'staffEvaluatorName', v)}
                                 />
                             </td>
@@ -97,9 +105,10 @@ export default function TopicTable({
                                 <td className="py-2 align-top text-center">
                                     {!topic.locked && (
                                         <button
-                                            onClick={() => setConfirmIndex(index)}
-                                            className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all p-0.5"
-                                            title="הסר שורה"
+                                            onClick={() => !removeBlocked && setConfirmIndex(index)}
+                                            disabled={removeBlocked}
+                                            className={`opacity-0 group-hover:opacity-100 transition-all p-0.5 ${removeBlocked ? 'text-gray-200 cursor-not-allowed' : 'text-gray-300 hover:text-red-400'}`}
+                                            title={removeBlocked ? 'צוות יכול להסיר את שורת ההערכה הזו' : 'הסר שורה'}
                                         >
                                             <X className="w-3.5 h-3.5" />
                                         </button>
@@ -107,7 +116,8 @@ export default function TopicTable({
                                 </td>
                             )}
                         </tr>
-                    ))}
+                        );
+                    })}
                 </tbody>
             </table>
             <div className="flex justify-start items-center mt-3 gap-2">
