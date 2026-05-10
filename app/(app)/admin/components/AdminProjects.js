@@ -66,12 +66,14 @@ export default function AdminProjects() {
             return {
                 ...student,
                 name: student.first_name + ' ' + student.last_name,
-                group, major
+                group, major,
+                masterName: student.project?.master ? student.project.master.first_name + ' ' + student.project.master.last_name : null,
             }
         });
     }, [allMembers, classes, majors]);
 
     const sortedData = useMemo(() => {
+        console.log(sortings)
         let newData = [...data];
 
         sortings.forEach(sorting => {
@@ -88,7 +90,7 @@ export default function AdminProjects() {
         { label: 'מגמה', key: 'major', sortable: true },
         { label: 'שם הפרויקט', key: 'title' },
         { label: 'מנחה מבוקש', key: 'requestedMaster', sortable: true },
-        { label: 'מנחה', key: 'master', sortable: true },
+        { label: 'מנחה', key: 'masterName', sortable: true },
     ]
 
 
@@ -151,7 +153,7 @@ export default function AdminProjects() {
                             <Cell>
                                 {student.project && (
                                     <select
-                                        value={student.project?.master?.user_id || ''}
+                                        value={student.project?.master?.id || ''}
                                         onChange={e => selectMaster(student.id, student.project.id, e.target.value)}
                                         className="bg-white border border-border rounded-md p-1"
                                     >
