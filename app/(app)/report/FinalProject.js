@@ -260,8 +260,9 @@ export default function FinalProject({ finalProject, onSave }) {
   useEffect(() => {
     if (!madeChanges) return;
     const timer = setTimeout(() => {
-      onSave(formData);
-      setMadeChanges(false);
+      onSave(formData)
+        .then(() => setMadeChanges(false))
+        .catch(() => setMadeChanges(true));
     }, 800);
     return () => clearTimeout(timer);
   }, [madeChanges, formData]);

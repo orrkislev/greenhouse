@@ -64,16 +64,21 @@ export default function Ikigai({ ikigai, semester, onSave }) {
         setMadeChanges(true)
     }
 
-    const autoSave = (data) => {
-        if (originalUser) onSave?.({ markers: data.markers });
-        else supabase.rpc('update_student_ikigai', { new_ikigai: data });
+    const autoSave = async (data) => {
+        if (originalUser) {
+            await onSave?.({ markers: data.markers });
+        } else {
+            const { error } = await supabase.rpc('update_student_ikigai', { new_ikigai: data });
+            if (error) throw error;
+        }
     };
 
     useEffect(() => {
         if (!madeChanges) return;
         const timer = setTimeout(() => {
-            autoSave({ markers });
-            setMadeChanges(false);
+            autoSave({ markers })
+                .then(() => setMadeChanges(false))
+                .catch(() => setMadeChanges(true));
         }, 800);
         return () => clearTimeout(timer);
     }, [madeChanges, markers]);

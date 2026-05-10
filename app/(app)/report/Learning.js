@@ -138,8 +138,9 @@ export default function Learning({ learning, onSave }) {
     useEffect(() => {
         if (!canSave) return;
         const timer = setTimeout(() => {
-            onSave({ professionalTopics, generalTopics, heutagogySkills });
-            setMadeChanges(false);
+            onSave({ professionalTopics, generalTopics, heutagogySkills })
+                .then(() => setMadeChanges(false))
+                .catch(() => setMadeChanges(true));
         }, 800);
         return () => clearTimeout(timer);
     }, [canSave, professionalTopics, generalTopics, heutagogySkills]);

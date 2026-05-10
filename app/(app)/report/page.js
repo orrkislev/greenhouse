@@ -108,7 +108,7 @@ export default function ReportPage() {
 
         if (error) {
             if (!silent) toastsActions.addFromError(error, 'שגיאה בשמירת ההערכה');
-            return;
+            throw error;
         }
 
         if (!silent) toastsActions.addToast({ message: 'נשמר בהצלחה!', type: 'success' });

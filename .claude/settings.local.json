@@ -11,7 +11,11 @@
       "Bash(npx next lint *)",
       "Bash(node_modules/.bin/next lint *)",
       "Bash(node_modules/.bin/eslint *)"
-    ]
+    ],
+
+    "deny": [
+      "Read(./.env.local)"
+    ] 
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
