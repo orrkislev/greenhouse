@@ -116,7 +116,7 @@ export const useEventsData = create((set, get) => {
                 toastsActions.addFromError(error, "שגיאה ביצירת אירוע");
                 return
             }
-            get().addEvents([event]);
+            get().addEvents([{...event, id: data.id }]);
             if (event.participants && event.participants.length > 0) {
                 const {error} = await supabase.from('event_participants').insert(event.participants.map(p => ({ event_id: data.id, user_id: p.id || p })));
                 if (error) {
