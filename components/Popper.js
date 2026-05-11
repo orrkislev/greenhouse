@@ -26,25 +26,19 @@ export default function usePopper(props = {onOpen: () => {}, onClose: () => {}})
         const popperRef = useRef(null)
         const [offset, setOffset] = useState({ x: 0, y: 0 })
 
+        // Runs after every render so the dialog stays on-screen when its content
+        // changes size (e.g. expanding help columns). The prev-check prevents loops.
         useEffect(() => {
-            // make sure its fully on the screen, with some margin
-            if (popperRef.current) {
-                const bounds = popperRef.current.getBoundingClientRect()
-                const margin = 50
-                if (bounds.left < margin) {
-                    setOffset({ x: -bounds.left + margin, y: 0 })
-                }
-                if (bounds.right > window.innerWidth - margin) {
-                    setOffset({ x: window.innerWidth - bounds.right - margin, y: 0 })
-                }
-                if (bounds.top < margin) {
-                    setOffset({ x: 0, y: -bounds.top + margin })
-                }
-                if (bounds.bottom > window.innerHeight - margin) {
-                    setOffset({ x: 0, y: window.innerHeight - bounds.bottom - margin })
-                }
-            }
-        }, [popperRef])
+            if (!popperRef.current) return
+            const bounds = popperRef.current.getBoundingClientRect()
+            const margin = 50
+            let x = 0, y = 0
+            if (bounds.left < margin) x = -bounds.left + margin
+            else if (bounds.right > window.innerWidth - margin) x = window.innerWidth - bounds.right - margin
+            if (bounds.top < margin) y = -bounds.top + margin
+            else if (bounds.bottom > window.innerHeight - margin) y = window.innerHeight - bounds.bottom - margin
+            setOffset(prev => prev.x === x && prev.y === y ? prev : { x, y })
+        })
 
         return createPortal(
             <AnimatePresence >
@@ -57,7 +51,7 @@ export default function usePopper(props = {onOpen: () => {}, onClose: () => {}})
                         transition={{ duration: 0.2, ease: 'easeInOut' }}
                     >
                         <div className="fixed top-0 left-0 w-full h-full" onClick={close} />
-                        <motion.div className="fixed bg-white p-4 rounded-lg border border-stone-300 shadow-sm"
+                        <motion.div layout="size" className="fixed bg-white p-4 rounded-lg border border-stone-300 shadow-sm"
                             ref={popperRef}
                             initial={{ y: 20, opacity: 0, scale: 0.98 }}
                             animate={{ y: 0, opacity: 1, scale: 1 }}
