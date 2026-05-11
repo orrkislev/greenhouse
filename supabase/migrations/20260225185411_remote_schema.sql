@@ -1763,6 +1763,8 @@ create or replace view "public"."staff_public" as  SELECT u.id AS user_id,
   WHERE (u.role = 'staff'::public.user_role);
 
 
+-- This function is no longer used as of 2026-05-11; kept here for reference (part of the migration)
+-- It allows students to update only their ikigai field in their report card, with proper authentication and error handling.
 CREATE OR REPLACE FUNCTION public.update_student_ikigai(new_ikigai jsonb)
  RETURNS void
  LANGUAGE plpgsql

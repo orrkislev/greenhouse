@@ -1,15 +1,12 @@
 'use client'
 import { IconButton } from '@/components/Button'
-import { supabase } from '@/utils/supabase/client'
 import { Coins, Earth, Heart, Star, X } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
-import { useUser } from '@/utils/store/useUser'
 import { formatSemesterLabel } from '@/utils/store/useTime'
 import AutoSaveIndicator from './components/AutoSaveIndicator'
 import { useSaveOnUnmount } from '@/utils/useSaveOnUnmount'
 
 export default function Ikigai({ ikigai, semester, onSave }) {
-    const originalUser = useUser(state => state.originalUser)
     const [markers, setMarkers] = useState(ikigai?.markers || [])
     const [editingId, setEditingId] = useState(null)
     const [madeChanges, setMadeChanges] = useState(false)
@@ -65,12 +62,7 @@ export default function Ikigai({ ikigai, semester, onSave }) {
     }
 
     const autoSave = async (data) => {
-        if (originalUser) {
-            await onSave?.({ markers: data.markers });
-        } else {
-            const { error } = await supabase.rpc('update_student_ikigai', { new_ikigai: data });
-            if (error) throw error;
-        }
+        await onSave?.({ markers: data.markers });
     };
 
     useEffect(() => {
