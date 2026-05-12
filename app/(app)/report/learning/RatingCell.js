@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { CircleHelp } from 'lucide-react'
 import usePopper from '@/components/Popper'
 import { RATING_LABELS, RATING_DESCRIPTIONS } from './data'
 import RatingBars from './RatingBars'
@@ -9,6 +10,7 @@ import RatingBars from './RatingBars'
 export default function RatingCell({ rating, canEdit, onRatingChange, evaluatorName, onNameChange }) {
     const [helpMode, setHelpMode] = useState(false);
     const [activeView, setActiveView] = useState(0);
+    const [hoveredRow, setHoveredRow] = useState(null);
 
     const popper = usePopper({
         onOpen: () => {},
@@ -34,15 +36,17 @@ export default function RatingCell({ rating, canEdit, onRatingChange, evaluatorN
                     <RatingBars rating={rating} />
                     {RATING_LABELS[rating - 1]}
                 </button>
+
                 <popper.Popper className="flex justify-center items-center">
                     <div className="max-w-[620px] overflow-x-auto">
+
                         {/* Help toggle + view selectors */}
                         <div className="flex items-center gap-2 mb-1">
                             <button
                                 onClick={() => setHelpMode(h => !h)}
-                                className={`text-xs w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-colors ${helpMode ? 'bg-stone-200 text-stone-700' : 'text-stone-400 hover:bg-stone-100'}`}
+                                className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-colors ${helpMode ? 'text-blue-600' : 'text-blue-300 hover:text-blue-500'}`}
                             >
-                                ?
+                                <CircleHelp size={16} />
                             </button>
                             <AnimatePresence>
                                 {helpMode && (
@@ -67,65 +71,90 @@ export default function RatingCell({ rating, canEdit, onRatingChange, evaluatorN
                             </AnimatePresence>
                         </div>
 
-                        {/* Column headers aligned with description cells */}
-                        {helpMode && (
-                            <div className="flex items-center gap-3 px-3 py-1 text-xs font-medium text-stone-400 border-b border-stone-100 mb-1">
-                                {/* Invisible spacer matching the width of the label+bars group */}
-                                <span className="flex items-center gap-2 shrink-0 invisible select-none" aria-hidden>
-                                    <span>{RATING_LABELS[4]}</span>
-                                    <RatingBars rating={5} />
-                                </span>
-                                <div className="flex-1 flex gap-4">
-                                    {view.columns.map(col => (
-                                        <span key={col.key} className="flex-1 text-right">{col.label}</span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Clear option */}
-                        <button
-                            className="w-full text-right px-3 py-1.5 text-sm hover:bg-stone-50 text-stone-400"
-                            onClick={() => { onRatingChange(null); popper.close(); }}
+                        {/*
+                          Three-column grid:
+                            col 1 — label      (max-content: sized to the widest label, so bars
+                                                always land in the same column regardless of label length)
+                            col 2 — bars       (max-content: fixed-size SVG)
+                            col 3 — description (1fr: fills remaining space; collapses to 0 when empty)
+                          Header cells live inside the same grid, so alignment is exact with no spacer hacks.
+                        */}
+                        <div
+                            className="grid items-center"
+                            style={{ gridTemplateColumns: 'max-content max-content 1fr' }}
                         >
-                            —
-                        </button>
+                            {/* Column headers — only visible in help mode */}
+                            {helpMode && (
+                                <>
+                                    <div className="pb-1 pr-3 pl-2 border-b border-stone-100" />
+                                    <div className="pb-1 px-1 border-b border-stone-100" />
+                                    <div className="pb-1 pl-3 border-b border-stone-100 flex gap-4 text-xs font-medium text-stone-400">
+                                        {view.columns.map(col => (
+                                            <span key={col.key} className="flex-1 text-right">{col.label}</span>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
 
-                        {/* Rating rows */}
-                        {RATING_LABELS.map((label, i) => (
+                            {/* Clear option — spans all columns */}
                             <button
-                                key={i}
-                                className={`w-full text-right px-3 py-1.5 text-sm hover:bg-stone-50 flex items-center gap-3 ${rating === i + 1 ? 'font-semibold bg-stone-50' : ''}`}
-                                onClick={() => { onRatingChange(i + 1); popper.close(); }}
+                                className="col-span-full text-right pr-3 pl-2 py-1.5 text-sm hover:bg-stone-50 text-stone-400"
+                                onClick={() => { onRatingChange(null); popper.close(); }}
                             >
-                                {/* Label + bars — anchored to the right in RTL */}
-                                <span className="flex items-center gap-2 shrink-0">
-                                    <span>{label}</span>
-                                    <RatingBars rating={i + 1} />
-                                </span>
-                                {/* Description columns — slide in to the left in RTL */}
-                                <AnimatePresence>
-                                    {helpMode && (
-                                        <motion.span
-                                            className="flex-1 flex gap-4"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            transition={{ duration: 0.15 }}
-                                        >
-                                            {view.columns.map(col => (
-                                                <span key={col.key} className="flex-1 text-right text-xs text-stone-500 font-normal">
-                                                    {col.values[i]}
-                                                </span>
-                                            ))}
-                                        </motion.span>
-                                    )}
-                                </AnimatePresence>
+                                —
                             </button>
-                        ))}
+
+                            {/* Rating rows — 3 cells each so columns stay aligned */}
+                            {RATING_LABELS.map((label, i) => {
+                                const isActive = rating === i + 1;
+                                const rowBg = isActive || hoveredRow === i ? 'bg-stone-50' : '';
+                                const rowHandlers = {
+                                    onMouseEnter: () => setHoveredRow(i),
+                                    onMouseLeave: () => setHoveredRow(null),
+                                };
+                                const rowClick = () => { onRatingChange(i + 1); popper.close(); };
+                                return (
+                                    <Fragment key={i}>
+                                        <button
+                                            {...rowHandlers}
+                                            onClick={rowClick}
+                                            tabIndex={-1}
+                                            className={`py-1.5 pr-3 pl-1 flex items-center justify-center ${rowBg}`}
+                                        >
+                                            <RatingBars rating={i + 1} />
+                                        </button>
+                                        <button
+                                            {...rowHandlers}
+                                            onClick={rowClick}
+                                            className={`text-right pr-2 pl-2 py-1.5 text-sm whitespace-nowrap ${isActive ? 'font-semibold' : ''} ${rowBg}`}
+                                        >
+                                            {label}
+                                        </button>
+                                        {helpMode ? (
+                                            <motion.button
+                                                {...rowHandlers}
+                                                onClick={rowClick}
+                                                tabIndex={-1}
+                                                className={`py-1.5 pl-3 flex gap-4 text-xs text-stone-500 font-normal ${rowBg}`}
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                transition={{ duration: 0.15 }}
+                                            >
+                                                {view.columns.map(col => (
+                                                    <span key={col.key} className="flex-1 text-right">{col.values[i]}</span>
+                                                ))}
+                                            </motion.button>
+                                        ) : (
+                                            <div {...rowHandlers} />
+                                        )}
+                                    </Fragment>
+                                );
+                            })}
+                        </div>
                     </div>
                 </popper.Popper>
             </div>
+
             {isStaff && canEdit && (popper.isOpen || evaluatorName) && (
                 <input
                     type="text"
