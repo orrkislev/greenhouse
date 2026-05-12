@@ -18,6 +18,9 @@ The production app is deployed on Vercel and connects to the managed Supabase Cl
 
 ---
 
+## Versioning
+Currently we're not working with GitHun issues, but we do have a NEXT_RELEASE.md file. It is used to plan and track bugfixes and features that need to be addressed for a specific milestone or occasion.
+
 ## Local Development Setup
 
 ### 1. Prerequisites

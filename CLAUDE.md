@@ -80,3 +80,11 @@ PostgreSQL 17 via Supabase with RLS enabled. Migrations in `supabase/migrations/
 
 ### Path aliases
 `@/*` maps to the project root (configured in `jsconfig.json`).
+
+## Release tracking (`NEXT_RELEASE.md`)
+
+`NEXT_RELEASE.md` in the project root is the running list of planned and completed work for the current release cycle.
+
+**When you finish a task:** move or add the completed item to the `_Done (this release)_` section at the bottom of the file, marked `[x]`.
+
+**When you encounter scope creep:** if a bug fix or task surfaces something that would be useful but is clearly out of scope for the current task, do not implement it. Instead, add a concise item to the appropriate section of `NEXT_RELEASE.md` (Features, Bug Fixes, or Improvements) and note it to the user. Keep the current task focused.

@@ -50,14 +50,14 @@ export default function POLEvaluation({ pol, year, onSave }) {
     useEffect(() => {
         if (!shouldSave) return;
         const timer = setTimeout(() => {
-            onSave({ studentSummary, studentQuote, mentorSummary, rankings, futurePlan });
+            onSave({ type: 'pol', studentSummary, studentQuote, mentorSummary, rankings, futurePlan });
         }, 5000);
         return () => clearTimeout(timer);
     }, [shouldSave, studentSummary, studentQuote, mentorSummary, rankings, futurePlan]);
 
     useSaveOnUnmount(
         () => shouldSave,
-        () => ({ studentSummary, studentQuote, mentorSummary, rankings, futurePlan }),
+        () => ({ type: 'pol', studentSummary, studentQuote, mentorSummary, rankings, futurePlan }),
         onSave
     );
 

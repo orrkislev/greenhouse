@@ -84,13 +84,13 @@ const GooeySlider = ({
   };
 
   return (
-    <div className="w-full flex items-start justify-center gap-4 select-none relative font-sans">
+    <div className="w-full flex items-start justify-center gap-2 select-none relative font-sans">
       {/* Left Label */}
-      <div className="flex-1 text-slate-600 font-medium text-sm tracking-wide min-w-[2rem] text-left mt-[18px]">
+      <div className="shrink-0 text-slate-600 font-medium text-sm tracking-wide min-w-[2rem] text-left mt-[18px]">
         {labelLeft}
       </div>
 
-      <div className="flex-1 flex flex-col mx-2">
+      <div className="flex-1 flex flex-col mx-1">
         {/* Slider Container */}
         <div
           ref={containerRef}
@@ -210,7 +210,7 @@ const GooeySlider = ({
       </div>
 
       {/* Right Label */}
-      <div className="flex-1 text-slate-600 font-medium text-sm tracking-wide min-w-[2rem] text-right mt-[18px]">
+      <div className="shrink-0 text-slate-600 font-medium text-sm tracking-wide min-w-[2rem] text-right mt-[18px]">
         {labelRight}
       </div>
 

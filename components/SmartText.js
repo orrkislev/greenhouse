@@ -62,7 +62,7 @@ export default function SmartText({ text, className, onEdit, withIcon = true, on
 
     return (
         <div className="flex gap-4 group items-center">
-            <SmartLabel text={text || ''} className={className} onClick={editable ? startEditing : undefined} placeholder={placeholder} />
+            <SmartLabel text={text || ''} className={`flex-1 min-w-0 ${className}`} onClick={editable ? startEditing : undefined} placeholder={placeholder} />
             {withIcon && <Pencil className="w-4 h-4 cursor-pointer opacity-0 group-hover:opacity-50 hover:opacity-100 transition-all"
                 onClick={startEditing}
             />}

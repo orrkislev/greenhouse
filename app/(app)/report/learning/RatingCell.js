@@ -26,11 +26,11 @@ export default function RatingCell({ rating, canEdit, onRatingChange, evaluatorN
 
     return (
         <div className={isStaff ? "flex flex-col items-center gap-1" : "flex items-center justify-center"}>
-            <div>
+            <div className="w-full">
                 <button
                     ref={popper.baseRef}
                     onClick={() => canEdit && popper.open()}
-                    className={`flex items-center gap-2 transition-opacity ${canEdit ? 'cursor-pointer hover:opacity-70' : 'cursor-default'}`}
+                    className={`w-full flex items-center gap-2 transition-opacity ${canEdit ? 'cursor-pointer hover:opacity-70' : 'cursor-default'}`}
                     title={rating ? RATING_LABELS[rating - 1] : 'לא הוגדר'}
                 >
                     <RatingBars rating={rating} />

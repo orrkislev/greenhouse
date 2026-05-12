@@ -15,6 +15,7 @@ import FinalProject from "./FinalProject";
 import PersonalGoals from "./PersonalGoals";
 import Portfolio from "./Portfolio";
 import POL from "./POL";
+import SummerEvaluation from "./SummerEvaluation";
 import { useUserGroups } from "@/utils/store/useGroups";
 import { getReportSemester, formatSemesterLabel } from "@/utils/store/useTime";
 import { isAdmin } from "@/utils/store/useUser";
@@ -203,14 +204,17 @@ export default function ReportPage() {
                         {view === 'autumn' && <Term project={data?.autumn_project} research={data?.autumn_research} term='סתו' />}
                         {view === 'winter' && <Term project={data?.winter_project} research={data?.winter_research} term='חורף' />}
                         {view === 'spring' && <Term project={data?.spring_project} research={data?.spring_research} term='אביב' />}
-                        {view === 'summer' && <Term project={data?.summer_project} research={data?.summer_research} term='קיץ' />}
+                        {view === 'summer' && (year === '1'
+                            ? <SummerEvaluation evalData={data?.end_eval} onSave={val => handleSave('end_eval', val, { silent: true })} />
+                            : <Term project={data?.summer_project} research={data?.summer_research} term='קיץ' />
+                        )}
                         {view === 'learning' && <Learning learning={data?.learning} onSave={val => handleSave('learning', val, { silent: true })} />}
                         {view === 'vocation' && <Vocation vocation={data?.vocation} onSave={val => handleSave('vocation', val, { silent: true })} />}
                         {view === 'finalProject' && <FinalProject finalProject={data?.special} onSave={val => handleSave('special', val, { silent: true })} />}
                         {view === 'finalProject_B' && <FinalProject finalProject={data?.special} onSave={val => handleSave('special', val, { silent: true })} />}
                         {view === 'personalGoals' && <PersonalGoals personalGoals={data?.special} onSave={val => handleSave('special', val, { silent: true })} />}
                         {view === 'portfolio' && <Portfolio portfolio={data?.portfolio_url} />}
-                        {view === 'POL' && <POL pol={data?.pol} year={year} onSave={val => handleSave('pol', val, { silent: true })} />}
+                        {view === 'POL' && <POL pol={data?.end_eval} year={year} onSave={val => handleSave('end_eval', val, { silent: true })} />}
                     </div>
                 </DashboardMain>
             </DashboardLayout>

@@ -25,7 +25,7 @@ export default function RadarChart({ data, size = 400, onEdit }) {
     };
 
     // Calculate value from mouse position
-    const calculateValueFromPosition = (x, y, angle) => {
+    const calculateValueFromPosition = (x, y) => {
         const dx = x - center;
         const dy = y - center;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -117,8 +117,7 @@ export default function RadarChart({ data, size = 400, onEdit }) {
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
 
-        const angle = points[draggingIndex].angle;
-        const newValue = calculateValueFromPosition(x, y, angle);
+        const newValue = calculateValueFromPosition(x, y);
 
         const newData = data.map((item, i) =>
             i === draggingIndex ? { ...item, value: newValue } : item
@@ -204,15 +203,20 @@ export default function RadarChart({ data, size = 400, onEdit }) {
                 />
             ))}
 
-            {/* Labels */}
+            {/* Labels — anchor based on horizontal position to avoid overlap with chart */}
             {data.map((item, i) => {
                 const point = points[i];
+                const cos = Math.cos((i / data.length) * 2 * Math.PI - Math.PI / 2);
+                // RTL text: 'start' anchors at the right edge, 'end' at the left edge
+                // → right-side labels need 'end' (left edge at anchor, text extends right)
+                // → left-side labels need 'start' (right edge at anchor, text extends left)
+                const anchor = cos > 0.1 ? 'end' : cos < -0.1 ? 'start' : 'middle';
                 return (
                     <text
                         key={i}
-                        x={point.labelX * 1.03}
+                        x={point.labelX}
                         y={point.labelY}
-                        textAnchor="middle"
+                        textAnchor={anchor}
                         dominantBaseline="middle"
                         fontSize="14"
                         fontWeight="500"
