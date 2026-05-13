@@ -6,13 +6,13 @@ import { useRef, useState } from "react";
 export default function Avatar({ user, className, hoverScale = true, ...props }) {
     return (
         <div className={`border border-stone-300 w-8 h-8 rounded-full bg-stone-200 relative flex items-center justify-center transition-transform duration-150 ${hoverScale ? 'group/avatar hover:scale-150 grayscale-50 hover:grayscale-0' : ''} ${className}`} {...props}>
-            <div className="text-sm text-stone-500">{user.first_name.charAt(0)}.{user.last_name.charAt(0)}</div>
-            {user.avatar_url && (
+            <div className="text-sm text-stone-500">{user?.first_name?.charAt(0)}.{user?.last_name?.charAt(0)}</div>
+            {user?.avatar_url && (
                 <div style={{ backgroundImage: `url(${user.avatar_url})` }} className="absolute w-full h-full bg-cover bg-center rounded-full" />
             )}
             <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-[90%] opacity-0 group-hover/avatar:-translate-y-[105%] text-center bg-white group-hover/avatar:opacity-100 transition-all duration-300"
                 style={{ fontSize: '0.6rem', lineHeight: '0.5rem' }} >
-                {user.first_name} {user.last_name}
+                {user?.first_name} {user?.last_name}
             </div>
         </div>
     )
@@ -54,7 +54,7 @@ export function AvatarEdit() {
                     onFile(e.dataTransfer.files[0]);
                 }}
             >
-                <div className="text-2xl text-stone-500">{user.first_name.charAt(0)}.{user.last_name.charAt(0)}</div>
+                <div className="text-2xl text-stone-500">{user?.first_name?.charAt(0)}.{user?.last_name?.charAt(0)}</div>
                 {imgUrl && <div className="absolute w-full h-full bg-cover bg-center rounded-full" style={{ backgroundImage: `url(${imgUrl})` }} />}
                 <input
                     ref={fileInputRef}

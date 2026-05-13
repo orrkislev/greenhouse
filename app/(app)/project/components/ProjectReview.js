@@ -176,37 +176,28 @@ const sections = [
     }
 ]
 
-export function ProjectReview() {
+export function ProjectReview({ term = null, title = 'משוב ורפלקציה' }) {
     const project = useProjectData(state => state.project);
+    const reviewKey = term ? `review_${term.name_en}` : 'review';
 
-    const [formData, setFormData] = useState(project?.metadata?.review ||
-        sections.reduce((acc, section) => ({
+    const emptyForm = sections.reduce((acc, section) => ({
+        ...acc,
+        [section.sectionName]: section.parameters.reduce((acc, param) => ({
             ...acc,
-            [section.sectionName]: section.parameters.reduce((acc, param) => ({
-                ...acc,
-                [param.id]: 50,
-            }), { 'overview': 50 })
-        }), { summary: "" })
-    );
+            [param.id]: 50,
+        }), { 'overview': 50 })
+    }), { summary: "" });
+
+    const [formData, setFormData] = useState(project?.metadata?.[reviewKey] || emptyForm);
     const [madeChanges, setMadeChanges] = useState(false);
 
     useEffect(() => {
-        if (!project?.metadata?.review) {
-            setFormData(sections.reduce((acc, section) => ({
-                ...acc,
-                [section.sectionName]: section.parameters.reduce((acc, param) => ({
-                    ...acc,
-                    [param.id]: 50,
-                }), { 'overview': 50 })
-            }), { summary: "" }));
-        } else {
-            setFormData(project?.metadata?.review);
-        }
-    }, [project?.metadata?.review]);
+        setFormData(project?.metadata?.[reviewKey] || emptyForm);
+    }, [project?.metadata?.[reviewKey], reviewKey]);
 
     useEffect(() => {
         if (!formData || !madeChanges) return;
-        projectActions.updateMetadata({ review: formData });
+        projectActions.updateMetadata({ [reviewKey]: formData });
     }, [formData, madeChanges])
 
     const handleParameterChange = (sectionName, paramId, value) => {
@@ -225,12 +216,13 @@ export function ProjectReview() {
     };
 
     const handleSave = () => {
-        projectActions.updateMetadata({ review: formData });
+        projectActions.updateMetadata({ [reviewKey]: formData });
         setMadeChanges(false);
     };
 
     return (
         <div className="flex flex-col gap-4 p-4 divide-y divide-stone-300/50 mb-16">
+            <h2 className="text-xl font-semibold text-stone-700">{title}</h2>
             {sections.map(section => (
                 <Box2 key={section.sectionName} label={section.sectionName} LabelIcon={section.icon}>
                     <div className='flex flex-col gap-4 divide-y divide-stone-300/50'>
