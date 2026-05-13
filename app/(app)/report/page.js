@@ -19,6 +19,7 @@ import SummerEvaluation from "./SummerEvaluation";
 import { useUserGroups } from "@/utils/store/useGroups";
 import { getReportSemester, formatSemesterLabel } from "@/utils/store/useTime";
 import { isAdmin } from "@/utils/store/useUser";
+import { getYearSections } from "@/utils/reportConfig";
 import { initializeReportSemester } from "@/utils/actions/report actions";
 import ContextBar from "@/components/ContextBar";
 import ReportContext from "./components/ReportContext";
@@ -120,6 +121,7 @@ export default function ReportPage() {
 
     const semesterId = selectedSemester?.slice(4); // "A" or "B"
     const year = userClass?.description;
+    const sections = getYearSections(year, semesterId);
 
     return (
         <>
@@ -127,67 +129,12 @@ export default function ReportPage() {
                 <DashboardPanel>
                     <DashboardPanelButton onClick={() => setView('ikigai')} $active={view === 'ikigai'}>איקיגאי</DashboardPanelButton>
                     <DashboardPanelButton onClick={() => setView('portfolio')} $active={view === 'portfolio'}>פורטפוליו</DashboardPanelButton>
-
                     <DashboardPanelButton onClick={() => setView('liba')} $active={view === 'liba'}>ליבה</DashboardPanelButton>
-                    {year == '1' && (
-                        <>
-                            {semesterId === "A" && (
-                                <>
-                                    <DashboardPanelButton onClick={() => setView('autumn')} $active={view === 'autumn'}>תקופת סתו</DashboardPanelButton>
-                                    <DashboardPanelButton onClick={() => setView('winter')} $active={view === 'winter'}>תקופת חורף</DashboardPanelButton>
-                                </>
-                            )}
-                             {semesterId === "B" && (
-                                <>
-                                    <DashboardPanelButton onClick={() => setView('spring')} $active={view === 'spring'}>תקופת אביב</DashboardPanelButton>
-                                    <DashboardPanelButton onClick={() => setView('summer')} $active={view === 'summer'}>תקופת קיץ</DashboardPanelButton>
-                                </>
-                             )}
-                        </>
-                    )}
-
-                    {(year == '2') && (
-                        <>
-                            {semesterId === "A" && (
-                                <>
-                                    <DashboardPanelButton onClick={() => setView('autumn')} $active={view === 'autumn'}>תקופת סתו</DashboardPanelButton>
-                                    <DashboardPanelButton onClick={() => setView('winter')} $active={view === 'winter'}>תקופת חורף</DashboardPanelButton>
-                                </>
-                            )}
-                            {semesterId === "B" && (
-                                <>
-                                    <DashboardPanelButton onClick={() => setView('spring')} $active={view === 'spring'}>תקופת אביב</DashboardPanelButton>
-                                    <DashboardPanelButton onClick={() => setView('POL')} $active={view === 'POL'}>P.O.L</DashboardPanelButton>
-                                </>
-                            )}
-                        </>
-                    )}
-
-                    {year == '3' && (
-                        <>
-                            {semesterId === "A" && (
-                                <DashboardPanelButton onClick={() => setView('finalProject')} $active={view === 'finalProject'}>פרויקט גמר</DashboardPanelButton>
-                            )}
-                            {semesterId === "B" && (
-                                <>
-                                    <DashboardPanelButton onClick={() => setView('finalProject_B')} $active={view === 'finalProject_B'}>פרויקט גמר</DashboardPanelButton>
-                                    <DashboardPanelButton onClick={() => setView('POL')} $active={view === 'POL'}>P.O.L</DashboardPanelButton>
-                                </>
-                            )}
-                        </>
-                    )}
-
-                    {year == '4' && (
-                        <>
-                            {semesterId === "A" && (
-                                <DashboardPanelButton onClick={() => setView('personalGoals')} $active={view === 'personalGoals'}>מטרות אישיות</DashboardPanelButton>
-                            )}
-                            {semesterId === "B" && (
-                                <DashboardPanelButton onClick={() => setView('POL')} $active={view === 'POL'}>P.O.L</DashboardPanelButton>
-                            )}
-                        </>
-                    )}
-
+                    {sections.map(section => (
+                        <DashboardPanelButton key={section.key} onClick={() => setView(section.key)} $active={view === section.key}>
+                            {section.label}
+                        </DashboardPanelButton>
+                    ))}
                     <DashboardPanelButton onClick={() => setView('learning')} $active={view === 'learning'}>למידה</DashboardPanelButton>
                     <DashboardPanelButton onClick={() => setView('vocation')} $active={view === 'vocation'}>יזמות מקיימת</DashboardPanelButton>
 
@@ -201,20 +148,19 @@ export default function ReportPage() {
                     <div className="gap-3 flex flex-col px-16 py-8 mb-32">
                         {view === 'ikigai' && <Ikigai ikigai={data?.ikigai} semester={selectedSemester} onSave={val => handleSave('ikigai', val, { silent: true })} />}
                         {view === 'liba' && <Liba liba={data?.liba} onSave={val => handleSave('liba', val, { silent: true })} />}
-                        {view === 'autumn' && <Term project={data?.autumn_project} research={data?.autumn_research} term='סתו' />}
-                        {view === 'winter' && <Term project={data?.winter_project} research={data?.winter_research} term='חורף' />}
-                        {view === 'spring' && <Term project={data?.spring_project} research={data?.spring_research} term='אביב' />}
-                        {view === 'summer' && (year === '1'
-                            ? <SummerEvaluation evalData={data?.end_eval} onSave={val => handleSave('end_eval', val, { silent: true })} />
-                            : <Term project={data?.summer_project} research={data?.summer_research} term='קיץ' />
-                        )}
+                        {sections.map(section => {
+                            if (view !== section.key) return null;
+                            const save = val => handleSave(section.dataKey, val, { silent: true });
+                            if (section.component === 'Term') return <Term key={section.key} project={data?.[section.projectKey]} research={data?.[section.researchKey]} term={section.termName} />;
+                            if (section.component === 'SummerEval') return <SummerEvaluation key={section.key} evalData={data?.[section.dataKey]} onSave={save} />;
+                            if (section.component === 'FinalProject') return <FinalProject key={section.key} finalProject={data?.[section.dataKey]} onSave={save} />;
+                            if (section.component === 'PersonalGoals') return <PersonalGoals key={section.key} personalGoals={data?.[section.dataKey]} onSave={save} />;
+                            if (section.component === 'POL') return <POL key={section.key} pol={data?.[section.dataKey]} year={year} onSave={save} />;
+                            return null;
+                        })}
                         {view === 'learning' && <Learning learning={data?.learning} onSave={val => handleSave('learning', val, { silent: true })} />}
                         {view === 'vocation' && <Vocation vocation={data?.vocation} onSave={val => handleSave('vocation', val, { silent: true })} />}
-                        {view === 'finalProject' && <FinalProject finalProject={data?.special} onSave={val => handleSave('special', val, { silent: true })} />}
-                        {view === 'finalProject_B' && <FinalProject finalProject={data?.special} onSave={val => handleSave('special', val, { silent: true })} />}
-                        {view === 'personalGoals' && <PersonalGoals personalGoals={data?.special} onSave={val => handleSave('special', val, { silent: true })} />}
                         {view === 'portfolio' && <Portfolio portfolio={data?.portfolio_url} />}
-                        {view === 'POL' && <POL pol={data?.end_eval} year={year} onSave={val => handleSave('end_eval', val, { silent: true })} />}
                     </div>
                 </DashboardMain>
             </DashboardLayout>

@@ -32,7 +32,7 @@ export default function StaffGroup({ group }) {
             <StaffGroup_Students group={group} />
             {group.type === 'class' && <StaffGroup_Meetings group={group} />}
 
-            {/* <StaffGroup_Evaluations group={group} /> */}
+            <StaffGroup_Evaluations group={group} />
 
             {group.type === 'club' && (
                 <Menu className="absolute top-0 left-0">

@@ -1,7 +1,7 @@
 'use client'
 
 import { ReportPage, ReportTitle } from './components/Layout';
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import Report_General from './components/Report_General';
 import Report_Liba from './components/Report_Liba';
 import Report_Learning from './components/Report_Learning';
@@ -85,7 +85,7 @@ export default function PrintReportPage({ studentId, semester }) {
                 <div data-report-page>
                     <ReportPage>
                         <Report_Projects student={student} />
-                        {student.year != '1' && (<Report_Portfolio student={student} />)}
+                        <Report_Portfolio student={student} />
                     </ReportPage>
                 </div>
 

@@ -7,6 +7,7 @@ import { userActions } from "@/utils/store/useUser";
 import Button from "@/components/Button";
 import { useRouter } from "next/navigation";
 import { getReportSemester } from "@/utils/store/useTime";
+import { getYearSections } from "@/utils/reportConfig";
 
 const Cell = tw.td` text-center cursor-pointer
     ${p => p.$good ? 'bg-green-400 hover:bg-green-500' : 'bg-stone-200 hover:bg-stone-400'}
@@ -19,9 +20,12 @@ export default function StaffGroup_Evaluations({ group }) {
     const { open, close, Popper } = usePopper();
     const router = useRouter();
 
+    const currentSemester = getReportSemester() ?? '2026A';
+    const semester = currentSemester.slice(4); // 'A' or 'B'
+    const sections = getYearSections(group?.description, semester);
+
     useEffect(() => {
         if (!group || !group.members) return;
-        const currentSemester = getReportSemester() ?? '2026A';
         const studentIds = group.members.filter(member => member?.role === 'student').map(member => member.id);
         (async () => {
             const { data, error } = await supabase.from('report_cards_public').select('*')
@@ -64,11 +68,7 @@ export default function StaffGroup_Evaluations({ group }) {
     const goToReport = (student, section) => userActions.switchToStudent(student, '/report?view=' + section);
     const viewFullReport = (student) => window.open(`/print_report/${student.id}`, "_blank", "noopener,noreferrer");
 
-    let projectTitles = ['פרויקט סתו', 'חקר סתו', 'פרויקט חורף', 'חקר חורף'];
-    if (group.description === '3') projectTitles = ['פרויקט גמר'];
-    if (group.description === '4') projectTitles = ['מטרות אישיות'];
-    const titles = ['תעודה', 'ממני אליך', 'איקיגאי', 'פורטפוליו', 'ליבה', ...projectTitles, 'למידה', 'יזמות מקיימת'];
-
+    const columnDefs = sections.flatMap(s => s.columns);
 
     return (
         <div className="flex flex-col gap-2 border border-border p-4 sticky top-0">
@@ -77,9 +77,9 @@ export default function StaffGroup_Evaluations({ group }) {
             <table className="text-xs table-auto border-separate border-spacing-1">
                 <thead>
                     <tr>
-                        {titles.map(title => (
-                            <th key={title} className="p-2">{title}</th>
-                        ))}
+                        {['תעודה', 'ממני אליך', 'איקיגאי', 'פורטפוליו', 'ליבה'].map(t => <th key={t} className="p-2">{t}</th>)}
+                        {columnDefs.map(col => <th key={col.navArg} className="p-2">{col.label}</th>)}
+                        {['למידה', 'יזמות מקיימת'].map(t => <th key={t} className="p-2">{t}</th>)}
                     </tr>
                 </thead>
                 <tbody>
@@ -96,26 +96,17 @@ export default function StaffGroup_Evaluations({ group }) {
                                     onClick={() => goToReport(student, 'portfolio')} />
                                 <Cell $good={student.report?.liba?.answer}
                                     onClick={() => goToReport(student, 'liba')} />
-                                {(group.description === '1' || group.description === '2') && (
-                                    <>
-                                        <Cell $good={student.report?.autumn_project?.summary?.length > 10} $bad={!student.report?.autumn_project}
-                                            onClick={() => goToProject(student, student.report?.autumn_project)} />
-                                        <Cell $good={student.report?.autumn_research?.summary?.length > 10} $bad={!student.report?.autumn_research}
-                                            onClick={() => goToResearch(student, student.report?.autumn_research)} />
-                                        <Cell $good={student.report?.winter_project?.summary?.length > 10} $bad={!student.report?.winter_project}
-                                            onClick={() => goToProject(student, student.report?.winter_project)} />
-                                        <Cell $good={student.report?.winter_research?.summary?.length > 10} $bad={!student.report?.winter_research}
-                                            onClick={() => goToResearch(student, student.report?.winter_research)} />
-                                    </>
-                                )}
-                                {group.description === '3' && (
-                                    <Cell $good={student.report?.special?.summary?.length > 10} $bad={!student.report?.special}
-                                        onClick={() => goToReport(student, 'finalProject')} />
-                                )}
-                                {group.description === '4' && (
-                                    <Cell $good={student.report?.special?.summary?.length > 10} $bad={!student.report?.special}
-                                        onClick={() => goToReport(student, 'personalGoals')} />
-                                )}
+                                {columnDefs.map(col => (
+                                    <Cell key={col.navArg}
+                                        $good={col.check(student.report)}
+                                        $bad={col.bad?.(student.report)}
+                                        onClick={() => {
+                                            if (col.navFn === 'project') goToProject(student, student.report?.[col.navArg]);
+                                            else if (col.navFn === 'research') goToResearch(student, student.report?.[col.navArg]);
+                                            else goToReport(student, col.navArg);
+                                        }}
+                                    />
+                                ))}
                                 <Cell $good={student.report?.learning?.topics?.some(t => t.name && t.learnings.some(l => l)) || student.report?.learning?.answer}
                                     onClick={() => goToReport(student, 'learning')} />
                                 <Cell $good={student.report?.vocation?.employmentAnswer}
