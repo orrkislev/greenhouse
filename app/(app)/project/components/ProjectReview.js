@@ -256,21 +256,24 @@ export function ProjectReview() {
                         ))}
                     </div>
                     {section.withOverview && (
-                        <div className='pr-8 bg-secondary-200/50 rounded-full pt-4 relative'>
-                            <div className='absolute right-6 top-3/7 -translate-y-1/2'>
+                        <div className='bg-secondary-200/50 rounded-full pt-3 pb-1 flex items-center gap-2 px-3'>
+                            <div className='shrink-0 text-sm font-medium leading-snug'>
                                 בכללי
-                                <div className='text-xs text-muted-foreground'>
+                                <div className='text-xs text-muted-foreground font-normal'>
                                     (זה הולך לתעודות הערכה של המחצית)
                                 </div>
                             </div>
-                            <GooeySlider
-                                min={0}
-                                max={100}
-                                value={formData[section.sectionName].overview || 50}
-                                onChange={(value) => handleParameterChange(section.sectionName, 'overview', value)}
-                                labelRight="בוצע מעולה"
-                                labelLeft="לא בוצע"
-                                color={section.color} />
+                            <div className='flex-1 min-w-0'>
+                                <GooeySlider
+                                    min={0}
+                                    max={100}
+                                    value={formData[section.sectionName].overview || 50}
+                                    onChange={(value) => handleParameterChange(section.sectionName, 'overview', value)}
+                                    labelRight="בוצע מעולה"
+                                    labelLeft="לא בוצע"
+                                    midValues={["חלקית", "בוצע"]}
+                                    color={section.color} />
+                            </div>
                         </div>
                     )}
                 </Box2>
