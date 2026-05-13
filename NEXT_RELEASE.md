@@ -2,10 +2,10 @@
 
 ## Features
 - [ ] Track student report status in staff pages
-- [ ] Add assistance/legend in report pages
+- [~] Add assistance/legend in report pages
 - [ ] Allow more than one review per project (for longer projects that span more than one term) 
 - [ ] Add end_eval (summer/POL) indicator to StaffGroup_Evaluations table (missing/complete, label by end_eval.type)
-- [ ] Spring evaluation for 1st year - spring project
+- [x] Spring evaluation for 1st year - spring project
 - [ ] spring evaluation for 2nd year - final review for long (winter-spring) project
 - [ ] (later) report printing
 
