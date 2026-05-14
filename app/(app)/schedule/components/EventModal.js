@@ -4,11 +4,56 @@ import { useAdmin, adminActions } from "@/utils/store/useAdmin";
 import { isStaff } from "@/utils/store/useUser";
 import { useUserGroups } from "@/utils/store/useGroups";
 import { format } from "date-fns";
-import { Save, Trash2, Plus, X } from "lucide-react";
-import { useState, useRef } from "react";
+import { Save, Trash2, Plus, X, Bold, Italic } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import WithLabel from "@/components/WithLabel";
 import usePopper from "@/components/Popper";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+
+function RichTextInput({ value, onChange }) {
+    const ref = useRef(null);
+    const initialized = useRef(false);
+
+    useEffect(() => {
+        if (ref.current && !initialized.current) {
+            ref.current.innerHTML = value;
+            initialized.current = true;
+        }
+    }, []);
+
+    const execFormat = (cmd) => {
+        ref.current.focus();
+        document.execCommand(cmd, false, null);
+        onChange(ref.current.innerHTML);
+    };
+
+    return (
+        <div className="border border-gray-300 rounded overflow-hidden">
+            <div className="flex gap-1 px-2 py-1 border-b border-gray-200 bg-gray-50">
+                <button
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); execFormat('bold'); }}
+                    className="w-6 h-6 font-bold text-sm rounded hover:bg-gray-200 flex items-center justify-center"
+                    title="מודגש (Ctrl+B)"
+                ><Bold size={13} /></button>
+                <button
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); execFormat('italic'); }}
+                    className="w-6 h-6 italic text-sm rounded hover:bg-gray-200 flex items-center justify-center"
+                    title="נטוי (Ctrl+I)"
+                ><Italic size={13} /></button>
+            </div>
+            <div
+                ref={ref}
+                contentEditable
+                suppressContentEditableWarning
+                onInput={() => onChange(ref.current.innerHTML)}
+                className="p-2 min-h-[2.5rem] outline-none text-sm"
+                dir="rtl"
+            />
+        </div>
+    );
+}
 
 export function EventEditModal({ event, close, _date, _time }) {
     const isNew = !event;
@@ -97,13 +142,7 @@ export function EventEditModal({ event, close, _date, _time }) {
 
             {/* Event Title */}
             <WithLabel label="תיאור">
-                <input
-                    type="text"
-                    placeholder="תיאור האירוע"
-                    className="border border-gray-300 rounded p-2 w-full"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                />
+                <RichTextInput value={title} onChange={setTitle} />
             </WithLabel>
 
             {/* Date/Day Selection with repeating checkbox */}
@@ -287,9 +326,10 @@ export function EventDetailModal({ event, close }) {
 
             <div className="flex flex-col gap-2">
                 <div className="text-sm font-semibold">תיאור</div>
-                <div className="border border-gray-300 rounded p-2 bg-white">
-                    {event?.summary || event?.title || 'אירוע'}
-                </div>
+                <div
+                    className="border border-gray-300 rounded p-2 bg-white"
+                    dangerouslySetInnerHTML={{ __html: event?.summary || event?.title || 'אירוע' }}
+                />
             </div>
 
             <div className="flex flex-col gap-2">

@@ -340,7 +340,7 @@ function Event({ event, precedingLegs = 0 }) {
                 )}
                 <div className="shrink-0">{timeString}</div>
                 <div className="break-words overflow-hidden">
-                    {event.summary || event.title || 'אירוע'}
+                    <span dangerouslySetInnerHTML={{ __html: event.summary || event.title || 'אירוע' }} />
                     {isMeeting && event.participants?.length > 0 && " עם " + event.participants.map(participant => participant.first_name).join(', ')}
                 </div>
                 {legLength && (
