@@ -51,11 +51,11 @@ export default function StaffGroup_Evaluations({ group }) {
         open();
     };
 
-    const goToProject = (student, project) => {
+    const goToProject = (student, project, termKey) => {
         if (!project) {
             userActions.switchToStudent(student, '/project');
         } else {
-            userActions.switchToStudent(student, '/project?id=' + project.id + '&view=review');
+            userActions.switchToStudent(student, '/project?id=' + project.id + '&view=review_' + termKey);
         }
     };
     const goToResearch = (student, research) => {
@@ -101,7 +101,7 @@ export default function StaffGroup_Evaluations({ group }) {
                                         $good={col.check(student.report)}
                                         $bad={col.bad?.(student.report)}
                                         onClick={() => {
-                                            if (col.navFn === 'project') goToProject(student, student.report?.[col.navArg]);
+                                            if (col.navFn === 'project') goToProject(student, student.report?.[col.navArg], col.termKey);
                                             else if (col.navFn === 'research') goToResearch(student, student.report?.[col.navArg]);
                                             else goToReport(student, col.navArg);
                                         }}

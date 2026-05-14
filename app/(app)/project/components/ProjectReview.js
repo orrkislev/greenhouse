@@ -178,7 +178,7 @@ const sections = [
 
 export function ProjectReview({ term = null, title = 'משוב ורפלקציה' }) {
     const project = useProjectData(state => state.project);
-    const reviewKey = term ? `review_${term.name_en}` : 'review';
+    const reviewKey = term ? `review_${term.name_en ?? term.id}` : 'review';
 
     const emptyForm = sections.reduce((acc, section) => ({
         ...acc,

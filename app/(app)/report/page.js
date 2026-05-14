@@ -151,7 +151,7 @@ export default function ReportPage() {
                         {sections.map(section => {
                             if (view !== section.key) return null;
                             const save = val => handleSave(section.dataKey, val, { silent: true });
-                            if (section.component === 'Term') return <Term key={section.key} project={data?.[section.projectKey]} research={data?.[section.researchKey]} term={section.termName} />;
+                            if (section.component === 'Term') return <Term key={section.key} project={data?.[section.projectKey]} research={data?.[section.researchKey]} term={section.termName} termKey={section.key} />;
                             if (section.component === 'SummerEval') return <SummerEvaluation key={section.key} evalData={data?.[section.dataKey]} onSave={save} />;
                             if (section.component === 'FinalProject') return <FinalProject key={section.key} finalProject={data?.[section.dataKey]} onSave={save} />;
                             if (section.component === 'PersonalGoals') return <PersonalGoals key={section.key} personalGoals={data?.[section.dataKey]} onSave={save} />;

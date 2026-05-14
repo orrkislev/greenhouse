@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 const MISSING_MSG = 'לא מצאנו את הפרטים באפליקציה. חשוב לפנות לצוות כדי להסדיר זאת.';
 
-export default function Term({ project, research, term }) {
+export default function Term({ project, research, term, termKey }) {
     const data = [
         { subject: 'הגדרת יעדים', value: project?.['הגדרת יעדים']?.overview || 50 },
         { subject: 'הצגה ותיעוד', value: project?.['תכנון']?.overview || 50 },
@@ -19,7 +19,7 @@ export default function Term({ project, research, term }) {
         <>
             <div className='flex justify-center gap-4'>
                 {project && (
-                    <Link href={`/project?id=${project.id}&view=review`}>
+                    <Link href={`/project?id=${project.id}&view=review_${termKey}`}>
                         <Button>
                             <ArrowDownRight className='w-4 h-4' />
                             משוב על הפרויקט

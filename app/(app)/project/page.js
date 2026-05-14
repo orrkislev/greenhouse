@@ -25,6 +25,10 @@ export default function ProjectPage2() {
         .map(id => allTerms.find(t => t.id === id))
         .filter(Boolean);
 
+    // When a single-term project is reached via view=review_<termKey> (from staff/report links),
+    // treat it the same as view=review so the generic single-term review is shown.
+    const isSingleTermReviewAlias = projectTerms.length === 1 && view === `review_${projectTerms[0]?.name_en}`;
+
     useEffect(() => {
         if (viewParam) setView(viewParam);
     }, [viewParam]);
@@ -46,11 +50,11 @@ export default function ProjectPage2() {
                         <DashboardPanelButton onClick={() => setView('dashboard')} $active={view === 'dashboard'}>ניהול הפרויקט</DashboardPanelButton>
                         {projectTerms.length > 1
                             ? projectTerms.map((term, i) => (
-                                <DashboardPanelButton key={term.id} onClick={() => setView(`review_${term.id}`)} $active={view === `review_${term.id}`}>
+                                <DashboardPanelButton key={term.id} onClick={() => setView(`review_${term.name_en}`)} $active={view === `review_${term.name_en}`}>
                                     {i === projectTerms.length - 1 ? 'משוב סוף הפרויקט' : `משוב תקופת ${term.name}`}
                                 </DashboardPanelButton>
                             ))
-                            : <DashboardPanelButton onClick={() => setView('review')} $active={view === 'review'}>משוב ורפלקציה</DashboardPanelButton>
+                            : <DashboardPanelButton onClick={() => setView('review')} $active={view === 'review' || isSingleTermReviewAlias}>משוב ורפלקציה</DashboardPanelButton>
                         }
                     </DashboardPanel>
                     <DashboardMain>
@@ -60,9 +64,9 @@ export default function ProjectPage2() {
                                 <ProjectName />
                                 {view === 'proposal' && <ProjectProposal />}
                                 {view === 'dashboard' && <ProjectDashboard />}
-                                {view === 'review' && <ProjectReview />}
+                                {(view === 'review' || isSingleTermReviewAlias) && <ProjectReview />}
                                 {projectTerms.map((term, i) => (
-                                    view === `review_${term.id}` && (
+                                    view === `review_${term.name_en}` && (
                                         <ProjectReview key={term.id} term={term}
                                             title={i === projectTerms.length - 1 ? 'משוב סוף הפרויקט' : `משוב תקופת ${term.name}`} />
                                     )

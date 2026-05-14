@@ -10,7 +10,7 @@ export const SECTION_DEFS = {
         projectKey: 'autumn_project',
         researchKey: 'autumn_research',
         columns: [
-            { label: 'פרויקט סתו', check: r => r?.autumn_project?.summary?.length > 10, bad: r => !r?.autumn_project, navFn: 'project', navArg: 'autumn_project' },
+            { label: 'פרויקט סתו', check: r => r?.autumn_project?.summary?.length > 10, bad: r => !r?.autumn_project, navFn: 'project', navArg: 'autumn_project', termKey: 'autumn' },
             { label: 'חקר סתו',    check: r => r?.autumn_research?.summary?.length > 10, bad: r => !r?.autumn_research, navFn: 'research', navArg: 'autumn_research' },
         ],
     },
@@ -22,7 +22,7 @@ export const SECTION_DEFS = {
         projectKey: 'winter_project',
         researchKey: 'winter_research',
         columns: [
-            { label: 'פרויקט חורף', check: r => r?.winter_project?.summary?.length > 10, bad: r => !r?.winter_project, navFn: 'project', navArg: 'winter_project' },
+            { label: 'פרויקט חורף', check: r => r?.winter_project?.summary?.length > 10, bad: r => !r?.winter_project, navFn: 'project', navArg: 'winter_project', termKey: 'winter' },
             { label: 'חקר חורף',    check: r => r?.winter_research?.summary?.length > 10, bad: r => !r?.winter_research, navFn: 'research', navArg: 'winter_research' },
         ],
     },
@@ -34,7 +34,7 @@ export const SECTION_DEFS = {
         projectKey: 'spring_project',
         researchKey: 'spring_research',
         columns: [
-            { label: 'פרויקט אביב', check: r => r?.spring_project?.summary?.length > 10, bad: r => !r?.spring_project, navFn: 'project', navArg: 'spring_project' },
+            { label: 'פרויקט אביב', check: r => r?.spring_project?.summary?.length > 10, bad: r => !r?.spring_project, navFn: 'project', navArg: 'spring_project', termKey: 'spring' },
             { label: 'חקר אביב',    check: r => r?.spring_research?.summary?.length > 10, bad: r => !r?.spring_research, navFn: 'research', navArg: 'spring_research' },
         ],
     },
