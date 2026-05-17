@@ -99,7 +99,7 @@ export const REPORT_SECTIONS = {
     '1': { 'A': ['autumn', 'winter'],  'B': ['spring', 'majors'] },
     '2': { 'A': ['autumn', 'winter'],  'B': ['spring', 'POL'] },
     '3': { 'A': ['finalProject'],      'B': ['finalProject_B', 'POL'] },
-    '4': { 'A': ['personalGoals'],     'B': ['POL'] },
+    '4': { 'A': ['personalGoals'],     'B': ['POL', 'finalProject_B'] },
 };
 
 export function getYearSections(year, semester) {

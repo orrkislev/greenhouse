@@ -37,7 +37,8 @@ export default function StudentCard({ student, viewMode }) {
                                         {(event.participants && event.participants.length > 0) ?
                                             <span className="text-foreground">{event.participants[0]?.first_name} {event.participants[0]?.last_name}</span>
                                             :
-                                            <span className="text-foreground">{event.title}</span>
+                                            // <span className="text-foreground" >{event.title}</span>
+                                            <span className="text-foreground" dangerouslySetInnerHTML={{ __html: event.title }}></span>
                                         }
                                     </div>
                                 </div>
