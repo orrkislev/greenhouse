@@ -88,7 +88,7 @@ export default function StaffGroup_Evaluations({ group }) {
                         .map(student => (
                             <tr key={student.id} className="border-b border-border/50 hover:border-2 hover:border-black">
                                 <Cell onClick={() => viewFullReport(student)}>{student.first_name} {student.last_name.charAt(0)}.</Cell>
-                                <Cell $good={student.report?.mentors}
+                                <Cell $good={student.report?.mentors && student.report.mentors.trim().length > 10}
                                     onClick={() => openMentorsField(student)} />
                                 <Cell $good={student.report?.ikigai}
                                     onClick={() => goToReport(student, 'ikigai')} />
@@ -126,6 +126,7 @@ export default function StaffGroup_Evaluations({ group }) {
                         <MentorsEditor
                             student={selectedStudent}
                             closeModal={close}
+                            onSave = {(id, mentors) => setData(prev => prev.map(s => s.id === id ? { ...s, report: { ...s.report, mentors } } : s))}
                         />
                     </div>
                 )}
@@ -137,7 +138,7 @@ export default function StaffGroup_Evaluations({ group }) {
 
 
 
-function MentorsEditor({ student, closeModal }) {
+function MentorsEditor({ student, closeModal, onSave }) {
     const [value, setValue] = useState(student.report?.mentors || '');
     const [buttonText, setButtonText] = useState('שמור');
 
@@ -161,6 +162,7 @@ function MentorsEditor({ student, closeModal }) {
             .eq('report_semester', currentSemester);
         if (error) toastsActions.addFromError(error, 'שגיאה בשמירת הממני אליך');
         setButtonText('רונן!');
+        onSave(student.id, value);
         setTimeout(() => {
             closeModal();
         }, 500);
