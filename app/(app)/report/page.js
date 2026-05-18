@@ -19,7 +19,7 @@ import SummerEvaluation from "./SummerEvaluation";
 import { useUserGroups } from "@/utils/store/useGroups";
 import { getReportSemester, formatSemesterLabel } from "@/utils/store/useTime";
 import { isAdmin } from "@/utils/store/useUser";
-import { getYearSections } from "@/utils/reportConfig";
+import { getDashboardSections } from "@/utils/reportConfig";
 import { initializeReportSemester } from "@/utils/actions/report actions";
 import ContextBar from "@/components/ContextBar";
 import ReportContext from "./components/ReportContext";
@@ -121,23 +121,17 @@ export default function ReportPage() {
 
     const semesterId = selectedSemester?.slice(4); // "A" or "B"
     const year = userClass?.description;
-    const sections = getYearSections(year, semesterId);
+    const allSections = getDashboardSections(year, semesterId);
 
     return (
         <>
             <DashboardLayout>
                 <DashboardPanel>
-                    <DashboardPanelButton onClick={() => setView('ikigai')} $active={view === 'ikigai'}>איקיגאי</DashboardPanelButton>
-                    <DashboardPanelButton onClick={() => setView('portfolio')} $active={view === 'portfolio'}>פורטפוליו</DashboardPanelButton>
-                    <DashboardPanelButton onClick={() => setView('liba')} $active={view === 'liba'}>ליבה</DashboardPanelButton>
-                    {sections.map(section => (
+                    {allSections.map(section => (
                         <DashboardPanelButton key={section.key} onClick={() => setView(section.key)} $active={view === section.key}>
                             {section.label}
                         </DashboardPanelButton>
                     ))}
-                    <DashboardPanelButton onClick={() => setView('learning')} $active={view === 'learning'}>למידה</DashboardPanelButton>
-                    <DashboardPanelButton onClick={() => setView('vocation')} $active={view === 'vocation'}>יזמות מקיימת</DashboardPanelButton>
-
                     {isAdmin() && (
                         <Link href="/topic-bank">
                             <DashboardPanelButton>ניהול בנק נושאים</DashboardPanelButton>
@@ -146,21 +140,23 @@ export default function ReportPage() {
                 </DashboardPanel>
                 <DashboardMain>
                     <div className="gap-3 flex flex-col px-16 py-8 mb-32">
-                        {view === 'ikigai' && <Ikigai ikigai={data?.ikigai} semester={selectedSemester} onSave={val => handleSave('ikigai', val, { silent: true })} />}
-                        {view === 'liba' && <Liba liba={data?.liba} onSave={val => handleSave('liba', val, { silent: true })} />}
-                        {sections.map(section => {
+                        {allSections.map(section => {
                             if (view !== section.key) return null;
                             const save = val => handleSave(section.dataKey, val, { silent: true });
-                            if (section.component === 'Term') return <Term key={section.key} project={data?.[section.projectKey]} research={data?.[section.researchKey]} term={section.termName} termKey={section.key} />;
-                            if (section.component === 'SummerEval') return <SummerEvaluation key={section.key} evalData={data?.[section.dataKey]} onSave={save} />;
-                            if (section.component === 'FinalProject') return <FinalProject key={section.key} finalProject={data?.[section.dataKey]} onSave={save} />;
-                            if (section.component === 'PersonalGoals') return <PersonalGoals key={section.key} personalGoals={data?.[section.dataKey]} onSave={save} />;
-                            if (section.component === 'POL') return <POL key={section.key} pol={data?.[section.dataKey]} year={year} onSave={save} />;
-                            return null;
+                            switch (section.component) {
+                                case 'Ikigai':        return <Ikigai key={section.key} ikigai={data?.ikigai} semester={selectedSemester} onSave={save} />;
+                                case 'Liba':          return <Liba key={section.key} liba={data?.liba} onSave={save} />;
+                                case 'Learning':      return <Learning key={section.key} learning={data?.learning} onSave={save} />;
+                                case 'Vocation':      return <Vocation key={section.key} vocation={data?.vocation} onSave={save} />;
+                                case 'Portfolio':     return <Portfolio key={section.key} portfolio={data?.portfolio_url} />;
+                                case 'Term':          return <Term key={section.key} project={data?.[section.projectKey]} research={data?.[section.researchKey]} term={section.termName} termKey={section.key} />;
+                                case 'SummerEval':    return <SummerEvaluation key={section.key} evalData={data?.[section.dataKey]} onSave={save} />;
+                                case 'FinalProject':  return <FinalProject key={section.key} finalProject={data?.[section.dataKey]} onSave={save} />;
+                                case 'PersonalGoals': return <PersonalGoals key={section.key} personalGoals={data?.[section.dataKey]} onSave={save} />;
+                                case 'POL':           return <POL key={section.key} pol={data?.[section.dataKey]} year={year} onSave={save} />;
+                                default:              return null;
+                            }
                         })}
-                        {view === 'learning' && <Learning learning={data?.learning} onSave={val => handleSave('learning', val, { silent: true })} />}
-                        {view === 'vocation' && <Vocation vocation={data?.vocation} onSave={val => handleSave('vocation', val, { silent: true })} />}
-                        {view === 'portfolio' && <Portfolio portfolio={data?.portfolio_url} />}
                     </div>
                 </DashboardMain>
             </DashboardLayout>

@@ -1,22 +1,15 @@
 import RadarChart from "@/components/RadarChart";
+import { getYearSections } from "@/utils/reportConfig";
 import { ReportPageSection, SectionSubtitle, SectionText, SectionTitle } from "./Layout";
 
-export default function Report_Projects({ student }) {
-
-    if (student.year === '1' || student.year === '2') {
-        return <Regular student={student} />;
-    }
-    if (student.year === '3') {
-        return <Final student={student} />;
-    }
-    if (student.year === '4') {
-        return <PersonalGoals student={student} />;
-    }
-
+export default function Report_Projects({ student, variant, semester }) {
+    if (variant === 'regular') return <Regular student={student} semester={semester} />;
+    if (variant === 'final')   return <Final student={student} />;
+    if (variant === 'goals')   return <PersonalGoals student={student} />;
     return null;
 }
 
-function TermSection({ project, research, term, student }) {
+function TermSection({ project, research, term }) {
     if (!project && !research) return null;
 
     const data = [
@@ -25,8 +18,6 @@ function TermSection({ project, research, term, student }) {
         { subject: 'למידה וביצוע', value: project?.['למידה וביצוע']?.overview || 50 },
         { subject: 'תכנון', value: project?.['הצגה ותיעוד']?.overview || 50 },
     ];
-
-    const smaller = student.year == 1;
 
     return (
         <div className='flex-1 flex flex-col'>
@@ -50,20 +41,27 @@ function TermSection({ project, research, term, student }) {
     );
 }
 
-function Regular({ student }) {
-    const autumnProject = student.autumn_project;
-    const autumnResearch = student.autumn_research;
-    const winterProject = student.winter_project;
-    const winterResearch = student.winter_research;
+// Semester-aware: reads which term sections to display from REPORT_SECTIONS via getYearSections.
+// To add winter alongside spring for year 2 Sem B, just update REPORT_SECTIONS['2']['B'] — no change here needed.
+function Regular({ student, semester }) {
+    const semesterLetter = semester?.slice(-1); // 'A' or 'B'
+    const termSections = getYearSections(student.year, semesterLetter)
+        .filter(s => s.projectKey);
 
     return (
         <ReportPageSection title="פרויקטים" className="flex-1">
             <div className='w-full flex-1 h-full flex flex-col gap-4'>
-                <TermSection project={autumnProject} research={autumnResearch} term="סתיו" student={student}/>
-                <TermSection project={winterProject} research={winterResearch} term="חורף" student={student}/>
+                {termSections.map(section => (
+                    <TermSection
+                        key={section.key}
+                        project={student[section.projectKey]}
+                        research={student[section.researchKey]}
+                        term={section.termName}
+                    />
+                ))}
             </div>
         </ReportPageSection>
-    )
+    );
 }
 
 function Final({ student }) {
@@ -122,10 +120,8 @@ function PersonalGoals({ student }) {
     return (
         <ReportPageSection title="מטרות אישיות" className="flex-1">
             <div className='w-full flex-1 h-full flex flex-col gap-4 justify-between pb-8'>
-                {/* Goals Section - Side by Side */}
                 {(personalGoals?.initialGoals?.some(g => g) || personalGoals?.updatedGoals?.some(g => g)) && (
                     <div className="flex gap-6">
-                        {/* Initial Goals */}
                         {personalGoals?.initialGoals?.some(g => g) && (
                             <div className="flex-1">
                                 <SectionSubtitle>מטרות מתחילת השנה</SectionSubtitle>
@@ -137,7 +133,6 @@ function PersonalGoals({ student }) {
                             </div>
                         )}
 
-                        {/* Updated Goals */}
                         {personalGoals?.updatedGoals?.some(g => g) && (
                             <div className="flex-1">
                                 <SectionSubtitle>מטרות מעודכנות</SectionSubtitle>
@@ -151,7 +146,6 @@ function PersonalGoals({ student }) {
                     </div>
                 )}
 
-                {/* Question/Answer Section (mode === 'questions') */}
                 {personalGoals?.mode === 'questions' && personalGoals?.answer && (
                     <div className="pt-2 border-t border-gray-200">
                         <SectionSubtitle>דברים שעשיתי</SectionSubtitle>
@@ -159,7 +153,6 @@ function PersonalGoals({ student }) {
                     </div>
                 )}
 
-                {/* Radar Chart Section (mode === 'radar') */}
                 {personalGoals?.mode === 'radar' && (
                     <div className="pt-2 border-t border-gray-200">
                         <div className="flex gap-8">

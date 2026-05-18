@@ -82,7 +82,7 @@ export function SelectedStudentCard({ student, context, group, onClose }) {
                 await eventsActions.loadGroupEvents(groupIds, today, today);
             }
             const project = await projectActions.getProjectForStudent(student.id);
-            setData({ ...student, events: userEvents, project: project.length > 0 ? project[0] : null });
+            setData({ ...student, events: userEvents, project: project?.length > 0 ? project[0] : null });
         })()
     }, [student, today])
 
