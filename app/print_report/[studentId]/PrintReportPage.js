@@ -11,6 +11,7 @@ import Report_Projects from './components/Report_Projects';
 import { toastsActions } from '@/utils/store/useToasts';
 import { ResizableSections } from './components/Helpers';
 import Report_Portfolio from './components/Report_Portfolio';
+import { formatSemesterLabel, getReportSemester } from '@/utils/store/useTime';
 
 
 
@@ -62,7 +63,7 @@ export default function PrintReportPage({ studentId, semester }) {
 
     useEffect(() => {
         if (student) {
-            document.title = `הערכה תשפו א - ${student.first_name} ${student.last_name}`;
+            document.title = `הערכה ${formatSemesterLabel(semester ?? getReportSemester())} - ${student.first_name} ${student.last_name}`;
         }
     }, [student])
 

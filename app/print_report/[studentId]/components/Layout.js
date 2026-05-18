@@ -3,6 +3,7 @@
 
 import { tw, cn } from "@/utils/tw"
 import { forwardRef } from "react"
+import { formatSemesterLabel, getReportSemester } from '@/utils/store/useTime';
 
 export function ReportPage({ children, withChamama = true, withAvoda = true, withHodHasharon = true, withAmal = true }) {
     return (
@@ -54,7 +55,7 @@ export function ReportTitle({ student }) {
     return (
         <div className='flex flex-col items-center justify-center'>
             <div className='text-lg text-center'>
-                תעודת מחצית ראשונה התשפ״ו
+                תעודת  {formatSemesterLabel(getReportSemester())}
             </div>
             <div className='text-3xl font-bold text-center'>
                 {student.first_name} {student.last_name}

@@ -191,11 +191,12 @@ export function getReportSemester(date = new Date()) {
 }
 
 // Human-readable label: "2026A" → "מחצית א 2026"
-export function formatSemesterLabel(semester, withYear = true) {
+export function formatSemesterLabel(semester, withYear = true, hebrew = false) {
     const year = semester.slice(0, 4);
+    const hebYear = `התש${year < 2030 ? "פ":"צ"}\"${String.fromCharCode(0x05D0 + (year % 10) - 1)}` ;
     const letter = semester.slice(4);
     const semesterLabel = `מחצית ${letter === 'A' ? 'א' : 'ב'}`;
-    return withYear ? `${semesterLabel} ${year}` : semesterLabel;
+    return withYear ? `${semesterLabel}' ${hebrew ? hebYear : year}` : semesterLabel;
 }
 
 // Previous semester: "2026A" → "2025B", "2026B" → "2026A"
