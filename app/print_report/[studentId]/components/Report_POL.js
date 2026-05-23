@@ -33,8 +33,8 @@ export default function Report_POL({ student }) {
                         <SectionText>{pol.futurePlan}</SectionText>
                     </>}
                 </div>
-                <div className="flex items-start justify-start p-8">
-                    <RadarChart data={radarData} size={200} />
+                <div className="flex items-start justify-start p-2">
+                    <RadarChart data={radarData} size={240} />
                 </div>
             </div>
         </ReportPageSection>
