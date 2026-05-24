@@ -248,6 +248,7 @@ b8c5c273-7abc-4611-8bca-9e823c9e4db0	שפה		10000000-0000-0000-0000-00000000000
 COPY public.user_profiles (id, avatar_url, profile, "googleRefreshToken", updated_at, portfolio_url, id_number, cv_url, title) FROM stdin;
 98773a61-7921-4bb5-a623-8a7ce8281ca0		{"pronouns": "he"}	\N	2026-02-26 15:17:58.001939+00	https://geranium-making-portfolio.my.canva.site/	\N	https://drive.google.com/file/d/1jTlhY50MZzpuMRoJow0kJMVxTX_yOS-2/	רכז מגמת הייטק, רכז שירות משמעותי
 44cd7c4b-5872-46ac-a5c2-4017a7a8e135	\N	{"pronouns": "she"}	\N	2026-02-26 19:10:57.136144+00	\N	\N	\N	\N
+1a3ca980-68ff-4b0b-bf90-5e2c60ac525c	\N	{"pronouns": "he"}	\N	2026-02-26 19:10:57.136144+00	\N	\N	\N	\N
 1a141c9f-7b7b-4f77-8b89-7489e4b5917a	\N	{"pronouns": "he"}	\N	2026-02-26 19:22:55.691569+00	\N	\N	\N	\N
 f512190e-e467-4dc4-b6f4-7d0794713c94	\N	{"pronouns": "he"}	\N	2026-02-26 19:23:19.197772+00	\N	\N	\N	\N
 \.

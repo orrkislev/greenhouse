@@ -4,6 +4,7 @@ import { prepareEmail, preparePassword } from '@/utils/actions/auth';
 import { resizeImage } from '@/utils/actions/storage actions';
 import { resetPin } from '../actions/admin actions';
 import { supabase } from '../supabase/client';
+import { updateOrThrow } from '../supabase/utils';
 import { redirect } from 'next/navigation';
 import { toastsActions } from './useToasts';
 import { createStoreActions } from './utils/storeUtils';
@@ -47,9 +48,12 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 		},
 		updateUserProfile: async (updates) => {
 			const user = get().user;
-			const { error } = await supabase.from('user_profiles').update(updates).eq('id', user.id);
-			if (error) toastsActions.addFromError(error, 'שגיאה בעדכון פרטי המשתמש');
-			else set({ user: { ...user, ...updates } });
+			try {
+				await updateOrThrow(supabase.from('user_profiles').update(updates).eq('id', user.id));
+				set({ user: { ...user, ...updates } });
+			} catch (e) {
+				toastsActions.addFromError(e, 'שגיאה בעדכון פרטי המשתמש');
+			}
 		},
 		signInWithGoogle: async () => {
 			await supabase.auth.signInWithOAuth({
