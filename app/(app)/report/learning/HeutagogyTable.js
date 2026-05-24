@@ -1,12 +1,45 @@
 'use client'
 
 import { useState } from 'react'
-import { Library, X } from 'lucide-react'
+import { CircleHelp, Library, X } from 'lucide-react'
 import Button from '@/components/Button'
 import SmartText from '@/components/SmartText'
 import RatingCell from './RatingCell'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import { useUser } from '@/utils/store/useUser'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+
+function HintTooltip({ hint }) {
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <button className="text-blue-300 hover:text-blue-500 shrink-0">
+                    <CircleHelp size={14} />
+                </button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+                <p className="max-w-xs text-right">{hint}</p>
+            </TooltipContent>
+        </Tooltip>
+    )
+}
+
+function SectionWarnings({ warnings }) {
+    if (!warnings?.length) return null;
+    return (
+        <div className="flex flex-col gap-1 mb-2">
+            {warnings.map((w, i) => (
+                <div key={i} className={`text-xs px-2 py-1 rounded ${
+                    w.red
+                        ? 'bg-red-100 text-red-600 border border-red-300'
+                        : 'bg-amber-50 text-amber-700 border border-amber-200'
+                }`}>
+                    {w.message}
+                </div>
+            ))}
+        </div>
+    );
+}
 
 export default function HeutagogyTable({
     title,
@@ -16,6 +49,7 @@ export default function HeutagogyTable({
     onOpenBank,
     onUpdate,
     onClear,
+    warnings = [],
 }) {
     const [confirmIndex, setConfirmIndex] = useState(null);
     const originalUser = useUser(state => state.originalUser);
@@ -24,13 +58,29 @@ export default function HeutagogyTable({
     return (
         <div className="mb-6">
             <h3 className="font-bold text-base text-gray-700 mb-2">{title}</h3>
+            <SectionWarnings warnings={warnings} />
             <table className="w-full text-right border-collapse">
                 <thead>
                     <tr className="border-b-2 border-gray-300 text-sm text-gray-500">
                         <th className="font-semibold pb-1.5 pr-1 w-[28%]">מיומנות</th>
-                        <th className="font-semibold pb-1.5 px-1">פירוט</th>
-                        <th className="font-semibold pb-1.5 px-1 w-[90px] text-center">הערכה עצמית</th>
-                        <th className="font-semibold pb-1.5 px-1 w-[90px] text-center">הערכת צוות</th>
+                        <th className="font-semibold pb-1.5 px-1">
+                            <span className="flex items-center gap-1">
+                                פירוט
+                                <HintTooltip hint="פירוט הנושאים או תתי המיומנויות שמרכיבים את התחום/מקצוע ונלמדו במסגרת בית הספר." />
+                            </span>
+                        </th>
+                        <th className="font-semibold pb-1.5 px-1 w-[90px] text-center">
+                            <span className="flex items-center justify-center gap-1">
+                                הערכה עצמית
+                                <HintTooltip hint="רמת הידע או הביצוע שהגעת אליה, בהתאם לפירוט שמופיע בשורה" />
+                            </span>
+                        </th>
+                        <th className="font-semibold pb-1.5 px-1 w-[90px] text-center">
+                            <span className="flex items-center justify-center gap-1">
+                                הערכת צוות
+                                <HintTooltip hint="הערכה חיצונית בנוסף להערכה העצמית. חשוב לכלול בהערכה כמה שיותר הערכות חיצוניות, זה בוחן מציאות חשוב מבחינתך, וגם דרך ליצור אמינות גבוה יותר של התעודה בעיני מי שיקרא אותה בעתיד. ניתן להזין הערכת צוות רק במהלך פגישה עם מאסטר/מנטור." />
+                            </span>
+                        </th>
                         {canEdit && <th className="pb-1.5 w-6" />}
                     </tr>
                 </thead>

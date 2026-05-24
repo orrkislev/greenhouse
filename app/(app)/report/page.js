@@ -20,6 +20,7 @@ import { useUserGroups } from "@/utils/store/useGroups";
 import { getReportSemester, formatSemesterLabel } from "@/utils/store/useTime";
 import { isAdmin } from "@/utils/store/useUser";
 import { getDashboardSections } from "@/utils/reportConfig";
+import { hasLearningAlerts } from "@/utils/learningWarnings";
 import { initializeReportSemester } from "@/utils/actions/report actions";
 import ContextBar from "@/components/ContextBar";
 import ReportContext from "./components/ReportContext";
@@ -123,12 +124,16 @@ export default function ReportPage() {
     const year = userClass?.description;
     const allSections = getDashboardSections(year, semesterId);
 
+    const sectionAlerts = {
+        learning: hasLearningAlerts(data?.learning),
+    };
+
     return (
         <>
             <DashboardLayout>
                 <DashboardPanel>
                     {allSections.map(section => (
-                        <DashboardPanelButton key={section.key} onClick={() => setView(section.key)} $active={view === section.key}>
+                        <DashboardPanelButton key={section.key} onClick={() => setView(section.key)} $active={view === section.key} marker={sectionAlerts[section.key]}>
                             {section.label}
                         </DashboardPanelButton>
                     ))}

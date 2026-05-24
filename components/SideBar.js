@@ -9,11 +9,13 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import Avatar from "./Avatar";
 import { useStudyPaths } from "@/utils/store/useStudy";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useProjectData } from "@/utils/store/useProject";
 import { useResearchData } from "@/utils/store/useResearch";
 import { useTodayEvents } from "@/utils/store/useEvents";
-import { getSemesterId } from "@/utils/store/useTime";
+import { getSemesterId, getReportSemester } from "@/utils/store/useTime";
+import { supabase } from "@/utils/supabase/client";
+import { hasLearningAlerts } from "@/utils/learningWarnings";
 
 const SideBarDiv = tw`flex flex-col border-l border-ghdark bg-ghgreen -my-6 py-4
 md:flex md:flex-col
@@ -43,6 +45,22 @@ export default function SideBar() {
     const project = useProjectData((state) => state.project)
     const research = useResearchData((state) => state.research)
     const todayEvents = useTodayEvents();
+    const [hasReportAlerts, setHasReportAlerts] = useState(false);
+
+    useEffect(() => {
+        if (!user?.id) return;
+        const semester = getReportSemester();
+        if (!semester) return;
+        supabase
+            .from('report_cards_public')
+            .select('learning')
+            .eq('id', user.id)
+            .eq('report_semester', semester)
+            .maybeSingle()
+            .then(({ data }) => {
+                setHasReportAlerts(hasLearningAlerts(data?.learning));
+            });
+    }, [user?.id]);
 
     if (!user) return null;
 
@@ -107,7 +125,7 @@ export default function SideBar() {
                 <SideBarContent>
 
                     {getSemesterId() && (
-                        <SideBarItem href="/report" Icon={ScrollText} label="הערכות" active={pathname === '/report'} />
+                        <SideBarItem href="/report" Icon={ScrollText} label="הערכות" active={pathname === '/report'} marker={hasReportAlerts} />
                     )}
 
                     {/* Home */}

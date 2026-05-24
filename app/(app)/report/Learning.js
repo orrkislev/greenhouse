@@ -19,6 +19,8 @@ import {
     migrateLearningData,
     topicFromBank,
 } from './learning/data'
+import { computeSectionWarnings } from '@/utils/learningWarnings'
+import { TooltipProvider } from '@/components/ui/tooltip'
 
 const HEUTAGOGY_MAJOR_NAME = 'מיומנויות יוטגוגיות';
 
@@ -151,8 +153,12 @@ export default function Learning({ learning, onSave }) {
         onSave
     );
 
+    const profWarnings = computeSectionWarnings(professionalTopics);
+    const genWarnings = computeSectionWarnings(generalTopics);
+    const hetWarnings = computeSectionWarnings(heutagogySkills, true);
+
     return (
-        <>
+        <TooltipProvider>
             <div className='mt-4 border-2 border-gray-400 bg-white rounded-2xl flex overflow-hidden'>
                 <div className='bg-gray-400 p-2 flex items-center justify-center min-w-[60px]'>
                     <div className='text-white rotate-90 text-3xl font-bold whitespace-nowrap'>
@@ -171,6 +177,7 @@ export default function Learning({ learning, onSave }) {
                         onOpenBank={openBank}
                         tableType="professional"
                         allTopics={allTopics}
+                        warnings={profWarnings}
                     />
                     <TopicTable
                         title="למידה כללית"
@@ -183,6 +190,7 @@ export default function Learning({ learning, onSave }) {
                         onOpenBank={openBank}
                         tableType="general"
                         allTopics={allTopics}
+                        warnings={genWarnings}
                     />
                     <div className="my-12 border-t border-gray-300/40" />
                     <HeutagogyTable
@@ -193,6 +201,7 @@ export default function Learning({ learning, onSave }) {
                         onOpenBank={openHeutagogyBank}
                         onUpdate={updateHeutagogy}
                         onClear={clearHeutagogy}
+                        warnings={hetWarnings}
                     />
                 </div>
             </div>
@@ -224,6 +233,6 @@ export default function Learning({ learning, onSave }) {
                 currentName={heutagogySkills[heutagogyBankRow]?.name || ''}
                 heutagogyTopics={heutagogyTopics}
             />
-        </>
+        </TooltipProvider>
     );
 }
