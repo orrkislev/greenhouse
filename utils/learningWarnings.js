@@ -5,7 +5,7 @@ export function computeSectionWarnings(items, isHeutagogy = false) {
 
     if (filled.length < min) {
         warnings.push({
-            message: `לתעודת הערכה רצינית, חשוב לכלול לפחות ${min} נושאים`,
+            message: `לתעודת הערכה רצינית, חשוב לכלול לפחות ${min} נושאים.`,
             red: true,
         });
     }

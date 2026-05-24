@@ -20,7 +20,6 @@ import { useUserGroups } from "@/utils/store/useGroups";
 import { getReportSemester, formatSemesterLabel } from "@/utils/store/useTime";
 import { isAdmin } from "@/utils/store/useUser";
 import { getDashboardSections } from "@/utils/reportConfig";
-import { hasLearningAlerts } from "@/utils/learningWarnings";
 import { initializeReportSemester } from "@/utils/actions/report actions";
 import ContextBar from "@/components/ContextBar";
 import ReportContext from "./components/ReportContext";
@@ -124,9 +123,9 @@ export default function ReportPage() {
     const year = userClass?.description;
     const allSections = getDashboardSections(year, semesterId);
 
-    const sectionAlerts = {
-        learning: hasLearningAlerts(data?.learning),
-    };
+    const sectionAlerts = Object.fromEntries(
+        allSections.map(s => [s.key, s.marker?.(data) ?? false])
+    );
 
     return (
         <>

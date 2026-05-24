@@ -1,8 +1,11 @@
+import { hasLearningAlerts } from './learningWarnings';
+
 // Each section's full descriptor.
 // `component`      — interactive React component name (used by report/page.js)
 // `printComponent` — print React component name (used by PrintReportPage.js)
 // `printVariant`   — optional variant prop passed to the print component
 // `columns`        — drives the staff evaluation table (one entry per table column)
+// `marker(r)`      — optional; return true to show an alert dot on the dashboard button
 export const SECTION_DEFS = {
     autumn: {
         key: 'autumn',
@@ -11,6 +14,7 @@ export const SECTION_DEFS = {
         termName: 'סתו',
         projectKey: 'autumn_project',
         researchKey: 'autumn_research',
+        marker: r => !r?.autumn_project || !r?.autumn_research,
         columns: [
             { label: 'פרויקט סתו', check: r => r?.autumn_project?.summary?.length > 10, bad: r => !r?.autumn_project, navFn: 'project', navArg: 'autumn_project', termKey: 'autumn' },
             { label: 'חקר סתו',    check: r => r?.autumn_research?.summary?.length > 10, bad: r => !r?.autumn_research, navFn: 'research', navArg: 'autumn_research' },
@@ -23,6 +27,7 @@ export const SECTION_DEFS = {
         termName: 'חורף',
         projectKey: 'winter_project',
         researchKey: 'winter_research',
+        marker: r => !r?.winter_project || !r?.winter_research,
         columns: [
             { label: 'פרויקט חורף', check: r => r?.winter_project?.summary?.length > 10, bad: r => !r?.winter_project, navFn: 'project', navArg: 'winter_project', termKey: 'winter' },
             { label: 'חקר חורף',    check: r => r?.winter_research?.summary?.length > 10, bad: r => !r?.winter_research, navFn: 'research', navArg: 'winter_research' },
@@ -35,6 +40,7 @@ export const SECTION_DEFS = {
         termName: 'אביב',
         projectKey: 'spring_project',
         researchKey: 'spring_research',
+        marker: r => !r?.spring_project || !r?.spring_research,
         columns: [
             { label: 'פרויקט אביב', check: r => r?.spring_project?.summary?.length > 10, bad: r => !r?.spring_project, navFn: 'project', navArg: 'spring_project', termKey: 'spring' },
             { label: 'חקר אביב',    check: r => r?.spring_research?.summary?.length > 10, bad: r => !r?.spring_research, navFn: 'research', navArg: 'spring_research' },
@@ -45,6 +51,7 @@ export const SECTION_DEFS = {
         label: 'תקופת קיץ',
         component: 'SummerEval',
         dataKey: 'end_eval',
+        marker: r => !r?.end_eval,
         columns: [
             { label: 'קיץ', check: r => !!r?.end_eval, navFn: 'report', navArg: 'summer' },
         ],
@@ -55,6 +62,7 @@ export const SECTION_DEFS = {
         component: 'SummerEval',
         dataKey: 'end_eval',
         printComponent: 'Report_Majors',
+        marker: r => !r?.majors,
         columns: [
             { label: 'ועדה למגמות', check: r => !!r?.majors, navFn: 'report', navArg: 'majors' },
         ],
@@ -66,6 +74,7 @@ export const SECTION_DEFS = {
         dataKey: 'special',
         printComponent: 'Report_Projects',
         printVariant: 'final',
+        marker: r => !r?.special,
         columns: [
             { label: 'פרויקט גמר', check: r => r?.special?.summary?.length > 10, bad: r => !r?.special, navFn: 'report', navArg: 'finalProject' },
         ],
@@ -77,6 +86,7 @@ export const SECTION_DEFS = {
         dataKey: 'special',
         printComponent: 'Report_Projects',
         printVariant: 'final',
+        marker: r => !r?.special,
         columns: [
             { label: 'פרויקט גמר', check: r => r?.special?.summary?.length > 10, bad: r => !r?.special, navFn: 'report', navArg: 'finalProject_B' },
         ],
@@ -88,6 +98,7 @@ export const SECTION_DEFS = {
         dataKey: 'special',
         printComponent: 'Report_Projects',
         printVariant: 'goals',
+        marker: r => !r?.special,
         columns: [
             { label: 'מטרות אישיות', check: r => r?.special?.summary?.length > 10, bad: r => !r?.special, navFn: 'report', navArg: 'personalGoals' },
         ],
@@ -98,6 +109,7 @@ export const SECTION_DEFS = {
         component: 'POL',
         dataKey: 'end_eval',
         printComponent: 'Report_POL',
+        marker: r => !r?.end_eval,
         columns: [
             { label: 'P.O.L', check: r => !!r?.end_eval, navFn: 'report', navArg: 'POL' },
         ],
@@ -106,9 +118,9 @@ export const SECTION_DEFS = {
     // ── Always-present sections (appear in all years/semesters) ──────────────
     ikigai:   { key: 'ikigai',   label: 'איקיגאי',      component: 'Ikigai',    dataKey: 'ikigai',        printComponent: 'Report_General' },
     liba:     { key: 'liba',     label: 'ליבה',          component: 'Liba',      dataKey: 'liba',          printComponent: 'Report_Liba' },
-    learning: { key: 'learning', label: 'למידה',         component: 'Learning',  dataKey: 'learning',      printComponent: 'Report_Learning' },
+    learning: { key: 'learning', label: 'למידה',         component: 'Learning',  dataKey: 'learning',      printComponent: 'Report_Learning', marker: r => hasLearningAlerts(r?.learning) },
     vocation: { key: 'vocation', label: 'יזמות מקיימת', component: 'Vocation',  dataKey: 'vocation',      printComponent: 'Report_Vocation' },
-    portfolio: { key: 'portfolio', label: 'פורטפוליו',   component: 'Portfolio', dataKey: 'portfolio_url', printComponent: 'Report_Portfolio' },
+    portfolio: { key: 'portfolio', label: 'פורטפוליו',  component: 'Portfolio', dataKey: 'portfolio_url', printComponent: 'Report_Portfolio', marker: r => !r?.portfolio_url },
 
     // ── Print-only sections ───────────────────────────────────────────────────
     // Term sections (autumn/winter/spring) are aggregated here by getYearSections

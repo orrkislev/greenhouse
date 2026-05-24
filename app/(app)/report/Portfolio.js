@@ -11,12 +11,13 @@ export default function Portfolio({ portfolio }) {
     const user = useUser(state => state.user)
     const updatePortfolioUrl = useUser(state => state.updatePortfolioUrl)
 
-    const [portfolioUrl, setPortfolioUrl] = useState(portfolio?.url || user?.portfolio_url || '')
-    const [savedUrl, setSavedUrl] = useState(user?.portfolio_url || '')
+    const [portfolioUrl, setPortfolioUrl] = useState(portfolio || user?.portfolio_url || '')
+    const [savedUrl, setSavedUrl] = useState(portfolio || user?.portfolio_url || '')
 
     useEffect(() => {
-        setPortfolioUrl(portfolio?.url || user?.portfolio_url || '')
-        setSavedUrl(user?.portfolio_url || '')
+        const url = portfolio || user?.portfolio_url || ''
+        setPortfolioUrl(url)
+        setSavedUrl(url)
     }, [portfolio, user])
 
     const shouldSave = useMemo(() => {
