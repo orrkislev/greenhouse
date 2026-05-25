@@ -114,7 +114,7 @@ export default function ScreenClient({ groups = [], reportCardsData = null }) {
             <div className={`flex-1 overflow-hidden p-3 ${isTopBarHidden ? 'pt-2' : 'pt-3'}`}>
                 {view === 'report' ? (
                     <div className={`h-full ${isTopBarHidden ? 'mt-2' : 'mt-8'}`}>
-                        <ReportCardView group={currentGroup} reportCardsData={reportCardsData} />
+                        <ReportCardView group={currentGroup} reportCardsData={reportCardsData} includeStaff={includeStaff} />
                     </div>
                 ) : columns.length > 0 ? (
                     <div className={`flex flex-row gap-2 items-start justify-center h-full ${isTopBarHidden ? 'mt-2' : 'mt-8'}`}>

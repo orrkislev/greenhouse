@@ -1,27 +1,35 @@
 'use client'
 
-import { getDashboardSections } from "@/utils/reportConfig";
+import { getDashboardSections, ikigaiStatus, portfolioStatus, libaStatus, learningStatus, vocationStatus } from "@/utils/reportConfig";
 import Avatar from "@/components/Avatar";
 
-const FIXED_CHECKS = {
-    ikigai:   { label: 'איקיגאי',      check: r => !!r?.ikigai },
-    portfolio:{ label: 'פורטפוליו',    check: r => !!r?.portfolio_url },
-    liba:     { label: 'ליבה',          check: r => !!r?.liba?.answer },
-    learning: { label: 'למידה',         check: r => !!(r?.learning?.topics?.some(t => t.name && t.learnings?.some(l => l)) || r?.learning?.answer) },
-    vocation: { label: 'יזמות מקיימת', check: r => !!r?.vocation?.employmentAnswer },
+const FIXED_STATUS = {
+    ikigai:   { label: 'איקיגאי',      status: ikigaiStatus },
+    portfolio:{ label: 'פורטפוליו',    status: portfolioStatus },
+    liba:     { label: 'ליבה',          status: libaStatus },
+    learning: { label: 'למידה',         status: learningStatus },
+    vocation: { label: 'יזמות מקיימת', status: vocationStatus },
 };
 
 function getSectionItems(sections) {
     return sections.flatMap(section => {
         if (section.columns?.length > 0) {
-            return section.columns.map(col => ({ label: col.label, check: col.check, bad: col.bad }));
+            return section.columns.map(col => ({ label: col.label, status: col.status }));
         }
-        const fixed = FIXED_CHECKS[section.key];
+        const fixed = FIXED_STATUS[section.key];
         return fixed ? [fixed] : [];
     });
 }
 
-export default function ReportCardView({ group, reportCardsData }) {
+// Shorten labels so items fit in a compact 2-column card
+const abbrev = label =>
+    label
+        .replace(/^פרויקט\s+/, 'פ. ')
+        .replace(/^חקר\s+/, 'ח. ')
+        .replace('ועדה למגמות', 'קיץ')
+        .replace('יזמות מקיימת', 'יזמות');
+
+export default function ReportCardView({ group, reportCardsData, includeStaff }) {
     if (!reportCardsData) {
         return (
             <div className="flex items-center justify-center h-full">
@@ -35,7 +43,13 @@ export default function ReportCardView({ group, reportCardsData }) {
     const sections = getDashboardSections(group?.description, semesterLetter);
     const sectionItems = getSectionItems(sections);
 
-    if (students.length === 0) {
+    // Filter out staff unless explicitly included
+    const staffIds = new Set(
+        (group?.students || []).filter(m => m.role !== 'student').map(m => m.id)
+    );
+    const visibleStudents = includeStaff ? students : students.filter(s => !staffIds.has(s.id));
+
+    if (visibleStudents.length === 0) {
         return (
             <div className="flex items-center justify-center h-full">
                 <p className="text-xl text-muted-foreground">אין נתוני תעודה לקבוצה זו</p>
@@ -44,8 +58,8 @@ export default function ReportCardView({ group, reportCardsData }) {
     }
 
     return (
-        <div className="flex flex-wrap gap-3 content-start justify-center overflow-y-auto h-full pb-2">
-            {students.map(student => (
+        <div className="flex flex-wrap gap-2 content-start justify-center overflow-y-auto h-full pb-2">
+            {visibleStudents.map(student => (
                 <StudentReportCard
                     key={student.id}
                     student={student}
@@ -57,36 +71,40 @@ export default function ReportCardView({ group, reportCardsData }) {
 }
 
 function StudentReportCard({ student, sectionItems }) {
-    const doneCount = sectionItems.filter(item => item.check(student)).length;
+    const doneCount = sectionItems.filter(item => item.status(student) === 'complete').length;
     const allDone = sectionItems.length > 0 && doneCount === sectionItems.length;
 
     return (
-        <div className={`bg-card rounded-lg p-3 border flex flex-col gap-2 w-[185px] ${allDone ? 'border-green-600/50' : 'border-border'}`}>
-            <div className="flex items-center gap-2 pb-2 border-b border-border">
-                <Avatar user={student} className="w-7 h-7 shrink-0" hoverScale={false} />
+        <div className={`bg-card rounded-lg p-2 border flex flex-col gap-1 w-[155px] ${allDone ? 'border-green-600/50' : 'border-border'}`}>
+            <div className="flex items-center gap-1.5 pb-1 border-b border-border">
+                <Avatar user={student} className="w-5 h-5 shrink-0" hoverScale={false} />
                 <div className="flex-1 min-w-0">
-                    <div className="text-sm font-bold text-foreground truncate">{student.first_name} {student.last_name}</div>
+                    <div className="text-[11px] font-bold text-foreground truncate">{student.first_name} {student.last_name}</div>
                 </div>
-                <span className={`text-xs font-mono shrink-0 ${allDone ? 'text-green-400' : 'text-muted-foreground'}`}>
+                <span className={`text-[10px] font-mono shrink-0 ${allDone ? 'text-green-400' : 'text-muted-foreground'}`}>
                     {doneCount}/{sectionItems.length}
                 </span>
             </div>
-            <div className="flex flex-col gap-0.5">
+            <div className="grid grid-cols-2 gap-x-1 gap-y-0.5">
                 {sectionItems.map((item, idx) => {
-                    const isGood = item.check(student);
-                    const isBad = !isGood && item.bad?.(student);
+                    const st = item.status(student);
                     return (
-                        <div key={idx} className={`flex items-center gap-1.5 rounded px-1.5 py-0.5 text-xs font-medium ${
-                            isGood
+                        <div key={idx} className={`flex items-center gap-1 rounded px-1 py-0.5 text-[10px] font-medium ${
+                            st === 'complete'
                                 ? 'text-green-400'
-                                : isBad
-                                    ? 'bg-orange-500/20 text-orange-300'
-                                    : 'bg-yellow-500/15 text-yellow-300'
+                                : st === 'attention'
+                                    ? 'bg-yellow-500/20 text-yellow-300'
+                                    : st === 'partial'
+                                        ? 'bg-orange-500/20 text-orange-300'
+                                        : 'bg-red-500/20 text-red-300'
                         }`}>
                             <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                                isGood ? 'bg-green-500' : isBad ? 'bg-orange-500' : 'bg-yellow-400'
+                                st === 'complete' ? 'bg-green-500'
+                                : st === 'attention' ? 'bg-yellow-400'
+                                : st === 'partial' ? 'bg-orange-400'
+                                : 'bg-red-400'
                             }`} />
-                            {item.label}
+                            {abbrev(item.label)}
                         </div>
                     );
                 })}

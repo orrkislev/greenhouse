@@ -7,12 +7,35 @@ import { userActions } from "@/utils/store/useUser";
 import Button from "@/components/Button";
 import { useRouter } from "next/navigation";
 import { getReportSemester } from "@/utils/store/useTime";
-import { getYearSections } from "@/utils/reportConfig";
+import { getYearSections, ikigaiStatus, portfolioStatus, libaStatus, learningStatus, vocationStatus } from "@/utils/reportConfig";
+
+// Cell color by status:
+//   empty     → red    (required section with nothing entered)
+//   partial   → orange (in progress but incomplete)
+//   attention → yellow (student done; staff must still act)
+//   complete  → green  (fully done)
+const STATUS_BG = {
+    complete:  'bg-green-400 hover:bg-green-500',
+    attention: 'bg-yellow-300 hover:bg-yellow-400',
+    partial:   'bg-orange-400 hover:bg-orange-500',
+    empty:     'bg-red-400 hover:bg-red-500',
+};
 
 const Cell = tw.td` text-center cursor-pointer
-    ${p => p.$good ? 'bg-green-400 hover:bg-green-500' : 'bg-stone-200 hover:bg-stone-400'}
-    ${p => p.$bad ? 'bg-red-400 hover:bg-red-500' : ''}
+    ${p => STATUS_BG[p.$status] ?? STATUS_BG.empty}
 `
+
+// Severity order: empty > attention > partial > complete
+const SEVERITY = { empty: 3, attention: 2, partial: 1, complete: 0 };
+const worstStatus = statuses =>
+    Object.keys(SEVERITY).find(s => SEVERITY[s] === Math.max(...statuses.map(s => SEVERITY[s] ?? 0)));
+
+// mentors is private data (not in report_cards_public), so its status lives here
+const mentorsStatus = r => {
+    const m = r?.mentors;
+    if (!m?.trim()) return 'empty';
+    return m.trim().length >= 10 ? 'complete' : 'partial';
+};
 
 export default function StaffGroup_Evaluations({ group }) {
     const [data, setData] = useState([]);
@@ -87,19 +110,26 @@ export default function StaffGroup_Evaluations({ group }) {
                         .sort((a, b) => a.first_name.localeCompare(b.first_name))
                         .map(student => (
                             <tr key={student.id} className="border-b border-border/50 hover:border-2 hover:border-black">
-                                <Cell onClick={() => viewFullReport(student)}>{student.first_name} {student.last_name.charAt(0)}.</Cell>
-                                <Cell $good={student.report?.mentors && student.report.mentors.trim().length > 10}
+                                <Cell $status={worstStatus([
+                                    mentorsStatus(student.report),
+                                    ikigaiStatus(student.report),
+                                    portfolioStatus(student.report),
+                                    libaStatus(student.report),
+                                    ...columnDefs.map(col => col.status(student.report)),
+                                    learningStatus(student.report),
+                                    vocationStatus(student.report),
+                                ])} onClick={() => viewFullReport(student)}>{student.first_name} {student.last_name.charAt(0)}.</Cell>
+                                <Cell $status={mentorsStatus(student.report)}
                                     onClick={() => openMentorsField(student)} />
-                                <Cell $good={student.report?.ikigai}
+                                <Cell $status={ikigaiStatus(student.report)}
                                     onClick={() => goToReport(student, 'ikigai')} />
-                                <Cell $good={student.report?.portfolio_url}
+                                <Cell $status={portfolioStatus(student.report)}
                                     onClick={() => goToReport(student, 'portfolio')} />
-                                <Cell $good={student.report?.liba?.answer}
+                                <Cell $status={libaStatus(student.report)}
                                     onClick={() => goToReport(student, 'liba')} />
                                 {columnDefs.map(col => (
                                     <Cell key={col.navArg}
-                                        $good={col.check(student.report)}
-                                        $bad={col.bad?.(student.report)}
+                                        $status={col.status(student.report)}
                                         onClick={() => {
                                             if (col.navFn === 'project') goToProject(student, student.report?.[col.navArg], col.termKey);
                                             else if (col.navFn === 'research') goToResearch(student, student.report?.[col.navArg]);
@@ -107,14 +137,28 @@ export default function StaffGroup_Evaluations({ group }) {
                                         }}
                                     />
                                 ))}
-                                <Cell $good={student.report?.learning?.topics?.some(t => t.name && t.learnings.some(l => l)) || student.report?.learning?.answer}
+                                <Cell $status={learningStatus(student.report)}
                                     onClick={() => goToReport(student, 'learning')} />
-                                <Cell $good={student.report?.vocation?.employmentAnswer}
+                                <Cell $status={vocationStatus(student.report)}
                                     onClick={() => goToReport(student, 'vocation')} />
                             </tr>
                         ))}
                 </tbody>
             </table>
+
+            <div className="flex gap-4 text-xs text-stone-500 mt-1">
+                {[
+                    ['bg-green-400',  'הושלם'],
+                    ['bg-yellow-300', 'דורש טיפול'],
+                    ['bg-orange-400', 'בתהליך'],
+                    ['bg-red-400',    'ריק'],
+                ].map(([color, label]) => (
+                    <span key={label} className="flex items-center gap-1">
+                        <span className={`inline-block w-3 h-3 rounded-sm ${color}`} />
+                        {label}
+                    </span>
+                ))}
+            </div>
 
             <Popper className="backdrop-blur-sm p-2">
                 {selectedStudent && (

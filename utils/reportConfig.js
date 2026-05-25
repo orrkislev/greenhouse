@@ -5,6 +5,12 @@ import { hasLearningAlerts } from './learningWarnings';
 // `printComponent` — print React component name (used by PrintReportPage.js)
 // `printVariant`   — optional variant prop passed to the print component
 // `columns`        — drives the staff evaluation table (one entry per table column)
+//   Each column has a `status(r)` function returning one of:
+//     'empty'     → red:    required section with nothing entered
+//     'partial'   → orange: in progress but incomplete
+//     'attention' → yellow: student done; staff must still act (write review / add rating)
+//     'complete'  → green:  fully done
+//   (A future 'na' state is reserved for sections irrelevant to a specific student.)
 // `marker(r)`      — optional; return true to show an alert dot on the dashboard button
 export const SECTION_DEFS = {
     autumn: {
@@ -16,8 +22,17 @@ export const SECTION_DEFS = {
         researchKey: 'autumn_research',
         marker: r => !r?.autumn_project || !r?.autumn_research,
         columns: [
-            { label: 'פרויקט סתו', check: r => r?.autumn_project?.summary?.length > 10, bad: r => !r?.autumn_project, navFn: 'project', navArg: 'autumn_project', termKey: 'autumn' },
-            { label: 'חקר סתו',    check: r => r?.autumn_research?.summary?.length > 10, bad: r => !r?.autumn_research, navFn: 'research', navArg: 'autumn_research' },
+            {
+                label: 'פרויקט סתו',
+                // empty: no project linked; partial: project exists but review not written; complete: review summary written (>10 chars)
+                status: r => !r?.autumn_project ? 'empty' : r.autumn_project.summary?.length > 10 ? 'complete' : 'partial',
+                navFn: 'project', navArg: 'autumn_project', termKey: 'autumn',
+            },
+            {
+                label: 'חקר סתו',
+                status: r => !r?.autumn_research ? 'empty' : r.autumn_research.summary?.length > 10 ? 'complete' : 'partial',
+                navFn: 'research', navArg: 'autumn_research',
+            },
         ],
     },
     winter: {
@@ -29,8 +44,16 @@ export const SECTION_DEFS = {
         researchKey: 'winter_research',
         marker: r => !r?.winter_project || !r?.winter_research,
         columns: [
-            { label: 'פרויקט חורף', check: r => r?.winter_project?.summary?.length > 10, bad: r => !r?.winter_project, navFn: 'project', navArg: 'winter_project', termKey: 'winter' },
-            { label: 'חקר חורף',    check: r => r?.winter_research?.summary?.length > 10, bad: r => !r?.winter_research, navFn: 'research', navArg: 'winter_research' },
+            {
+                label: 'פרויקט חורף',
+                status: r => !r?.winter_project ? 'empty' : r.winter_project.summary?.length > 10 ? 'complete' : 'partial',
+                navFn: 'project', navArg: 'winter_project', termKey: 'winter',
+            },
+            {
+                label: 'חקר חורף',
+                status: r => !r?.winter_research ? 'empty' : r.winter_research.summary?.length > 10 ? 'complete' : 'partial',
+                navFn: 'research', navArg: 'winter_research',
+            },
         ],
     },
     spring: {
@@ -42,8 +65,16 @@ export const SECTION_DEFS = {
         researchKey: 'spring_research',
         marker: r => !r?.spring_project || !r?.spring_research,
         columns: [
-            { label: 'פרויקט אביב', check: r => r?.spring_project?.summary?.length > 10, bad: r => !r?.spring_project, navFn: 'project', navArg: 'spring_project', termKey: 'spring' },
-            { label: 'חקר אביב',    check: r => r?.spring_research?.summary?.length > 10, bad: r => !r?.spring_research, navFn: 'research', navArg: 'spring_research' },
+            {
+                label: 'פרויקט אביב',
+                status: r => !r?.spring_project ? 'empty' : r.spring_project.summary?.length > 10 ? 'complete' : 'partial',
+                navFn: 'project', navArg: 'spring_project', termKey: 'spring',
+            },
+            {
+                label: 'חקר אביב',
+                status: r => !r?.spring_research ? 'empty' : r.spring_research.summary?.length > 10 ? 'complete' : 'partial',
+                navFn: 'research', navArg: 'spring_research',
+            },
         ],
     },
     summer: {
@@ -53,7 +84,7 @@ export const SECTION_DEFS = {
         dataKey: 'end_eval',
         marker: r => !r?.end_eval,
         columns: [
-            { label: 'קיץ', check: r => !!r?.end_eval, navFn: 'report', navArg: 'summer' },
+            { label: 'קיץ', status: r => r?.end_eval ? 'complete' : 'empty', navFn: 'report', navArg: 'summer' },
         ],
     },
     majors: {
@@ -62,9 +93,10 @@ export const SECTION_DEFS = {
         component: 'SummerEval',
         dataKey: 'end_eval',
         printComponent: 'Report_Majors',
-        marker: r => !r?.majors,
+        // end_eval stores the summer evaluation (portfolio + majors acceptance); there is no separate 'majors' field
+        marker: r => !r?.end_eval,
         columns: [
-            { label: 'ועדה למגמות', check: r => !!r?.majors, navFn: 'report', navArg: 'majors' },
+            { label: 'ועדה למגמות', status: r => r?.end_eval ? 'complete' : 'empty', navFn: 'report', navArg: 'majors' },
         ],
     },
     finalProject: {
@@ -76,7 +108,12 @@ export const SECTION_DEFS = {
         printVariant: 'final',
         marker: r => !r?.special,
         columns: [
-            { label: 'פרויקט גמר', check: r => r?.special?.summary?.length > 10, bad: r => !r?.special, navFn: 'report', navArg: 'finalProject' },
+            {
+                label: 'פרויקט גמר',
+                // empty: no data; partial: data entered but summary not yet written; complete: summary written (>10 chars)
+                status: r => !r?.special ? 'empty' : r.special.summary?.length > 10 ? 'complete' : 'partial',
+                navFn: 'report', navArg: 'finalProject',
+            },
         ],
     },
     finalProject_B: {
@@ -88,7 +125,11 @@ export const SECTION_DEFS = {
         printVariant: 'final',
         marker: r => !r?.special,
         columns: [
-            { label: 'פרויקט גמר', check: r => r?.special?.summary?.length > 10, bad: r => !r?.special, navFn: 'report', navArg: 'finalProject_B' },
+            {
+                label: 'פרויקט גמר',
+                status: r => !r?.special ? 'empty' : r.special.summary?.length > 10 ? 'complete' : 'partial',
+                navFn: 'report', navArg: 'finalProject_B',
+            },
         ],
     },
     personalGoals: {
@@ -100,7 +141,11 @@ export const SECTION_DEFS = {
         printVariant: 'goals',
         marker: r => !r?.special,
         columns: [
-            { label: 'מטרות אישיות', check: r => r?.special?.summary?.length > 10, bad: r => !r?.special, navFn: 'report', navArg: 'personalGoals' },
+            {
+                label: 'מטרות אישיות',
+                status: r => !r?.special ? 'empty' : r.special.summary?.length > 10 ? 'complete' : 'partial',
+                navFn: 'report', navArg: 'personalGoals',
+            },
         ],
     },
     POL: {
@@ -111,7 +156,7 @@ export const SECTION_DEFS = {
         printComponent: 'Report_POL',
         marker: r => !r?.end_eval,
         columns: [
-            { label: 'P.O.L', check: r => !!r?.end_eval, navFn: 'report', navArg: 'POL' },
+            { label: 'P.O.L', status: r => r?.end_eval ? 'complete' : 'empty', navFn: 'report', navArg: 'POL' },
         ],
     },
 
@@ -236,3 +281,51 @@ export const PRINT_REPORT_PAGES = {
 export function getPrintPages(year, semester) {
     return PRINT_REPORT_PAGES[String(year)]?.[String(semester)] ?? [];
 }
+
+// ── Standalone status functions for always-present sections ──────────────────
+// Used by both the staff evaluation table and the screen report card view.
+// All take `r` = a row from report_cards_public (flat object: ikigai, liba, etc. as top-level fields).
+
+// complete: any markers placed on the ikigai diagram
+export const ikigaiStatus = r =>
+    r?.ikigai?.markers?.length > 0 ? 'complete' : 'empty';
+
+// complete: portfolio URL is set
+export const portfolioStatus = r =>
+    r?.portfolio_url ? 'complete' : 'empty';
+
+// complete: both core question and answer filled; partial: only one of the three fields touched
+export const libaStatus = r => {
+    const l = r?.liba;
+    const hasQ = !!l?.question?.trim();
+    const hasA = !!l?.answer?.trim();
+    if (!hasQ && !hasA && !l?.nextStep?.trim()) return 'empty';
+    if (hasQ && hasA) return 'complete';
+    return 'partial';
+};
+
+// attention: student has filled enough content but no staff ratings yet (staff must act).
+// Thresholds mirror computeSectionWarnings: min 2 professional topics, all 5 heutagogy skills.
+export const learningStatus = r => {
+    const l = r?.learning;
+    if (!l) return 'empty';
+
+    // Old format (pre-migration to professionalTopics/generalTopics/heutagogySkills)
+    if (l.topics !== undefined) return l.topics.some(t => t.name) ? 'partial' : 'empty';
+
+    const profFilled = (l.professionalTopics || []).filter(t => t.name);
+    const hetFilled  = (l.heutagogySkills    || []).filter(s => s.name);
+    if (!profFilled.length && !hetFilled.length) return 'empty';
+
+    const allTopics      = [...profFilled, ...(l.generalTopics || []).filter(t => t.name)];
+    const hasStaffRating = allTopics.some(t => t.staffRating != null);
+    const enoughProf     = profFilled.length >= 2; // min per computeSectionWarnings
+    const allHeutagogy   = hetFilled.length >= 5;  // HEUTAGOGY_ROW_COUNT from learning/data.js
+
+    if (enoughProf && allHeutagogy) return hasStaffRating ? 'complete' : 'attention';
+    return 'partial';
+};
+
+// complete: employment answer is filled
+export const vocationStatus = r =>
+    r?.vocation?.employmentAnswer?.trim() ? 'complete' : 'empty';
