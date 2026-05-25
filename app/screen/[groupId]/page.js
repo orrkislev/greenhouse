@@ -1,13 +1,40 @@
 import { getSupabaseAdminClient } from "@/utils/supabase/server";
 import ScreenClient from "./ScreenClient";
 
-export default async function ScreenPage({ params }) {
+const SEMESTER_DEFAULTS = {
+    A: { start_month: 1, start_day: 1, end_month: 2, end_day: 28 },
+    B: { start_month: 4, start_day: 24, end_month: 6, end_day: 30 },
+};
+
+async function getServerSemester(supabase) {
+    const { data: rows } = await supabase
+        .from('misc')
+        .select('name, data')
+        .in('name', ['report_semester_A', 'report_semester_B']);
+    const configs = Object.fromEntries(
+        (rows || []).map(r => [r.name.replace('report_semester_', ''), r.data])
+    );
+    const now = new Date();
+    const startYear = now.getMonth() < 7 ? now.getFullYear() - 1 : now.getFullYear();
+    const academicYear = startYear + 1;
+    for (const semId of ['A', 'B']) {
+        const sem = { ...SEMESTER_DEFAULTS[semId], ...configs[semId] };
+        const start = new Date(now.getFullYear(), sem.start_month - 1, sem.start_day);
+        const end = new Date(now.getFullYear(), sem.end_month - 1, sem.end_day);
+        if (now > start && now < end) return `${academicYear}${semId}`;
+    }
+    return `${academicYear}${now.getMonth() >= 3 && now.getMonth() <= 6 ? 'B' : 'A'}`;
+}
+
+export default async function ScreenPage({ params, searchParams }) {
     const { groupId } = await params;
+    const { view } = await searchParams;
     const supabase = getSupabaseAdminClient();
 
     let groups = [];
     let error = null;
 
+    // Semi-official backdoor to fetch all classes to display in the Lobby TV
     if (groupId === 'IShouldDefintelyBeAbleToDoThat') {
         const { data: classes, error: classesError } = await supabase
             .from('groups')
@@ -69,7 +96,25 @@ export default async function ScreenPage({ params }) {
         );
     }
 
+    let reportCardsData = null;
+    if (view === 'report' && groups.length === 1) {
+        const group = groups[0];
+        if (group.type === 'class' || group.type === 'major') {
+            const semester = await getServerSemester(supabase);
+            const groupField = group.type === 'major' ? 'major' : 'class';
+            const { data: reportCards } = await supabase
+                .from('report_cards_public')
+                .select('*')
+                .eq(groupField, group.name)
+                .eq('report_semester', semester);
+            reportCardsData = {
+                students: (reportCards || []).sort((a, b) => a.first_name.localeCompare(b.first_name, 'he')),
+                semester,
+            };
+        }
+    }
+
     return (
-        <ScreenClient groups={groups} />
+        <ScreenClient groups={groups} reportCardsData={reportCardsData} />
     );
 }

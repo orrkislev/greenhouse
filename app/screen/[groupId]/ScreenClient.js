@@ -4,8 +4,9 @@ import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import StudentCard from "./StudentCard";
 import ScreenTopBar from "./ScreenTopBar";
+import ReportCardView from "./ReportCardView";
 
-export default function ScreenClient({ groups = [] }) {
+export default function ScreenClient({ groups = [], reportCardsData = null }) {
     const searchParams = useSearchParams();
 
     // Parse URL parameters
@@ -85,12 +86,23 @@ export default function ScreenClient({ groups = [] }) {
         setShouldRotate(prev => !prev);
     };
 
+    const handleReportView = () => {
+        if (reportCardsData !== null) {
+            setView('report');
+        } else {
+            const url = new URL(window.location.href);
+            url.searchParams.set('view', 'report');
+            window.location.href = url.toString();
+        }
+    };
+
     return (
         <div className="h-screen w-screen bg-gradient-to-br from-slate-900 via-gray-900 to-stone-900 overflow-hidden flex flex-col">
             <ScreenTopBar
                 group={currentGroup}
                 viewMode={view}
                 setViewMode={setView}
+                onReportView={handleReportView}
                 includeStaff={includeStaff}
                 toggleStaff={toggleStaff}
                 isRotating={shouldRotate}
@@ -100,7 +112,11 @@ export default function ScreenClient({ groups = [] }) {
 
             {/* Content */}
             <div className={`flex-1 overflow-hidden p-3 ${isTopBarHidden ? 'pt-2' : 'pt-3'}`}>
-                {columns.length > 0 ? (
+                {view === 'report' ? (
+                    <div className={`h-full ${isTopBarHidden ? 'mt-2' : 'mt-8'}`}>
+                        <ReportCardView group={currentGroup} reportCardsData={reportCardsData} />
+                    </div>
+                ) : columns.length > 0 ? (
                     <div className={`flex flex-row gap-2 items-start justify-center h-full ${isTopBarHidden ? 'mt-2' : 'mt-8'}`}>
                         {columns.map((columnStudents, colIndex) => (
                             <div key={colIndex} className="flex flex-col gap-2 flex-1 max-w-[280px] overflow-y-auto">

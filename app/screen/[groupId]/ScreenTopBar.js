@@ -1,5 +1,5 @@
 import { tw } from '@/utils/tw';
-import { Calendar, Snail, Brain } from 'lucide-react';
+import { Calendar, Snail, Brain, ClipboardList } from 'lucide-react';
 import { useTime } from "@/utils/store/useTime";
 import { differenceInWeeks, startOfWeek } from "date-fns";
 import { motion } from 'framer-motion';
@@ -13,6 +13,7 @@ export default function ScreenTopBar({
     group,
     viewMode,
     setViewMode,
+    onReportView,
     includeStaff,
     toggleStaff,
     isRotating,
@@ -110,6 +111,13 @@ export default function ScreenTopBar({
                 >
                     <Brain className="w-4 h-4" />
                     חקר
+                </TopBarButton>
+                <TopBarButton
+                    onClick={onReportView}
+                    $active={viewMode === 'report'}
+                >
+                    <ClipboardList className="w-4 h-4" />
+                    תעודה
                 </TopBarButton>
 
                 {/* Checkboxes */}

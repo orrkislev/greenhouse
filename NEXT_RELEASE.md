@@ -26,6 +26,8 @@ _In progress_
 
 _Done (this release)_
 
+- [x] Screen page: new `?view=report` view showing report card completion status per student — each student gets a card with color-coded section indicators (green = done, orange = missing, yellow = partial); data fetched server-side via admin client (works unauthenticated); not part of the rotation
+
 - [x] Centralized all report section definitions in `reportConfig.js`: enriched `SECTION_DEFS` with `printComponent`/`printVariant`, added `DASHBOARD_SECTIONS` (full ordered dashboard nav per year×semester), `PRINT_REPORT_PAGES` (A4 page layout per year×semester), and helpers `getDashboardSections`/`getPrintPages`
 - [x] `report/page.js` dashboard panel and main now fully config-driven via `getDashboardSections` — no hardcoded section buttons or views
 - [x] `PrintReportPage.js` layout now fully config-driven via `getPrintPages` — semester B layouts include POL/Majors page; semester-aware projects section
