@@ -96,7 +96,24 @@ export const SECTION_DEFS = {
         // end_eval stores the summer evaluation (portfolio + majors acceptance); there is no separate 'majors' field
         marker: r => !r?.end_eval,
         columns: [
-            { label: 'ועדה למגמות', status: r => r?.end_eval ? 'complete' : 'empty', navFn: 'report', navArg: 'majors' },
+            {
+                label: 'ועדה למגמות',
+                status: r => {
+                    if (!r?.end_eval) return 'empty';
+                    const e = r.end_eval;
+                    const hasRequestedMajor = !!e.majorsAcceptance?.requestedMajor;
+                    const hasRatings = [
+                        e.portfolio?.content,
+                        e.portfolio?.design,
+                        e.majorsAcceptance?.presentation,
+                        e.majorsAcceptance?.reflection,
+                    ].some(v => v != null && v > 0);
+                    if (!hasRequestedMajor || !hasRatings) return 'empty';
+                    if (e.majorsAcceptance?.review?.trim().length > 10 && e.portfolio?.review?.trim().length > 10) return 'complete';
+                    return 'partial';
+                },
+                navFn: 'report', navArg: 'majors',
+            },
         ],
     },
     finalProject: {
@@ -156,7 +173,20 @@ export const SECTION_DEFS = {
         printComponent: 'Report_POL',
         marker: r => !r?.end_eval,
         columns: [
-            { label: 'P.O.L', status: r => r?.end_eval ? 'complete' : 'empty', navFn: 'report', navArg: 'POL' },
+            {
+                label: 'P.O.L',
+                status: r => {
+                    if (!r?.end_eval) return 'empty';
+                    const e = r.end_eval;
+                    // Student hasn't meaningfully started their part
+                    if (!e.studentSummary?.trim() && !e.futurePlan?.trim()) return 'partial';
+                    // Staff key content is missing
+                    const rankingCount = Object.values(e.rankings || {}).filter(v => v != null && v > 0).length;
+                    if (!e.mentorSummary?.trim() && !e.studentQuote?.trim() && rankingCount < 3) return 'attention';
+                    return 'complete';
+                },
+                navFn: 'report', navArg: 'POL',
+            },
         ],
     },
 
