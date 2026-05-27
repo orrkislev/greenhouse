@@ -153,6 +153,10 @@ export const isAdmin = () => {
 	const user = useUser.getState().user;
 	return user && user.role == 'staff' && user.is_admin;
 }
+export const isVocationStaff = () => {
+	const user = useUser.getState().user;
+	return user && user.role === 'staff' && user.title?.includes('תעסוקה');
+}
 
 export const userActions = createStoreActions(useUser);
 
