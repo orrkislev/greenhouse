@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { adminActions, useAdmin } from "@/utils/store/useAdmin";
 import { Plus, Save, UserRoundX } from "lucide-react";
 import { Cell, Checkbox, TableHeader } from "./Common";
@@ -6,8 +6,9 @@ import { userActions } from "@/utils/store/useUser";
 
 export default function AdminStaff() {
     const allMembers = useAdmin(state => state.allMembers);
-    const [madeChanges, setMadeChanges] = useState(false);
     const [staffData, setStaffData] = useState(allMembers.filter(member => member.role === 'staff' || member.role === 'admin'));
+    const debounceTimer = useRef(null);
+    const staffDataRef = useRef(staffData);
 
     useEffect(() => {
         adminActions.loadData();
@@ -16,6 +17,8 @@ export default function AdminStaff() {
     useEffect(() => {
         setStaffData(allMembers.filter(member => member.role === 'staff' || member.role === 'admin'));
     }, [allMembers])
+
+    useEffect(() => { staffDataRef.current = staffData; }, [staffData]);
 
     const addStaff = () => {
         setStaffData([...staffData, {
@@ -27,25 +30,24 @@ export default function AdminStaff() {
             role: 'staff',
             is_admin: false,
         }]);
-        setMadeChanges(true);
     }
 
     const updateStaffData = (id, key, value) => {
-        setStaffData(staffData.map(s => s.id === id ? { ...s, [key]: value, dirty: true } : s));
-        setMadeChanges(true);
+        setStaffData(prev => prev.map(s => s.id === id ? { ...s, [key]: value, dirty: true } : s));
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(() => {
+            const updates = staffDataRef.current.filter(s => s.dirty && !s.isNew);
+            for (const staff of updates) adminActions.updateMember(staff.id, staff);
+            setStaffData(prev => prev.map(s => s.isNew ? s : { ...s, dirty: false }));
+        }, 1000);
     }
 
-    const saveChanges = async () => {
-        const updates = staffData.filter(staff => staff.dirty && !staff.isNew);
-        const newStaff = staffData.filter(staff => staff.isNew);
-        for (const staff of updates) {
-            await adminActions.updateMember(staff.id, staff);
-        }
+    const saveNewStaff = async () => {
+        const newStaff = staffData.filter(s => s.isNew);
         for (const staff of newStaff) {
-            delete staff.id;
-            await adminActions.createMember(staff);
+            const { id, ...rest } = staff;
+            await adminActions.createMember(rest);
         }
-        setMadeChanges(false);
     }
 
     const deleteStaff = async (staff) => {
@@ -68,18 +70,19 @@ export default function AdminStaff() {
         { key: 'first_name', label: 'שם פרטי', sortable: true },
         { key: 'last_name', label: 'שם משפחה', sortable: true },
         { key: 'pronouns', label: 'כינוי', sortable: false },
+        { key: 'title', label: 'תפקיד', sortable: false },
         { key: 'admin', label: 'ניהול', sortable: false },
         { key: 'delete', label: '', sortable: false },
     ];
 
     return (
-        <div className='flex gap-4 border border-border p-4'>
-            <table className="text-left text-xs border-collapse border-border border">
+        <div className='overflow-hidden rounded-lg border border-border w-fit'>
+            <table className="text-right text-xs">
                 <TableHeader headers={headers} />
                 <tbody>
                     {staffData.sort((a, b) => a.first_name.localeCompare(b.first_name))
                         .map((staff, index) => (
-                        <tr key={index}>
+                        <tr key={index} className="group hover:bg-muted transition-colors border-b border-ghblack">
                             <Cell>{index + 1}</Cell>
                             {staff.isNew ? (
                                 <Cell>
@@ -111,20 +114,32 @@ export default function AdminStaff() {
                                     ))}
                                 </select>
                             </Cell>
+                            <Cell>
+                                <input type="text" defaultValue={staff.title || ''} placeholder="תפקיד" className="border-none outline-none p-0 m-0 w-full"
+                                    onChange={(e) => updateStaffData(staff.id, 'title', e.target.value)}
+                                />
+                            </Cell>
                             <Cell><Checkbox value={staff.is_admin} onChange={(value) => updateStaffData(staff.id, 'is_admin', value)} /></Cell>
-                            <Cell><button className="p-1 bg-destructive my-1 rounded text-white text-xs hover:bg-red-600 flex items-center gap-2" onClick={() => deleteStaff(staff)}><UserRoundX className="w-4 h-4" /></button></Cell>
+                            <Cell>
+                                <button
+                                    className="p-1 bg-destructive my-1 rounded text-white text-xs hover:bg-red-600 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onClick={() => deleteStaff(staff)}
+                                >
+                                    <UserRoundX className="w-4 h-4" />
+                                </button>
+                            </Cell>
                         </tr>
                     ))}
-                    <tr>
-                        <td className="text-center">
+                    <tr className="border-t border-border">
+                        <td className="text-center py-1 px-4">
                             <button className="px-4 py-1 bg-emerald-500 my-1 rounded text-white text-xs hover:bg-emerald-600 flex items-center gap-2" onClick={addStaff}>
                                 צוות חדש <Plus className="w-4 h-4" />
                             </button>
                         </td>
                         {Array.from({ length: headers.length - 2 }).map((_, index) => (<td key={index}></td>))}
-                        {madeChanges && (
-                            <td>
-                                <button className="px-4 py-1 bg-emerald-500 my-1 rounded text-white text-xs hover:bg-emerald-600 flex items-center gap-2" onClick={saveChanges}>
+                        {staffData.some(s => s.isNew) && (
+                            <td className="py-1 px-4">
+                                <button className="px-4 py-1 bg-emerald-500 my-1 rounded text-white text-xs hover:bg-emerald-600 flex items-center gap-2" onClick={saveNewStaff}>
                                     שמירה <Save className="w-4 h-4" />
                                 </button>
                             </td>
@@ -132,6 +147,6 @@ export default function AdminStaff() {
                     </tr>
                 </tbody>
             </table>
-        </div >
+        </div>
     );
 }

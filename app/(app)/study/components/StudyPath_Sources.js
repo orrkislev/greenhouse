@@ -39,7 +39,7 @@ export default function StudyPath_Sources({ path }) {
 
 function StudyPath_Sources_English({ path }) {
     const user = useUser(state => state.user)
-    const isOwner = path.student_id === user?.id
+    const isOwner = path.student_id === user?.id || !!user?.title?.includes('אנגלית')
     const [selectedSourceIndex, setSelectedSourceIndex] = useState(0)
 
     const clickNewSource = () => {

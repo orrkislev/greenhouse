@@ -1,9 +1,9 @@
 import { useState } from "react";
 
 export const Cell = ({ children, className = '' }) => (
-    <td className={`py-1 px-4 border-b border-blue-stone-50 ${className}`}>
+    <td className={`py-1 px-4 border-b border-ghblack/20 ${className}`}>
         <div className="flex items-center">
-            <div className="block antialiased font-sans leading-normal text-blue-stone-900 font-normal w-full text-center">
+            <div className="block antialiased font-sans leading-normal text-blue-stone-900 font-normal w-full text-right">
                 {children}
             </div>
         </div>

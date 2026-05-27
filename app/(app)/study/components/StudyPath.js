@@ -11,8 +11,8 @@ import { useUser } from "@/utils/store/useUser"
 
 export default function StudyPath({ path }) {
     const user = useUser(state => state.user)
-    const isOwner = path.student_id === user?.id
     const isEnglish = path.id === EnglishPathID
+    const isOwner = path.student_id === user?.id || (isEnglish && !!user?.title?.includes('אנגלית'))
 
     return (
         <div className={`flex flex-col gap-8 ${isEnglish ? 'ltr' : ''}`}>
@@ -31,7 +31,7 @@ export default function StudyPath({ path }) {
 
 function PathBG({ path }) {
     const user = useUser(state => state.user)
-    const isOwner = path.student_id === user?.id
+    const isOwner = path.student_id === user?.id || (path.id === EnglishPathID && !!user?.title?.includes('אנגלית'))
     const inputRef = useRef(null)
 
     const imgUrl = useMemo(() => {

@@ -36,13 +36,20 @@ export const useAdmin = create((set, get) => ({
                 username,
                 role,
                 is_admin,
-                user_profiles( profile ),
+                user_profiles( profile, title ),
                 groups:users_groups!left (
                     group_id
                 )
             `).eq('active', true);
         if (allMembersError) toastsActions.addFromError(allMembersError, 'שגיאה בטעינת המשתמשים');
-        allMembers.forEach(member => member.groups = member.groups.map(g => g.group_id));
+        allMembers.forEach(member => {
+            member.groups = member.groups.map(g => g.group_id);
+            if (member.user_profiles) {
+                member.profile = member.user_profiles.profile;
+                member.title = member.user_profiles.title;
+                delete member.user_profiles;
+            }
+        });
         set({ classes, majors, allMembers });
     },
 
