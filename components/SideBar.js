@@ -77,7 +77,7 @@ export default function SideBar() {
                         <TopBarIconItem href="/report" Icon={Sparkles} active={pathname === '/report'} title="הערכות" />
                     )}
                     <TopBarIconItem href="/" Icon={TreePalm} active={pathname === '/'} title="בית" />
-                    <TopBarIconItem href="/schedule" Icon={Calendar} active={pathname === '/schedule'} title="לוח זמנים" />
+                    <TopBarIconItem href="/schedule" Icon={Calendar} active={pathname === '/schedule'} title="תכנון" />
                     <TopBarIconItem href="/study" Icon={BookOpen} active={pathname === '/study'} title="למידה" />
                     <TopBarIconItem href="/project" Icon={Snail} active={pathname === '/project'} title="הפרויקט" />
                     <TopBarIconItem href="/research" Icon={Brain} active={pathname === '/research'} title="חקר" />
@@ -128,11 +128,13 @@ export default function SideBar() {
                         <SideBarItem href="/report" Icon={ScrollText} label="הערכות" active={pathname === '/report'} marker={hasReportAlerts} />
                     )}
 
+                    <Separator />
+
                     {/* Home */}
                     <SideBarItem href="/" Icon={TreePalm} label="בית" active={pathname === '/'} />
 
                     {/* Schedule */}
-                    <SideBarItem href="/schedule" Icon={Calendar} label="לוח זמנים" active={pathname === '/schedule'} marker={!todayEvents.length} />
+                    <SideBarItem href="/schedule" Icon={Calendar} label="תכנון" active={pathname === '/schedule'} marker={!todayEvents.length} />
 
                     <Separator />
 

@@ -114,6 +114,32 @@ export default async function ScreenPage({ params, searchParams }) {
         }
     }
 
+    // Fetch today's planned tasks for all students across all groups
+    const allStudentIds = groups.flatMap(g => g.students?.map(s => s.id) || []);
+    if (allStudentIds.length > 0) {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const { data: plannedTasks } = await supabase
+            .from('tasks')
+            .select('id, title, student_id')
+            .eq('planned_date', todayStr)
+            .in('student_id', allStudentIds)
+            .neq('status', 'completed')
+            .neq('status', 'archived');
+
+        if (plannedTasks && plannedTasks.length > 0) {
+            const tasksByStudent = {};
+            plannedTasks.forEach(t => {
+                if (!tasksByStudent[t.student_id]) tasksByStudent[t.student_id] = [];
+                tasksByStudent[t.student_id].push(t);
+            });
+            groups.forEach(group => {
+                group.students?.forEach(student => {
+                    student.plannedTasks = tasksByStudent[student.id] || [];
+                });
+            });
+        }
+    }
+
     return (
         <ScreenClient groups={groups} reportCardsData={reportCardsData} />
     );

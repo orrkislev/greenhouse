@@ -6,12 +6,14 @@ import { EventEditModal, EventDetailModal } from "./EventModal";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useUser } from "@/utils/store/useUser";
 import { useGroups } from "@/utils/store/useGroups";
-import { ArrowLeft, ArrowRight, ClipboardPlus, Plus } from "lucide-react";
+import { ArrowLeft, ArrowRight, ClipboardPlus, Plus, X } from "lucide-react";
 import { days, getTimeSlot, getEndTimeSlot, isInTimeSlot, times } from "./utils";
 import { projectActions, projectUtils, useProjectData } from "@/utils/store/useProject";
 import { ganttActions, useGantt } from "@/utils/store/useGantt";
 import TaskModal from "@/components/TaskModal";
 import Menu, { MenuItem, MenuList } from "@/components/Menu";
+import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { usePlanning, planningActions } from "@/utils/store/usePlanning";
 
 export default function Schedule() {
     const allEvents = useWeekEvents();
@@ -20,9 +22,13 @@ export default function Schedule() {
     const { nextWeek, prevWeek } = useTime();
     const projectTasks = useProjectData(state => state.tasks);
     const gantt = useGantt(state => state.gantt);
+    const studyGroups = useGantt(state => state.studyGroups);
+    const personalTasks = usePlanning(state => state.personalTasks);
+    const assignedTasks = usePlanning(state => state.assignedTasks);
 
     useEffect(() => {
         projectActions.loadTasks();
+        ganttActions.loadStudyGroups();
     }, [])
 
     useEffect(() => {
@@ -31,14 +37,16 @@ export default function Schedule() {
         }
     }, [week])
 
-    if (!week || week.length === 0) return null;
-    if (!allEvents) return null;
-
     const currentDayOfWeek = (new Date()).getDay();
 
+    const allPlanningTasks = useMemo(() => {
+        return [...personalTasks, ...assignedTasks, ...projectTasks];
+    }, [personalTasks, assignedTasks, projectTasks]);
 
     // Memoize cell events grouping
     const cells = useMemo(() => {
+        if (!week || week.length === 0 || !allEvents) return {};
+        const studyGroupsArr = Array.isArray(studyGroups) ? studyGroups : [];
         const result = {};
         week.forEach((day, dayIndex) => {
             const dayEvents = allEvents.filter(event => event.date === day);
@@ -87,20 +95,40 @@ export default function Schedule() {
                     }
                 }
             });
+
+            // Planned tasks for this day
+            result[`${day}-planned`] = allPlanningTasks.filter(t => t.planned_date === day);
         });
+
+        studyGroupsArr.forEach(group => {
+            const dayIndex = parseInt(group.day);
+            const date = week[dayIndex];
+            if (!date) return;
+            const timeMatch = group.title.match(/^(\d+:\d+)/);
+            const timeStr = timeMatch ? timeMatch[1] : null;
+            const targetSlot = (timeStr && getTimeSlot(timeStr)) || '9:30';
+            const cellKey = `${date}-${targetSlot}`;
+            if (result[cellKey]) {
+                result[cellKey].studyGroups = [...(result[cellKey].studyGroups || []), group];
+            }
+        });
+
         return result;
-    }, [allEvents, week, projectTasks, gantt]);
+    }, [allEvents, week, projectTasks, gantt, allPlanningTasks, studyGroups]);
+
+    if (!week || week.length === 0) return null;
+    if (!allEvents) return null;
 
     return (
         <table className="table-fixed border-collapse w-full h-full">
             <thead>
                 <tr>
                     {days.map((day, index) => {
-                        // For weekend column, show the Saturday date
                         const dateStr = index === 5 ? week[5] : week[index];
                         const date = new Date(dateStr);
                         const formattedDate = format(date, 'd/M');
                         const allDayGantt = cells[`${dateStr}-header`] || [];
+                        const plannedForDay = cells[`${dateStr}-planned`] || [];
 
                         const isCurrentDayHeader = index === currentDayOfWeek ||
                             (index === 5 && (currentDayOfWeek === 5 || currentDayOfWeek === 6));
@@ -111,44 +139,28 @@ export default function Schedule() {
                             ? 'bg-stone-100 border-stone-300'
                             : 'border-slate-400';
                         return (
-                            <th key={day} className={`border w-1/6 p-2 ${thClass}`}>
-                                <div className="flex items-center justify-center gap-2 relative">
-                                    {index === 0 && (
-                                        <button
-                                            onClick={prevWeek}
-                                            className="absolute right-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded p-1"
-                                            aria-label="Previous week"
-                                        >
-                                            <ArrowRight />
-                                        </button>
-                                    )}
-                                    <div className={`flex flex-col items-center`}>
-                                        <div className={`font-bold ${isToday(date) ? 'bg-ghpurple text-ghglow rounded-full aspect-square p-2' : ''}`}>{day}</div>
-                                        <div className="text-xs text-gray-500 font-normal mb-2">{formattedDate}</div>
-                                        {allDayGantt.map((e, i) => (
-                                            <div key={i} className="text-[11px] text-gray-400 font-normal truncate max-w-full">{e.summary}</div>
-                                        ))}
-                                    </div>
-                                    {index === 5 && (
-                                        <button
-                                            onClick={nextWeek}
-                                            className="absolute left-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded p-1"
-                                            aria-label="Next week"
-                                        >
-                                            <ArrowLeft />
-                                        </button>
-                                    )}
-                                </div>
-                            </th>
+                            <DayHeader
+                                key={day}
+                                day={day}
+                                dateStr={dateStr}
+                                date={date}
+                                formattedDate={formattedDate}
+                                allDayGantt={allDayGantt}
+                                plannedForDay={plannedForDay}
+                                thClass={thClass}
+                                isCurrentDayHeader={isCurrentDayHeader}
+                                index={index}
+                                prevWeek={prevWeek}
+                                nextWeek={nextWeek}
+                            />
                         );
                     })}
                 </tr>
             </thead>
             <tbody>
                 {times.map((time, tindex) => (
-                    <tr>
+                    <tr key={tindex}>
                         {week.map((day, dindex) => {
-                            // Mark today, or mark weekend column if today is Friday (5) or Saturday (6)
                             const isCurrentDay = currentDayOfWeek === dindex ||
                                 (dindex === 5 && (currentDayOfWeek === 5 || currentDayOfWeek === 6));
 
@@ -168,8 +180,150 @@ export default function Schedule() {
     )
 }
 
+function DayHeader({ day, dateStr, date, formattedDate, allDayGantt, plannedForDay, thClass, isCurrentDayHeader, index, prevWeek, nextWeek }) {
+    const thRef = useRef(null);
+    const inputRef = useRef(null);
+    const [isDragOver, setIsDragOver] = useState(false);
+    const [addingTask, setAddingTask] = useState(false);
+    const [newTaskTitle, setNewTaskTitle] = useState('');
+
+    useEffect(() => {
+        const el = thRef.current;
+        if (!el) return;
+        return dropTargetForElements({
+            element: el,
+            canDrop: ({ source }) => source.data.type === 'planning-task',
+            getData: () => ({ targetDate: dateStr }),
+            onDragEnter: () => setIsDragOver(true),
+            onDragLeave: () => setIsDragOver(false),
+            onDrop: ({ source }) => {
+                setIsDragOver(false);
+                if (source.data.taskId) {
+                    planningActions.setPlannedDate(source.data.taskId, dateStr);
+                }
+            },
+        });
+    }, [dateStr]);
+
+    useEffect(() => {
+        if (addingTask && inputRef.current) inputRef.current.focus();
+    }, [addingTask]);
+
+    const commitAdd = () => {
+        const trimmed = newTaskTitle.trim();
+        if (trimmed) planningActions.addPersonalTaskWithDate(trimmed, dateStr);
+        setNewTaskTitle('');
+        setAddingTask(false);
+    };
+
+    return (
+        <th
+            ref={thRef}
+            className={`border w-1/6 p-2 transition-colors duration-150 ${thClass}
+                ${isDragOver ? '!bg-green-100 !border-green-400 border-dashed' : ''}`}
+        >
+            <div className="flex items-center justify-center gap-2 relative group/header">
+                {index === 0 && (
+                    <button
+                        onClick={prevWeek}
+                        className="absolute right-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded p-1"
+                        aria-label="Previous week"
+                    >
+                        <ArrowRight />
+                    </button>
+                )}
+                <div className="flex flex-col items-center w-full">
+                    <div className={`font-bold ${isToday(date) ? 'bg-ghpurple text-ghglow rounded-full aspect-square p-2' : ''}`}>{day}</div>
+                    <div className="text-xs text-gray-500 font-normal mb-1">{formattedDate}</div>
+                    {allDayGantt.map((e, i) => (
+                        <div key={i} className="text-[11px] text-gray-400 font-normal truncate max-w-full">{e.summary}</div>
+                    ))}
+                    {plannedForDay.length > 0 && (
+                        <div className="flex flex-col gap-0.5 w-full mt-1">
+                            {plannedForDay.map(task => (
+                                <PlannedTaskChip key={task.id} task={task} />
+                            ))}
+                        </div>
+                    )}
+                    {addingTask ? (
+                        <input
+                            ref={inputRef}
+                            value={newTaskTitle}
+                            onChange={e => setNewTaskTitle(e.target.value)}
+                            onBlur={commitAdd}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter') commitAdd();
+                                if (e.key === 'Escape') { setAddingTask(false); setNewTaskTitle(''); }
+                            }}
+                            placeholder="משימה חדשה..."
+                            className="w-full mt-1 text-[10px] border border-primary rounded px-1.5 py-0.5 bg-background focus:outline-none"
+                            onClick={e => e.stopPropagation()}
+                        />
+                    ) : (
+                        <button
+                            onClick={e => { e.stopPropagation(); setAddingTask(true); }}
+                            className="opacity-0 group-hover/header:opacity-100 transition-opacity mt-1 flex items-center gap-0.5 text-[10px] text-muted-foreground hover:text-foreground"
+                            title="הוסף משימה ליום זה"
+                        >
+                            <Plus className="w-2.5 h-2.5" />
+                            משימה
+                        </button>
+                    )}
+                    {isDragOver && (
+                        <div className="text-[10px] text-green-600 font-semibold mt-1">שחרר כאן</div>
+                    )}
+                </div>
+                {index === 5 && (
+                    <button
+                        onClick={nextWeek}
+                        className="absolute left-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded p-1"
+                        aria-label="Next week"
+                    >
+                        <ArrowLeft />
+                    </button>
+                )}
+            </div>
+        </th>
+    );
+}
+
+function PlannedTaskChip({ task }) {
+    const [modalOpen, setModalOpen] = useState(false);
+    const sourceColor = task.group_id
+        ? 'bg-orange-100 text-orange-700 border-orange-200'
+        : task.status === 'completed'
+        ? 'bg-gray-100 text-gray-400 border-gray-200 line-through'
+        : 'bg-blue-100 text-blue-700 border-blue-200';
+
+    return (
+        <>
+            <div className={`flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] border ${sourceColor} group/chip`}>
+                <span
+                    className="truncate flex-1 cursor-pointer hover:underline"
+                    onClick={e => { e.stopPropagation(); setModalOpen(true); }}
+                >
+                    {task.title}
+                </span>
+                <button
+                    onClick={e => { e.stopPropagation(); planningActions.setPlannedDate(task.id, null); }}
+                    className="opacity-0 group-hover/chip:opacity-100 transition-opacity shrink-0"
+                    title="הסר מיום זה"
+                >
+                    <X className="w-2.5 h-2.5" />
+                </button>
+            </div>
+            <TaskModal
+                task={task}
+                isOpen={modalOpen}
+                onClose={() => { setModalOpen(false); planningActions.loadAllTasks(); }}
+                context={null}
+            />
+        </>
+    );
+}
+
 function Cell({ date, time, cellData, isToday, isWeekend }) {
-    const { events = [], legCount = 0, tasks = [], ganttEvents = [] } = cellData || {};
+    const { events = [], legCount = 0, tasks = [], ganttEvents = [], studyGroups = [] } = cellData || {};
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
     const show930Menu = time === '9:30';
     const isEvening = time === 'ערב';
@@ -181,7 +335,6 @@ function Cell({ date, time, cellData, isToday, isWeekend }) {
         borderClass = 'border-violet-300';
     } else if (isWeekend || isEvening) {
         bgClass = 'bg-stone-200';
-        // borderClass = 'border-stone-300';
     }
 
     return (
@@ -191,8 +344,12 @@ function Cell({ date, time, cellData, isToday, isWeekend }) {
             <div className='text-xs opacity-50'>{time}</div>
 
             <div className="relative" style={{ height: 'calc(100% - 1.25rem)' }}>
-                {/* Events area: shrinks on hover to reveal "+" button */}
                 <div className='flex flex-col gap-1 h-full transition-[padding-bottom] duration-200 group-hover/cell:pb-8'>
+                    {studyGroups.map((group, index) => (
+                        <div key={index} className="shrink-0">
+                            <StudyGroupEvent group={group} />
+                        </div>
+                    ))}
                     {ganttEvents.map((ganttEvent, index) => (
                         <div key={index} className="shrink-0">
                             <GanttEvent ganttEvent={ganttEvent} />
@@ -215,7 +372,6 @@ function Cell({ date, time, cellData, isToday, isWeekend }) {
                     })}
                 </div>
 
-                {/* "+" button: absolute at bottom, visible on cell hover */}
                 <div className="absolute bottom-0 left-0 right-0 h-7 opacity-0 group-hover/cell:opacity-100 transition-opacity duration-200">
                     <NewEventButton date={date} time={time} />
                 </div>
@@ -262,6 +418,16 @@ function Task({ task }) {
     )
 }
 
+function StudyGroupEvent({ group }) {
+    const name = group.title.replace(/^\d+:\d+\s*:\s*/, '');
+    return (
+        <div className="bg-gray-100 border border-dashed border-gray-300 rounded px-1 py-0.5 text-[10px] text-gray-400 truncate">
+            {name}
+            {group.content && <span className="mr-1 opacity-70">{group.content}</span>}
+        </div>
+    );
+}
+
 function GanttEvent({ ganttEvent }) {
     return (
         <div className="bg-amber-100 border border-amber-300 rounded p-1 text-xs text-amber-800 truncate">
@@ -273,7 +439,6 @@ function GanttEvent({ ganttEvent }) {
     );
 }
 
-// Color palette for groups
 const GROUP_COLORS = [
     { event: 'bg-blue-500 hover:bg-blue-700', groupHover: 'group-hover/event:bg-blue-700' },
     { event: 'bg-purple-500 hover:bg-purple-700', groupHover: 'group-hover/event:bg-purple-700' },
@@ -289,7 +454,6 @@ const MEETING_COLORS = { event: 'bg-green-600 hover:bg-green-700', groupHover: '
 
 function getGroupColor(groupId) {
     if (!groupId) return GROUP_COLORS[0];
-    // Simple hash function to consistently assign colors
     const hash = groupId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return GROUP_COLORS[hash % GROUP_COLORS.length];
 }
@@ -304,7 +468,6 @@ function Event({ event, precedingLegs = 0 }) {
     const isOwner = user?.id && event?.created_by === user.id;
 
     useEffect(() => {
-        // if the event ends in a different time slot, get the cell of the end time (using id) nd set the lefEndRef to it
         if (getEndTimeSlot(event.end) !== getTimeSlot(event.start)) {
             const cellId = `${event.date}-${getEndTimeSlot(event.end)}`;
             const cell = document.getElementById(cellId);
@@ -317,8 +480,6 @@ function Event({ event, precedingLegs = 0 }) {
     }, [event])
 
     const timeString = event.start.split(':')[0].padStart(2, '0') + ':' + event.start.split(':')[1].padStart(2, '0');
-
-    // Get group info
     const group = event.group_id ? groups.find(g => g.id === event.group_id) : null;
     const colors = isMeeting ? MEETING_COLORS : getGroupColor(event.group_id);
 

@@ -96,7 +96,7 @@ export default function ScreenTopBar({
                     $active={viewMode === 'events'}
                 >
                     <Calendar className="w-4 h-4" />
-                    לוח זמנים
+                    תכנון
                 </TopBarButton>
                 <TopBarButton
                     onClick={() => setViewMode('project')}

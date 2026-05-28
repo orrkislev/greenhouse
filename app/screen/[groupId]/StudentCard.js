@@ -37,7 +37,6 @@ export default function StudentCard({ student, viewMode }) {
                                         {(event.participants && event.participants.length > 0) ?
                                             <span className="text-foreground">{event.participants[0]?.first_name} {event.participants[0]?.last_name}</span>
                                             :
-                                            // <span className="text-foreground" >{event.title}</span>
                                             <span className="text-foreground" dangerouslySetInnerHTML={{ __html: event.title }}></span>
                                         }
                                     </div>
@@ -46,6 +45,18 @@ export default function StudentCard({ student, viewMode }) {
                         </div>
                     ) : (
                         <div className="text-xs text-muted-foreground">אין אירועים היום</div>
+                    )}
+                    {student.plannedTasks?.length > 0 && (
+                        <div className="mt-1.5 pt-1.5 border-t border-border">
+                            <div className="text-[10px] text-muted-foreground mb-1">משימות היום</div>
+                            <div className="flex flex-wrap gap-1">
+                                {student.plannedTasks.map((task, idx) => (
+                                    <span key={idx} className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-[10px]">
+                                        {task.title}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
                     )}
                 </>
             )}
