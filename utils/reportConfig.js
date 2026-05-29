@@ -256,7 +256,7 @@ export const PRINT_REPORT_PAGES = {
         'B': [
             { type: 'resizable', top: 'ikigai',   bottom: 'liba',     initialRatio: 0.6 },
             { type: 'stack',     sections: ['projects_regular', 'portfolio'] },
-            { type: 'stack',     sections: ['majors'] },
+            // { type: 'stack',     sections: ['majors'] },
             { type: 'resizable', top: 'learning', bottom: 'vocation', initialRatio: 0.5 },
             { type: 'stack',     sections: ['chamama_logo'] },
         ],

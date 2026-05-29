@@ -21,7 +21,7 @@ function TermSection({ project, research, term }) {
 
     return (
         <div className='flex-1 flex flex-col'>
-            <div className="flex gap-2 flex-1">
+            <div className="flex gap-8 items-start">
                 <div className="flex-1 flex flex-col">
                     <SectionTitle className='underline'>{term}</SectionTitle>
                     <SectionSubtitle>פרויקט ה{project?.term || term} - <span className='text-2xl'>{project?.title}</span></SectionSubtitle>
@@ -29,13 +29,14 @@ function TermSection({ project, research, term }) {
                         <SectionText smaller className="text-muted-foreground -mt-2">בליווי {project?.master?.first_name}</SectionText>
                     )}
                     <SectionText smaller className="italic mt-1">{project?.summary}</SectionText>
-
-                    <SectionSubtitle className="mt-4">חקר ה{term} - {research?.title}</SectionSubtitle>
-                    <SectionText smaller className="italic">{research?.summary}</SectionText>
                 </div>
-                <div className="flex items-start justify-start p-8">
+                <div className="flex-shrink-0 pt-2">
                     <RadarChart data={data} size={200} />
                 </div>
+            </div>
+            <div className="mt-6">
+                <SectionSubtitle>חקר ה{term} - {research?.title}</SectionSubtitle>
+                <SectionText smaller className="italic">{research?.summary}</SectionText>
             </div>
         </div>
     );

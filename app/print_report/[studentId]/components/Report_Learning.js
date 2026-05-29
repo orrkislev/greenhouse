@@ -1,3 +1,4 @@
+import { KeyRound } from "lucide-react";
 import { ReportPageSection } from "./Layout";
 
 function RatingBars({ rating, isSelf }) {
@@ -20,44 +21,43 @@ function RatingBars({ rating, isSelf }) {
 
 const KEY_ICON = '🔑';
 
+function DashedArrowConnector() {
+    return (
+        <div className="flex-1  min-w-16 h-1 border-t border-dashed border-neutral-400 mx-2 relative">
+        </div>
+    );
+}
+
 function HeutagogyTable({ skills }) {
     const visible = skills?.filter(s => s.name) || [];
     if (visible.length === 0) return null;
     const hasAnySelf = visible.some(s => !s.staffRating && !!s.rating);
     return (
         <div className="mt-4">
-            <div className="font-bold text-[9pt] mb-1 text-neutral-500">מיומנויות יוטגוגיות</div>
-            <table className='w-full table-fixed text-right'>
-                <thead className='border-b border-neutral-600'>
-                    <tr>
-                        <th className='font-bold pb-1 w-[28%] text-[8pt]'>מיומנות</th>
-                        <th className='font-bold pb-1 text-[8pt]'>פירוט</th>
-                        <th className='font-bold pb-1 w-[5em] text-center text-[8pt]'>הערכה</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {visible.map((skill, index) => {
-                        const r = skill.staffRating || skill.rating;
-                        const isSelf = !skill.staffRating && !!skill.rating;
-                        return (
-                            <tr key={index} className='border-b border-dashed border-neutral-300'>
-                                <td className='p-1 align-top font-semibold text-[8pt]'>{skill.name}</td>
-                                <td className='p-1 align-top text-neutral-700 text-[8pt]'>{skill.detail}</td>
-                                <td className='p-1 align-top text-center text-[8pt]'>
-                                    {r ? (
-                                        <span className="flex items-center gap-1 justify-center">
-                                            <RatingBars rating={r} isSelf={isSelf} />
-                                            <span className={`font-bold ${isSelf ? '' : 'invisible'}`}>*</span>
-                                        </span>
-                                    ) : '—'}
-                                </td>
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
+            <div className="font-bold text-[12pt] mb-1 text-neutral-500" contentEditable suppressContentEditableWarning>מיומנויות יוטגוגיות</div>
+            {visible.map((skill, index) => (
+                <div key={index} className='flex justify-between gap-2 py-1 items-center'>
+                    <div className='text-[10pt]' contentEditable suppressContentEditableWarning>
+                        <span className="font-semibold">{skill.name} - </span>
+                        {skill.detail}
+                    </div>
+                    <DashedArrowConnector />
+                    <div className='text-center text-[10pt]'>
+                        {(() => {
+                            const r = skill.staffRating || skill.rating;
+                            const isSelf = !skill.staffRating && !!skill.rating;
+                            return r ? (
+                                <span className="flex items-center gap-1 justify-center">
+                                    <RatingBars rating={r} isSelf={isSelf} />
+                                    <span className={`font-bold ${isSelf ? '' : 'invisible'}`}>*</span>
+                                </span>
+                            ) : '—';
+                        })()}
+                    </div>
+                </div>
+            ))}
             {hasAnySelf && (
-                <div className="text-[7pt] text-neutral-500 mt-3">* הערכה המסומנת בכוכבית היא הערכה עצמית.</div>
+                <div className="text-[10pt] text-neutral-500 mt-3" contentEditable suppressContentEditableWarning>* הערכה המסומנת בכוכבית היא הערכה עצמית.</div>
             )}
         </div>
     );
@@ -68,33 +68,23 @@ function TopicTable({ title, topics }) {
     if (visibleTopics.length === 0) return null;
     return (
         <div className="mb-4">
-            <div className="font-bold text-[9pt] mb-1 text-neutral-500">{title}</div>
-            <table className='w-full table-fixed text-right'>
-                <thead className='border-b border-neutral-600'>
-                    <tr>
-                        <th className='font-bold pb-1 w-[28%] text-[8pt]'>נושא</th>
-                        <th className='font-bold pb-1 text-[8pt]'>פירוט</th>
-                        <th className='font-bold pb-1 w-[22%] text-[8pt]'>יישום</th>
-                        <th className='font-bold pb-1 w-[5em] text-center text-[8pt]'>הערכה</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {visibleTopics.map((topic, index) => (
-                        <tr key={index} className='border-b border-dashed border-neutral-300'>
-                            <td className='p-1 align-top font-semibold text-[8pt]' contentEditable suppressContentEditableWarning>
-                                {topic.keyTopic && <span className="mr-0.5">{KEY_ICON}</span>}
-                                {topic.name}
-                            </td>
-                            <td className='p-1 align-top text-neutral-700 text-[8pt]' contentEditable suppressContentEditableWarning>
-                                {topic.detail}
-                            </td>
-                            <td className='p-1 align-top text-neutral-700 text-[8pt]' contentEditable suppressContentEditableWarning>
-                                {topic.application}
-                            </td>
-                            <td className='p-1 align-top text-center text-[8pt]'>
+            <div className="font-bold text-[12pt] mb-1 text-neutral-500" contentEditable suppressContentEditableWarning>{title}</div>
+            <div className="space-y-1">
+                {visibleTopics.map((topic, index) => {
+                    const r = topic.staffRating || topic.rating;
+                    const isSelf = !topic.staffRating && !!topic.rating;
+                    return (
+                        <div key={index} className={`flex justify-between gap-2 py-1 items-center ${isSelf ? 'bg-gray-200/80 opacity-80' : ''}`}>
+                            <div className='text-[10pt]' contentEditable suppressContentEditableWarning>
+                                {topic.keyTopic && <span className="mr-0.5"> <KeyRound className="inline ml-1 w-3.5 h-3.5 text-gray-700" title="נושא מפתח בחממה" />
+                                </span>}
+                                <span className="font-semibold">{topic.name}</span>
+                                {topic.detail ? <span className="text-neutral-700"> - {topic.detail}</span> : null}
+                                {topic.application ? <span className="text-neutral-700"> | יישום: {topic.application}</span> : null}
+                            </div>
+                            <DashedArrowConnector />
+                            <div className='text-center text-[10pt]'>
                                 {(() => {
-                                    const r = topic.staffRating || topic.rating;
-                                    const isSelf = !topic.staffRating && !!topic.rating;
                                     return r ? (
                                         <span className="flex items-center gap-1 justify-center">
                                             <RatingBars rating={r} isSelf={isSelf} />
@@ -102,11 +92,11 @@ function TopicTable({ title, topics }) {
                                         </span>
                                     ) : '—';
                                 })()}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                            </div>
+                        </div>
+                    )
+                })}
+            </div>
         </div>
     );
 }
@@ -130,9 +120,9 @@ export default function Report_Learning({ student }) {
                     <table className='w-full text-right mb-4'>
                         <thead className='border-b border-neutral-600'>
                             <tr>
-                                <th className='font-bold pb-1 min-w-[8em]'>נושא הלמידה</th>
-                                <th className='font-bold pb-1 min-w-[10em]'>מה למדתי</th>
-                                <th className='font-bold pb-1'>איך למדתי</th>
+                                <th className='font-bold pb-1 min-w-[8em]' contentEditable suppressContentEditableWarning>נושא הלמידה</th>
+                                <th className='font-bold pb-1 min-w-[10em]' contentEditable suppressContentEditableWarning>מה למדתי</th>
+                                <th className='font-bold pb-1' contentEditable suppressContentEditableWarning>איך למדתי</th>
                             </tr>
                         </thead>
                         <tbody>

@@ -13,10 +13,10 @@ export function ReportPage({ children, withChamama = true, withAvoda = true, wit
             }}
         >
             <div className="flex items-center justify-between grayscale mb-6">
-                {withChamama ? <img src="/images/report/chamama.png" alt="logo" className="h-12 " /> : <div className="h-12" />}
-                {withAvoda ? <img src="/images/report/haavoda.png" alt="logo" className="h-12" /> : <div className="h-12" />}
-                {withHodHasharon ? <img src="/images/report/hodHasharon.png" alt="logo" className="h-12" /> : <div className="h-12" />}
-                {withAmal ? <img src="/images/report/amal.jpeg" alt="logo" className="h-12" /> : <div className="h-12" />}
+                {withChamama ? <img src="/images/report/chamama.png" alt="logo" className="h-12 " /> : <div className="" />}
+                {withAvoda ? <img src="/images/report/haavoda.png" alt="logo" className="h-12" /> : <div className="" />}
+                {withHodHasharon ? <img src="/images/report/hodHasharon.png" alt="logo" className="h-12" /> : <div className="" />}
+                {withAmal ? <img src="/images/report/amal.jpeg" alt="logo" className="h-12" /> : <div className="" />}
             </div>
             {children}
         </div>

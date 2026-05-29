@@ -39,3 +39,4 @@ _Done (this release)_
 - [x] Summer evaluation for 1st year semester B — portfolio (content + design + review) and majors acceptance (major dropdown, presentation + reflection sliders + review) with radar chart; stored in `end_eval` column (renamed from `pol`) with `type: 'summer_eval_1b'`
 - [x] Renamed `pol` DB column to `end_eval`; added `type` field to POL save payload (`type: 'pol'`)
 - [x] alignment issues in report Learning tables
+- [x] Learning report tables unified to row-based style: removed separate detail column, attached detail/application text to topic line, enforced 10pt minimum text, and replaced dashed row dividers with dashed topic-to-evaluation arrow connectors

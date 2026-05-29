@@ -41,19 +41,20 @@ export default function RadarChart({ data, size = 400, onEdit, showLegend = true
     const legendWidth = showLegend ? Math.round(size * 0.38) : 0;
     const totalWidth = size + legendWidth;
     // x where leaders terminate and labels anchor (left edge of label text)
-    const legendX = showLegend ? Math.round(legendWidth * 0.1 + 5) : 0;
+    const legendX = showLegend ? 0 : 0;
     // absolute x of chart center in SVG space
     const absCx = legendWidth + center;
 
     const calculatePoint = (index, value, total) => {
         const angle = (index / total) * TAU - Math.PI / 2;
         const radius = (value / 100) * maxRadius;
+        const addedRadius = index % 2 === 0 ? 20 : 10; // optional: add small offset to odd points to break ties
         return {
             x: center + radius * Math.cos(angle),
             y: center + radius * Math.sin(angle),
             angle,
-            labelX: center + (maxRadius + 20) * Math.cos(angle),
-            labelY: center + (maxRadius + 20) * Math.sin(angle),
+            labelX: center + (maxRadius + addedRadius) * Math.cos(angle),
+            labelY: center + (maxRadius + addedRadius) * Math.sin(angle),
         };
     };
 
@@ -291,7 +292,11 @@ export default function RadarChart({ data, size = 400, onEdit, showLegend = true
                             fontWeight="500"
                             fill="#333"
                         >
-                            {item.subject}
+                            {item.subject.split(' ').map((word, index) => (
+                                <tspan key={index} x={point.labelX} dy={index === 0 ? '0' : '1em'}>
+                                    {word}
+                                </tspan>
+                            ))}
                         </text>
                     );
                 })}
@@ -307,7 +312,7 @@ export default function RadarChart({ data, size = 400, onEdit, showLegend = true
                     <line
                         x1={mx} y1={my}
                         x2={legendX} y2={my}
-                        stroke="#94beb2"
+                        stroke="#999"
                         strokeWidth="1.3"
                         strokeDasharray="2 3.5"
                         strokeLinecap="round"
@@ -316,7 +321,7 @@ export default function RadarChart({ data, size = 400, onEdit, showLegend = true
                     <circle
                         cx={mx} cy={my} r="3.8"
                         fill="#fff"
-                        stroke="#94beb2"
+                        stroke="#999"
                         strokeWidth="1.4"
                     />
                     <text
@@ -327,7 +332,7 @@ export default function RadarChart({ data, size = 400, onEdit, showLegend = true
                         direction="rtl"
                         fontSize="12"
                         fontWeight="500"
-                        fill="#94beb2"
+                        fill="#999"
                     >
                         {label}
                     </text>

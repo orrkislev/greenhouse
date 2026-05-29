@@ -104,14 +104,15 @@ export default function PrintReportPage({ studentId, semester }) {
         <div className='print-report-scroll h-screen overflow-y-auto bg-neutral-600'>
             <div data-print-root className='flex flex-col items-center justify-center gap-16'>
                 {pages.map((page, i) => {
-                    const isLogoPage = page.type === 'stack' && page.sections.includes('chamama_logo');
+                    // const isLogoPage = page.type === 'stack' && page.sections.includes('chamama_logo');
+                    const isLogoPage = i == 0
                     return (
                         <div key={i} data-report-page>
                             <ReportPage
-                                withChamama={!isLogoPage}
-                                withAvoda={!isLogoPage}
-                                withHodHasharon={!isLogoPage}
-                                withAmal={!isLogoPage}
+                                withChamama={isLogoPage}
+                                withAvoda={isLogoPage}
+                                withHodHasharon={isLogoPage}
+                                withAmal={isLogoPage}
                             >
                                 {i === 0 && <ReportTitle student={student} />}
                                 {page.type === 'resizable' && (
