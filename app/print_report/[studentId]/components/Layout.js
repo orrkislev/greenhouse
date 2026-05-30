@@ -55,7 +55,7 @@ export function ReportTitle({ student }) {
     return (
         <div className='flex flex-col items-center justify-center'>
             <div className='text-lg text-center'>
-                תעודת  {formatSemesterLabel(getReportSemester())}
+                תעודת  {formatSemesterLabel(getReportSemester(), true, true)}
             </div>
             <div className='text-3xl font-bold text-center'>
                 {student.first_name} {student.last_name}
