@@ -19,7 +19,7 @@ export default function Report_Majors({ student }) {
                     <SectionSubtitle>תיק עבודות</SectionSubtitle>
                     <SectionText>{data?.portfolio?.review ? data.portfolio.review : "לא הוצג תיק עבודות!"}</SectionText>
                         
-                    <SectionSubtitle>קבלה למגמה{data.majorsAcceptance?.requestedMajor ? ` — ${data.majorsAcceptance?.requestedMajor}` : ''}</SectionSubtitle>
+                    <SectionSubtitle>קבלה למגמה{data?.majorsAcceptance?.requestedMajor ? ` — ${data.majorsAcceptance?.requestedMajor}` : ''}</SectionSubtitle>
                     <SectionText>{data?.majorsAcceptance?.review ? data.majorsAcceptance?.review : "עליך להגיש מועמדות למגמה בצורה מסודרת."}</SectionText>
                 </div>
                 <div className="flex items-start justify-start p-8">

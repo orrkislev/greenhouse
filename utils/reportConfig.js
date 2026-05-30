@@ -255,7 +255,7 @@ export const PRINT_REPORT_PAGES = {
         ],
         'B': [
             { type: 'resizable', top: 'ikigai',   bottom: 'liba',     initialRatio: 0.6 },
-            { type: 'stack',     sections: ['projects_regular', 'portfolio'] },
+            { type: 'stack',     sections: ['projects_regular', 'majors', 'portfolio'] },
             // { type: 'stack',     sections: ['majors'] },
             { type: 'resizable', top: 'learning', bottom: 'vocation', initialRatio: 0.5 },
             { type: 'stack',     sections: ['chamama_logo'] },
@@ -270,9 +270,9 @@ export const PRINT_REPORT_PAGES = {
         ],
         'B': [
             { type: 'resizable', top: 'ikigai',   bottom: 'liba',     initialRatio: 0.6 },
-            { type: 'stack',     sections: ['projects_regular', 'portfolio'] },
-            { type: 'stack',     sections: ['POL'] },
-            { type: 'resizable', top: 'learning', bottom: 'vocation', initialRatio: 0.5 },
+            { type: 'stack',     sections: ['projects_regular', 'POL'] },
+            { type: 'stack',     sections: ['learning'] },
+            { type: 'resizable', top: 'portfolio', bottom: 'vocation', initialRatio: 0.5 },
             { type: 'stack',     sections: ['chamama_logo'] },
         ],
     },
