@@ -1,7 +1,7 @@
 'use client'
 
 import { ReportPage, ReportTitle } from './components/Layout';
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Report_General from './components/Report_General';
 import Report_Liba from './components/Report_Liba';
 import Report_Learning from './components/Report_Learning';
@@ -115,18 +115,10 @@ export default function PrintReportPage({ studentId, semester }) {
                                 withAmal={isLogoPage}
                             >
                                 {i === 0 && <ReportTitle student={student} />}
-                                {page.type === 'resizable' && (
-                                    <ResizableSections
-                                        topSection={renderSection(page.top, student, semesterLetter)}
-                                        bottomSection={renderSection(page.bottom, student, semesterLetter)}
-                                        initialRatio={page.initialRatio}
-                                    />
-                                )}
-                                {page.type === 'stack' && page.sections.map(key => (
-                                    <Fragment key={key}>
-                                        {renderSection(key, student, semesterLetter)}
-                                    </Fragment>
-                                ))}
+                                <ResizableSections
+                                    sections={page.sections.map(key => renderSection(key, student, semesterLetter))}
+                                    initialSizes={page.initialSizes}
+                                />
                             </ReportPage>
                         </div>
                     );

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 
 export function DraggableDivider({ onDrag }) {
@@ -43,27 +43,62 @@ export function DraggableDivider({ onDrag }) {
     );
 }
 
-export function ResizableSections({ topSection, bottomSection, initialRatio = 0.5 }) {
-    const [ratio, setRatio] = useState(initialRatio);
-    const sectionRef = useRef(null);
+export function ResizableSections({ sections, initialSizes }) {
+    const n = sections.length;
 
-    const handleDrag = useCallback((clientY) => {
-        const rect = sectionRef.current?.getBoundingClientRect();
+    const [sizes, setSizes] = useState(() => {
+        if (!initialSizes) return sections.map(() => 1 / n);
+        const total = initialSizes.reduce((a, b) => a + b, 0);
+        return initialSizes.map(s => s / total);
+    });
+
+    const containerRef = useRef(null);
+    const sectionRefs = useRef([]);
+
+    // When no initialSizes: after first paint, measure natural scrollHeight of each section.
+    // If all content fits within the container, size proportionally; otherwise keep equal.
+    useLayoutEffect(() => {
+        if (initialSizes || n <= 1) return;
+        const containerH = containerRef.current?.getBoundingClientRect().height;
+        if (!containerH) return;
+        const naturalHeights = sectionRefs.current.map(el => el?.scrollHeight ?? 0);
+        const total = naturalHeights.reduce((a, b) => a + b, 0);
+        if (total > 0 && total <= containerH) {
+            setSizes(naturalHeights.map(h => h / containerH));
+        }
+    }, []);
+
+    const handleDrag = useCallback((divIdx, clientY) => {
+        const rect = containerRef.current?.getBoundingClientRect();
         if (!rect) return;
-        const relativeY = clientY - rect.top;
-        const newRatio = Math.min(0.8, Math.max(0.2, relativeY / rect.height));
-        setRatio(newRatio);
+        setSizes(prev => {
+            const next = [...prev];
+            const sumBefore = prev.slice(0, divIdx).reduce((a, b) => a + b, 0);
+            const combined = prev[divIdx] + prev[divIdx + 1];
+            const minFrac = 0.05;
+            const raw = (clientY - rect.top) / rect.height - sumBefore;
+            next[divIdx]     = Math.min(combined - minFrac, Math.max(minFrac, raw));
+            next[divIdx + 1] = combined - next[divIdx];
+            return next;
+        });
     }, []);
 
     return (
-        <div ref={sectionRef} className="flex flex-col flex-1 min-h-0">
-            <div className="flex flex-col min-h-0" style={{ flex: ratio }}>
-                {topSection}
-            </div>
-            <DraggableDivider onDrag={handleDrag} />
-            <div className="flex flex-col min-h-0" style={{ flex: 1 - ratio }}>
-                {bottomSection}
-            </div>
+        <div ref={containerRef} className="flex flex-col flex-1 min-h-0">
+            {sections.map((section, i) => (
+                <Fragment key={i}>
+                    <div
+                        ref={el => sectionRefs.current[i] = el}
+                        className="flex flex-col min-h-0"
+                        style={{ flex: sizes[i] }}
+                    >
+                        {section}
+                    </div>
+                    {i < n - 1 && (
+                        <DraggableDivider onDrag={(y) => handleDrag(i, y)} />
+                    )}
+                </Fragment>
+            ))}
         </div>
     );
 }

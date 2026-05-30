@@ -241,69 +241,68 @@ export function getDashboardSections(year, semester) {
 }
 
 // Print layout per year × semester: array of A4 pages.
-// Each page is either:
-//   { type: 'resizable', top, bottom, initialRatio } — drag-to-resize pair
-//   { type: 'stack', sections: [...] }               — fixed flex-column
-// All keys reference SECTION_DEFS entries.
+// Each page is: { sections: [...keys], initialSizes?: [...weights] }
+// - sections: array of SECTION_DEFS keys, rendered top-to-bottom with drag-to-resize dividers between them
+// - initialSizes: optional relative weights (e.g. [0.6, 0.4] or [3, 2] are equivalent).
+//   If omitted, sections start at their natural content height if it fits; otherwise equal sizes.
 export const PRINT_REPORT_PAGES = {
     '1': {
         'A': [
-            { type: 'resizable', top: 'ikigai',   bottom: 'liba',     initialRatio: 0.6 },
-            { type: 'stack',     sections: ['projects_regular', 'portfolio'] },
-            { type: 'resizable', top: 'learning', bottom: 'vocation', initialRatio: 0.5 },
-            { type: 'stack',     sections: ['chamama_logo'] },
+            { sections: ['ikigai', 'liba'],              initialSizes: [0.6, 0.4] },
+            { sections: ['projects_regular', 'portfolio'] },
+            { sections: ['learning', 'vocation'],        initialSizes: [0.5, 0.5] },
+            { sections: ['chamama_logo'] },
         ],
         'B': [
-            { type: 'resizable', top: 'ikigai',   bottom: 'liba',     initialRatio: 0.6 },
-            { type: 'stack',     sections: ['projects_regular', 'majors', 'portfolio'] },
-            // { type: 'stack',     sections: ['majors'] },
-            { type: 'resizable', top: 'learning', bottom: 'vocation', initialRatio: 0.5 },
-            { type: 'stack',     sections: ['chamama_logo'] },
+            { sections: ['ikigai', 'liba'],                        initialSizes: [0.6, 0.4] },
+            { sections: ['projects_regular', 'majors', 'portfolio'] },
+            { sections: ['learning', 'vocation'],                  initialSizes: [0.5, 0.5] },
+            { sections: ['chamama_logo'] },
         ],
     },
     '2': {
         'A': [
-            { type: 'resizable', top: 'ikigai',   bottom: 'liba',     initialRatio: 0.6 },
-            { type: 'stack',     sections: ['projects_regular', 'portfolio'] },
-            { type: 'resizable', top: 'learning', bottom: 'vocation', initialRatio: 0.5 },
-            { type: 'stack',     sections: ['chamama_logo'] },
+            { sections: ['ikigai', 'liba'],              initialSizes: [0.6, 0.4] },
+            { sections: ['projects_regular', 'portfolio'] },
+            { sections: ['learning', 'vocation'],        initialSizes: [0.5, 0.5] },
+            { sections: ['chamama_logo'] },
         ],
         'B': [
-            { type: 'resizable', top: 'ikigai',   bottom: 'liba',     initialRatio: 0.6 },
-            { type: 'stack',     sections: ['projects_regular', 'POL'] },
-            { type: 'stack',     sections: ['learning'] },
-            { type: 'resizable', top: 'portfolio', bottom: 'vocation', initialRatio: 0.5 },
-            { type: 'stack',     sections: ['chamama_logo'] },
+            { sections: ['ikigai', 'liba'],              initialSizes: [0.6, 0.4] },
+            { sections: ['projects_regular', 'POL'] },
+            { sections: ['learning'] },
+            { sections: ['vocation', 'portfolio'],       initialSizes: [0.5, 0.5] },
+            { sections: ['chamama_logo'] },
         ],
     },
     '3': {
         'A': [
-            { type: 'resizable', top: 'ikigai',   bottom: 'liba',     initialRatio: 0.6 },
-            { type: 'stack',     sections: ['finalProject', 'portfolio'] },
-            { type: 'resizable', top: 'learning', bottom: 'vocation', initialRatio: 0.5 },
-            { type: 'stack',     sections: ['chamama_logo'] },
+            { sections: ['ikigai', 'liba'],              initialSizes: [0.6, 0.4] },
+            { sections: ['finalProject', 'portfolio'] },
+            { sections: ['learning', 'vocation'],        initialSizes: [0.5, 0.5] },
+            { sections: ['chamama_logo'] },
         ],
         'B': [
-            { type: 'resizable', top: 'ikigai',   bottom: 'liba',     initialRatio: 0.6 },
-            { type: 'stack',     sections: ['finalProject_B', 'portfolio'] },
-            { type: 'stack',     sections: ['POL'] },
-            { type: 'resizable', top: 'learning', bottom: 'vocation', initialRatio: 0.5 },
-            { type: 'stack',     sections: ['chamama_logo'] },
+            { sections: ['ikigai', 'liba'],              initialSizes: [0.6, 0.4] },
+            { sections: ['finalProject_B', 'portfolio'] },
+            { sections: ['POL'] },
+            { sections: ['learning', 'vocation'],        initialSizes: [0.5, 0.5] },
+            { sections: ['chamama_logo'] },
         ],
     },
     '4': {
         'A': [
-            { type: 'resizable', top: 'ikigai',   bottom: 'liba',     initialRatio: 0.6 },
-            { type: 'stack',     sections: ['personalGoals', 'portfolio'] },
-            { type: 'resizable', top: 'learning', bottom: 'vocation', initialRatio: 0.5 },
-            { type: 'stack',     sections: ['chamama_logo'] },
+            { sections: ['ikigai', 'liba'],              initialSizes: [0.6, 0.4] },
+            { sections: ['personalGoals', 'portfolio'] },
+            { sections: ['learning', 'vocation'],        initialSizes: [0.5, 0.5] },
+            { sections: ['chamama_logo'] },
         ],
         'B': [
-            { type: 'resizable', top: 'ikigai',   bottom: 'liba',     initialRatio: 0.6 },
-            { type: 'stack',     sections: ['personalGoals', 'portfolio'] },
-            { type: 'stack',     sections: ['POL'] },
-            { type: 'resizable', top: 'learning', bottom: 'vocation', initialRatio: 0.5 },
-            { type: 'stack',     sections: ['chamama_logo'] },
+            { sections: ['ikigai', 'liba'],              initialSizes: [0.6, 0.4] },
+            { sections: ['personalGoals', 'portfolio'] },
+            { sections: ['POL'] },
+            { sections: ['learning', 'vocation'],        initialSizes: [0.5, 0.5] },
+            { sections: ['chamama_logo'] },
         ],
     },
 };
