@@ -15,10 +15,10 @@ export default function SmartTextArea(props) {
         <textarea
             ref={ref}
             rows={1}
-            className={`bg-transparent text-stone-800 rounded px-1 w-full outline-none pointer-events-auto focus:bg-white/50 resize-none text-sm`}
+            {...props}
+            className={`bg-transparent text-stone-800 rounded px-1 w-full outline-none pointer-events-auto focus:bg-white/50 resize-none text-sm ${props.className || ''}`}
             style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', minHeight: '0', ...props.style }}
             onChange={props.onChange || (() => { })}
-            {...props}
         />
     );
 }
