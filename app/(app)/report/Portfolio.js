@@ -18,7 +18,7 @@ export default function Portfolio({ portfolio }) {
         const url = portfolio || user?.portfolio_url || ''
         setPortfolioUrl(url)
         setSavedUrl(url)
-    }, [portfolio, user])
+    }, [portfolio, user?.portfolio_url])
 
     const shouldSave = useMemo(() => {
         return portfolioUrl !== savedUrl
