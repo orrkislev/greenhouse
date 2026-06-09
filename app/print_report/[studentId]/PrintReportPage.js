@@ -32,7 +32,7 @@ function ChamamaLogo() {
     return (
         <div className="flex justify-center items-center h-full">
             <div className="flex flex-col items-center justify-center">
-                <img src="/images/report/chamamaLarge.jpg" alt="logo" className="h-64 grayscale" />
+                <img src="/images/report/chamamaLarge.png" alt="logo" className="h-64 grayscale" />
             </div>
         </div>
     );
