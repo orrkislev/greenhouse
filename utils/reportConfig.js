@@ -201,6 +201,7 @@ export const SECTION_DEFS = {
     // Term sections (autumn/winter/spring) are aggregated here by getYearSections
     projects_regular: { key: 'projects_regular', printComponent: 'Report_Projects', printVariant: 'regular' },
     chamama_logo:     { key: 'chamama_logo',     printComponent: 'ChamamaLogo' },
+    final_year_general: { key: 'final_year_general', printComponent: 'Report_General', printVariant: 'finalYear' }
 };
 
 // Which interactive sections appear for each year × semester combination.
@@ -255,8 +256,8 @@ export const PRINT_REPORT_PAGES = {
         ],
         'B': [
             { sections: ['ikigai', 'liba'],                        initialSizes: [0.6, 0.4] },
-            { sections: ['projects_regular', 'majors', 'portfolio'] },
-            { sections: ['learning', 'vocation'],                  initialSizes: [0.5, 0.5] },
+            { sections: ['projects_regular', 'majors'],            initialSizes: [0.6, 0.4] },
+            { sections: ['learning', 'vocation'],                  initialSizes: [0.7, 0.3] },
             { sections: ['chamama_logo'] },
         ],
     },
@@ -270,8 +271,7 @@ export const PRINT_REPORT_PAGES = {
         'B': [
             { sections: ['ikigai', 'liba'],              initialSizes: [0.6, 0.4] },
             { sections: ['projects_regular', 'POL'] },
-            { sections: ['learning'] },
-            { sections: ['vocation', 'portfolio'],       initialSizes: [0.5, 0.5] },
+            { sections: ['learning', 'vocation'],        initialSizes: [0.7, 0.3] },
             { sections: ['chamama_logo'] },
         ],
     },
@@ -283,10 +283,9 @@ export const PRINT_REPORT_PAGES = {
             { sections: ['chamama_logo'] },
         ],
         'B': [
-            { sections: ['ikigai', 'liba'],              initialSizes: [0.6, 0.4] },
-            { sections: ['finalProject_B', 'portfolio'] },
-            { sections: ['POL'] },
-            { sections: ['learning', 'vocation'],        initialSizes: [0.5, 0.5] },
+            { sections: ['final_year_general', 'vocation'], initialSizes: [0.6, 0.4] },
+            { sections: ['finalProject_B', 'POL'],          initialSizes: [0.6, 0.4] },
+            { sections: ['learning'] },
             { sections: ['chamama_logo'] },
         ],
     },
@@ -298,10 +297,9 @@ export const PRINT_REPORT_PAGES = {
             { sections: ['chamama_logo'] },
         ],
         'B': [
-            { sections: ['ikigai', 'liba'],              initialSizes: [0.6, 0.4] },
-            { sections: ['personalGoals', 'portfolio'] },
+            { sections: ['final_year_general'],              initialSizes: [0.6, 0.4] },
             { sections: ['POL'] },
-            { sections: ['learning', 'vocation'],        initialSizes: [0.5, 0.5] },
+            { sections: ['learning', 'vocation'],        initialSizes: [0.7, 0.3] },
             { sections: ['chamama_logo'] },
         ],
     },

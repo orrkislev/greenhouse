@@ -31,10 +31,10 @@ function DashedArrowConnector() {
 function HeutagogyTable({ skills }) {
     const visible = skills?.filter(s => s.name) || [];
     if (visible.length === 0) return null;
-    const hasAnySelf = visible.some(s => !s.staffRating && !!s.rating);
+    
     return (
         <div className="mt-4">
-            <div className="font-bold text-[12pt] mb-1 text-neutral-500" contentEditable suppressContentEditableWarning>מיומנויות יוטגוגיות</div>
+            <div className="font-bold text-[12pt] mb-1" contentEditable suppressContentEditableWarning>מיומנויות יוטגוגיות</div>
             {visible.map((skill, index) => (
                 <div key={index} className='flex justify-between gap-2 py-1 items-center'>
                     <div className='text-[10pt]' contentEditable suppressContentEditableWarning>
@@ -56,9 +56,6 @@ function HeutagogyTable({ skills }) {
                     </div>
                 </div>
             ))}
-            {hasAnySelf && (
-                <div className="text-[10pt] text-neutral-500 mt-3" contentEditable suppressContentEditableWarning>* הערכה המסומנת בכוכבית היא הערכה עצמית.</div>
-            )}
         </div>
     );
 }
@@ -68,7 +65,7 @@ function TopicTable({ title, topics }) {
     if (visibleTopics.length === 0) return null;
     return (
         <div className="mb-4">
-            <div className="font-bold text-[12pt] mb-1 text-neutral-500" contentEditable suppressContentEditableWarning>{title}</div>
+            <div className="font-bold text-[12pt] mb-1" contentEditable suppressContentEditableWarning>{title}</div>
             <div className="space-y-1">
                 {visibleTopics.map((topic, index) => {
                     const r = topic.staffRating || topic.rating;
@@ -113,6 +110,13 @@ export default function Report_Learning({ student }) {
     const oldTopics = learning?.topics?.filter(t => t.name) || [];
     const isOldStructure = professionalTopics === null && oldTopics.length > 0;
 
+    // const hasAnySelf = visible.some(s => !s.staffRating && !!s.rating);
+    const hasAnySelf = [
+        ...(professionalTopics || []),
+        ...(generalTopics || []),
+        ...(heutagogySkills || [])
+    ].some(s => !s.staffRating && !!s.rating);
+
     return (
         <ReportPageSection title="למידה" className="flex-2">
             <div className='h-full flex flex-col'>
@@ -144,6 +148,10 @@ export default function Report_Learning({ student }) {
                         <TopicTable title="נושאים מקצועיים" topics={professionalTopics} />
                         <TopicTable title="למידה כללית" topics={generalTopics} />
                         <HeutagogyTable skills={heutagogySkills} />
+                        {hasAnySelf && (
+                            <div className="text-[10pt] text-neutral-500 mt-3" contentEditable suppressContentEditableWarning>* הערכה המסומנת בכוכבית היא הערכה עצמית.</div>
+                        )}
+
                     </>
                 )}
             </div>

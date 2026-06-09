@@ -111,7 +111,7 @@ export default function StaffGroup_Evaluations({ group }) {
                         .map(student => (
                             <tr key={student.id} className="border-b border-border/50 hover:border-2 hover:border-black">
                                 <Cell $status={worstStatus([
-                                    mentorsStatus(student.report),
+                                    ['3','4'].includes(group?.description) ? 'complete' : mentorsStatus(student.report),
                                     ikigaiStatus(student.report),
                                     portfolioStatus(student.report),
                                     libaStatus(student.report),
@@ -119,7 +119,7 @@ export default function StaffGroup_Evaluations({ group }) {
                                     learningStatus(student.report),
                                     vocationStatus(student.report),
                                 ])} onClick={() => viewFullReport(student)}>{student.first_name} {student.last_name.charAt(0)}.</Cell>
-                                <Cell $status={mentorsStatus(student.report)}
+                                <Cell $status={['3','4'].includes(group?.description) ? 'complete' : mentorsStatus(student.report)}
                                     onClick={() => openMentorsField(student)} />
                                 <Cell $status={ikigaiStatus(student.report)}
                                     onClick={() => goToReport(student, 'ikigai')} />

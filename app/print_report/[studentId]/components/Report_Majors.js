@@ -1,4 +1,5 @@
 // TODO: full print styling pass — font sizes, spacing, section dividers
+import { QRCodeSVG } from 'qrcode.react';
 import RadarChart from '@/components/RadarChart';
 import { ReportPageSection, SectionSubtitle, SectionText } from './Layout';
 
@@ -22,9 +23,11 @@ export default function Report_Majors({ student }) {
                     <SectionSubtitle>קבלה למגמה{data?.majorsAcceptance?.requestedMajor ? ` — ${data.majorsAcceptance?.requestedMajor}` : ''}</SectionSubtitle>
                     <SectionText>{data?.majorsAcceptance?.review ? data.majorsAcceptance?.review : "עליך להגיש מועמדות למגמה בצורה מסודרת."}</SectionText>
                 </div>
-                <div className="flex items-start justify-start p-8">
+                <div className="flex flex-col items-end justify-start p-8 gap-6">
+                    {student?.portfolio_url && <QRCodeSVG value={student?.portfolio_url} size={120} />}
                     <RadarChart data={radarData} size={200} />
                 </div>
+
             </div>
         </ReportPageSection>
     );
