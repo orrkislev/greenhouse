@@ -288,6 +288,7 @@ export default function RadarChart({ data, size = 400, onEdit, showLegend = true
                             y={point.labelY}
                             textAnchor={anchor}
                             dominantBaseline="middle"
+                            direction="rtl"
                             fontSize="14"
                             fontWeight="500"
                             fill="#333"
