@@ -13,10 +13,10 @@ function TermSection({ project, research, term }) {
     if (!project && !research) return null;
 
     const data = [
-        { subject: 'הגדרת יעדים', value: project?.['הגדרת יעדים']?.overview || 50 },
-        { subject: 'הצגה ותיעוד', value: project?.['תכנון']?.overview || 50 },
-        { subject: 'למידה וביצוע', value: project?.['למידה וביצוע']?.overview || 50 },
-        { subject: 'תכנון', value: project?.['הצגה ותיעוד']?.overview || 50 },
+        { subject: 'הגדרת יעדים', value: project?.['הגדרת יעדים']?.overview || 0 },
+        { subject: 'הצגה ותיעוד', value: project?.['הצגה ותיעוד']?.overview || 0 },
+        { subject: 'למידה וביצוע', value: project?.['למידה וביצוע']?.overview || 0 },
+        { subject: 'תכנון', value: project?.['תכנון']?.overview || 0 },
     ];
 
     return (
@@ -69,11 +69,11 @@ function Final({ student }) {
     const finalProject = student.special;
 
     const radarData = finalProject?.radar || [
-        { subject: 'הצבת יעדים', value: 50 },
-        { subject: 'תכנון', value: 50 },
-        { subject: 'למידה', value: 50 },
-        { subject: 'ביצוע', value: 50 },
-        { subject: 'הצגה', value: 50 },
+        { subject: 'הצבת יעדים', value: 0 },
+        { subject: 'תכנון', value: 0 },
+        { subject: 'למידה', value: 0 },
+        { subject: 'ביצוע', value: 0 },
+        { subject: 'הצגה', value: 0 },
     ];
 
     return (
@@ -111,11 +111,11 @@ function PersonalGoals({ student }) {
     const personalGoals = student.special;
 
     const defaultRadarData = [
-        { subject: 'תכנון', value: 50 },
-        { subject: 'למידה', value: 50 },
-        { subject: 'ביצוע', value: 50 },
-        { subject: 'רכישת מקצוע', value: 50 },
-        { subject: 'הצגה', value: 50 }
+        { subject: 'תכנון', value: 0 },
+        { subject: 'למידה', value: 0 },
+        { subject: 'ביצוע', value: 0 },
+        { subject: 'רכישת מקצוע', value: 0 },
+        { subject: 'הצגה', value: 0 }
     ];
 
     return (

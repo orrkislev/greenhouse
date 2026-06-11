@@ -9,10 +9,10 @@ const MISSING_MSG = 'לא מצאנו את הפרטים באפליקציה. חש�
 
 export default function Term({ project, research, term, termKey }) {
     const data = [
-        { subject: 'הגדרת יעדים', value: project?.['הגדרת יעדים']?.overview || 50 },
-        { subject: 'הצגה ותיעוד', value: project?.['תכנון']?.overview || 50 },
-        { subject: 'למידה וביצוע', value: project?.['למידה וביצוע']?.overview || 50 },
-        { subject: 'תכנון', value: project?.['הצגה ותיעוד']?.overview || 50 },
+        { subject: 'הגדרת יעדים', value: project?.['הגדרת יעדים']?.overview || 0 },
+        { subject: 'הצגה ותיעוד', value: project?.['הצגה ותיעוד']?.overview || 0 },
+        { subject: 'למידה וביצוע', value: project?.['למידה וביצוע']?.overview || 0 },
+        { subject: 'תכנון', value: project?.['תכנון']?.overview || 0 },
     ];
 
     return (

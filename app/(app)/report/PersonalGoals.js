@@ -16,11 +16,11 @@ export default function PersonalGoals({ personalGoals, onSave }) {
         mode: 'questions', // 'questions' or 'radar'
         question: '',
         radarData: [
-            { subject: 'תכנון', value: 50 },
-            { subject: 'למידה', value: 50 },
-            { subject: 'ביצוע', value: 50 },
-            { subject: 'רכישת מקצוע', value: 50 },
-            { subject: 'הצגה', value: 50 }
+            { subject: 'תכנון', value: 0 },
+            { subject: 'למידה', value: 0 },
+            { subject: 'ביצוע', value: 0 },
+            { subject: 'רכישת מקצוע', value: 0 },
+            { subject: 'הצגה', value: 0 }
         ],
         summary: ''
     };
