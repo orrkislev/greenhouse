@@ -7,10 +7,10 @@ export default function Report_POL({ student }) {
     const pol = student.end_eval;
 
     const radarData = [
-        { subject: 'תוכן', value: pol?.rankings?.content || 50 },
-        { subject: 'הצגה', value: pol?.rankings?.presentation || 50 },
-        { subject: 'תיק עבודות', value: pol?.rankings?.portfolio || 50 },
-        { subject: 'תכנון קדימה', value: pol?.rankings?.planning || 50 },
+        { subject: 'תוכן', value: pol?.rankings?.content || 0 },
+        { subject: 'הצגה', value: pol?.rankings?.presentation || 0 },
+        { subject: 'תיק עבודות', value: pol?.rankings?.portfolio || 0 },
+        { subject: 'תכנון קדימה', value: pol?.rankings?.planning || 0 },
     ];
 
     return (
