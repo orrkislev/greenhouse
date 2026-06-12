@@ -1,13 +1,16 @@
 import { supabase } from "@/utils/supabase/client"
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { toastsActions } from "@/utils/store/useToasts";
 import { tw } from "@/utils/tw";
 import usePopper from "@/components/Popper";
-import { userActions } from "@/utils/store/useUser";
+import { userActions, useUser } from "@/utils/store/useUser";
 import Button from "@/components/Button";
 import { useRouter } from "next/navigation";
 import { getReportSemester } from "@/utils/store/useTime";
 import { getYearSections, ikigaiStatus, portfolioStatus, libaStatus, learningStatus, vocationStatus } from "@/utils/reportConfig";
+import { LATENESS, LATENESS_OPTIONS, pronounsKey, presencePercent } from "@/utils/presenceConfig";
+import { upsertPresence, resolveStudentsByIdNumber } from "@/utils/actions/presence actions";
+import ExcelJS from "exceljs";
 
 // Cell color by status:
 //   empty     → red    (required section with nothing entered)
@@ -40,8 +43,10 @@ const mentorsStatus = r => {
 export default function StaffGroup_Evaluations({ group }) {
     const [data, setData] = useState([]);
     const [selectedStudent, setSelectedStudent] = useState(null);
+    const [popperMode, setPopperMode] = useState(null); // 'mentors' | 'presence' | 'lateness' | 'import'
     const { open, close, Popper } = usePopper();
     const router = useRouter();
+    const user = useUser(s => s.user);
 
     const currentSemester = getReportSemester() ?? '2026A';
     const semester = currentSemester.slice(4); // 'A' or 'B'
@@ -69,8 +74,9 @@ export default function StaffGroup_Evaluations({ group }) {
         })();
     }, [group]);
 
-    const openMentorsField = (student) => {
+    const openPopper = (student, mode) => {
         setSelectedStudent(student);
+        setPopperMode(mode);
         open();
     };
 
@@ -93,56 +99,96 @@ export default function StaffGroup_Evaluations({ group }) {
 
     const columnDefs = sections.flatMap(s => s.columns);
 
+    const updateStudentPresence = (studentId, updates) => {
+        setData(prev => prev.map(s =>
+            s.id === studentId
+                ? { ...s, report: { ...s.report, ...updates } }
+                : s
+        ));
+    };
+
     return (
         <div className="flex flex-col gap-2 border border-border p-4 sticky top-0">
-            <h4 className="text-lg font-bold">הערכות</h4>
+            <div className="flex items-center justify-between">
+                <h4 className="text-lg font-bold">הערכות</h4>
+                {user?.is_admin && (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => { setPopperMode('import'); open(); }}
+                    >
+                        יבוא נוכחות ממשו"ב
+                    </Button>
+                )}
+            </div>
 
             <table className="text-xs table-auto border-separate border-spacing-1">
                 <thead>
                     <tr>
                         {['תעודה', 'ממני אליך', 'איקיגאי', 'פורטפוליו', 'ליבה'].map(t => <th key={t} className="p-2">{t}</th>)}
                         {columnDefs.map(col => <th key={col.navArg} className="p-2">{col.label}</th>)}
-                        {['למידה', 'יזמות מקיימת'].map(t => <th key={t} className="p-2">{t}</th>)}
+                        {['למידה', 'יזמות מקיימת', 'נוכחות', 'איחורים'].map(t => <th key={t} className="p-2">{t}</th>)}
                     </tr>
                 </thead>
                 <tbody>
                     {data
                         .sort((a, b) => a.first_name.localeCompare(b.first_name))
-                        .map(student => (
-                            <tr key={student.id} className="border-b border-border/50 hover:border-2 hover:border-black">
-                                <Cell $status={worstStatus([
-                                    ['3','4'].includes(group?.description) ? 'complete' : mentorsStatus(student.report),
-                                    ikigaiStatus(student.report),
-                                    portfolioStatus(student.report),
-                                    libaStatus(student.report),
-                                    ...columnDefs.map(col => col.status(student.report)),
-                                    learningStatus(student.report),
-                                    vocationStatus(student.report),
-                                ])} onClick={() => viewFullReport(student)}>{student.first_name} {student.last_name.charAt(0)}.</Cell>
-                                <Cell $status={['3','4'].includes(group?.description) ? 'complete' : mentorsStatus(student.report)}
-                                    onClick={() => openMentorsField(student)} />
-                                <Cell $status={ikigaiStatus(student.report)}
-                                    onClick={() => goToReport(student, 'ikigai')} />
-                                <Cell $status={portfolioStatus(student.report)}
-                                    onClick={() => goToReport(student, 'portfolio')} />
-                                <Cell $status={libaStatus(student.report)}
-                                    onClick={() => goToReport(student, 'liba')} />
-                                {columnDefs.map(col => (
-                                    <Cell key={col.navArg}
-                                        $status={col.status(student.report)}
-                                        onClick={() => {
-                                            if (col.navFn === 'project') goToProject(student, student.report?.[col.navArg], col.termKey);
-                                            else if (col.navFn === 'research') goToResearch(student, student.report?.[col.navArg]);
-                                            else goToReport(student, col.navArg);
-                                        }}
-                                    />
-                                ))}
-                                <Cell $status={learningStatus(student.report)}
-                                    onClick={() => goToReport(student, 'learning')} />
-                                <Cell $status={vocationStatus(student.report)}
-                                    onClick={() => goToReport(student, 'vocation')} />
-                            </tr>
-                        ))}
+                        .map(student => {
+                            const pct = presencePercent(student.report?.presence_days, student.report?.absence_days);
+                            const latenessLabel = student.report?.lateness
+                                ? LATENESS[pronounsKey(student.report?.pronouns)]?.[student.report.lateness]
+                                : null;
+
+                            return (
+                                <tr key={student.id} className="border-b border-border/50 hover:border-2 hover:border-black">
+                                    <Cell $status={worstStatus([
+                                        ['3','4'].includes(group?.description) ? 'complete' : mentorsStatus(student.report),
+                                        ikigaiStatus(student.report),
+                                        portfolioStatus(student.report),
+                                        libaStatus(student.report),
+                                        ...columnDefs.map(col => col.status(student.report)),
+                                        learningStatus(student.report),
+                                        vocationStatus(student.report),
+                                    ])} onClick={() => viewFullReport(student)}>{student.first_name} {student.last_name.charAt(0)}.</Cell>
+                                    <Cell $status={['3','4'].includes(group?.description) ? 'complete' : mentorsStatus(student.report)}
+                                        onClick={() => openPopper(student, 'mentors')} />
+                                    <Cell $status={ikigaiStatus(student.report)}
+                                        onClick={() => goToReport(student, 'ikigai')} />
+                                    <Cell $status={portfolioStatus(student.report)}
+                                        onClick={() => goToReport(student, 'portfolio')} />
+                                    <Cell $status={libaStatus(student.report)}
+                                        onClick={() => goToReport(student, 'liba')} />
+                                    {columnDefs.map(col => (
+                                        <Cell key={col.navArg}
+                                            $status={col.status(student.report)}
+                                            onClick={() => {
+                                                if (col.navFn === 'project') goToProject(student, student.report?.[col.navArg], col.termKey);
+                                                else if (col.navFn === 'research') goToResearch(student, student.report?.[col.navArg]);
+                                                else goToReport(student, col.navArg);
+                                            }}
+                                        />
+                                    ))}
+                                    <Cell $status={learningStatus(student.report)}
+                                        onClick={() => goToReport(student, 'learning')} />
+                                    <Cell $status={vocationStatus(student.report)}
+                                        onClick={() => goToReport(student, 'vocation')} />
+                                    {/* Presence cell: shows percentage, neutral background */}
+                                    <td
+                                        className="text-center cursor-pointer bg-stone-100 hover:bg-stone-200 px-2"
+                                        onClick={() => openPopper(student, 'presence')}
+                                    >
+                                        {pct != null ? `${pct}%` : '—'}
+                                    </td>
+                                    {/* Lateness cell: red when not set, green when set */}
+                                    <Cell
+                                        $status={student.report?.lateness ? 'complete' : 'empty'}
+                                        onClick={() => openPopper(student, 'lateness')}
+                                    >
+                                        {latenessLabel ?? ''}
+                                    </Cell>
+                                </tr>
+                            );
+                        })}
                 </tbody>
             </table>
 
@@ -161,7 +207,7 @@ export default function StaffGroup_Evaluations({ group }) {
             </div>
 
             <Popper className="backdrop-blur-sm p-2">
-                {selectedStudent && (
+                {selectedStudent && popperMode === 'mentors' && (
                     <div className="w-2xl">
                         <div className="flex justify-center items-center flex-col mb-2">
                             <div className="">ממני אליך</div>
@@ -170,7 +216,54 @@ export default function StaffGroup_Evaluations({ group }) {
                         <MentorsEditor
                             student={selectedStudent}
                             closeModal={close}
-                            onSave = {(id, mentors) => setData(prev => prev.map(s => s.id === id ? { ...s, report: { ...s.report, mentors } } : s))}
+                            onSave={(id, mentors) => setData(prev => prev.map(s => s.id === id ? { ...s, report: { ...s.report, mentors } } : s))}
+                        />
+                    </div>
+                )}
+                {selectedStudent && popperMode === 'presence' && (
+                    <div className="w-sm">
+                        <div className="flex justify-center items-center flex-col mb-2">
+                            <div className="">נוכחות</div>
+                            <div className="font-bold text-lg">{selectedStudent.first_name} {selectedStudent.last_name}</div>
+                        </div>
+                        <PresenceEditor
+                            student={selectedStudent}
+                            semester={currentSemester}
+                            closeModal={close}
+                            onSave={(id, updates) => updateStudentPresence(id, updates)}
+                        />
+                    </div>
+                )}
+                {selectedStudent && popperMode === 'lateness' && (
+                    <div className="w-sm">
+                        <div className="flex justify-center items-center flex-col mb-2">
+                            <div className="">איחורים</div>
+                            <div className="font-bold text-lg">{selectedStudent.first_name} {selectedStudent.last_name}</div>
+                        </div>
+                        <LatenessEditor
+                            student={selectedStudent}
+                            semester={currentSemester}
+                            closeModal={close}
+                            onSave={(id, updates) => updateStudentPresence(id, updates)}
+                        />
+                    </div>
+                )}
+                {popperMode === 'import' && (
+                    <div className="w-3xl">
+                        <div className="flex justify-center items-center flex-col mb-2">
+                            <div className="font-bold text-lg">יבוא נוכחות מ-Mashov</div>
+                            <div className="text-sm text-stone-500">{currentSemester}</div>
+                        </div>
+                        <ImportPresenceModal
+                            semester={currentSemester}
+                            closeModal={close}
+                            onSave={(updates) => {
+                                setData(prev => prev.map(s => {
+                                    const u = updates[s.id];
+                                    if (!u) return s;
+                                    return { ...s, report: { ...s.report, ...u } };
+                                }));
+                            }}
                         />
                     </div>
                 )}
@@ -193,7 +286,6 @@ function MentorsEditor({ student, closeModal, onSave }) {
     const shouldSave = useMemo(() => {
         return value.trim() !== student.report?.mentors?.trim()
     }, [value, student]);
-
 
     const save = async () => {
         if (!shouldSave) return;
@@ -223,5 +315,262 @@ function MentorsEditor({ student, closeModal, onSave }) {
             />
             <Button data-role="save" onClick={save} disabled={!shouldSave}>{buttonText}</Button>
         </>
+    );
+}
+
+
+function PresenceEditor({ student, semester, closeModal, onSave }) {
+    const [presenceDays, setPresenceDays] = useState(student.report?.presence_days ?? '');
+    const [absenceDays, setAbsenceDays]   = useState(student.report?.absence_days ?? '');
+    const [saving, setSaving] = useState(false);
+
+    const save = async () => {
+        setSaving(true);
+        try {
+            await upsertPresence([{
+                student_id: student.id,
+                semester,
+                presence_days: Number(presenceDays) || 0,
+                absence_days:  Number(absenceDays) || 0,
+            }]);
+            onSave(student.id, {
+                presence_days: Number(presenceDays) || 0,
+                absence_days:  Number(absenceDays) || 0,
+            });
+            closeModal();
+        } catch (e) {
+            toastsActions.addFromError(e, 'שגיאה בשמירת הנוכחות');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <div className="flex flex-col gap-3" dir="rtl">
+            <label className="flex items-center gap-2">
+                <span className="w-28 text-sm">ימי נוכחות</span>
+                <input
+                    type="number" min="0"
+                    value={presenceDays}
+                    onChange={e => setPresenceDays(e.target.value)}
+                    className="w-24 border border-border rounded px-2 py-1 text-center"
+                />
+            </label>
+            <label className="flex items-center gap-2">
+                <span className="w-28 text-sm">ימי היעדרות</span>
+                <input
+                    type="number" min="0"
+                    value={absenceDays}
+                    onChange={e => setAbsenceDays(e.target.value)}
+                    className="w-24 border border-border rounded px-2 py-1 text-center"
+                />
+            </label>
+            <Button data-role="save" onClick={save} disabled={saving}>
+                {saving ? '...' : 'שמור'}
+            </Button>
+        </div>
+    );
+}
+
+
+function LatenessEditor({ student, semester, closeModal, onSave }) {
+    const [latenessCount, setLatenessCount] = useState(student.report?.lateness_count ?? '');
+    const [lateness, setLateness]           = useState(student.report?.lateness ?? '');
+    const [saving, setSaving] = useState(false);
+
+    const gKey = pronounsKey(student.report?.pronouns);
+    const labels = LATENESS[gKey];
+
+    const save = async () => {
+        setSaving(true);
+        try {
+            await upsertPresence([{
+                student_id:     student.id,
+                semester,
+                presence_days:  student.report?.presence_days ?? 0,
+                absence_days:   student.report?.absence_days ?? 0,
+                lateness_count: latenessCount !== '' ? Number(latenessCount) : null,
+                lateness:       lateness || null,
+            }]);
+            onSave(student.id, {
+                lateness_count: latenessCount !== '' ? Number(latenessCount) : null,
+                lateness:       lateness || null,
+            });
+            closeModal();
+        } catch (e) {
+            toastsActions.addFromError(e, 'שגיאה בשמירת האיחורים');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <div className="flex flex-col gap-3" dir="rtl">
+            <label className="flex items-center gap-2">
+                <span className="w-28 text-sm">מספר איחורים <span className="text-stone-400">(ממשו"ב)</span></span>
+                <input
+                    type="number" min="0"
+                    value={latenessCount}
+                    onChange={e => setLatenessCount(e.target.value)}
+                    className="w-24 border border-border rounded px-2 py-1 text-center"
+                />
+            </label>
+            <div className="flex flex-col gap-1">
+                <span className="text-sm">הערכת איחורים</span>
+                {LATENESS_OPTIONS.map(key => (
+                    <label key={key} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="radio"
+                            name="lateness"
+                            value={key}
+                            checked={lateness === key}
+                            onChange={() => setLateness(key)}
+                        />
+                        <span className="text-sm">{labels?.[key]}</span>
+                    </label>
+                ))}
+            </div>
+            <Button data-role="save" onClick={save} disabled={saving}>
+                {saving ? '...' : 'שמור'}
+            </Button>
+        </div>
+    );
+}
+
+
+function ImportPresenceModal({ semester, closeModal, onSave }) {
+    const [matched, setMatched]     = useState(null); // resolved rows with student info
+    const [unmatched, setUnmatched] = useState(null); // rows not found in app
+    const [saving, setSaving]       = useState(false);
+    const fileRef = useRef();
+
+    const handleFile = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Parse XLSX client-side
+        const buf = await file.arrayBuffer();
+        const wb = new ExcelJS.Workbook();
+        await wb.xlsx.load(buf);
+        const sheet = wb.worksheets[0];
+
+        const parsed = [];
+        sheet.eachRow((row, rowNum) => {
+            if (rowNum < 4) return; // skip first 3 rows (info, blank, headers)
+            const idNum = row.getCell(2).value;
+            if (!idNum) return; // summary row
+            parsed.push({
+                idNum: String(idNum).trim(),
+                presence_days:  Number(row.getCell(7).value) || 0,
+                absence_days:   Number(row.getCell(8).value) || 0,
+                lateness_count: Number(row.getCell(9).value) || 0,
+            });
+        });
+        // Resolve student UUIDs server-side
+        try {
+            const resolved = await resolveStudentsByIdNumber(parsed.map(r => Number(r.idNum)));
+            const resolvedMap = Object.fromEntries(resolved.map(r => [r.id_number, r]));
+            const matchedRows = [];
+            const unmatchedRows = [];
+            parsed.forEach(r => {
+                const student = resolvedMap[r.idNum];
+                if (student) {
+                    matchedRows.push({ ...r, ...student });
+                } else {
+                    unmatchedRows.push(r);
+                }
+            });
+            setMatched(matchedRows);
+            setUnmatched(unmatchedRows);
+        } catch (e) {
+            toastsActions.addFromError(e, 'שגיאה בזיהוי תלמידים');
+        }
+    };
+
+    const confirmImport = async () => {
+        if (!matched?.length) return;
+        setSaving(true);
+        try {
+            await upsertPresence(matched.map(r => ({
+                student_id:     r.student_id,
+                semester,
+                presence_days:  r.presence_days,
+                absence_days:   r.absence_days,
+                lateness_count: r.lateness_count,
+                isImport:       true, // triggers clearing lateness + setting imported_at/by
+            })));
+            // Build update map for local state
+            const updates = {};
+            matched.forEach(r => {
+                updates[r.student_id] = {
+                    presence_days:  r.presence_days,
+                    absence_days:   r.absence_days,
+                    lateness_count: r.lateness_count,
+                    lateness:       null,
+                };
+            });
+            onSave(updates);
+            closeModal();
+        } catch (e) {
+            toastsActions.addFromError(e, 'שגיאה ביבוא הנוכחות');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <div className="flex flex-col gap-4" dir="rtl">
+            <input
+                ref={fileRef}
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleFile}
+                className="text-sm"
+            />
+
+            {matched && (
+                <>
+                    <div className="text-sm font-medium">תלמידים שזוהו ({matched.length})</div>
+                    <div className="max-h-48 overflow-y-auto border border-border rounded">
+                        <table className="text-xs w-full">
+                            <thead className="bg-stone-100 sticky top-0">
+                                <tr>
+                                    {['שם', 'נוכחות', 'היעדרות', 'איחורים'].map(h => (
+                                        <th key={h} className="p-1 text-center">{h}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {matched.map(r => (
+                                    <tr key={r.student_id} className="border-t border-border">
+                                        <td className="p-1">{r.first_name} {r.last_name}</td>
+                                        <td className="p-1 text-center">{r.presence_days}</td>
+                                        <td className="p-1 text-center">{r.absence_days}</td>
+                                        <td className="p-1 text-center">{r.lateness_count}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {unmatched?.length > 0 && (
+                        <>
+                            <div className="text-sm font-medium text-red-600">לא זוהו ({unmatched.length})</div>
+                            <div className="text-xs text-stone-500">
+                                {unmatched.map(r => r.idNum).join(', ')}
+                            </div>
+                        </>
+                    )}
+
+                    <div className="text-xs text-stone-500">
+                        שים לב: יבוא חדש יאפס את הערכת האיחורים הידנית לתלמידים אלו.
+                    </div>
+
+                    <Button data-role="save" onClick={confirmImport} disabled={saving || !matched.length}>
+                        {saving ? '...' : `יבא ${matched.length} תלמידים`}
+                    </Button>
+                </>
+            )}
+        </div>
     );
 }

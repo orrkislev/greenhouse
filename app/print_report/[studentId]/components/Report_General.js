@@ -1,5 +1,6 @@
 import { Heart, Star, Coins, Globe } from "lucide-react";
 import { ReportPageSection, SectionSubtitle, SectionText } from "./Layout";
+import { LATENESS, pronounsKey, presencePercent } from "@/utils/presenceConfig";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 function MiniIkigai({ ikigai }) {
@@ -296,16 +297,24 @@ export default function Report_General({ student, variant = 'regular' }) {
                             <MiniIkigai ikigai={student.ikigai} />
                         </div>
                     </div>
-                    {/* <div className='flex flex-col gap-2'>
-                        <div className='flex items-center gap-2'>
-                            <SectionSubtitle>נוכחות </SectionSubtitle>
-                            <SectionText smaller>100%</SectionText>    
+                    {presencePercent(student.presence_days, student.absence_days) != null && (
+                        <div className='flex flex-col gap-2'>
+                            <div className='flex items-center gap-2'>
+                                <SectionSubtitle>נוכחות</SectionSubtitle>
+                                <SectionText smaller>
+                                    {presencePercent(student.presence_days, student.absence_days)}%
+                                </SectionText>
+                            </div>
+                            {student.lateness && (
+                                <div className='flex items-center gap-2'>
+                                    <SectionSubtitle>איחורים</SectionSubtitle>
+                                    <SectionText smaller>
+                                        {LATENESS[pronounsKey(student.pronouns)]?.[student.lateness]}
+                                    </SectionText>
+                                </div>
+                            )}
                         </div>
-                        <div className='flex items-center gap-2'>
-                            <SectionSubtitle>איחורים </SectionSubtitle>
-                            <SectionText smaller>לא מאחר בכלל!</SectionText>    
-                        </div>
-                    </div> */}
+                    )}
                 </div>
 
                 { variant === 'regular' && 
