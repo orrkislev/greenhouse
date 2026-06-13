@@ -5,12 +5,10 @@ import { tw } from "@/utils/tw";
 import usePopper from "@/components/Popper";
 import { userActions, useUser } from "@/utils/store/useUser";
 import Button from "@/components/Button";
-import { useRouter } from "next/navigation";
 import { getReportSemester } from "@/utils/store/useTime";
 import { getYearSections, ikigaiStatus, portfolioStatus, libaStatus, learningStatus, vocationStatus } from "@/utils/reportConfig";
 import { LATENESS, LATENESS_OPTIONS, pronounsKey, presencePercent } from "@/utils/presenceConfig";
-import { upsertPresence, resolveStudentsByIdNumber } from "@/utils/actions/presence actions";
-import ExcelJS from "exceljs";
+import { upsertPresence, resolveStudentsByIdNumber, parseMashovXlsx } from "@/utils/actions/presence actions";
 
 // Cell color by status:
 //   empty     → red    (required section with nothing entered)
@@ -45,7 +43,6 @@ export default function StaffGroup_Evaluations({ group }) {
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [popperMode, setPopperMode] = useState(null); // 'mentors' | 'presence' | 'lateness' | 'import'
     const { open, close, Popper } = usePopper();
-    const router = useRouter();
     const user = useUser(s => s.user);
 
     const currentSemester = getReportSemester() ?? '2026A';
@@ -313,7 +310,10 @@ function MentorsEditor({ student, closeModal, onSave }) {
                 placeholder={`${student.first_name} היקר...`}
                 dir="rtl"
             />
-            <Button data-role="save" onClick={save} disabled={!shouldSave}>{buttonText}</Button>
+            <div className="flex gap-2 mt-1">
+                <Button data-role="save" onClick={save} disabled={!shouldSave}>{buttonText}</Button>
+                <Button data-role="cancel" onClick={closeModal}>ביטול</Button>
+            </div>
         </>
     );
 }
@@ -365,9 +365,12 @@ function PresenceEditor({ student, semester, closeModal, onSave }) {
                     className="w-24 border border-border rounded px-2 py-1 text-center"
                 />
             </label>
-            <Button data-role="save" onClick={save} disabled={saving}>
-                {saving ? '...' : 'שמור'}
-            </Button>
+            <div className="flex gap-2">
+                <Button data-role="save" onClick={save} disabled={saving}>
+                    {saving ? '...' : 'שמור'}
+                </Button>
+                <Button data-role="cancel" onClick={closeModal}>ביטול</Button>
+            </div>
         </div>
     );
 }
@@ -430,9 +433,12 @@ function LatenessEditor({ student, semester, closeModal, onSave }) {
                     </label>
                 ))}
             </div>
-            <Button data-role="save" onClick={save} disabled={saving}>
-                {saving ? '...' : 'שמור'}
-            </Button>
+            <div className="flex gap-2">
+                <Button data-role="save" onClick={save} disabled={saving}>
+                    {saving ? '...' : 'שמור'}
+                </Button>
+                <Button data-role="cancel" onClick={closeModal}>ביטול</Button>
+            </div>
         </div>
     );
 }
@@ -442,32 +448,24 @@ function ImportPresenceModal({ semester, closeModal, onSave }) {
     const [matched, setMatched]     = useState(null); // resolved rows with student info
     const [unmatched, setUnmatched] = useState(null); // rows not found in app
     const [saving, setSaving]       = useState(false);
+    const [fileName, setFileName]   = useState(null);
+    const [parseError, setParseError] = useState(null);
     const fileRef = useRef();
 
     const handleFile = async (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
+        setFileName(file.name);
+        setParseError(null);
+        setMatched(null);
+        setUnmatched(null);
 
-        // Parse XLSX client-side
-        const buf = await file.arrayBuffer();
-        const wb = new ExcelJS.Workbook();
-        await wb.xlsx.load(buf);
-        const sheet = wb.worksheets[0];
-
-        const parsed = [];
-        sheet.eachRow((row, rowNum) => {
-            if (rowNum < 4) return; // skip first 3 rows (info, blank, headers)
-            const idNum = row.getCell(2).value;
-            if (!idNum) return; // summary row
-            parsed.push({
-                idNum: String(idNum).trim(),
-                presence_days:  Number(row.getCell(7).value) || 0,
-                absence_days:   Number(row.getCell(8).value) || 0,
-                lateness_count: Number(row.getCell(9).value) || 0,
-            });
-        });
-        // Resolve student UUIDs server-side
         try {
+            // Parse XLSX on the server (ExcelJS is Node.js only)
+            const formData = new FormData();
+            formData.append('file', file);
+            const parsed = await parseMashovXlsx(formData);
+
             const resolved = await resolveStudentsByIdNumber(parsed.map(r => Number(r.idNum)));
             const resolvedMap = Object.fromEntries(resolved.map(r => [r.id_number, r]));
             const matchedRows = [];
@@ -483,7 +481,7 @@ function ImportPresenceModal({ semester, closeModal, onSave }) {
             setMatched(matchedRows);
             setUnmatched(unmatchedRows);
         } catch (e) {
-            toastsActions.addFromError(e, 'שגיאה בזיהוי תלמידים');
+            setParseError(e.message);
         }
     };
 
@@ -520,13 +518,22 @@ function ImportPresenceModal({ semester, closeModal, onSave }) {
 
     return (
         <div className="flex flex-col gap-4" dir="rtl">
+            <p className="text-sm text-stone-500">{'יש להעלות קובץ אקסל XLSX, שאותו ניתן להפיק מהמשו"ב, במסך יומן מחנך ← דוח כללי.'}</p>
             <input
                 ref={fileRef}
                 type="file"
                 accept=".xlsx,.xls"
                 onChange={handleFile}
-                className="text-sm"
+                className="hidden"
             />
+            <div className="flex items-center gap-2">
+                <Button onClick={() => fileRef.current?.click()}>בחר קובץ Excel</Button>
+                <span className="text-sm text-stone-500">{fileName ?? 'לא נבחר קובץ'}</span>
+                <Button data-role="cancel" onClick={closeModal}>ביטול</Button>
+            </div>
+            {parseError && (
+                <p className="text-sm text-red-600">{parseError}</p>
+            )}
 
             {matched && (
                 <>
@@ -566,9 +573,12 @@ function ImportPresenceModal({ semester, closeModal, onSave }) {
                         שים לב: יבוא חדש יאפס את הערכת האיחורים הידנית לתלמידים אלו.
                     </div>
 
-                    <Button data-role="save" onClick={confirmImport} disabled={saving || !matched.length}>
-                        {saving ? '...' : `יבא ${matched.length} תלמידים`}
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button data-role="save" onClick={confirmImport} disabled={saving || !matched.length}>
+                            {saving ? '...' : `יבא ${matched.length} תלמידים`}
+                        </Button>
+                        <Button data-role="cancel" onClick={closeModal}>ביטול</Button>
+                    </div>
                 </>
             )}
         </div>

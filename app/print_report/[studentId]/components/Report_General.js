@@ -305,11 +305,13 @@ export default function Report_General({ student, variant = 'regular' }) {
                                     {presencePercent(student.presence_days, student.absence_days)}%
                                 </SectionText>
                             </div>
-                            {student.lateness && (
+                            {(student.lateness || student.lateness_count > 0) && (
                                 <div className='flex items-center gap-2'>
                                     <SectionSubtitle>איחורים</SectionSubtitle>
                                     <SectionText smaller>
-                                        {LATENESS[pronounsKey(student.pronouns)]?.[student.lateness]}
+                                        {student.lateness
+                                            ? LATENESS[pronounsKey(student.pronouns)]?.[student.lateness]
+                                            : student.lateness_count}
                                     </SectionText>
                                 </div>
                             )}

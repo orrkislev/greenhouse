@@ -1,5 +1,42 @@
 'use server';
 import { getSupabaseServerClient } from '../supabase/server';
+import ExcelJS from 'exceljs';
+
+// Parse a Mashov XLSX file (passed as FormData) on the server.
+// Returns array of { idNum, presence_days, absence_days, lateness_count }.
+export async function parseMashovXlsx(formData) {
+    const file = formData.get('file');
+    const buf = await file.arrayBuffer();
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(buf);
+    const sheet = wb.worksheets[0];
+
+    const ERROR_MSG = 'הקובץ אינו בפורמט המתאים. יש להעלות דוח מונה כללי לתקופה הרלוונטית מאפליקציית משו"ב';
+
+    const a1 = String(sheet.getRow(1).getCell(1).value ?? '');
+    const b3 = String(sheet.getRow(3).getCell(2).value ?? '').trim();
+    const g3 = String(sheet.getRow(3).getCell(7).value ?? '').trim();
+    const h3 = String(sheet.getRow(3).getCell(8).value ?? '').trim();
+    const i3 = String(sheet.getRow(3).getCell(9).value ?? '').trim();
+
+    if (!a1.includes('מונה כללי') || b3 !== 'ת.ז. התלמיד' || g3 !== 'נוכחות' || h3 !== 'חיסור' || (i3 !== '' && i3 !== 'איחור')) {
+        throw new Error(ERROR_MSG);
+    }
+
+    const rows = [];
+    sheet.eachRow((row, rowNum) => {
+        if (rowNum < 4) return; // skip info row, blank row, header row
+        const idNum = row.getCell(2).value;
+        if (!idNum) return; // summary row at end
+        rows.push({
+            idNum:          String(idNum).trim(),
+            presence_days:  Number(row.getCell(7).value) || 0,
+            absence_days:   Number(row.getCell(8).value) || 0,
+            lateness_count: Number(row.getCell(9).value) || 0,
+        });
+    });
+    return rows;
+}
 
 // Upsert presence rows into student_presence.
 // On re-import: overwrites presence_days, absence_days, lateness_count, imported_at, imported_by.
