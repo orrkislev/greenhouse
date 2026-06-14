@@ -8,11 +8,19 @@ import Link from 'next/link';
 const MISSING_MSG = 'לא מצאנו את הפרטים באפליקציה. חשוב לפנות לצוות כדי להסדיר זאת.';
 
 export default function Term({ project, research, term, termKey }) {
+
+    // DIRTY HACK: the radar chart is designed to take values from 25-100, but the project/research overview values are 0-100.
+    // So we need to convert them to the 25-100 range.
+    // This is actually a good idea, because a 0-100 scale is more natural (we only show it differently in the graph to make the legend more readable)
+    // Other values in the app are using a 25-100 scale, 
+    // So in the next version we should do a migration to fix them
+    // (see: SummerEvaluation.js and POL.js)
+    const ov = key => 25 + 75 * ((project?.[key]?.overview || 0) / 100);
     const data = [
-        { subject: 'הגדרת יעדים', value: project?.['הגדרת יעדים']?.overview || 0 },
-        { subject: 'הצגה ותיעוד', value: project?.['הצגה ותיעוד']?.overview || 0 },
-        { subject: 'למידה וביצוע', value: project?.['למידה וביצוע']?.overview || 0 },
-        { subject: 'תכנון', value: project?.['תכנון']?.overview || 0 },
+        { subject: 'הגדרת יעדים', value: ov('הגדרת יעדים') },
+        { subject: 'הצגה ותיעוד', value: ov('הצגה ותיעוד') },
+        { subject: 'למידה וביצוע', value: ov('למידה וביצוע') },
+        { subject: 'תכנון', value: ov('תכנון') },
     ];
 
     return (
