@@ -283,8 +283,8 @@ export const PRINT_REPORT_PAGES = {
             { sections: ['chamama_logo'] },
         ],
         'B': [
-            { sections: ['final_year_general', 'vocation'], initialSizes: [0.6, 0.4] },
-            { sections: ['finalProject_B', 'POL'],          initialSizes: [0.6, 0.4] },
+            { sections: ['final_year_general', 'POL'],  initialSizes: [0.45, 0.55] },
+            { sections: ['finalProject_B', 'vocation'], initialSizes: [0.7, 0.3] },
             { sections: ['learning'] },
             { sections: ['chamama_logo'] },
         ],
@@ -297,9 +297,9 @@ export const PRINT_REPORT_PAGES = {
             { sections: ['chamama_logo'] },
         ],
         'B': [
-            { sections: ['final_year_general'],              initialSizes: [0.6, 0.4] },
-            { sections: ['POL'] },
-            { sections: ['learning', 'vocation'],        initialSizes: [0.7, 0.3] },
+            { sections: ['final_year_general', 'POL'],   initialSizes: [0.5, 0.5] },
+            { sections: ['finalProject_B', 'vocation'],  initialSizes: [0.5, 0.5] },
+            { sections: ['learning']},
             { sections: ['chamama_logo'] },
         ],
     },

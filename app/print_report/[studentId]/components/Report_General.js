@@ -2,6 +2,7 @@ import { Heart, Star, Coins, Globe } from "lucide-react";
 import { ReportPageSection, SectionSubtitle, SectionText } from "./Layout";
 import { LATENESS, pronounsKey, presencePercent } from "@/utils/presenceConfig";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Report_PortfolioDiv } from './Report_Portfolio';
 
 function MiniIkigai({ ikigai }) {
     const markers = ikigai?.markers || [];
@@ -283,6 +284,29 @@ function MiniIkigai({ ikigai }) {
     );
 }
 
+export function Report_Presence({ student }) {
+    return (
+        <div className='flex flex-col gap-2'>
+            <div className='flex items-center gap-2'>
+                <SectionSubtitle>נוכחות</SectionSubtitle>
+                <SectionText smaller>
+                    {presencePercent(student.presence_days, student.absence_days)}%
+                </SectionText>
+            </div>
+            {(student.lateness || student.lateness_count > 0) && (
+                <div className='flex items-center gap-2'>
+                    <SectionSubtitle>איחורים</SectionSubtitle>
+                    <SectionText smaller>
+                        {student.lateness
+                            ? LATENESS[pronounsKey(student.pronouns)]?.[student.lateness]
+                            : student.lateness_count}
+                    </SectionText>
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function Report_General({ student, variant = 'regular' }) {
 
     const smaller = student.year == 4;
@@ -297,26 +321,9 @@ export default function Report_General({ student, variant = 'regular' }) {
                             <MiniIkigai ikigai={student.ikigai} />
                         </div>
                     </div>
-                    {presencePercent(student.presence_days, student.absence_days) != null && (
-                        <div className='flex flex-col gap-2'>
-                            <div className='flex items-center gap-2'>
-                                <SectionSubtitle>נוכחות</SectionSubtitle>
-                                <SectionText smaller>
-                                    {presencePercent(student.presence_days, student.absence_days)}%
-                                </SectionText>
-                            </div>
-                            {(student.lateness || student.lateness_count > 0) && (
-                                <div className='flex items-center gap-2'>
-                                    <SectionSubtitle>איחורים</SectionSubtitle>
-                                    <SectionText smaller>
-                                        {student.lateness
-                                            ? LATENESS[pronounsKey(student.pronouns)]?.[student.lateness]
-                                            : student.lateness_count}
-                                    </SectionText>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                    { variant === 'regular' &&
+                        <Report_Presence student={student} />
+                    }
                 </div>
 
                 { variant === 'regular' && 
@@ -325,10 +332,19 @@ export default function Report_General({ student, variant = 'regular' }) {
                         <SectionText smaller>{student.mentors}</SectionText>
                     </div>
                 }
-                { variant === 'finalYear' && student.liba?.question && student.liba?.answer &&
+                { variant === 'finalYear' && 
                     <div className='flex-1 flex flex-col gap-1'>
-                        <SectionSubtitle className='h-12'>{student.liba?.question}</SectionSubtitle>
-                        <SectionText>{student.liba?.answer}</SectionText>
+                        {student.liba?.question && student.liba?.answer && 
+                            <>
+                                <SectionSubtitle className='h-12'>{student.liba?.question}</SectionSubtitle>
+                                <SectionText>{student.liba?.answer}</SectionText>
+                            </>
+                        }
+                        {parseInt(student.year) > 2 &&
+                            <Report_PortfolioDiv student={student} />    
+                        }
+                      
+                        <Report_Presence student={student} />
                     </div>
                 }
             </div>

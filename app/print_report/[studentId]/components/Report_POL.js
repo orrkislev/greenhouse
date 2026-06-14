@@ -2,6 +2,8 @@
 import { QRCodeSVG } from 'qrcode.react';
 import RadarChart from '@/components/RadarChart';
 import { ReportPageSection, SectionSubtitle, SectionText } from './Layout';
+import { Report_PortfolioDiv } from './Report_Portfolio';
+
 
 export default function Report_POL({ student }) {
     const pol = student.end_eval;
@@ -38,23 +40,9 @@ export default function Report_POL({ student }) {
                 <SectionSubtitle>תוכנית להמשך</SectionSubtitle>
                 <SectionText>{pol.futurePlan}</SectionText>
             </>}
-
-
-            <div className="flex gap-6 items-start mt-4">
-                <div className="flex-1">
-                    <SectionSubtitle>תיק עבודות</SectionSubtitle>
-                    <SectionText className="mt-2">
-                        {student?.portfolio_url
-                            ? 'ניתן לסרוק את ה-QR כדי לגשת לפורטפוליו, שבו מוצגים הפרויקטים, העבודות והיצירות שלי'
-                            : 'כאן אמור להיות קישור לתיק העבודות שלך, שבו תוכל להציג את הפרויקטים, העבודות והיצירות שלך. נראה שלא העלית פורטפוליו עדיין.'
-                        }
-                    </SectionText>
-                </div>
-                <div className="flex items-center justify-center p-4 border border-border rounded-lg bg-gray-50">
-                    {student?.portfolio_url && <QRCodeSVG value={student?.portfolio_url} size={120} />}
-                </div>
-            </div>
-
+            {parseInt(student.year) < 3 &&
+                <Report_PortfolioDiv student={student} />    
+            }
 
         </ReportPageSection>
     );
