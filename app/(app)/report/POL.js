@@ -133,8 +133,10 @@ export default function POLEvaluation({ pol, year, onSave }) {
                                 <div key={key}>
                                     <div className='text-sm font-medium text-gray-600 mb-1 flex items-center gap-2'>
                                         {label}
-                                        {key === 'portfolio' && !user?.portfolio_url && (
-                                            <span className='text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-300'>חסר</span>
+                                        {key === 'portfolio' && (
+                                            !user?.portfolio_url
+                                                ? <span className='text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-300'>חסר</span>
+                                                : <a href={user.portfolio_url} target="_blank" rel="noopener noreferrer" className='text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-green-100 text-green-600 border border-green-300 hover:bg-green-200'>קיים</a>
                                         )}
                                     </div>
                                     <GooeySlider

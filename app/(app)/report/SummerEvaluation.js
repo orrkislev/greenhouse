@@ -127,9 +127,10 @@ export default function SummerEvaluation({ evalData, onSave }) {
                     <div className={`flex-1 p-4 flex flex-col gap-4 ${!isStaffMode ? 'pointer-events-none opacity-80' : ''}`}>
                         <div className='flex items-center gap-2'>
                             <div className='text-xs font-semibold text-gray-400 uppercase tracking-wide'>תיק עבודות דיגיטלי</div>
-                            {!user?.portfolio_url && (
-                                <span className='text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-300'>חסר</span>
-                            )}
+                            {!user?.portfolio_url
+                                ? <span className='text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-300'>חסר</span>
+                                : <a href={user.portfolio_url} target="_blank" rel="noopener noreferrer" className='text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-green-100 text-green-600 border border-green-300 hover:bg-green-200'>קיים</a>
+                            }
                         </div>
 
                         <div>
