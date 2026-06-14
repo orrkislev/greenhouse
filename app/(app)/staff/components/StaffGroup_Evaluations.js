@@ -22,7 +22,7 @@ const STATUS_BG = {
     empty:     'bg-red-400 hover:bg-red-500',
 };
 
-const Cell = tw.td` text-center cursor-pointer
+const Cell = tw.td` text-center cursor-pointer group-hover:brightness-90
     ${p => STATUS_BG[p.$status] ?? STATUS_BG.empty}
 `
 
@@ -137,7 +137,7 @@ export default function StaffGroup_Evaluations({ group }) {
                                 : null;
 
                             return (
-                                <tr key={student.id} className="border-b border-border/50 hover:border-2 hover:border-black">
+                                <tr key={student.id} className="group border-b border-border/50">
                                     <Cell $status={worstStatus([
                                         ['3','4'].includes(group?.description) ? 'complete' : mentorsStatus(student.report),
                                         ikigaiStatus(student.report),
@@ -171,7 +171,7 @@ export default function StaffGroup_Evaluations({ group }) {
                                         onClick={() => goToReport(student, 'vocation')} />
                                     {/* Presence cell: shows percentage, neutral background */}
                                     <td
-                                        className="text-center cursor-pointer bg-stone-100 hover:bg-stone-200 px-2"
+                                        className="text-center cursor-pointer bg-stone-100 group-hover:brightness-90 px-2"
                                         onClick={() => openPopper(student, 'presence')}
                                     >
                                         {pct != null ? `${pct}%` : '—'}

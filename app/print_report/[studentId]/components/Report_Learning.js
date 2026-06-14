@@ -1,5 +1,7 @@
+import { Fragment } from "react";
 import { KeyRound } from "lucide-react";
 import { ReportPageSection } from "./Layout";
+import { RATING_LABELS } from "@/app/(app)/report/learning/data";
 
 function RatingBars({ rating, isSelf }) {
     const barW = 4; const barGap = 2; const maxH = 14;
@@ -31,31 +33,37 @@ function DashedArrowConnector() {
 function HeutagogyTable({ skills }) {
     const visible = skills?.filter(s => s.name) || [];
     if (visible.length === 0) return null;
-    
+
     return (
         <div className="mt-4">
             <div className="font-bold text-[12pt] mb-1" contentEditable suppressContentEditableWarning>מיומנויות יוטגוגיות</div>
-            {visible.map((skill, index) => (
-                <div key={index} className='flex justify-between gap-2 py-1 items-center'>
-                    <div className='text-[10pt]' contentEditable suppressContentEditableWarning>
-                        <span className="font-semibold">{skill.name} - </span>
-                        {skill.detail}
-                    </div>
-                    <DashedArrowConnector />
-                    <div className='text-center text-[10pt]'>
-                        {(() => {
-                            const r = skill.staffRating || skill.rating;
-                            const isSelf = !skill.staffRating && !!skill.rating;
-                            return r ? (
-                                <span className="flex items-center gap-1 justify-center">
-                                    <RatingBars rating={r} isSelf={isSelf} />
-                                    <span className={`font-bold ${isSelf ? '' : 'invisible'}`}>*</span>
-                                </span>
-                            ) : '—';
-                        })()}
-                    </div>
-                </div>
-            ))}
+            <div className="grid items-center" style={{ gridTemplateColumns: '1fr auto' }}>
+                {visible.map((skill, index) => {
+                    const r = skill.staffRating || skill.rating;
+                    const isSelf = !skill.staffRating && !!skill.rating;
+                    const textColor = isSelf ? 'text-gray-400' : 'text-black';
+                    return (
+                        <Fragment key={index}>
+                            <div className={`flex items-center py-1 ${textColor}`}>
+                                <div className='text-[10pt]' contentEditable suppressContentEditableWarning>
+                                    <span className="font-semibold">{skill.name} - </span>
+                                    {skill.detail}
+                                </div>
+                                <DashedArrowConnector />
+                            </div>
+                            <div className={`py-1 text-[10pt] ${textColor}`}>
+                                {r ? (
+                                    <span className="flex items-center gap-1">
+                                        <RatingBars rating={r} isSelf={isSelf} />
+                                        <span>{RATING_LABELS[r - 1]}</span>
+                                        <span className={`font-bold ${isSelf ? '' : 'invisible'}`}>*</span>
+                                    </span>
+                                ) : '—'}
+                            </div>
+                        </Fragment>
+                    );
+                })}
+            </div>
         </div>
     );
 }
@@ -66,32 +74,33 @@ function TopicTable({ title, topics }) {
     return (
         <div className="mb-4">
             <div className="font-bold text-[12pt] mb-1" contentEditable suppressContentEditableWarning>{title}</div>
-            <div className="space-y-1">
+            <div className="grid items-center" style={{ gridTemplateColumns: '1fr auto' }}>
                 {visibleTopics.map((topic, index) => {
                     const r = topic.staffRating || topic.rating;
                     const isSelf = !topic.staffRating && !!topic.rating;
+                    const textColor = isSelf ? 'text-gray-400' : 'text-black';
                     return (
-                        <div key={index} className={`flex justify-between gap-2 py-1 items-center ${isSelf ? 'bg-gray-200/80 opacity-80' : ''}`}>
-                            <div className='text-[10pt]' contentEditable suppressContentEditableWarning>
-                                {topic.keyTopic && <span className="mr-0.5"> <KeyRound className="inline ml-1 w-3.5 h-3.5 text-gray-700" title="נושא מפתח בחממה" />
-                                </span>}
-                                <span className="font-semibold">{topic.name}</span>
-                                {topic.detail ? <span className="text-neutral-700"> - {topic.detail}</span> : null}
-                                {topic.application ? <span className="text-neutral-700"> | יישום: {topic.application}</span> : null}
+                        <Fragment key={index}>
+                            <div className={`flex items-center py-1 ${textColor}`}>
+                                <div className='text-[10pt]' contentEditable suppressContentEditableWarning>
+                                    {topic.keyTopic && <span className="mr-0.5"><KeyRound className="inline ml-1 w-3.5 h-3.5" title="נושא מפתח בחממה" /></span>}
+                                    <span className="font-semibold">{topic.name}</span>
+                                    {topic.detail ? <span> - {topic.detail}</span> : null}
+                                    {topic.application ? <span> | יישום: {topic.application}</span> : null}
+                                </div>
+                                <DashedArrowConnector />
                             </div>
-                            <DashedArrowConnector />
-                            <div className='text-center text-[10pt]'>
-                                {(() => {
-                                    return r ? (
-                                        <span className="flex items-center gap-1 justify-center">
-                                            <RatingBars rating={r} isSelf={isSelf} />
-                                            <span className={`font-bold ${isSelf ? '' : 'invisible'}`}>*</span>
-                                        </span>
-                                    ) : '—';
-                                })()}
+                            <div className={`py-1 text-[10pt] ${textColor}`}>
+                                {r ? (
+                                    <span className="flex items-center gap-1">
+                                        <RatingBars rating={r} isSelf={isSelf} />
+                                        <span>{RATING_LABELS[r - 1]}</span>
+                                        <span className={`font-bold ${isSelf ? '' : 'invisible'}`}>*</span>
+                                    </span>
+                                ) : '—'}
                             </div>
-                        </div>
-                    )
+                        </Fragment>
+                    );
                 })}
             </div>
         </div>

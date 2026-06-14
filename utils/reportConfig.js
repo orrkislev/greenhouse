@@ -144,7 +144,10 @@ export const SECTION_DEFS = {
         columns: [
             {
                 label: 'פרויקט גמר',
-                status: r => !r?.special ? 'empty' : r.special.summary?.length > 10 ? 'complete' : 'partial',
+                status: r => !r?.special ? 
+                         'empty' :
+                         r.special.reflections_project?.length > 10 && r.special.reflections_research?.length > 10
+                         && r.special.master_name?.length > 1 ? 'complete' : 'partial',
                 navFn: 'report', navArg: 'finalProject_B',
             },
         ],

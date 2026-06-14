@@ -202,11 +202,11 @@ export default function FinalProject({ finalProject, onSave }) {
       reflections_research: "",
       next_steps: "",
       radar: [
-        { subject: 'הצבת יעדים', value: 0 },
-        { subject: 'תכנון', value: 0 },
-        { subject: 'למידה', value: 0 },
-        { subject: 'ביצוע', value: 0 },
-        { subject: 'הצגה', value: 0 },
+        { subject: 'הצבת יעדים', value: 25 },
+        { subject: 'תכנון', value: 25 },
+        { subject: 'למידה', value: 25 },
+        { subject: 'ביצוע', value: 25 },
+        { subject: 'הצגה', value: 25 },
       ]
     });
 
