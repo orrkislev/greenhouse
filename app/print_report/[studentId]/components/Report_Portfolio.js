@@ -1,4 +1,6 @@
 import { QRCodeSVG } from 'qrcode.react';
+
+const normalizeUrl = url => url && !/^https?:\/\//i.test(url) ? `https://${url}` : url
 import { ReportPageSection, SectionSubtitle, SectionText, SectionTitle } from "./Layout";
 
 export function Report_PortfolioDiv({ student }) {
@@ -15,7 +17,7 @@ export function Report_PortfolioDiv({ student }) {
             </div>
             <div className="flex items-center justify-center p-4 border border-border rounded-lg bg-gray-50">
                 {student?.portfolio_url && (
-                    <a href={student.portfolio_url} target="_blank" rel="noopener noreferrer">
+                    <a href={normalizeUrl(student.portfolio_url)} target="_blank" rel="noopener noreferrer">
                         <QRCodeSVG value={student.portfolio_url} size={120} />
                     </a>
                 )}

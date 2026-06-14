@@ -7,6 +7,8 @@ import { QRCodeSVG } from 'qrcode.react'
 import AutoSaveIndicator from './components/AutoSaveIndicator'
 import { useSaveOnUnmount } from '@/utils/useSaveOnUnmount'
 
+const normalizeUrl = url => url && !/^https?:\/\//i.test(url) ? `https://${url}` : url
+
 export default function Portfolio({ portfolio }) {
     const user = useUser(state => state.user)
     const updatePortfolioUrl = useUser(state => state.updatePortfolioUrl)
@@ -51,7 +53,7 @@ export default function Portfolio({ portfolio }) {
 
                 {savedUrl && (
                     <div className="border border-border rounded-lg p-4 bg-gray-50 flex flex-col items-center">
-                        <a href={savedUrl} target="_blank" rel="noopener noreferrer">
+                        <a href={normalizeUrl(savedUrl)} target="_blank" rel="noopener noreferrer">
                             <QRCodeSVG value={savedUrl} size={150} />
                         </a>
                     </div>

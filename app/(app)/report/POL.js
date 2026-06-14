@@ -8,6 +8,8 @@ import GooeySlider from '@/components/GooeySlider'
 import RadarChart from '@/components/RadarChart'
 import { ALLOW_STUDENT_EDIT } from './page'
 
+const normalizeUrl = url => url && !/^https?:\/\//i.test(url) ? `https://${url}` : url
+
 const DEFAULT_RANKINGS = { content: 0, presentation: 0, portfolio: 0, planning: 0 }
 
 const CATEGORIES = [
@@ -136,7 +138,7 @@ export default function POLEvaluation({ pol, year, onSave }) {
                                         {key === 'portfolio' && (
                                             !user?.portfolio_url
                                                 ? <span className='text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 border border-red-300'>חסר</span>
-                                                : <a href={user.portfolio_url} target="_blank" rel="noopener noreferrer" className='text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-green-100 text-green-600 border border-green-300 hover:bg-green-200'>קיים</a>
+                                                : <a href={normalizeUrl(user.portfolio_url)} target="_blank" rel="noopener noreferrer" className='text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-green-100 text-green-600 border border-green-300 hover:bg-green-200'>קיים</a>
                                         )}
                                     </div>
                                     <GooeySlider
