@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import { prepareEmail, preparePassword } from '@/utils/actions/auth';
 import { resizeImage } from '@/utils/actions/storage actions';
+import { signInWithPin } from '../actions/auth actions';
 import { resetPin } from '../actions/admin actions';
 import { supabase } from '../supabase/client';
 import { updateOrThrow } from '../supabase/utils';
@@ -26,11 +26,12 @@ export const useUser = create(subscribeWithSelector((set, get) => {
 		},
 		signIn: async (username, pinPass) => {
 			set({ error: null });
-			const email = prepareEmail(username);
-			const password = preparePassword(pinPass)
-			const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-			if (error) set({ error });
-			if (data) await get().getUserData(data.user.id);
+			const result = await signInWithPin(username, pinPass);
+			if (result.error) {
+				set({ error: { message: result.error } });
+				return;
+			}
+			await get().getUserData(result.userId);
 		},
 		getUserData: async (userId) => {
 			await supabase.auth.refreshSession();

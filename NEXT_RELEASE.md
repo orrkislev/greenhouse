@@ -26,6 +26,10 @@ _In progress_
 
 _Done (this release)_
 
+- [x] End-of-year read-only mode: `readonly_mode` flag in `misc` table triggers DB-level RLS write-blocking for students across all data tables (projects, research, tasks, study_paths, user_profiles, users, groups, users_groups, events, event_participants, misc); staff/admins always have full write access
+- [x] PIN login security hardening: `pinLoginAllowed` flag in `misc` controls student PIN access; staff PIN login permanently blocked; auth logic moved to `signInWithPin` server action in `utils/actions/auth actions.js`
+- [x] To activate end-of-year mode: `UPDATE misc SET data='{"enabled":true}'::jsonb WHERE name='readonly_mode'` + same with `false` for `pinLoginAllowed`
+
 - [x] Screen page: new `?view=report` view showing report card completion status per student — each student gets a card with color-coded section indicators (green = done, orange = missing, yellow = partial); data fetched server-side via admin client (works unauthenticated); not part of the rotation
 - [x] "תכנון" — daily task planning system: sidebar task panel (personal/assigned/project/study tasks), drag-to-date onto weekly and semester calendar columns, planned-task chips in day headers, merged events+tasks on homepage, tasks shown in screen student cards
 
