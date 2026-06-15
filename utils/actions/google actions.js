@@ -18,6 +18,7 @@ export async function getAuthUrl(redirect_url) {
       'https://www.googleapis.com/auth/drive.file',
     ],
     prompt: 'consent',
+    state: 'google-calendar-auth',
   });
 
   return url;

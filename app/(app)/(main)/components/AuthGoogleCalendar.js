@@ -32,9 +32,10 @@ export function AuthGoogleListener() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const code = searchParams.get('code');
+    const state = searchParams.get('state');
 
     useEffect(() => {
-        if (code) {
+        if (code && state === 'google-calendar-auth') {
             (async () => {
                 const origin = window.location.origin;
                 const token = await getRefreshToken(origin, code);
@@ -48,7 +49,7 @@ export function AuthGoogleListener() {
                 }
             })();
         }
-    }, [code, router]);
+    }, [code, state, router]);
 
     return null;
 }
