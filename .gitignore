@@ -46,3 +46,4 @@ __Local*
 
 # Local supabase
 supabase/config.toml
+supabase/.env
