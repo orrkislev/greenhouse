@@ -89,8 +89,11 @@ export const useProjectData = create((set, get) => {
         updateOnSupabase: debounce(async () => {
             const { project } = get();
             if (!project) return;
-            if (project.master) project.master = project.master?.user_id || null;
-            const { error } = await supabase.from('projects').update(prepareForProjectsTable(project)).eq('id', project.id);
+            const payload = { ...project };
+            // master is a joined object ({ user_id, first_name, ... }) when freshly loaded,
+            // but a plain uuid string once already normalized here - only coerce the object shape.
+            if (payload.master && typeof payload.master === 'object') payload.master = payload.master.user_id ?? null;
+            const { error } = await supabase.from('projects').update(prepareForProjectsTable(payload)).eq('id', project.id);
             if (error) toastsActions.addFromError(error, 'שגיאה בעדכון הפרויקט');
         }, 1000),
 
