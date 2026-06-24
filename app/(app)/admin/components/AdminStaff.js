@@ -15,7 +15,13 @@ export default function AdminStaff() {
     }, [])
 
     useEffect(() => {
-        setStaffData(allMembers.filter(member => member.role === 'staff' || member.role === 'admin').sort((a, b) => a.first_name.localeCompare(b.first_name)));
+        setStaffData(prev => {
+            const newRows = prev.filter(s => s.isNew);
+            const updated = allMembers
+                .filter(member => member.role === 'staff' || member.role === 'admin')
+                .sort((a, b) => a.first_name.localeCompare(b.first_name));
+            return [...updated, ...newRows];
+        });
     }, [allMembers])
 
     useEffect(() => { staffDataRef.current = staffData; }, [staffData]);
@@ -80,7 +86,7 @@ export default function AdminStaff() {
             <table className="text-right text-xs">
                 <TableHeader headers={headers} />
                 <tbody>
-                    {staffData.sort((a, b) => a.isNew ? 1 : b.isNew ? -1 : 0)
+                    {[...staffData].sort((a, b) => a.isNew ? 1 : b.isNew ? -1 : 0)
                         .map((staff, index) => (
                         <tr key={staff.id} className="group hover:bg-muted transition-colors border-b border-ghblack">
                             <Cell>{index + 1}</Cell>
