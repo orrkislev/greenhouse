@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # The Supabase clients are constructed at module scope (utils/supabase/client.js,
+      # utils/actions/admin actions.js), so `next build` throws if these are unset.
+      # Nothing calls Supabase during a build - no generateStaticParams, no build-time
+      # fetching - so placeholders are enough and no repo secrets are needed. That also
+      # keeps CI working for pull requests from forks, which cannot read secrets.
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key

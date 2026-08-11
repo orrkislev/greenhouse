@@ -18,6 +18,7 @@
 - [ ] `npm run db:reset` is a PowerShell-only script — the README setup path is broken on macOS
 
 ## Improvements
+- [ ] ESLint is completely non-functional — `next lint` was removed in Next 16, and `npx eslint .` crashes on the `FlatCompat` shim in `eslint.config.mjs` (circular structure in `next/core-web-vitals`). Migrate to a native flat config using `@next/eslint-plugin-next`, fix whatever it surfaces, then add `lint` to `.github/workflows/ci.yml` as a second required check.
 - [ ] limit number of topics in learning report
 - [ ] Ikigai warnings: limit number of items, duplicate items
 - [ ] Add Undo to ikigai and pages containing radar chart / slider
@@ -36,6 +37,7 @@ _In progress_
 
 _Done (this release)_
 
+- [x] Git workflow for the growing team: `main` is branch-protected (no direct pushes, admins included), all work lands via PR with 1 approval from anyone plus a green `build` check, branches must be current with `main`, merged branches auto-delete. Added `.github/workflows/ci.yml` (build only — lint is broken, filed above) and `docs/rules/git-workflow.md` covering the loop, review checklist, migration-vs-deploy ordering, the emergency unlock, and hard rules for AI agents.
 - [x] Removed the generic `links` join table — task ownership is now `tasks.project_id` / `tasks.study_path_id` FKs alongside the existing `group_id`, with `ON DELETE CASCADE`. Migration `20260811000001_tasks_owner_columns.sql` backfills from `links`, archives 82 tasks whose parent had already been deleted, rewrites `get_user_orphaned_tasks`, and drops `links` plus `get_linked_items`, `get_next_project_tasks`, `get_studypath_next_tasks` and `project_get_master` (all callerless). Fixes along the way: duplicate `deleteTask` in `useProject.js`, missing `unlinkTaskFromProject` (moving a task out of a project used to throw), `path.id === path.id` in `useStudy.unlinkStepFromPath`, and `useStudy.loadPaths` doing one RPC per path — now a single query.
 - [x] Development rulebook: `AGENTS.md` as the agent-agnostic entry point, `docs/rules/development.md` as the coding rulebook (style, data layer, errors, comments, DB workflow, agent behavior), `CLAUDE.md` reduced to a pointer. Design rules still to come.
 - [x] Screen page: new `?view=report` view showing report card completion status per student — each student gets a card with color-coded section indicators (green = done, orange = missing, yellow = partial); data fetched server-side via admin client (works unauthenticated); not part of the rotation

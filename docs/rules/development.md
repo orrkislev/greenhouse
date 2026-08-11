@@ -284,6 +284,9 @@ How to work in this repo, as distinct from how the code should look.
   running — against a dead local DB the app fails opaquely.
 - Don't run the app or open a browser to check UI work unless asked.
 - Read a file rather than running a command to learn something the file already states.
+- **Never commit or push to `main`** — it is branch-protected and the push will be
+  rejected. Work goes on a branch and lands via PR. See
+  [`git-workflow.md`](git-workflow.md), which has a section of hard rules for agents.
 
 ---
 
