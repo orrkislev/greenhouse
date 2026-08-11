@@ -13,11 +13,21 @@
 - [ ] save mechanism fails (sometimes) in project review
 - [ ] update timestamp columns (in db) are not set, except on insert.
 - [ ] Show final project for 4th year students that have one this year
+- [ ] Silent failures: `useEvents.js`, `useGantt.js`, `useLogs.js`, `useTime.js` use bare `throw error` instead of `toastsActions.addFromError`, so the user sees nothing
+- [ ] `useStudy.js`: `updateStep` and `deleteStep` use a no-op `map(path => path.id === pathId ? path : path)` and mutate in place — state updates work by accident
+- [ ] `npm run db:reset` is a PowerShell-only script — the README setup path is broken on macOS
 
 ## Improvements
 - [ ] limit number of topics in learning report
 - [ ] Ikigai warnings: limit number of items, duplicate items
 - [ ] Add Undo to ikigai and pages containing radar chart / slider
+- [ ] Move component-level Supabase queries into stores/actions — 9 files still query directly (`report/page.js`, `report/Learning.js`, `report/SummerEvaluation.js`, `TopicBankManager.js`, `staff/english_report/page.js`, `StaffGroup_Evaluations.js`, `PrintReportPage.js`, `SideBar.js`, `TaskModal.js`). `TaskModal.js` needs a planning-store action that accepts a full task payload, not just a title.
+- [ ] Extract a `useReport` store so report sections subscribe directly instead of receiving `data` + `handleSave` drilled from `report/page.js`
+- [ ] Remove unused dependencies: `@emotion/react`, `@emotion/styled`, `firebase`, `firebase-admin`, `react-google-picker`, `html2pdf.js` (imported nowhere)
+- [ ] Delete the 34 commented-out code blocks (largest in `utils/supabase/server.js`, `useProject.js`)
+- [ ] Delete the empty `utils/gamification/` and `components/gamification/` directories
+- [ ] `useProject.js`: `continueProject` is an empty stub with a dangling `if (newTerm) { }` — implement or remove
+- [ ] Decide npm vs pnpm — `package-lock.json` is committed but the standing instruction is pnpm-only
 
 ---
 
@@ -26,6 +36,8 @@ _In progress_
 
 _Done (this release)_
 
+- [x] Removed the generic `links` join table — task ownership is now `tasks.project_id` / `tasks.study_path_id` FKs alongside the existing `group_id`, with `ON DELETE CASCADE`. Migration `20260811000001_tasks_owner_columns.sql` backfills from `links`, archives 82 tasks whose parent had already been deleted, rewrites `get_user_orphaned_tasks`, and drops `links` plus `get_linked_items`, `get_next_project_tasks`, `get_studypath_next_tasks` and `project_get_master` (all callerless). Fixes along the way: duplicate `deleteTask` in `useProject.js`, missing `unlinkTaskFromProject` (moving a task out of a project used to throw), `path.id === path.id` in `useStudy.unlinkStepFromPath`, and `useStudy.loadPaths` doing one RPC per path — now a single query.
+- [x] Development rulebook: `AGENTS.md` as the agent-agnostic entry point, `docs/rules/development.md` as the coding rulebook (style, data layer, errors, comments, DB workflow, agent behavior), `CLAUDE.md` reduced to a pointer. Design rules still to come.
 - [x] Screen page: new `?view=report` view showing report card completion status per student — each student gets a card with color-coded section indicators (green = done, orange = missing, yellow = partial); data fetched server-side via admin client (works unauthenticated); not part of the rotation
 - [x] "תכנון" — daily task planning system: sidebar task panel (personal/assigned/project/study tasks), drag-to-date onto weekly and semester calendar columns, planned-task chips in day headers, merged events+tasks on homepage, tasks shown in screen student cards
 

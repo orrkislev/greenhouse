@@ -1,7 +1,7 @@
 import { useTime } from "@/utils/store/useTime";
 import { create } from "zustand";
 import { createDataLoadingHook, createStoreActions, withUser } from "./utils/storeUtils";
-import { makeLink, prepareForProjectsTable, unLink } from "../supabase/utils";
+import { prepareForProjectsTable } from "../supabase/utils";
 import { supabase } from "../supabase/client";
 import { resizeImage } from "../actions/storage actions";
 import { newLogActions } from "./useLogs";
@@ -82,7 +82,8 @@ export const useProjectData = create((set, get) => {
             if (!project) return;
             const { error } = await supabase.from('projects').delete().eq('id', project.id);
             if (error) toastsActions.addFromError(error, 'שגיאה בסגירת הפרויקט');
-            set({ project: null });
+            // tasks are removed by the project_id FK cascade
+            set({ project: null, tasks: [] });
             newLogActions.add(`סגרתי את הפרויקט ${project.title}. `)
         },
 
@@ -155,28 +156,18 @@ export const useProjectData = create((set, get) => {
 
         loadTasks: async () => {
             if (get().tasks.length > 0) return; // Don't reload if we already have tasks
-            if (!useProjectData.getState().project) return;
-            set({ tasks: [] });
             const project = useProjectData.getState().project;
             if (!project) return;
-            const { data, error } = await supabase.rpc('get_linked_items', {
-                p_item_id: useProjectData.getState().project.id,
-                p_table_name: 'projects',
-                p_target_types: ['tasks']
-            })
-            if (error) toastsActions.addFromError(error, 'שגיאה בטעינת משימות הפרויקט');
-            const tasks = data.map(item => item.data).filter(task => task)
-            tasks.forEach(task => task.context = projectUtils.getContext(task.project_id));
+            const { data, error } = await supabase.from('tasks').select('*')
+                .eq('project_id', project.id)
+                .order('position', { ascending: true, nullsFirst: false });
+            if (error) {
+                toastsActions.addFromError(error, 'שגיאה בטעינת משימות הפרויקט');
+                return;
+            }
+            const tasks = data.map(task => ({ ...task, context: projectUtils.getContext(task.project_id) }));
             set({ tasks });
         },
-        // loadNextTasks: withLoadingCheck(async () => {
-        //     set({ tasks: [] });
-        //     if (!useProjectData.getState().project) return;
-        //     const projectId = useProjectData.getState().project.id;
-        //     const { data, error } = await supabase.rpc('get_next_project_tasks', { p_project_id: projectId })
-        //     if (error) throw error;
-        //     set({ tasks: data });
-        // }),
 
         updateTask: async (taskId, updates) => {
             updates.updated_at = new Date().toISOString()
@@ -184,12 +175,6 @@ export const useProjectData = create((set, get) => {
             const { error } = await supabase.from('tasks').update(updates).eq('id', taskId);
             if (error) toastsActions.addFromError(error, 'שגיאה בעדכון משימה');
         },
-        deleteTask: async (taskId) => {
-            const { error } = await supabase.from('tasks').delete().eq('id', taskId);
-            if (error) toastsActions.addFromError(error, 'שגיאה במחיקת משימה');
-            set({ tasks: get().tasks.filter(task => task.id !== taskId) });
-        },
-
         changeOrder: (taskId, newSpot) => {
             const task = get().tasks.find(t => t.id === taskId);
             const newTasks = get().tasks.filter(t => t.id !== taskId);
@@ -212,28 +197,40 @@ export const useProjectData = create((set, get) => {
             if (!task.due_date) task.due_date = format(new Date(), 'yyyy-MM-dd');
             if (!task.status) task.status = 'todo';
             if (!task.student_id) task.student_id = useProjectData.getState().project.student_id;
-            const { data, error } = await supabase.from('tasks').insert(task).select().single();
-            if (error) toastsActions.addFromError(error, 'שגיאה ביצירת משימה חדשה בפרויקט');
-            await get().linkTaskToProject(data, projectId);
+            const { data, error } = await supabase.from('tasks')
+                .insert({ ...task, project_id: projectId }).select().single();
+            if (error) {
+                toastsActions.addFromError(error, 'שגיאה ביצירת משימה חדשה בפרויקט');
+                return;
+            }
             newLogActions.add(`הוספתי משימה חדשה בפרויקט. `);
-            set(state => ({ tasks: [...state.tasks, data] }));
+            if (useProjectData.getState().project?.id === projectId) {
+                set(state => ({ tasks: [...state.tasks, { ...data, context: projectUtils.getContext(projectId) }] }));
+            }
         },
         linkTaskToProject: async (task, projectId) => {
-            await makeLink('tasks', task.id, 'projects', projectId);
+            const { error } = await supabase.from('tasks').update({ project_id: projectId }).eq('id', task.id);
+            if (error) {
+                toastsActions.addFromError(error, 'שגיאה בשיוך משימה לפרויקט');
+                return;
+            }
             if (useProjectData.getState().project?.id === projectId) {
-                task.context = projectUtils.getContext(projectId);
-                set({ tasks: get().tasks.map(t => t.id === task.id ? task : t) });
+                const updated = { ...task, project_id: projectId, context: projectUtils.getContext(projectId) };
+                set({ tasks: [...get().tasks.filter(t => t.id !== task.id), updated] });
             }
         },
+        unlinkTaskFromProject: async (taskId) => {
+            const { error } = await supabase.from('tasks').update({ project_id: null }).eq('id', taskId);
+            if (error) {
+                toastsActions.addFromError(error, 'שגיאה בהסרת משימה מהפרויקט');
+                return;
+            }
+            set({ tasks: get().tasks.filter(t => t.id !== taskId) });
+        },
         deleteTask: async (taskId) => {
-            const projectId = useProjectData.getState().project?.id;
-            if (!projectId) return;
             const { error } = await supabase.from('tasks').delete().eq('id', taskId);
             if (error) toastsActions.addFromError(error, 'שגיאה במחיקת משימה');
-            await unLink('tasks', taskId, 'projects', projectId);
-            if (useProjectData.getState().project?.id === projectId) {
-                set({ tasks: get().tasks.filter(t => t.id !== taskId) });
-            }
+            set({ tasks: get().tasks.filter(t => t.id !== taskId) });
         },
     }
 });

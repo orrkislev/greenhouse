@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { createUser, deleteUser, updateUser } from "@/utils/actions/admin actions";
 import { supabase } from "../supabase/client";
-import { makeLink, prepareForGroupsTable } from "../supabase/utils";
+import { prepareForGroupsTable } from "../supabase/utils";
 import { projectActions } from "./useProject";
 import { createDataLoadingHook } from "./utils/storeUtils";
 import { format } from "date-fns";

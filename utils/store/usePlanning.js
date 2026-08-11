@@ -20,7 +20,10 @@ export const usePlanning = create((set, get) => {
                     .from('tasks')
                     .select('*')
                     .eq('student_id', user.id)
+                    // tasks owned by a group/project/study path belong to those sections
                     .is('group_id', null)
+                    .is('project_id', null)
+                    .is('study_path_id', null)
                     .neq('status', 'archived')
                     .neq('status', 'closed')
                     .order('position', { ascending: true }),
@@ -35,23 +38,7 @@ export const usePlanning = create((set, get) => {
             if (personalRes.error) toastsActions.addFromError(personalRes.error, 'שגיאה בטעינת משימות אישיות');
             if (assignedRes.error) toastsActions.addFromError(assignedRes.error, 'שגיאה בטעינת משימות מוקצות');
 
-            // Exclude tasks that are linked to projects or study_paths (those belong to other sections)
-            const candidateIds = (personalRes.data || []).map(t => t.id);
-            let linkedTaskIds = new Set();
-            if (candidateIds.length > 0) {
-                const [linksA, linksB] = await Promise.all([
-                    supabase.from('links').select('a_id')
-                        .eq('a_table', 'tasks').in('b_table', ['projects', 'study_paths']).in('a_id', candidateIds),
-                    supabase.from('links').select('b_id')
-                        .eq('b_table', 'tasks').in('a_table', ['projects', 'study_paths']).in('b_id', candidateIds),
-                ]);
-                (linksA.data || []).forEach(l => linkedTaskIds.add(l.a_id));
-                (linksB.data || []).forEach(l => linkedTaskIds.add(l.b_id));
-            }
-
-            const personalTasks = (personalRes.data || []).filter(t =>
-                !linkedTaskIds.has(t.id) && !t.metadata?.english
-            );
+            const personalTasks = (personalRes.data || []).filter(t => !t.metadata?.english);
 
             set({
                 personalTasks,

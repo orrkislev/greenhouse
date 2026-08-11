@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { createDataLoadingHook, createStoreActions, withUser } from "./utils/storeUtils";
 import { supabase } from "../supabase/client";
 import { useUser } from "./useUser";
-import { makeLink, prepareForStudyPathsTable, prepareForTasksTable, unLink } from "../supabase/utils";
+import { prepareForStudyPathsTable, prepareForTasksTable } from "../supabase/utils";
 import { resizeImage } from "../actions/storage actions";
 import { newLogActions } from "./useLogs";
 import { toastsActions } from "./useToasts";
@@ -23,15 +23,14 @@ export const useStudy = create((set, get) => {
             const { data, error } = await supabase.from('study_paths').select('*').eq('student_id', user.id);
             if (error) toastsActions.addFromError(error, 'שגיאה בטעינת תחומי הלמידה');
 
-            for (const path of data) {
-                const { data: stepsData, error: stepsError } = await supabase.rpc('get_linked_items', {
-                    p_table_name: 'study_paths',
-                    p_item_id: path.id,
-                    p_target_types: ['tasks']
-                });
-                if (stepsError) toastsActions.addFromError(stepsError, 'שגיאה בטעינת שלבי תחום למידה');
-                path.steps = stepsData ? stepsData.map(t => t.data) : [];
-            }
+            // One query for every path's steps, then group client-side
+            const { data: allSteps, error: stepsError } = await supabase.from('tasks').select('*')
+                .in('study_path_id', data.map(path => path.id))
+                .order('position', { ascending: true, nullsFirst: false });
+            if (stepsError) toastsActions.addFromError(stepsError, 'שגיאה בטעינת שלבי תחום למידה');
+            data.forEach(path => {
+                path.steps = (allSteps || []).filter(step => step.study_path_id === path.id);
+            });
 
 
             if (!data.some(path => path.id === EnglishPathID)) {
@@ -60,12 +59,11 @@ export const useStudy = create((set, get) => {
                 description: 'איך בדיוק אני אלמד את זה?',
                 student_id: useUser.getState().user.id,
                 position: 0,
+                study_path_id: pathData.id,
             })).select().single();
             if (stepError) toastsActions.addFromError(stepError, 'שגיאה ביצירת שלב לתחום למידה חדש');
 
-            await makeLink('tasks', stepData.id, 'study_paths', pathData.id);
-
-            set({ paths: [...get().paths, { ...pathData, steps: [stepData] }] })
+            set({ paths: [...get().paths, { ...pathData, steps: stepData ? [stepData] : [] }] })
 
             newLogActions.add(`התחלתי תחום למידה חדש.`);
         },
@@ -92,21 +90,33 @@ export const useStudy = create((set, get) => {
             const path = get().paths.find(path => path.id === pathId)
             step.position = path.steps.length
             step.student_id = useUser.getState().user.id
+            step.study_path_id = pathId
             if (path.id === EnglishPathID) step.metadata = { ...step.metadata, english: true }
             const { data, error } = await supabase.from('tasks').insert(prepareForTasksTable(step)).select().single();
-            if (error) toastsActions.addFromError(error, 'שגיאה ביצירת שלב לתחום למידה חדש');
-            await get().linkStepToPath(data, pathId);
+            if (error) {
+                toastsActions.addFromError(error, 'שגיאה ביצירת שלב לתחום למידה חדש');
+                return;
+            }
+            set(state => ({ paths: state.paths.map(p => p.id === pathId ? { ...p, steps: [...p.steps, data] } : p) }))
             newLogActions.add(`הוספתי שלב לתחום הלמידה ${path.title}.`);
         },
         linkStepToPath: async (step, pathId) => {
-            await makeLink('tasks', step.id, 'study_paths', pathId);
-            set(state => ({ paths: state.paths.map(path => path.id === pathId ? { ...path, steps: [...path.steps, step] } : path) }))
+            const { error } = await supabase.from('tasks').update({ study_path_id: pathId }).eq('id', step.id);
+            if (error) {
+                toastsActions.addFromError(error, 'שגיאה בשיוך שלב לתחום למידה');
+                return;
+            }
+            set(state => ({ paths: state.paths.map(path => path.id === pathId ? { ...path, steps: [...path.steps, { ...step, study_path_id: pathId }] } : path) }))
         },
         unlinkStepFromPath: async (stepId) => {
-            const path = useStudy.getState().paths.find(path => path.steps.some(step => step.id === stepId))
+            const path = get().paths.find(path => path.steps.some(step => step.id === stepId))
             if (!path) return;
-            await unLink('tasks', stepId, 'study_paths', path.id);
-            set(state => ({ paths: state.paths.map(path => path.id === path.id ? { ...path, steps: path.steps.filter(step => step.id !== stepId) } : path) }))
+            const { error } = await supabase.from('tasks').update({ study_path_id: null }).eq('id', stepId);
+            if (error) {
+                toastsActions.addFromError(error, 'שגיאה בהסרת שלב מתחום הלמידה');
+                return;
+            }
+            set(state => ({ paths: state.paths.map(p => p.id === path.id ? { ...p, steps: p.steps.filter(step => step.id !== stepId) } : p) }))
             newLogActions.add(`מחקתי שלב מתחום הלמידה ${path.title}.`);
         },
         updateStep: async (pathId, stepId, stepData) => {

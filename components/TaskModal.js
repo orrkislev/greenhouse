@@ -6,7 +6,6 @@ import { Bookmark, CheckCircle, CircleX, Save, Trash2, X } from "lucide-react";
 import { addDays, format } from "date-fns";
 import ItemContextPicker from "./ItemContextPicker";
 import { supabase } from "@/utils/supabase/client";
-import { makeLink, unLink } from "@/utils/supabase/utils";
 import { useUser } from "@/utils/store/useUser";
 import { projectActions } from "@/utils/store/useProject";
 import { studyActions } from "@/utils/store/useStudy";
@@ -46,32 +45,30 @@ function TaskModalContent({ task, close, initialContext, defaultDueDate }) {
     }, [task])
 
     const handleSave = async () => {
-        const taskContent = { title, description, due_date, url};
+        const taskContent = { title, description, due_date, url };
         if (!task) {
             const taskData = {
                 student_id: useUser.getState().user.id,
                 status: 'todo',
                 ...taskContent,
             };
-            if (context && context.table === 'projects') await projectActions.addTaskToProject(taskData, context.id);
-            else if (context && context.table === 'study_paths') await studyActions.addStep(context.id, taskData);
+            if (context?.table === 'projects') await projectActions.addTaskToProject(taskData, context.id);
+            else if (context?.table === 'study_paths') await studyActions.addStep(context.id, taskData);
             else {
-                const { data, error } = await supabase.from('tasks').insert(taskData).select().single();
+                const { error } = await supabase.from('tasks').insert(taskData);
                 if (error) throw error;
-                if (context) await makeLink('tasks', data.id, context.table, context.id);
             }
         } else {
-            if (task.context.table === 'projects') await projectActions.updateTask(task.id, taskContent);
-            else if (task.context.table === 'study_paths') await studyActions.updateStep(task.context.id, task.id, taskContent);
+            if (task.context?.table === 'projects') await projectActions.updateTask(task.id, taskContent);
+            else if (task.context?.table === 'study_paths') await studyActions.updateStep(task.context.id, task.id, taskContent);
             else await supabase.from('tasks').update(taskContent).eq('id', task.id);
-            if (task.context && task.context.id !== context.id) {
-                if (task.context.table === 'projects') await projectActions.unlinkTaskFromProject(task.id);
-                else if (task.context.table === 'study_paths') await studyActions.unlinkStepFromPath(task.id);
-                else await unLink('tasks', task.id, task.context.table, task.context.id);
 
-                if (context.table === 'projects') await projectActions.linkTaskToProject(task, context.id);
-                else if (context.table === 'study_paths') await studyActions.linkStepToPath(task, context.id);
-                else if (context) await makeLink('tasks', task.id, context.table, context.id);
+            if (task.context?.id !== context?.id) {
+                if (task.context?.table === 'projects') await projectActions.unlinkTaskFromProject(task.id);
+                else if (task.context?.table === 'study_paths') await studyActions.unlinkStepFromPath(task.id);
+
+                if (context?.table === 'projects') await projectActions.linkTaskToProject(task, context.id);
+                else if (context?.table === 'study_paths') await studyActions.linkStepToPath(task, context.id);
             }
         }
         close();
@@ -80,9 +77,8 @@ function TaskModalContent({ task, close, initialContext, defaultDueDate }) {
     const handleDelete = async () => {
         if (task) {
             await supabase.from('tasks').delete().eq('id', task.id);
-            if (task.context && task.context.table === 'study_paths') await studyActions.unlinkStepFromPath(task.id);
-            else if (task.context && task.context.table === 'projects') await projectActions.deleteTask(task.id);
-            else if (task.context) await unLink('tasks', task.id, task.context.table, task.context.id);
+            if (task.context?.table === 'study_paths') await studyActions.unlinkStepFromPath(task.id);
+            else if (task.context?.table === 'projects') await projectActions.deleteTask(task.id);
         }
         close();
     };
