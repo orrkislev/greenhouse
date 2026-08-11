@@ -66,6 +66,18 @@ All data fetching and saving lives in `utils/store/*` or `utils/actions/*`.
 Components never query Supabase, and never receive shared state as props — they
 subscribe to the store themselves. See [`docs/rules/development.md`](docs/rules/development.md).
 
+## Git workflow
+
+`main` is branch-protected — **direct pushes are rejected, for everyone**.
+
+1. Branch from current `main` (`feature/...`, `fix/...`, `chore/...`).
+2. Open a PR into `main`.
+3. Needs 1 approval from anyone on the team, and a green `build` check, to merge.
+
+Migrations are the exception: `supabase db push` goes straight to production and must
+land *before* the PR merges. Full rules — reviewing, emergency unlock, agent-specific
+constraints — in [`docs/rules/git-workflow.md`](docs/rules/git-workflow.md).
+
 ## Release tracking
 
 `NEXT_RELEASE.md` is the running list for the current release cycle.
@@ -80,4 +92,6 @@ subscribe to the store themselves. See [`docs/rules/development.md`](docs/rules/
 
 - [`docs/rules/development.md`](docs/rules/development.md) — code style, data flow,
   errors, comments, database workflow, agent behavior.
+- [`docs/rules/git-workflow.md`](docs/rules/git-workflow.md) — branches, PRs, reviews,
+  migrations vs deploys, branch-protection settings.
 - `docs/rules/design.md` — visual and UI rules. *(not written yet)*

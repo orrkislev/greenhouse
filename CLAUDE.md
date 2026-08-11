@@ -5,3 +5,4 @@ reads the same rules. Nothing project-specific should be added here — put it t
 
 @AGENTS.md
 @docs/rules/development.md
+@docs/rules/git-workflow.md
