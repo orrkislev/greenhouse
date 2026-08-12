@@ -1,9 +1,12 @@
 import { getSupabaseAdminClient } from "@/utils/supabase/server";
 import ScreenClient from "./ScreenClient";
 
+// Mirrors getSemesterId / getAcademicYear in utils/store/useTime.js. Kept as a separate
+// copy because this route renders on the server without the client store - if the rule
+// changes there, change it here too.
 const SEMESTER_DEFAULTS = {
-    A: { start_month: 1, start_day: 1, end_month: 2, end_day: 28 },
-    B: { start_month: 4, start_day: 24, end_month: 6, end_day: 30 },
+    A: { start_month: 9, start_day: 1 },
+    B: { start_month: 3, start_day: 1 },
 };
 
 async function getServerSemester(supabase) {
@@ -15,15 +18,22 @@ async function getServerSemester(supabase) {
         (rows || []).map(r => [r.name.replace('report_semester_', ''), r.data])
     );
     const now = new Date();
-    const startYear = now.getMonth() < 7 ? now.getFullYear() - 1 : now.getFullYear();
-    const academicYear = startYear + 1;
-    for (const semId of ['A', 'B']) {
-        const sem = { ...SEMESTER_DEFAULTS[semId], ...configs[semId] };
-        const start = new Date(now.getFullYear(), sem.start_month - 1, sem.start_day);
-        const end = new Date(now.getFullYear(), sem.end_month - 1, sem.end_day);
-        if (now > start && now < end) return `${academicYear}${semId}`;
-    }
-    return `${academicYear}${now.getMonth() >= 3 && now.getMonth() <= 6 ? 'B' : 'A'}`;
+    const academicYear = (now.getMonth() < 7 ? now.getFullYear() - 1 : now.getFullYear()) + 1;
+
+    const startOf = id => {
+        const sem = { ...SEMESTER_DEFAULTS[id], ...configs[id] };
+        return sem.start_month * 100 + sem.start_day;
+    };
+    const a = startOf('A');
+    const b = startOf('B');
+    const today = (now.getMonth() + 1) * 100 + now.getDate();
+
+    let semId;
+    if (a === b) semId = 'A';
+    else if (a < b) semId = (today >= a && today < b) ? 'A' : 'B';
+    else semId = (today >= b && today < a) ? 'B' : 'A';
+
+    return `${academicYear}${semId}`;
 }
 
 export default async function ScreenPage({ params, searchParams }) {
