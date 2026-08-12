@@ -72,7 +72,8 @@ subscribe to the store themselves. See [`docs/rules/development.md`](docs/rules/
 
 1. Branch from current `main` (`feature/...`, `fix/...`, `chore/...`).
 2. Open a PR into `main`.
-3. Needs 1 approval from anyone on the team, and a green `build` check, to merge.
+3. A green `build` check is all that's required to merge — you can merge your own PR.
+   Request a review when the change is risky or you're unsure; it isn't enforced.
 
 Migrations are the exception: `supabase db push` goes straight to production and must
 land *before* the PR merges. Full rules — reviewing, emergency unlock, agent-specific

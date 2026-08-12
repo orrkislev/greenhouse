@@ -18,7 +18,7 @@ git push -u origin fix/task-ordering
 gh pr create --base main           # or open it in the GitHub UI
 ```
 
-Then: **1 approval** → **green `build` check** → **merge**.
+Then: **green `build` check** → **merge**. You can merge your own PR.
 
 ## The rules
 
@@ -28,10 +28,19 @@ Then: **1 approval** → **green `build` check** → **merge**.
   `fix/task-ordering`, not `fix/bug`.
 - **Branch from current `main`.** Pull first. Branching from a stale `main` is the most
   common cause of a painful merge later.
-- **Every PR needs 1 approval.** Anyone on the team can approve — there is no designated
-  reviewer. Ping in WhatsApp if you need one quickly.
-- **The `build` check must be green.** A red X means the app doesn't compile. Don't merge
-  it, and don't ask for review on it — fix it first.
+- **The `build` check must be green.** A red X means the app doesn't compile. This is the
+  one hard gate — fix it, don't work around it.
+- **Review is not required, but ask for one when it matters.** Approvals are set to zero
+  so nobody is ever blocked waiting on a teammate, and so a typo fix takes ninety seconds
+  instead of a day. That's a deliberate trade for speed, and it puts the judgement on
+  you. Request a review — `gh pr create --reviewer <user>`, or the Reviewers box — when
+  the change touches money, grades, auth, permissions, or the database; when you're not
+  sure it's right; or when it's big enough that a second pair of eyes is cheaper than the
+  bug. Merge it yourself when it's cosmetic, obvious, or yours alone.
+
+  > Note: GitHub does not allow approving your own pull request — that's a platform
+  > restriction with no setting behind it. Requiring an approval would therefore mean
+  > nobody could ever merge alone, which is why the requirement is zero rather than one.
 - **Keep your branch up to date with `main`** before merging. GitHub enforces this
   (`strict` mode) and will show an "Update branch" button when you're behind.
 - **Open the Vercel preview URL on the PR and actually click around.** A green build only
@@ -54,7 +63,7 @@ drop in the next.
 
 ## Reviewing a PR
 
-You don't need to understand every line. Check:
+When you *are* asked to review — you don't need to understand every line. Check:
 
 1. Does the `build` check pass?
 2. Does the Vercel preview actually work for the thing the PR claims to change?
@@ -76,11 +85,13 @@ git reset --hard origin/main  # discard them from local main
 git switch fix/my-work        # carry on, then push and open a PR
 ```
 
-## Emergency: production is broken and nobody can approve
+## Emergency: you need to bypass the PR flow
 
-GitHub does not let you approve your own PR, and admins are not exempt from protection.
-If you are genuinely alone and production is down, unlock deliberately and put it back
-immediately:
+You should almost never need this — approvals aren't required, so a fix only has to pass
+`build` to merge. It exists for the case where CI itself is broken or unavailable and
+production is down. `enforce_admins` is on, so being the owner doesn't help.
+
+Unlock deliberately, and put it back immediately:
 
 ```bash
 gh api -X DELETE repos/orrkislev/greenhouse/branches/main/protection
@@ -104,7 +115,10 @@ These are hard rules, not suggestions:
   "the code is written". If you were asked to implement something, the deliverable is a
   reviewable PR.
 - **Never hand over a red PR.** If CI fails, fix it or explain precisely why you can't.
-- **Never merge your own PR**, even if you technically can. A human approves.
+- **Never merge your own PR.** GitHub now permits it — approvals are set to zero — which
+  is exactly why this rule has to be explicit. Zero required approvals is a convenience
+  for the humans on this team, not a licence for an agent to land its own work unseen.
+  Open the PR, report it, and let a person merge.
 - **Say plainly what you did and did not verify.** "Build passes" and "I clicked through
   the preview and it works" are very different claims. Don't blur them.
 - If a migration is involved, say explicitly whether it has been pushed, and whether it
@@ -124,8 +138,8 @@ gh api -X PUT repos/orrkislev/greenhouse/branches/main/protection \
 {
   "required_status_checks": { "strict": true, "contexts": ["build"] },
   "required_pull_request_reviews": {
-    "required_approving_review_count": 1,
-    "dismiss_stale_reviews": true
+    "required_approving_review_count": 0,
+    "dismiss_stale_reviews": false
   },
   "enforce_admins": true,
   "restrictions": null,
@@ -143,11 +157,15 @@ What each setting does:
 |---|---|
 | `contexts: ["build"]` | the `build` job in `.github/workflows/ci.yml` must pass |
 | `strict: true` | branch must be up to date with `main` before merging |
-| `required_approving_review_count: 1` | one approval, from anyone with write access |
-| `dismiss_stale_reviews: true` | new commits invalidate an existing approval |
+| `required_approving_review_count: 0` | no approval required — you can merge your own PR |
 | `enforce_admins: true` | admins are not exempt — this is what makes the rule real |
 | `allow_force_pushes` / `allow_deletions: false` | `main` cannot be rewritten or deleted |
 | `delete_branch_on_merge` | merged branches clean themselves up |
+
+The `required_pull_request_reviews` block is still present with a count of zero — that is
+what keeps "changes must be made through a pull request" in force. Removing the block
+entirely would drop the PR requirement too, and direct pushes to `main` would start
+succeeding.
 
 Verify at any time with:
 
