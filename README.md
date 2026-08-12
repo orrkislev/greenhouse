@@ -74,7 +74,7 @@ Then edit `.env.local`:
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | **Publishable** key from the output |
 | `SUPABASE_SERVICE_ROLE_KEY` | **Secret** key from the output |
 
-The Google and `GETIMG_KEY` variables are only needed for Google Calendar / Drive integration and AI image generation. You can leave them blank for basic local development.
+The Google variable is only needed for Google Calendar / Drive integration. You can leave it blank for basic local development.
 
 ### 5. Populate the database
 Run the reset script to apply all migrations and load seed data:

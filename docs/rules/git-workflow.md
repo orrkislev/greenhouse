@@ -111,9 +111,14 @@ These are hard rules, not suggestions:
 - **Never commit or push to `main`.** Branch first, always.
 - **Never disable, weaken, or work around branch protection** to land your work. If
   protection blocks you, that is the system functioning correctly. Stop and report.
-- **"Done" means an open PR with a green build** — not a commit, not a local branch, not
-  "the code is written". If you were asked to implement something, the deliverable is a
-  reviewable PR.
+- **Do not commit or push until you are asked to.** Finish the work, leave it in the
+  working tree, and report what changed. The human reads the diff first. Committing as
+  you go takes away the cheapest moment to redirect you, and turns "change that bit" into
+  a revert.
+- **"Done" means the work is finished and reported** — not that a commit exists, and not
+  that a PR is open. Say what you changed and what you did not verify, then stop.
+- **When you are asked to commit**: branch, never `main`. One branch per coherent piece of
+  work, not one per file. Don't push or open a PR unless that was asked for too.
 - **Never hand over a red PR.** If CI fails, fix it or explain precisely why you can't.
 - **Never merge your own PR.** GitHub now permits it — approvals are set to zero — which
   is exactly why this rule has to be explicit. Zero required approvals is a convenience

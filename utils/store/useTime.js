@@ -1,4 +1,4 @@
-import { add, addDays, format, isAfter, isBefore, isSameDay, startOfWeek, subDays } from "date-fns";
+import { add, addDays, format, isBefore, isSameDay, startOfWeek, subDays } from "date-fns";
 import { create } from "zustand";
 import { supabase } from "../supabase/client";
 import { subscribeWithSelector } from "zustand/middleware";
@@ -152,22 +152,30 @@ export function dateRange(start, end) {
 }
 
 
+// A runs Sep-Feb (wrapping the new year), B runs Mar-Aug. The end dates are kept so the
+// admin UI can show a full window, but only the two start dates decide the answer - they
+// partition the year between them.
 export const REPORT_SEMESTER_DEFAULTS = {
-    A: { start_month: 1, start_day: 1, end_month: 2, end_day: 28 },
-    B: { start_month: 4, start_day: 24, end_month: 6, end_day: 30 },
+    A: { start_month: 9, start_day: 1, end_month: 2, end_day: 28 },
+    B: { start_month: 3, start_day: 1, end_month: 8, end_day: 31 },
 };
 
-// Returns 'A' or 'B' when inside a report semester window, null otherwise
+// Always returns 'A' or 'B' - every date falls in one semester or the other.
+// Each semester runs from its own start date until the other one starts.
 export function getSemesterId(date = new Date()) {
     const reportSemesters = useTime.getState().reportSemesters;
-    const year = date.getFullYear();
-    for (const semId of ['A', 'B']) {
-        const sem = { ...REPORT_SEMESTER_DEFAULTS[semId], ...reportSemesters?.[semId] };
-        const start = new Date(year, sem.start_month - 1, sem.start_day);
-        const end = new Date(year, sem.end_month - 1, sem.end_day);
-        if (isAfter(date, start) && isBefore(date, end)) return semId;
-    }
-    return null;
+    const startOf = id => {
+        const sem = { ...REPORT_SEMESTER_DEFAULTS[id], ...reportSemesters?.[id] };
+        return sem.start_month * 100 + sem.start_day;
+    };
+    const a = startOf('A');
+    const b = startOf('B');
+    const now = (date.getMonth() + 1) * 100 + date.getDate();
+
+    if (a === b) return 'A';
+    // Whichever boundary comes first in the calendar year owns the middle of the year.
+    if (a < b) return (now >= a && now < b) ? 'A' : 'B';
+    return (now >= b && now < a) ? 'B' : 'A';
 }
 
 // Returns the academic year as a short string, e.g. "2026"

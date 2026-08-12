@@ -130,19 +130,11 @@ hand-roll equivalents.
 - Two clients, from `utils/supabase/server.js`:
   - `getSupabaseServerClient()` — the user's cookies, **RLS applies**.
   - `getSupabaseAdminClient()` — service role, **RLS is bypassed entirely**.
-- **Any action using the admin client must authorize the caller itself.** RLS is not
-  protecting you there. The pattern to copy is `createUser` in `admin actions.js`:
-
-  ```js
-  const serverClient = await getSupabaseServerClient();
-  const { data: { user: callingUser } } = await serverClient.auth.getUser();
-  if (!callingUser) throw new Error('Not authenticated');
-  const { data: callerData } = await supabase.from('users').select('is_admin').eq('id', callingUser.id).single();
-  if (!callerData?.is_admin) throw new Error('Not authorized');
-  ```
-
-  This is non-negotiable. An admin-client action without a caller check is a
-  privilege-escalation hole reachable from any logged-in student.
+- **Any action using the admin client must authenticate and authorize the caller itself,
+  and must never trust a user id passed in as a parameter.** RLS is not protecting you
+  there, and server actions are HTTP endpoints anyone can call with arguments of their
+  choosing. This is non-negotiable — see [`security.md`](security.md) for the pattern to
+  copy and a real example of what happens without it.
 - Server actions **throw**. The calling store catches and toasts.
 
 ---
@@ -190,8 +182,9 @@ hand-roll equivalents.
 
 ## 7. Styling — mechanics
 
-Visual and aesthetic rules are a separate document (`docs/rules/design.md`, not
-written yet). This section is only about *how* styles are attached.
+Which container and how things are arranged is [`design.md`](design.md); what things look
+like — type, colour, borders, spacing — is [`styling.md`](styling.md). This section is
+only about *how* styles are attached.
 
 - Tailwind 4 utility classes, written inline in JSX.
 - `cn()` from `utils/tw.js` merges conditional classes (`clsx` + `tailwind-merge`).
@@ -284,8 +277,10 @@ How to work in this repo, as distinct from how the code should look.
   running — against a dead local DB the app fails opaquely.
 - Don't run the app or open a browser to check UI work unless asked.
 - Read a file rather than running a command to learn something the file already states.
+- **Don't commit or push until asked.** Leave finished work in the working tree and
+  report it — the diff is how the user reviews you, and committing first removes that.
 - **Never commit or push to `main`** — it is branch-protected and the push will be
-  rejected. Work goes on a branch and lands via PR. See
+  rejected. When asked to commit, use a branch. See
   [`git-workflow.md`](git-workflow.md), which has a section of hard rules for agents.
 
 ---
