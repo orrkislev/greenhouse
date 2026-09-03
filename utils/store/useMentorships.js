@@ -12,12 +12,12 @@ export const useMentorships = create((set, get) => ({
     getMentorships: withUser(async (user) => {
         set({ mentorships: [] });
         let query = supabase.from('mentorships')
-            .select(`*, 
+            .select(`*,
                 student:users!mentorships_student_id_fkey (
                     id, first_name, last_name, username, role, user_profiles( avatar_url, cv_url, portfolio_url )
                 ),
-                mentor:users!mentorships_mentor_id_fkey (
-                    id, first_name, last_name, username, role, user_profiles( avatar_url )
+                mentor:staff_public!mentor_id (
+                    id:user_id, first_name, last_name, avatar_url
                 )`)
         if (user.role === 'student') query = query.eq('student_id', user.id);
         else query = query.eq('mentor_id', user.id);
