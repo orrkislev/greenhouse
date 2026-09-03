@@ -161,11 +161,17 @@ CREATE TRIGGER tasks_write_guard BEFORE UPDATE ON public.tasks
 -- ─── study_paths: the shared English path ────────────────────────────────────
 --
 -- useStudy.js:37 fetches the fixed row 'd5b55c53-5f6b-4832-97cf-3fbb99037218' for every student;
--- no student owns it, so the only existing student policy (auth.uid() = student_id) hides it -
--- confirmed at baseline (harness E1). student_id is nullable; NULL means "shared template".
--- Prefer the NULL test over hardcoding the uuid so no magic constant lands in a policy.
+-- the only existing student policy (auth.uid() = student_id) hides it from anyone who isn't its
+-- owner - confirmed at baseline (harness E1).
+--
+-- The original version of this policy tested `student_id IS NULL`, on the assumption that a
+-- NULL owner is how a shared template is marked. Production pre-flight (step 4) proved that
+-- assumption wrong: the real row's student_id is NOT NULL - it's set to the English teacher's
+-- own id, not a placeholder. A NULL test would have matched nothing in production and left this
+-- feature exactly as broken as it is today. Match the known id directly instead; keep the NULL
+-- test as a fallback in case a genuinely unowned template is ever added later.
 CREATE POLICY "study_paths read shared" ON public.study_paths
   FOR SELECT TO authenticated
-  USING (student_id IS NULL);
+  USING (id = 'd5b55c53-5f6b-4832-97cf-3fbb99037218'::uuid OR student_id IS NULL);
 
 COMMIT;

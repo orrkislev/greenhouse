@@ -137,9 +137,12 @@ BEGIN
   INSERT INTO public.task_assignments (task_id, student_id, status)
     VALUES (group_task, student_a, 'todo');
 
-  -- the real shared English study path - NULL owner
+  -- the real shared English study path. Owned by a specific staff member in production (not
+  -- NULL) - confirmed via prod pre-flight step 4 - so the fixture must match: a real owner who
+  -- is neither the reading student nor NULL, to actually exercise the policy's `id = ...` branch
+  -- rather than its `student_id IS NULL` fallback.
   INSERT INTO public.study_paths (id, title, student_id)
-    VALUES (english_path, 'English', NULL)
+    VALUES (english_path, 'English', staff_gen)
     ON CONFLICT (id) DO NOTHING;
 
   -- current_term / misc pre-auth reads (useTime.js:88-99, login screen) - do not depend on the
