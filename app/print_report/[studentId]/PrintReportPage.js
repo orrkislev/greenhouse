@@ -46,9 +46,15 @@ function renderSection(key, student, semester) {
 
 export default function PrintReportPage({ studentId, semester }) {
     const [student, setStudent] = useState(null);
+    // Distinguishes "still loading" (student === null, notFound === false) from a confirmed
+    // failure - RLS restricts report_cards_* to the student's own row or staff, so a student
+    // requesting someone else's studentId legitimately lands here rather than seeing their data.
+    const [notFound, setNotFound] = useState(false);
 
     useEffect(() => {
         if (!studentId) return;
+        setStudent(null);
+        setNotFound(false);
         (async () => {
             // Determine which semester to print: use provided semester, or fall back to the latest one
             let targetSemester = semester;
@@ -63,16 +69,17 @@ export default function PrintReportPage({ studentId, semester }) {
                 targetSemester = latestRow?.report_semester;
             }
 
-            if (!targetSemester) return;
+            if (!targetSemester) { setNotFound(true); return; }
 
             const { data: publicData, error: publicError } = await supabase
                 .from('report_cards_public')
                 .select('*')
                 .eq('id', studentId)
                 .eq('report_semester', targetSemester)
-                .single();
-            if (publicError) {
-                toastsActions.addFromError(publicError, 'שגיאה בטעינת הדוח הציבורי של התלמיד');
+                .maybeSingle();
+            if (publicError || !publicData) {
+                if (publicError) toastsActions.addFromError(publicError, 'שגיאה בטעינת הדוח הציבורי של התלמיד');
+                setNotFound(true);
                 return;
             }
             const { data: privateData, error: privateError } = await supabase
@@ -80,9 +87,10 @@ export default function PrintReportPage({ studentId, semester }) {
                 .select('mentors')
                 .eq('id', studentId)
                 .eq('report_semester', targetSemester)
-                .single();
-            if (privateError) {
-                toastsActions.addFromError(privateError, 'שגיאה בטעינת הדוח הפרטי של התלמיד');
+                .maybeSingle();
+            if (privateError || !privateData) {
+                if (privateError) toastsActions.addFromError(privateError, 'שגיאה בטעינת הדוח הפרטי של התלמיד');
+                setNotFound(true);
                 return;
             }
             setStudent({ ...publicData, ...privateData });
@@ -95,7 +103,15 @@ export default function PrintReportPage({ studentId, semester }) {
         }
     }, [student])
 
-    if (!student) return null;
+    if (notFound) {
+        return (
+            <div className="flex items-center justify-center min-h-screen text-stone-500 text-lg">
+                אין לך הרשאה לצפות בדוח זה, או שהוא אינו קיים
+            </div>
+        );
+    }
+
+    if (!student) return null; // still loading
 
     const semesterLetter = (semester ?? getReportSemester()).slice(-1); // 'A' or 'B'
     const pages = getPrintPages(student.year, semesterLetter);

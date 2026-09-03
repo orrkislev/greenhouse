@@ -21,6 +21,17 @@ The production app is deployed on Vercel and connects to the managed Supabase Cl
 ## Versioning
 Currently we're not working with GitHun issues, but we do have a NEXT_RELEASE.md file. It is used to plan and track bugfixes and features that need to be addressed for a specific milestone or occasion.
 
+## Development Workflow
+
+Code changes land through a pull request — `main` is branch-protected, so direct pushes
+are rejected, and a PR needs a green `build` check (CI) before it can merge. You can
+merge your own PR once it's green; reviews are a judgment call, not enforced.
+
+The full rules — branch naming, when to ask for review, database migrations vs. code
+deploys, recovering from a local commit to `main`, the emergency unlock — live in
+[`AGENTS.md`](AGENTS.md) and [`docs/rules/git-workflow.md`](docs/rules/git-workflow.md).
+Read those before your first PR; they're not repeated here.
+
 ## Local Development Setup
 
 ### 1. Prerequisites
@@ -142,10 +153,13 @@ npx supabase db diff -f rename_this_to_your_feature_name
 ```
 
 ### 3. Deploy the changes
-1.  **Push Code**: Commit the new migration file and push to GitHub. This updates your **Code** on Vercel.
+1.  **Push Code**: Commit the new migration file and open a PR into `main` (see
+    [Development Workflow](#development-workflow) above) — direct pushes to `main` are
+    rejected. Merging the PR is what deploys the code to Vercel.
 2.  **Push Database**: Run the following to update your **Production Database**:
     ```bash
     npx supabase db push
     ```
 > [!IMPORTANT]
-> Always push your database migrations *before* or *simultaneously* with your code push to avoid "column not found" errors in the live app!
+> Always push your database migrations *before* or *simultaneously* with merging your PR
+> to avoid "column not found" errors in the live app!

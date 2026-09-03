@@ -29,8 +29,11 @@ export const useLogsData = create((set, get) => {
                 } else log.user = user;
                 if (log.mentor_id) {
                     if (log.mentor_id !== user.id) {
-                        const { data: mentor } = await supabase.from('users').select('id, first_name, last_name, role, user_profiles( avatar_url )').eq('id', log.mentor_id).single();
-                        if (mentor) log.mentor = mentor;
+                        // A student cannot read another user's row in `users` (RLS), so a mentor
+                        // who is staff must be looked up via `staff_public` instead - see
+                        // docs/rules/security.md.
+                        const { data: mentor } = await supabase.from('staff_public').select('user_id, first_name, last_name, avatar_url').eq('user_id', log.mentor_id).maybeSingle();
+                        if (mentor) log.mentor = { id: mentor.user_id, first_name: mentor.first_name, last_name: mentor.last_name, role: 'staff', avatar_url: mentor.avatar_url };
                     } else log.mentor = user;
                 }
             }
@@ -49,9 +52,8 @@ export const useLogsData = create((set, get) => {
                     log.context = context;
                 }
                 if (log.mentor_id) {
-                    const { data: mentor, error: mentorError } = await supabase.from('users').select('id, first_name, last_name, role, user_profiles( avatar_url )').eq('id', log.mentor_id).single();
-                    if (mentorError) throw mentorError;
-                    log.mentor = mentor;
+                    const { data: mentor } = await supabase.from('staff_public').select('user_id, first_name, last_name, avatar_url').eq('user_id', log.mentor_id).maybeSingle();
+                    if (mentor) log.mentor = { id: mentor.user_id, first_name: mentor.first_name, last_name: mentor.last_name, role: 'staff', avatar_url: mentor.avatar_url };
                 }
             }
             set((state) => ({ logs: [...state.logs, ...data] }));

@@ -100,44 +100,87 @@ their private evaluation. It now carries the check above. Don't reintroduce the 
 
 ## Row Level Security
 
-RLS is **on** for almost every table, and a new table must ship its policies **in the same
-migration** that creates it. A table with RLS enabled and no policies denies everything;
-a table with RLS disabled allows everything to anyone holding the anon key — which is
-public by design, shipped in the browser bundle.
+RLS is **on** for every table in `public`, and a new table must ship its policies **in the
+same migration** that creates it. A table with RLS enabled and no policies denies
+everything; a table with RLS disabled allows everything to anyone holding the anon key —
+which is public by design, shipped in the browser bundle.
 
-### Currently exposed — this is a bug, not a precedent
+### Role helpers
 
-| Table | Contents |
-|---|---|
-| `vocation` | `place_of_work`, `position`, `contact_name`, **`contact_phone`**, `work_hours` |
-| `vocation_checkins` | attendance hours and notes |
-| `event_participants` | event ↔ user links |
+Policies use these instead of inlining the JWT expression or querying `users`:
 
-RLS is disabled on all three, so anyone with the anon key can read and modify every row.
-There's a migration named `20260527000002_vocation_disable_rls.sql`, so it was a
-deliberate unblock at some point. It is tracked in `NEXT_RELEASE.md`.
+| Helper | Definition | Use on |
+|---|---|---|
+| `is_staff()` | reads `auth.jwt() -> 'app_metadata' ->> 'role'` | any table, including `users` |
+| `is_admin()` | reads `auth.jwt() -> 'app_metadata' ->> 'is_admin'` | any table, including `users` |
+| `is_vocation_staff()` | `SECURITY DEFINER`; joins `users`+`user_profiles` for a `תעסוקה` title | **only** `vocation` and `vocation_checkins` |
 
-**Do not "fix" this by running `ALTER TABLE … ENABLE ROW LEVEL SECURITY` on its own** —
-with no policies, that blacks out the vocation feature completely. Policies first, in the
-same migration.
+**Never write a policy that subqueries `public.users` from a policy on `public.users`
+itself** — `custom_access_token_hook` reads `users` during token issuance, so a
+self-referencing policy recurses and locks out login for everyone, including whoever would
+fix it. This is why `is_staff()`/`is_admin()` read the JWT rather than the table: they
+have no table dependency, so they can't create this cycle. `is_vocation_staff()` does read
+tables (`user_profiles.title` isn't in the JWT) — that's fine on `vocation`/`vocation_checkins`,
+but never put it on `users` or `user_profiles`.
 
-Check the current state any time with the Supabase advisors, or:
+### Views bypass RLS unless told not to
+
+A view runs with the privileges of its **owner** by default, not the querying role — so a
+view over an RLS-protected table can silently read past every policy on the underlying
+table. This bit us for real: `report_cards_public`, `staff_public`, `current_term`, and the
+two audit views all lacked `security_invoker`, so `report_cards_public` — id number, name,
+every evaluation field, attendance — was readable by the plain anon key, and separately by
+*any logged-in student for any other student*, despite `report_cards_private`'s own
+policies correctly denying the same read on the base table.
+
+Any view over an RLS-protected table needs an explicit call:
+`ALTER VIEW public.some_view SET (security_invoker = on);` — then the view enforces the
+base table's policies for whoever queries it, instead of running as owner. The one
+deliberate exception is `staff_public`: it **stays** security-definer, because
+`get_user_groups()` depends on being able to join it to build a mentor list for students
+who can't read `users` directly. Check any new view's `reloptions` before assuming it's
+covered:
 
 ```sql
-SELECT relname, relrowsecurity FROM pg_class
-WHERE relnamespace = 'public'::regnamespace AND relkind = 'r' ORDER BY 2, 1;
+SELECT relname, relrowsecurity, reloptions FROM pg_class
+WHERE relnamespace = 'public'::regnamespace AND relkind IN ('r', 'v') ORDER BY 1;
 ```
+
+### Column-level protection needs a trigger, not a GRANT
+
+RLS is row-level. When one column of a row must be writable by its owner but not by
+others who can also write that row (e.g. a student writes their own report-card
+self-evaluation, but must not overwrite the staff-authored `mentors` column) — column
+`GRANT`s can't express it, since students and staff are both the `authenticated` role. Use
+a `BEFORE INSERT OR UPDATE` trigger with an **allowlist** of student-writable columns
+(fails closed for any column added later), short-circuited for staff. See
+`report_cards_private_write_guard` and `tasks_write_guard`.
+
+This only protects **columns**, not keys inside a JSONB column — see the report card note
+under [Personal data](#personal-data).
+
+### Historical exposure — fixed, not a precedent
+
+`vocation`, `vocation_checkins` and `event_participants` used to have RLS disabled (or, for
+`event_participants`, never enabled at all), so the anon key could read and write every
+row — including `contact_phone` for every student's workplace placement. Fixed by
+migrations `20260901000001`/`20260901000002`. **If you ever see
+`ALTER TABLE … DISABLE ROW LEVEL SECURITY` in a new migration, that is a regression, not a
+fix for a broken feature** — the actual fix for "RLS broke the feature" is almost always a
+missing policy, not turning RLS off. That is exactly how this exposure happened the first
+time (`20260527000002_vocation_disable_rls.sql`).
 
 ## Public by design
 
-These render **without authentication** and use the admin client deliberately:
+`app/screen/[groupId]` — the hallway display (students, their day, their tasks) — renders
+**without authentication** and uses the admin client deliberately. Anything it selects is
+effectively public to anyone with the URL. **Don't add fields to it casually**, and don't
+widen `report_cards_public` to make it easier — that view is the boundary between what
+staff write and what students see.
 
-- `app/screen/[groupId]` — the hallway display. Shows students, their day, their tasks.
-- `app/print_report/[studentId]` — printable report cards.
-
-Anything these queries select is effectively public to anyone with the URL. **Don't add
-fields to them casually**, and don't widen `report_cards_public` to make a print page
-easier — that view is the boundary between what staff write and what students see.
+`app/print_report/[studentId]` is **not** on this list — it requires login (`WithAuth`),
+and access is enforced by `report_cards_private`/`report_cards_public`'s own RLS (staff may
+read any student; a student only their own), not by the route.
 
 ## Secrets
 
@@ -168,6 +211,17 @@ workplaces, and a named adult contact's phone number.
 - When adding a column that holds anything personal, decide its RLS policy at the same
   time, not later.
 
+**Known limitation — JSONB columns on `report_cards_private` have no sub-key protection.**
+`report_cards_private_write_guard` stops a student writing the `mentors` *column*, but
+`learning`, `liba`, `ikigai`, `special` and `end_eval` are JSONB blobs with keys written by
+different parties — e.g. staff write `learning.englishMasterReview`
+(`app/(app)/staff/english_report/page.js`) while a student's own save upserts the whole
+`learning` object (`app/(app)/report/page.js`), so whichever saves last wins. This is a
+concurrency/ownership problem, not an authorization one — a column-level guard can't
+express "these keys within this column belong to staff." Tracked in `NEXT_RELEASE.md`;
+likely fix is an edit-lock mechanism or splitting staff-authored keys into their own
+columns.
+
 ## Audit trail
 
 Changes to `projects.metadata`, `research.metadata` and `report_cards_private` are
@@ -181,7 +235,9 @@ view. Don't strip those triggers when writing a migration that touches those tab
 1. Does this need the admin client, or would the server client do?
 2. If admin: does it authenticate **and** authorize the caller, and does it avoid trusting
    any id passed in?
-3. New table → RLS enabled **and** policies, same migration.
+3. New table → RLS enabled **and** policies, same migration. Never disable RLS to "fix" a
+   broken feature — add the missing policy instead.
 4. New column holding personal data → policy decided now.
-5. Does it widen anything reachable from `/screen` or `/print_report`?
-6. Any new `NEXT_PUBLIC_*` variable → confirm it is genuinely safe to publish.
+5. New view over an RLS-protected table → does it need `security_invoker = on`?
+6. Does it widen anything reachable from `/screen`?
+7. Any new `NEXT_PUBLIC_*` variable → confirm it is genuinely safe to publish.
